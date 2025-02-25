@@ -1,7 +1,12 @@
+import api from "@/Config/http"
+import { isTeacher } from "@/Helpers/role"
+import useTeachers from "@/Hooks/Users/useTeachers"
 import { useHistory } from "@/utils"
+import { DatePicker, TimePicker } from "@mui/lab"
 import {
   Button,
   Checkbox,
+  createTheme,
   CssBaseline,
   FormControlLabel,
   Grid,
@@ -12,20 +17,15 @@ import {
   ThemeProvider,
 } from "@mui/material"
 import Container from "@mui/material/Container"
+import { default as AdapterDateFns, default as LocalizationProvider } from "@mui/x-date-pickers"
+import type { MouseEvent, ReactNode } from "react"
 import { useEffect, useState } from "react"
 import type { FieldRenderProps } from "react-final-form"
 import { Field, Form } from "react-final-form"
 import ReactLoading from "react-loading"
-import "./styles.css"
-// Picker
-import api from "@/Config/http"
-import { isTeacher } from "@/Helpers/role"
-import useTeachers from "@/Hooks/Users/useTeachers"
-import DateFnsUtils from "@date-io/date-fns"
-import { DatePicker, MuiPickersUtilsProvider, TimePicker } from "@material-ui/pickers"
-import { createTheme, makeStyles } from "@mui/material/styles"
-import type { MouseEvent, ReactNode } from "react"
 import { toast } from "react-toastify"
+import { makeStyles } from "tss-react/mui"
+import "./styles.css"
 
 /*
   Componente responsável pela página de criação de bancas
@@ -486,7 +486,7 @@ function ExaminingBoard() {
                     label={tipo_banca ? "Local" : "Link"}
                   />
                 </Grid>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <Grid item xs={6}>
                     <Field
                       name="data_realizacao"
@@ -507,7 +507,7 @@ function ExaminingBoard() {
                       label="Hora"
                     />
                   </Grid>
-                </MuiPickersUtilsProvider>
+                </LocalizationProvider>
                 <Grid item style={{ marginTop: 16 }}>
                   <ThemeProvider theme={theme}>
                     <Button

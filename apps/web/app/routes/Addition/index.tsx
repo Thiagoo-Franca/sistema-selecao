@@ -4,9 +4,9 @@ import api from "@/Config/http"
 import { isTeacher } from "@/Helpers/role"
 import usePreRegister from "@/Hooks/Addition/usePreRegister"
 import { useHistory } from "@/utils"
-import { MailOutline } from "@material-ui/icons"
 import { Box, Button, Container, createTheme, Modal, ThemeProvider } from "@mui/material"
 import { DataGrid } from "@mui/x-data-grid"
+import { Mail } from "lucide-react"
 import { useEffect, useState } from "react"
 import ReactLoading from "react-loading"
 import SelectSearch, { fuzzySearch } from "react-select-search"
@@ -286,7 +286,7 @@ function Addition() {
                       color="primary"
                       style={{ marginLeft: 16, borderRadius: 10 }}
                     >
-                      <MailOutline style={{ marginRight: "0.5rem" }} />
+                      <Mail style={{ marginRight: "0.5rem" }} />
                       Pré-cadastrar componente
                     </Button>
                   </ThemeProvider>

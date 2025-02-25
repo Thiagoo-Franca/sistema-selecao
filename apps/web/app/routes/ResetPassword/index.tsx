@@ -1,13 +1,13 @@
 import { TextFieldAdapter as TextField } from "@/Components/FormAdapters"
 import api from "@/Config/http"
 import { useHistory } from "@/utils"
-import { Button, CssBaseline, Grid } from "@mui/material"
+import { Button, createTheme, CssBaseline, Grid, ThemeProvider } from "@mui/material"
 import Container from "@mui/material/Container"
-import { createTheme, makeStyles, ThemeProvider } from "@mui/material/styles"
 import { useCallback, useEffect, useState } from "react"
 import { Field, Form } from "react-final-form"
 import ReactLoading from "react-loading"
 import { toast } from "react-toastify"
+import { makeStyles } from "tss-react/mui"
 import "./styles.css"
 
 /*

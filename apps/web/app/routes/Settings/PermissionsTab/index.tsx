@@ -1,8 +1,7 @@
 import { Box, Button, ThemeProvider, createTheme } from "@mui/material"
-
-import { makeStyles } from "@material-ui/styles"
 import { DataGrid } from "@mui/x-data-grid"
 import ReactLoading from "react-loading"
+import { makeStyles } from "tss-react/mui"
 
 import { ptBRGrid } from "@/Assets/Locales/grid.locale"
 import useAdminActions from "@/Hooks/Admin/useAdminActions"
@@ -27,7 +26,7 @@ export const ROLES_DICT = {
   1: "Orientador",
   2: "Avaliador",
   3: "Administrador",
-}
+} as const
 
 function RenderRolesCell({ row }) {
   const { role } = row

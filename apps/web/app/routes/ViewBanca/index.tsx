@@ -5,9 +5,9 @@ import "./styles.css"
 
 import api from "@/Config/http"
 import { useHistory } from "@/utils"
-import { Button, CssBaseline, Grid, ThemeProvider } from "@mui/material"
-import { createTheme, makeStyles } from "@mui/material/styles"
+import { Button, createTheme, CssBaseline, Grid, ThemeProvider } from "@mui/material"
 import { useLocation } from "react-router"
+import { makeStyles } from "tss-react/mui"
 import CardBanca from "../../Components/Card"
 
 /*

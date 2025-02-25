@@ -1,13 +1,13 @@
 import { SelectAdapter as Select, TextFieldAdapter as TextField } from "@/Components/FormAdapters"
 import useUser from "@/Hooks/Users/useUser"
 import { useHistory } from "@/utils"
-import { SaveOutlined } from "@material-ui/icons"
-import { Box, Button, Grid, MenuItem } from "@mui/material"
+import { Save } from "lucide-react"
+import { Box, Button, createTheme, Grid, MenuItem, ThemeProvider } from "@mui/material"
 import Container from "@mui/material/Container"
-import { createTheme, makeStyles, ThemeProvider } from "@mui/material/styles"
 import { useCallback, useEffect, useState } from "react"
 import { Field, Form } from "react-final-form"
 import ReactLoading from "react-loading"
+import { makeStyles } from "tss-react/mui"
 import "./styles.css"
 
 function AccountSettings() {
@@ -161,7 +161,7 @@ function AccountSettings() {
                           color="primary"
                           type="submit"
                           disabled={submitting}
-                          startIcon={<SaveOutlined />}
+                          startIcon={<Save />}
                         >
                           Salvar Alterações
                         </Button>

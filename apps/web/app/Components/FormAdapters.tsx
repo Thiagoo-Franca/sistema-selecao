@@ -48,7 +48,6 @@ interface DatePickerWrapperProps extends FieldRenderProps<string, HTMLElement> {
   margin?: "normal" | "dense" | "none"
 }
 
-// Custom Field Adapters for Material-UI
 export const TextFieldAdapter = ({ input, meta, ...rest }: TextFieldProps) => {
   const showError = ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) && meta.touched
   return (

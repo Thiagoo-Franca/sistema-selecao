@@ -1,6 +1,4 @@
-export const TODO = <const T>(_: T & { __brand: "TODO" }) => {
-  throw new Error("TODO")
-}
+export const TODO = <const T>(_: T & { __brand: "TODO" }) => {}
 
 // Fake use history just for let me replace the react-router-dom
 export const useHistory = () => {

@@ -1,8 +1,8 @@
 import { useReducer } from "react"
 
-import { makeStyles } from "@material-ui/styles"
 import { DataGrid } from "@mui/x-data-grid"
 import ReactLoading from "react-loading"
+import { makeStyles } from "tss-react/mui"
 
 import { ptBRGrid } from "@/Assets/Locales/grid.locale"
 import useCourses from "@/Hooks/Users/useCourses"

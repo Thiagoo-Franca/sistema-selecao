@@ -1,7 +1,5 @@
 import { useHistory } from "@/utils"
-import { ThemeProvider } from "@material-ui/styles"
-import { Box, Button } from "@mui/material"
-import { createTheme } from "@mui/material/styles"
+import { Box, Button, createTheme, ThemeProvider } from "@mui/material"
 import { useContext, useState } from "react"
 import { Link } from "react-router"
 

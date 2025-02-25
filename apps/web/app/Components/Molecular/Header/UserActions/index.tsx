@@ -1,10 +1,10 @@
 import { useState } from "react"
 
 import { Avatar, Box, Menu, MenuItem, Tooltip } from "@mui/material"
+import { LogOut, User } from "lucide-react"
 
+import { ROLES_DICT } from "@/routes/Settings/PermissionsTab"
 import { useHistory } from "@/utils"
-import { Create, ExitToApp } from "@material-ui/icons"
-import { ROLES_DICT } from "Pages/Settings/PermissionsTab"
 import "./styles.css"
 
 function getInitials(name) {
@@ -14,7 +14,7 @@ function getInitials(name) {
   return `${first[0]}${second?.lenght ? second[0] : ""}`
 }
 
-function getRoleName(role) {
+function getRoleName(role: number) {
   return ROLES_DICT[role]
 }
 
@@ -67,7 +67,7 @@ export default function UserActions({ name, role, isLoggedIn, onClickLogout }) {
         <MenuItem onClick={handleClickMyAccount}>
           <Box display="flex" alignItems="center" justifyContent="center">
             <Box display="flex" alignItems="center" justifyContent="center" marginRight={1}>
-              <Create className="icon" />
+              <User className="icon" />
             </Box>
             Editar informações
           </Box>
@@ -75,7 +75,7 @@ export default function UserActions({ name, role, isLoggedIn, onClickLogout }) {
         <MenuItem onClick={onClickLogout}>
           <Box display="flex" alignItems="center" justifyContent="center">
             <Box display="flex" alignItems="center" justifyContent="center" marginRight={1}>
-              <ExitToApp className="icon" />
+              <LogOut className="icon" />
             </Box>
             Sair
           </Box>

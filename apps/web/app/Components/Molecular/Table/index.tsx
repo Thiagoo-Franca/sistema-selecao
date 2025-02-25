@@ -1,6 +1,7 @@
 import { ptBRGrid } from "@/Assets/Locales/grid.locale"
-import { createTheme, makeStyles, ThemeProvider } from "@mui/material/styles"
+import { createTheme, ThemeProvider } from "@mui/material"
 import { DataGrid, ptBR } from "@mui/x-data-grid"
+import { makeStyles } from "tss-react/mui"
 
 /*
   Componente responsável pela renderização da tabela de defesas

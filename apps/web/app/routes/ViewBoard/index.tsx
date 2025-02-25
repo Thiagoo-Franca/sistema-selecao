@@ -9,16 +9,26 @@ import {
   SelectAdapter as Select,
   TextFieldAdapter as TextField,
 } from "@/Components/FormAdapters"
-import { Box, Button, Checkbox, CssBaseline, FormControlLabel, Grid, MenuItem, ThemeProvider } from "@mui/material"
+import {
+  Box,
+  Button,
+  Checkbox,
+  createTheme,
+  CssBaseline,
+  FormControlLabel,
+  Grid,
+  MenuItem,
+  ThemeProvider,
+} from "@mui/material"
 import { Field, Form } from "react-final-form"
 // Picker
 import api from "@/Config/http"
 import { isTeacher } from "@/Helpers/role"
 import { useBanca } from "@/Hooks/Banca/useBanca"
-import DateFnsUtils from "@date-io/date-fns"
-import { DatePicker, MuiPickersUtilsProvider, TimePicker } from "@material-ui/pickers"
-import { createTheme, makeStyles } from "@mui/material/styles"
+import { DatePicker, TimePicker } from "@mui/lab"
+import { default as AdapterDateFns, default as LocalizationProvider } from "@mui/x-date-pickers"
 import { useParams } from "react-router"
+import { makeStyles } from "tss-react/mui"
 
 /*
   Componente responsável pela página de visualização de bancas
@@ -480,7 +490,7 @@ function ViewBoard() {
                     <Grid item xs={6}>
                       <Field name="local" multiline fullWidth component={TextField} Obrigatório label="Local ou link" />
                     </Grid>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
                       <Grid item xs={6}>
                         <Field
                           name="data_realizacao"
@@ -504,7 +514,7 @@ function ViewBoard() {
                       <Grid item xs={12}>
                         <Field name="nota_nao_alteravel" disabled fullWidth component={TextField} label="Nota Final" />
                       </Grid>
-                    </MuiPickersUtilsProvider>
+                    </LocalizationProvider>
                     <Box display="flex" justifyContent="flex-end" width="100%" gridGap={8}>
                       <ThemeProvider theme={theme}>
                         <Button
