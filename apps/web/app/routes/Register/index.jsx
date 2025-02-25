@@ -1,153 +1,124 @@
-import React, { useContext, useState, useCallback, useMemo } from "react";
-import { MyContext } from "../../Context";
-import { useHistory } from "react-router-dom";
-import "./styles.css";
-import Container from "@material-ui/core/Container";
-import { makeStyles } from "@material-ui/core/styles";
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import { Form, Field } from "react-final-form";
-import { TextField, Select } from "final-form-material-ui";
-import { Grid, Button, CssBaseline, MenuItem } from "@material-ui/core";
-import { useQuery } from "Hooks/Helpers/useQuery";
-import { toast } from "react-toastify";
+import { useHistory } from "@/utils"
+import { Button, CssBaseline, Grid, MenuItem } from "@material-ui/core"
+import Container from "@material-ui/core/Container"
+import { createTheme, makeStyles, ThemeProvider } from "@material-ui/core/styles"
+import { Select, TextField } from "final-form-material-ui"
+import { useQuery } from "Hooks/Helpers/useQuery"
+import { useCallback, useContext, useMemo, useState } from "react"
+import { Field, Form } from "react-final-form"
+import { toast } from "react-toastify"
+import { MyContext } from "../../Context"
+import "./styles.css"
 
-import ReactLoading from "react-loading";
+import ReactLoading from "react-loading"
 
-import * as Yup from "yup";
+import * as Yup from "yup"
 
 const yupSync = (schema) => async (values) => {
   try {
-    await schema.validate(values, { abortEarly: false });
-    return {};
+    await schema.validate(values, { abortEarly: false })
+    return {}
   } catch (error) {
     return error.inner.reduce((errors, err) => {
-      errors[err.path] = err.message;
-      return errors;
-    }, {});
+      errors[err.path] = err.message
+      return errors
+    }, {})
   }
-};
+}
 
 // validação Yup
 const validationSchemaForTeachers = Yup.object().shape({
-  nome: Yup.string()
-    .max(255, "Máximo de 255 caracteres")
-    .required("Campo Obrigatório"),
-  email: Yup.string()
-    .email("Insira um e-mail válido")
-    .max(64, "Máximo de 64 caracteres")
-    .required("Campo Obrigatório"),
-  username: Yup.string()
-    .max(255, "Máximo de 255 caracteres")
-    .required("Campo Obrigatório"),
+  nome: Yup.string().max(255, "Máximo de 255 caracteres").required("Campo Obrigatório"),
+  email: Yup.string().email("Insira um e-mail válido").max(64, "Máximo de 64 caracteres").required("Campo Obrigatório"),
+  username: Yup.string().max(255, "Máximo de 255 caracteres").required("Campo Obrigatório"),
   password: Yup.string()
     .min(6, "Mínimo de 6 caracteres")
     .max(16, "Máximo de 16 caracteres")
     .required("Campo Obrigatório"),
-  universidade: Yup.string()
-    .max(64, "Máximo de 64 caracteres")
-    .required("Campo Obrigatório"),
+  universidade: Yup.string().max(64, "Máximo de 64 caracteres").required("Campo Obrigatório"),
   pronoun: Yup.string().required("Campo Obrigatório"),
   academic_title: Yup.string().required("Campo Obrigatório"),
   registration_id: Yup.string().max(9, "Máximo de 9 caracteres"),
-});
+})
 
 const validationSchema = Yup.object().shape({
-  nome: Yup.string()
-    .max(255, "Máximo de 255 caracteres")
-    .required("Campo Obrigatório"),
-  email: Yup.string()
-    .email("Insira um e-mail válido")
-    .max(64, "Máximo de 64 caracteres")
-    .required("Campo Obrigatório"),
-  username: Yup.string()
-    .max(255, "Máximo de 255 caracteres")
-    .required("Campo Obrigatório"),
+  nome: Yup.string().max(255, "Máximo de 255 caracteres").required("Campo Obrigatório"),
+  email: Yup.string().email("Insira um e-mail válido").max(64, "Máximo de 64 caracteres").required("Campo Obrigatório"),
+  username: Yup.string().max(255, "Máximo de 255 caracteres").required("Campo Obrigatório"),
   password: Yup.string()
     .min(6, "Mínimo de 6 caracteres")
     .max(16, "Máximo de 16 caracteres")
     .required("Campo Obrigatório"),
-  universidade: Yup.string()
-    .max(64, "Máximo de 64 caracteres")
-    .required("Campo Obrigatório"),
+  universidade: Yup.string().max(64, "Máximo de 64 caracteres").required("Campo Obrigatório"),
   pronoun: Yup.string().required("Campo Obrigatório"),
   academic_title: Yup.string().required("Campo Obrigatório"),
-  registration_id: Yup.string()
-    .required("Campo Obrigatório")
-    .max(9, "Máximo de 9 caracteres"),
-});
+  registration_id: Yup.string().required("Campo Obrigatório").max(9, "Máximo de 9 caracteres"),
+})
 
 function Register() {
-  const { registerUser } = useContext(MyContext);
-  const [loading, setLoading] = useState(false);
-  const query = useQuery();
-  const history = useHistory();
+  const { registerUser } = useContext(MyContext)
+  const [loading, setLoading] = useState(false)
+  const query = useQuery()
+  const history = useHistory()
 
-  const validate = useMemo(
-    () =>
-      yupSync(
-        query.get("inv") ? validationSchemaForTeachers : validationSchema
-      ),
-    [query]
-  );
+  const validate = useMemo(() => yupSync(query.get("inv") ? validationSchemaForTeachers : validationSchema), [query])
 
   const [state, setState] = useState({
     errorMsg: "",
     successMsg: "",
-  });
+  })
 
   const goToHome = useCallback(() => {
-    history.push("");
-  }, [history]);
+    history.push("")
+  }, [history])
 
   const checkUserExist = async (email) => {
     try {
       const response = await fetch(`/api/checkUser?email=${email}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-      });
+      })
       if (!response.ok) {
-        console.error(`Erro na resposta da API: ${response.status}`);
-        return false;
+        console.error(`Erro na resposta da API: ${response.status}`)
+        return false
       }
-      const data = await response.json();
-      return data.exists;
+      const data = await response.json()
+      return data.exists
     } catch (error) {
-      console.error("Erro ao verificar usuário:", error);
-      return false;
+      console.error("Erro ao verificar usuário:", error)
+      return false
     }
-  };
+  }
 
   // Função para submeter o formulário
   const submitForm = async (values) => {
-    values.hash = query.get("inv");
+    values.hash = query.get("inv")
     try {
-      setLoading(true);
-      const userExists = await checkUserExist(values.email);
+      setLoading(true)
+      const userExists = await checkUserExist(values.email)
       if (userExists) {
-        setState({ errorMsg: "Usuário já existe", successMsg: "" });
-        toast.error("Usuário já existe!");
-        setLoading(false);
-        return;
+        setState({ errorMsg: "Usuário já existe", successMsg: "" })
+        toast.error("Usuário já existe!")
+        setLoading(false)
+        return
       }
-      await registerUser(values);
-      setState({ errorMsg: "", successMsg: "Usuário cadastrado com sucesso" });
-      toast.success("Usuário cadastrado com sucesso!");
-      goToHome();
-      setLoading(false);
+      await registerUser(values)
+      setState({ errorMsg: "", successMsg: "Usuário cadastrado com sucesso" })
+      toast.success("Usuário cadastrado com sucesso!")
+      goToHome()
+      setLoading(false)
     } catch (error) {
-      setState({ errorMsg: "Erro ao cadastrar usuário", successMsg: "" });
-      toast.error(
-        "Não foi possível cadastrar o usuário. Tente novamente mais tarde."
-      );
-      console.error("Erro:", error);
-      setLoading(false);
+      setState({ errorMsg: "Erro ao cadastrar usuário", successMsg: "" })
+      toast.error("Não foi possível cadastrar o usuário. Tente novamente mais tarde.")
+      console.error("Erro:", error)
+      setLoading(false)
     }
-  };
+  }
 
   // Estilos do botão
   const themeButton = createTheme({
     palette: { primary: { main: "#329F5B" } },
-  });
+  })
 
   const styles = makeStyles({
     root: {
@@ -156,19 +127,14 @@ function Register() {
       "& .MuiFormControl-root": { display: "flex" },
       "& .MuiSelect-select.MuiSelect-select": { textAlign: "left" },
     },
-  });
-  const classesGrid = styles();
+  })
+  const classesGrid = styles()
 
   return (
     <Container className="App">
       {loading ? (
         <div className="center">
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={100}
-            width={100}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
         </div>
       ) : (
         <div style={{ padding: 16, margin: "auto", maxWidth: 2000 }}>
@@ -188,12 +154,7 @@ function Register() {
             validate={validate}
             render={({ handleSubmit }) => (
               <form onSubmit={handleSubmit} noValidate>
-                <Grid
-                  container
-                  alignItems="flex-start"
-                  spacing={2}
-                  className={classesGrid.root}
-                >
+                <Grid container alignItems="flex-start" spacing={2} className={classesGrid.root}>
                   <Grid item xs={12}>
                     <Field
                       fullWidth
@@ -206,12 +167,7 @@ function Register() {
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    <Field
-                      name="pronoun"
-                      value={state.pronoun}
-                      component={Select}
-                      label="Gênero"
-                    >
+                    <Field name="pronoun" value={state.pronoun} component={Select} label="Gênero">
                       <MenuItem value="0" alignItems="flex-start">
                         Masculino
                       </MenuItem>
@@ -307,7 +263,7 @@ function Register() {
         </div>
       )}
     </Container>
-  );
+  )
 }
 
-export default Register;
+export default Register

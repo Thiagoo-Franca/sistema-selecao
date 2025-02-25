@@ -11,6 +11,6 @@ export default [
   route("/settings", "routes/Settings/index.jsx"),
   route("/users", "routes/Users/index.jsx"),
   route("/editarbanca/:id", "routes/ViewBoard/index.jsx"),
-  route("/resetpass", "routes/ResetPassword/index.js"),
+  route("/resetpass", "routes/ResetPassword/index.jsx"),
   route("/experimento", "routes/Evaluation/Evaluation.jsx"),
 ] satisfies RouteConfig

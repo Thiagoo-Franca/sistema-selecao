@@ -1,33 +1,33 @@
-import React, { useCallback, useEffect, useState } from "react";
-import "./styles.css";
-import Container from "@material-ui/core/Container";
-import ReactLoading from "react-loading";
-import { useHistory, useLocation } from "react-router-dom";
+import Container from "@material-ui/core/Container"
+import { useCallback, useEffect, useState } from "react"
+import ReactLoading from "react-loading"
+import "./styles.css"
 
-import CardBanca from "../../Components/Card";
-import { Grid, Button, CssBaseline, ThemeProvider } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { createTheme } from "@material-ui/core/styles";
-import api from "Config/http";
+import { useHistory } from "@/utils"
+import { Button, CssBaseline, Grid, ThemeProvider } from "@material-ui/core"
+import { createTheme, makeStyles } from "@material-ui/core/styles"
+import api from "Config/http"
+import { useLocation } from "react-router"
+import CardBanca from "../../Components/Card"
 
 /*
   Componente responsável pela página de visualização de bancas
 */
 
 function ViewBanca() {
-  const location = useLocation();
-  const history = useHistory();
+  const location = useLocation()
+  const history = useHistory()
 
-  const [banca, setBanca] = useState([]);
-  const [inn, setInn] = useState([]);
-  const [done, setDone] = useState(false);
-  const [done2, setDone2] = useState(false);
-  const [date, setDate] = useState("");
+  const [banca, setBanca] = useState([])
+  const [inn, setInn] = useState([])
+  const [done, setDone] = useState(false)
+  const [done2, setDone2] = useState(false)
+  const [date, setDate] = useState("")
 
   const goToHome = useCallback(() => {
-    if (location.key) history.goBack();
-    else history.push("");
-  }, [history, location]);
+    if (location.key) history.goBack()
+    else history.push("")
+  }, [history, location])
 
   const theme = createTheme({
     palette: {
@@ -44,22 +44,22 @@ function ViewBanca() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   useEffect(() => {
-    let url = window.location.href;
+    let url = window.location.href
     let regex = /[?&]([^=#]+)=([^&#]*)/g,
       banca = "",
-      match;
-    match = regex.exec(url);
+      match
+    match = regex.exec(url)
     if (match == null) {
-      goToHome();
+      goToHome()
     }
-    banca = match[2];
+    banca = match[2]
     api.get(`/banca/${banca}`).then(function (response) {
       if (response.data.data != null) {
-        let data = new Date(response.data.data.data_realizacao);
-        data.setSeconds(0);
+        let data = new Date(response.data.data.data_realizacao)
+        data.setSeconds(0)
         setDate(
           data.toLocaleString("pt-BR", {
             year: "numeric",
@@ -68,35 +68,35 @@ function ViewBanca() {
             hour: "2-digit",
             minute: "2-digit",
           })
-        );
-        setBanca(response.data.data);
-        setDone(true);
+        )
+        setBanca(response.data.data)
+        setDone(true)
       } else {
-        goToHome();
+        goToHome()
       }
-    });
-  }, [goToHome]);
+    })
+  }, [goToHome])
 
   useEffect(() => {
-    let url = window.location.href;
+    let url = window.location.href
     let regex = /[?&]([^=#]+)=([^&#]*)/g,
       banca = "",
-      match;
-    match = regex.exec(url);
+      match
+    match = regex.exec(url)
     if (match == null) {
-      goToHome();
+      goToHome()
     }
-    banca = match[2];
+    banca = match[2]
     api
       .get(`/usuario-banca/usuarios/${banca}`)
       .then(function (response) {
-        setInn(response.data.data);
-        setDone2(true);
+        setInn(response.data.data)
+        setDone2(true)
       })
       .catch(function (error) {
-        setDone2(true);
-      });
-  }, [goToHome]);
+        setDone2(true)
+      })
+  }, [goToHome])
 
   const styles = makeStyles({
     root: {
@@ -104,20 +104,15 @@ function ViewBanca() {
       padding: "16px",
       borderRadius: "8px",
     },
-  });
+  })
 
-  const classesGrid = styles();
+  const classesGrid = styles()
 
   return (
     <>
       {!done && !done2 ? (
         <div className="center">
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={100}
-            width={100}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
         </div>
       ) : (
         <Container className="App">
@@ -131,12 +126,7 @@ function ViewBanca() {
             }}
           >
             <CssBaseline />
-            <Grid
-              container
-              alignItems="flex-start"
-              spacing={2}
-              className={classesGrid.root}
-            >
+            <Grid container alignItems="flex-start" spacing={2} className={classesGrid.root}>
               <div className="banca-content">
                 <h1>Título: {banca.titulo_trabalho}</h1>
               </div>
@@ -151,16 +141,10 @@ function ViewBanca() {
                   <CardBanca text={banca.autor} title="Autor"></CardBanca>
                 </Grid>
                 <Grid item xs={4}>
-                  <CardBanca
-                    text={banca.matricula}
-                    title="Matrícula"
-                  ></CardBanca>
+                  <CardBanca text={banca.matricula} title="Matrícula"></CardBanca>
                 </Grid>
                 <Grid item xs={4}>
-                  <CardBanca
-                    text={banca.palavras_chave}
-                    title="Palavras Chaves (Separadas por vírgula)"
-                  ></CardBanca>
+                  <CardBanca text={banca.palavras_chave} title="Palavras Chaves (Separadas por vírgula)"></CardBanca>
                 </Grid>
                 <Grid item xs={4}>
                   <CardBanca text={banca.turma} title="Turma"></CardBanca>
@@ -172,10 +156,7 @@ function ViewBanca() {
                   <CardBanca text={banca.ano} title="Ano"></CardBanca>
                 </Grid>
                 <Grid item xs={4}>
-                  <CardBanca
-                    text={banca.semestre_letivo}
-                    title="Semestre Letivo"
-                  ></CardBanca>
+                  <CardBanca text={banca.semestre_letivo} title="Semestre Letivo"></CardBanca>
                 </Grid>
                 <Grid item xs={4}>
                   <CardBanca text={banca.local} title="Local"></CardBanca>
@@ -213,6 +194,6 @@ function ViewBanca() {
         </Container>
       )}
     </>
-  );
+  )
 }
-export default ViewBanca;
+export default ViewBanca

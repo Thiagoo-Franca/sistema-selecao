@@ -1,37 +1,37 @@
-import React, { createContext, Component } from "react";
-import api from "Config/http";
+import api from "Config/http"
+import React, { Component, createContext } from "react"
 
 /*
   Componente que guarda as informações de login
 */
 
-export const MyContext = createContext();
+export const MyContext = createContext()
 
 class MyContextProvider extends Component {
   constructor() {
-    super();
+    super()
     this.state = {
       loading: true,
       data: [],
-    };
-    this.isLoggedIn();
+    }
+    this.isLoggedIn()
   }
 
   // Root State
   state = {
     isAuth: false,
-  };
+  }
 
   // On Click the Log out button
   logoutUser = async () => {
-    await api.delete("/login");
+    await api.delete("/login")
 
-    localStorage.clear();
+    localStorage.clear()
     this.setState({
       ...this.state,
       isAuth: false,
-    });
-  };
+    })
+  }
 
   registerUser = async (user) => {
     // Sending the user registration request
@@ -47,34 +47,34 @@ class MyContextProvider extends Component {
       role: 0,
       pronoun: Number(user.pronoun),
       hash: user.hash,
-    });
+    })
 
-    return register.data;
-  };
+    return register.data
+  }
 
   loginUser = async (user) => {
-    var bodyFormData = new FormData();
-    bodyFormData.append("username", user.username);
-    bodyFormData.append("password", user.password);
+    var bodyFormData = new FormData()
+    bodyFormData.append("username", user.username)
+    bodyFormData.append("password", user.password)
 
     const res = await api
       .post("/login", bodyFormData)
       .then(function (response) {
-        return response;
+        return response
       })
       .catch(function (response) {
         //handle error
-        return 0;
-      });
+        return 0
+      })
 
-    return res;
+    return res
     // return login.data;
-  };
+  }
 
   // Checking user logged in or not
   isLoggedIn = () => {
-    return localStorage.getItem("token") !== null;
-  };
+    return localStorage.getItem("token") !== null
+  }
 
   render() {
     const contextValue = {
@@ -84,13 +84,9 @@ class MyContextProvider extends Component {
       registerUser: this.registerUser,
       loginUser: this.loginUser,
       logoutUser: this.logoutUser,
-    };
-    return (
-      <MyContext.Provider value={contextValue}>
-        {this.props.children}
-      </MyContext.Provider>
-    );
+    }
+    return <MyContext.Provider value={contextValue}>{this.props.children}</MyContext.Provider>
   }
 }
 
-export default MyContextProvider;
+export default MyContextProvider

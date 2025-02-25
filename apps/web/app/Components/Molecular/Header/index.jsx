@@ -1,23 +1,23 @@
-import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
-import { useHistory } from "react-router-dom";
-import { Box, Button } from "@material-ui/core";
-import { createTheme } from "@material-ui/core/styles";
-import { ThemeProvider } from "@material-ui/styles";
+import { useHistory } from "@/utils"
+import { Box, Button } from "@material-ui/core"
+import { createTheme } from "@material-ui/core/styles"
+import { ThemeProvider } from "@material-ui/styles"
+import { useContext, useState } from "react"
+import { Link } from "react-router"
 
-import InsitutoDeComputacao from "../../../Assets/Images/instituto_de_computacao.png";
-import { MyContext } from "../../../Context";
-import "./styles.css";
-import UserActions from "./UserActions";
+import InsitutoDeComputacao from "../../../Assets/Images/instituto_de_computacao.png"
+import { MyContext } from "../../../Context"
+import "./styles.css"
+import UserActions from "./UserActions"
 /*
   Componente responsável pela renderização do cabeçalho da aplicação
 */
 
 const Header = () => {
-  const { logoutUser, isLoggedIn } = useContext(MyContext);
-  const [isUserLogged, setIsUserLogged] = useState(isLoggedIn());
+  const { logoutUser, isLoggedIn } = useContext(MyContext)
+  const [isUserLogged, setIsUserLogged] = useState(isLoggedIn())
 
-  const history = useHistory();
+  const history = useHistory()
 
   const theme = createTheme({
     palette: {
@@ -40,7 +40,7 @@ const Header = () => {
         contrastText: "#000",
       },
     },
-  });
+  })
 
   const evaluationTheme = createTheme({
     palette: {
@@ -51,35 +51,28 @@ const Header = () => {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   const redirectTo = (path) => {
-    history.push(path);
-  };
+    history.push(path)
+  }
 
   const onClickLogout = () => {
-    logoutUser();
-    setIsUserLogged(false);
-    redirectTo("/");
-  };
+    logoutUser()
+    setIsUserLogged(false)
+    redirectTo("/")
+  }
 
   const onClickEvaluate = () => {
-    window.open(
-      "https://docs.google.com/forms/d/1_kGlkMi9KywxwHiVuBCyJt-vfgcb93MwXQUuNAEUL6U",
-      "_blank"
-    );
-  };
+    window.open("https://docs.google.com/forms/d/1_kGlkMi9KywxwHiVuBCyJt-vfgcb93MwXQUuNAEUL6U", "_blank")
+  }
 
   return (
     <>
       <div className="header" expand="lg">
         <div className="logo-container">
           <Link className="link" to="/" style={{ textDecoration: "none" }}>
-            <img
-              src={InsitutoDeComputacao}
-              alt="Logos IC"
-              className="img-logo"
-            />
+            <img src={InsitutoDeComputacao} alt="Logos IC" className="img-logo" />
             <h1 className="logo">Sistema de Defesas de TCC</h1>
           </Link>
         </div>
@@ -99,19 +92,11 @@ const Header = () => {
               <Button className="navigation-option" component={Link} to="/">
                 Home
               </Button>
-              <Button
-                className="navigation-option"
-                component={Link}
-                to="/dashboard"
-              >
+              <Button className="navigation-option" component={Link} to="/dashboard">
                 Minhas Bancas
               </Button>
               {localStorage.getItem("role") === "3" && (
-                <Button
-                  className="navigation-option"
-                  component={Link}
-                  to="/settings"
-                >
+                <Button className="navigation-option" component={Link} to="/settings">
                   Painel Administrativo
                 </Button>
               )}
@@ -136,21 +121,11 @@ const Header = () => {
                   Avaliação do Sistema
                 </Button>
               </ThemeProvider>
-              <Link
-                variant="contained"
-                color="primary"
-                component={Button}
-                to="login"
-              >
+              <Link variant="contained" color="primary" component={Button} to="login">
                 Login
               </Link>
               <Box width={8} />
-              <Link
-                variant="text"
-                color="primary"
-                component={Button}
-                to="register"
-              >
+              <Link variant="text" color="primary" component={Button} to="register">
                 Registre-se
               </Link>
             </ThemeProvider>
@@ -158,7 +133,7 @@ const Header = () => {
         )}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

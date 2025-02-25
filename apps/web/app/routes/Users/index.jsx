@@ -1,37 +1,37 @@
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import "./styles.css";
-import ReactLoading from "react-loading";
-import { Button, ThemeProvider } from "@material-ui/core";
-import SelectSearch, { fuzzySearch } from "react-select-search";
-import { createTheme } from "@material-ui/core/styles";
-import api from "Config/http";
-import { toast } from "react-toastify";
+import { useHistory } from "@/utils"
+import { Button, ThemeProvider } from "@material-ui/core"
+import { createTheme } from "@material-ui/core/styles"
+import api from "Config/http"
+import { useEffect, useState } from "react"
+import ReactLoading from "react-loading"
+import SelectSearch, { fuzzySearch } from "react-select-search"
+import { toast } from "react-toastify"
+import "./styles.css"
 
 /*
   Componente responsável pela página de adição de usuários à bancas
 */
 
 function Users() {
-  const [data, setData] = useState([]);
-  const [userIds] = useState([]);
-  const [done, setDone] = useState(undefined);
-  const [optionsUsers, setOptionsUsers] = useState([]);
-  const [usuario, setUsuario] = useState("");
-  const [cargo, setCargo] = useState("");
+  const [data, setData] = useState([])
+  const [userIds] = useState([])
+  const [done, setDone] = useState(undefined)
+  const [optionsUsers, setOptionsUsers] = useState([])
+  const [usuario, setUsuario] = useState("")
+  const [cargo, setCargo] = useState("")
 
-  const history = useHistory();
+  const history = useHistory()
 
   const goToDashboard = () => {
-    let path = ``;
-    history.push(path);
-  };
+    let path = ``
+    history.push(path)
+  }
 
   const reload = () => {
-    window.location.reload();
-  };
+    window.location.reload()
+  }
 
-  const userId = localStorage.getItem("userId");
+  const userId = localStorage.getItem("userId")
 
   const theme = createTheme({
     palette: {
@@ -48,7 +48,7 @@ function Users() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   const themeConvite = createTheme({
     palette: {
@@ -59,59 +59,55 @@ function Users() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   const editRole = async () => {
-    var bodyFormData = new FormData();
-    bodyFormData.append("role", cargo);
-    setDone(false);
-    api
-      .post(`/usuario/${usuario}/role`, bodyFormData)
-      .then(function (response) {
-        setDone(true);
-        reload();
-      });
-  };
+    var bodyFormData = new FormData()
+    bodyFormData.append("role", cargo)
+    setDone(false)
+    api.post(`/usuario/${usuario}/role`, bodyFormData).then(function (response) {
+      setDone(true)
+      reload()
+    })
+  }
 
   const generateLink = () => {
-    var bodyFormData = new FormData();
-    bodyFormData.append("user_id", userId);
-    bodyFormData.append("invite_hash", Math.random());
+    var bodyFormData = new FormData()
+    bodyFormData.append("user_id", userId)
+    bodyFormData.append("invite_hash", Math.random())
 
     api.post("/invite", bodyFormData).then(function (response) {
-      const baseUrl = window.location.hostname;
+      const baseUrl = window.location.hostname
 
-      const inviteLink = `${baseUrl}/register?inv=${response.data.data}`;
-      navigator.clipboard.writeText(inviteLink);
-      toast.success(
-        `O link de convite: ${inviteLink} foi copiado para a área de transferência.`
-      );
-    });
-  };
+      const inviteLink = `${baseUrl}/register?inv=${response.data.data}`
+      navigator.clipboard.writeText(inviteLink)
+      toast.success(`O link de convite: ${inviteLink} foi copiado para a área de transferência.`)
+    })
+  }
 
   useEffect(() => {
     api.get("/usuario").then(function (response) {
-      setData(response.data.data);
-      setDone(true);
-      return response;
-    });
-  }, []);
+      setData(response.data.data)
+      setDone(true)
+      return response
+    })
+  }, [])
 
   const userChange = (value) => {
-    setUsuario(value);
-  };
+    setUsuario(value)
+  }
 
   const roleChange = (value) => {
-    setCargo(value);
-  };
+    setCargo(value)
+  }
 
   if (data && data.length > 0 && optionsUsers.length <= 0) {
     const options = data
       .filter(function (e) {
-        return !userIds.includes(e.id);
+        return !userIds.includes(e.id)
       })
-      .map((user) => ({ name: user.nome, value: user.id }));
-    setOptionsUsers(options);
+      .map((user) => ({ name: user.nome, value: user.id }))
+    setOptionsUsers(options)
   }
 
   const optionsCargos = [
@@ -127,18 +123,13 @@ function Users() {
       name: "Administrador",
       value: 3,
     },
-  ];
+  ]
 
   return (
     <>
       {!done ? (
         <div className="center">
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={100}
-            width={100}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
         </div>
       ) : (
         <div className="container">
@@ -210,7 +201,7 @@ function Users() {
         </div>
       )}
     </>
-  );
+  )
 }
 
-export default Users;
+export default Users

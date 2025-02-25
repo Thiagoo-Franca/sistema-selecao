@@ -1,66 +1,50 @@
-import React, { useEffect, useState } from "react";
-import "./styles.css";
-import Container from "@material-ui/core/Container";
-import ReactLoading from "react-loading";
-import { useHistory } from "react-router-dom";
+import { useHistory } from "@/utils"
+import Container from "@material-ui/core/Container"
+import { useEffect, useState } from "react"
+import ReactLoading from "react-loading"
+import "./styles.css"
 
-import { Form, Field } from "react-final-form";
-import { TextField, Radio, Select } from "final-form-material-ui";
-import {
-  Grid,
-  Button,
-  CssBaseline,
-  MenuItem,
-  ThemeProvider,
-  FormControlLabel,
-  Checkbox,
-  Box,
-} from "@material-ui/core";
+import { Box, Button, Checkbox, CssBaseline, FormControlLabel, Grid, MenuItem, ThemeProvider } from "@material-ui/core"
+import { Radio, Select, TextField } from "final-form-material-ui"
+import { Field, Form } from "react-final-form"
 // Picker
-import DateFnsUtils from "@date-io/date-fns";
-import {
-  MuiPickersUtilsProvider,
-  TimePicker,
-  DatePicker,
-} from "@material-ui/pickers";
-import { makeStyles } from "@material-ui/core/styles";
-import { createTheme } from "@material-ui/core/styles";
-import api from "Config/http";
-import { isTeacher } from "Helpers/role";
-import { useBanca } from "Hooks/Banca/useBanca";
-import { useParams } from "react-router-dom/cjs/react-router-dom";
+import DateFnsUtils from "@date-io/date-fns"
+import { createTheme, makeStyles } from "@material-ui/core/styles"
+import { DatePicker, MuiPickersUtilsProvider, TimePicker } from "@material-ui/pickers"
+import api from "Config/http"
+import { isTeacher } from "Helpers/role"
+import { useBanca } from "Hooks/Banca/useBanca"
+import { useParams } from "react-router"
 
 /*
   Componente responsável pela página de visualização de bancas
 */
 function ViewBoard() {
-  const [tipo_banca, setTipo_banca] = useState(true);
-  const [done, setDone] = useState(undefined);
-  const [cursos, setCursos] = useState([]);
-  const [nota, setNota] = useState([]);
+  const [tipo_banca, setTipo_banca] = useState(true)
+  const [done, setDone] = useState(undefined)
+  const [cursos, setCursos] = useState([])
+  const [nota, setNota] = useState([])
 
-  const history = useHistory();
-  const { id } = useParams();
-  const { banca, loading } = useBanca(id);
+  const history = useHistory()
+  const { id } = useParams()
+  const { banca, loading } = useBanca(id)
 
   useEffect(() => {
-    api.get("cursos").then(({ data: { data } }) => setCursos(data));
-  }, []);
+    api.get("cursos").then(({ data: { data } }) => setCursos(data))
+  }, [])
 
   const goToDashboard = () => {
-    let path = `/dashboard`;
-    history.push(path);
-  };
+    let path = `/dashboard`
+    history.push(path)
+  }
 
   function DatePickerWrapper(props) {
     const {
       input: { name, onChange, value, ...restInput },
       meta,
       ...rest
-    } = props;
-    const showError =
-      ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) &&
-      meta.touched;
+    } = props
+    const showError = ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) && meta.touched
 
     return (
       <DatePicker
@@ -73,7 +57,7 @@ function ViewBoard() {
         onChange={onChange}
         value={value === "" ? null : value}
       />
-    );
+    )
   }
 
   function TimePickerWrapper(props) {
@@ -81,10 +65,8 @@ function ViewBoard() {
       input: { name, onChange, value, ...restInput },
       meta,
       ...rest
-    } = props;
-    const showError =
-      ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) &&
-      meta.touched;
+    } = props
+    const showError = ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) && meta.touched
 
     return (
       <TimePicker
@@ -96,30 +78,30 @@ function ViewBoard() {
         onChange={onChange}
         value={value === "" ? null : value}
       />
-    );
+    )
   }
 
   function encode(details) {
-    var formBody = [];
+    var formBody = []
     for (var property in details) {
-      var encodedKey = encodeURIComponent(property);
-      var encodedValue = encodeURIComponent(details[property]);
-      formBody.push(encodedKey + "=" + encodedValue);
+      var encodedKey = encodeURIComponent(property)
+      var encodedValue = encodeURIComponent(details[property])
+      formBody.push(encodedKey + "=" + encodedValue)
     }
-    formBody = formBody.join("&");
-    return formBody;
+    formBody = formBody.join("&")
+    return formBody
   }
 
   const onSubmit = async (values) => {
-    var hour = new Date(values.hora);
-    var date = new Date(values.data_realizacao);
+    var hour = new Date(values.hora)
+    var date = new Date(values.data_realizacao)
 
-    hour.setHours(hour.getHours() - 3);
-    hour.setDate(date.getDate());
-    hour.setMonth(date.getMonth());
-    hour.setFullYear(date.getFullYear());
-    values.data_realizacao = hour.toISOString().slice(0, 19).replace("T", " ");
-    values.visible = values.visible ? 1 : 0;
+    hour.setHours(hour.getHours() - 3)
+    hour.setDate(date.getDate())
+    hour.setMonth(date.getMonth())
+    hour.setFullYear(date.getFullYear())
+    values.data_realizacao = hour.toISOString().slice(0, 19).replace("T", " ")
+    values.visible = values.visible ? 1 : 0
 
     api
       .put(`/banca/${banca.id}`, encode(values), {
@@ -128,9 +110,9 @@ function ViewBoard() {
         },
       })
       .then(function (response) {
-        goToDashboard();
-      });
-  };
+        goToDashboard()
+      })
+  }
 
   const validate = (values) => {
     const REQUIRED_FIELDS_VALIDATION = [
@@ -146,7 +128,7 @@ function ViewBoard() {
       "turma",
       "ano",
       "semestre_letivo",
-    ];
+    ]
 
     const FIELD_LENGHT_VALIDATION = {
       titulo_trabalho: 255,
@@ -159,78 +141,75 @@ function ViewBoard() {
       matricula: 10,
       turma: 45,
       ano: 4,
-    };
+    }
 
-    const errors = {};
+    const errors = {}
 
     REQUIRED_FIELDS_VALIDATION.forEach((key) => {
-      if (!values[key]) errors[key] = "Obrigatório";
-    });
+      if (!values[key]) errors[key] = "Obrigatório"
+    })
 
     Object.keys(FIELD_LENGHT_VALIDATION).forEach((key) => {
       if (values[key] && values[key].length > FIELD_LENGHT_VALIDATION[key])
-        errors[
-          key
-        ] = `O tamanho máximo deste campo é de ${FIELD_LENGHT_VALIDATION[key]} caracteres.`;
-    });
+        errors[key] = `O tamanho máximo deste campo é de ${FIELD_LENGHT_VALIDATION[key]} caracteres.`
+    })
 
     if (isTeacher() && !values.autor) {
-      errors.autor = "Obrigatório";
+      errors.autor = "Obrigatório"
     }
     if (isTeacher() && values.pronome_autor !== 0 && !values.pronome_autor) {
-      errors.pronome_autor = "Obrigatório";
+      errors.pronome_autor = "Obrigatório"
     }
     if (isTeacher() && !values.matricula) {
-      errors.matricula = "Obrigatório";
+      errors.matricula = "Obrigatório"
     }
 
-    if (values.ano && !Number(values.ano))
-      errors.ano = "Insira um valor válido";
+    if (values.ano && !Number(values.ano)) errors.ano = "Insira um valor válido"
 
-    return errors;
-  };
+    return errors
+  }
 
   const handleChange = (e) => {
-    const { value } = e.target;
+    const { value } = e.target
     if (value === "remoto") {
-      setTipo_banca(false);
+      setTipo_banca(false)
     } else if (value === "local") {
-      setTipo_banca(true);
+      setTipo_banca(true)
     }
-  };
+  }
 
   const generateReport = async () => {
     api.get(`/documento/documentoInfo/${banca.id}`).then(function (response) {
-      var data = response.data;
+      var data = response.data
 
-      var bodyFormData = new FormData();
-      bodyFormData.append("curso", data.curso);
-      bodyFormData.append("disciplina", data.disciplina);
-      bodyFormData.append("turma", data.turma);
-      bodyFormData.append("titulo_trabalho", data.titulo_trabalho);
-      bodyFormData.append("nome_curso", data.nome_curso);
-      bodyFormData.append("data", data.data);
-      bodyFormData.append("horario", data.horario);
-      bodyFormData.append("nota_orientador", data.nota_orientador);
-      bodyFormData.append("orientador", data.orientador);
-      bodyFormData.append("semestre", data.semestre);
-      bodyFormData.append("avaliadores", JSON.stringify(data.avaliadores));
-      bodyFormData.append("aluno", data.aluno);
+      var bodyFormData = new FormData()
+      bodyFormData.append("curso", data.curso)
+      bodyFormData.append("disciplina", data.disciplina)
+      bodyFormData.append("turma", data.turma)
+      bodyFormData.append("titulo_trabalho", data.titulo_trabalho)
+      bodyFormData.append("nome_curso", data.nome_curso)
+      bodyFormData.append("data", data.data)
+      bodyFormData.append("horario", data.horario)
+      bodyFormData.append("nota_orientador", data.nota_orientador)
+      bodyFormData.append("orientador", data.orientador)
+      bodyFormData.append("semestre", data.semestre)
+      bodyFormData.append("avaliadores", JSON.stringify(data.avaliadores))
+      bodyFormData.append("aluno", data.aluno)
       api
         .post(`/documento/${banca.id}`, bodyFormData, {
           responseType: "blob",
         })
         .then((response) => {
           // RETRIEVE THE response AND CREATE LOCAL URL
-          setDone(true);
-          var _url = window.URL.createObjectURL(response.data);
-          window.open(_url, "_blank").focus(); // window.open + focus
+          setDone(true)
+          var _url = window.URL.createObjectURL(response.data)
+          window.open(_url, "_blank").focus() // window.open + focus
         })
         .catch((err) => {
           // console.log(err);
-        });
-    });
-  };
+        })
+    })
+  }
 
   const generateOrientationReport = () => {
     api
@@ -239,14 +218,14 @@ function ViewBoard() {
       })
       .then((response) => {
         // RETRIEVE THE response AND CREATE LOCAL URL
-        setDone(true);
-        var _url = window.URL.createObjectURL(response.data);
-        window.open(_url, "_blank").focus(); // window.open + focus
+        setDone(true)
+        var _url = window.URL.createObjectURL(response.data)
+        window.open(_url, "_blank").focus() // window.open + focus
       })
       .catch((err) => {
         // console.log(err);
-      });
-  };
+      })
+  }
 
   const generateParticipationReport = () => {
     api
@@ -255,31 +234,31 @@ function ViewBoard() {
       })
       .then((response) => {
         // RETRIEVE THE response AND CREATE LOCAL URL
-        setDone(true);
-        var _url = window.URL.createObjectURL(response.data);
-        window.open(_url, "_blank").focus(); // window.open + focus
+        setDone(true)
+        var _url = window.URL.createObjectURL(response.data)
+        window.open(_url, "_blank").focus() // window.open + focus
       })
       .catch((err) => {
         // console.log(err);
-      });
-  };
+      })
+  }
 
   useEffect(() => {
     if (banca?.id) {
       api.get(`/nota/${banca.id}`).then(function (response) {
-        setNota(response.data.data || "");
-        setDone(true);
-        return response;
-      });
+        setNota(response.data.data || "")
+        setDone(true)
+        return response
+      })
     }
-  }, [banca?.id]);
+  }, [banca?.id])
 
   const styles = makeStyles({
     root: {
       boxShadow: "0 0 4px rgb(0 0 0 / 12%), 0 2px 4px rgb(0 0 0 / 20%)",
       padding: "16px",
     },
-  });
+  })
 
   const theme = createTheme({
     palette: {
@@ -296,7 +275,7 @@ function ViewBoard() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   const themeEditar = createTheme({
     palette: {
@@ -307,20 +286,15 @@ function ViewBoard() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
-  const classesGrid = styles();
+  const classesGrid = styles()
 
   return (
     <>
       {loading || !done ? (
         <div className="center">
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={100}
-            width={100}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
         </div>
       ) : (
         <Container className="App banca-form-container">
@@ -358,20 +332,9 @@ function ViewBoard() {
                 visible: banca.visible && banca.visible !== "0",
               }}
               validate={validate}
-              render={({
-                handleSubmit,
-                reset,
-                submitting,
-                pristine,
-                values,
-              }) => (
+              render={({ handleSubmit, reset, submitting, pristine, values }) => (
                 <form onSubmit={handleSubmit} noValidate>
-                  <Grid
-                    container
-                    alignItems="flex-start"
-                    spacing={2}
-                    className={classesGrid.root}
-                  >
+                  <Grid container alignItems="flex-start" spacing={2} className={classesGrid.root}>
                     <Grid item xs={isTeacher() ? 10 : 12}>
                       <Field
                         fullWidth
@@ -400,15 +363,8 @@ function ViewBoard() {
                         <Field name="visible" onClick={handleChange}>
                           {({ input }) => (
                             <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={input.value}
-                                  onChange={input.onChange}
-                                />
-                              }
-                              label={`Visibilidade: ${
-                                input.value ? "Pública" : "Privada"
-                              }`}
+                              control={<Checkbox checked={input.value} onChange={input.onChange} />}
+                              label={`Visibilidade: ${input.value ? "Pública" : "Privada"}`}
                             />
                           )}
                         </Field>
@@ -426,32 +382,13 @@ function ViewBoard() {
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <Field
-                        name="abstract"
-                        fullWidth
-                        multiline
-                        Obrigatório
-                        component={TextField}
-                        label="Abstract"
-                      />
+                      <Field name="abstract" fullWidth multiline Obrigatório component={TextField} label="Abstract" />
                     </Grid>
                     <Grid item xs={6}>
-                      <Field
-                        name="autor"
-                        fullWidth
-                        Obrigatório
-                        component={TextField}
-                        label="Autor"
-                      />
+                      <Field name="autor" fullWidth Obrigatório component={TextField} label="Autor" />
                     </Grid>
                     <Grid item xs={3}>
-                      <Field
-                        name="matricula"
-                        fullWidth
-                        Obrigatório
-                        component={TextField}
-                        label="Matrícula"
-                      />
+                      <Field name="matricula" fullWidth Obrigatório component={TextField} label="Matrícula" />
                     </Grid>
                     <Grid item xs={3}>
                       <Field
@@ -479,21 +416,10 @@ function ViewBoard() {
                       />
                     </Grid>
                     <Grid item xs={6}>
-                      <Field
-                        name="turma"
-                        fullWidth
-                        Obrigatório
-                        component={TextField}
-                        label="Turma"
-                      />
+                      <Field name="turma" fullWidth Obrigatório component={TextField} label="Turma" />
                     </Grid>
                     <Grid item xs={3}>
-                      <Field
-                        name="curso"
-                        label="Curso"
-                        formControlProps={{ className: "curso" }}
-                        component={Select}
-                      >
+                      <Field name="curso" label="Curso" formControlProps={{ className: "curso" }} component={Select}>
                         {cursos.map(({ id, sigla }) => (
                           <MenuItem key={id} value={id}>
                             {sigla}
@@ -530,14 +456,7 @@ function ViewBoard() {
                       ></Field>
                     </Grid>
                     <Grid item xs={3}>
-                      <Field
-                        name="ano"
-                        multiline
-                        fullWidth
-                        Obrigatório
-                        component={TextField}
-                        label="Ano"
-                      />
+                      <Field name="ano" multiline fullWidth Obrigatório component={TextField} label="Ano" />
                     </Grid>
                     <Grid item xs={3}>
                       <Field
@@ -555,14 +474,7 @@ function ViewBoard() {
                       </Field>
                     </Grid>
                     <Grid item xs={6}>
-                      <Field
-                        name="local"
-                        multiline
-                        fullWidth
-                        component={TextField}
-                        Obrigatório
-                        label="Local ou link"
-                      />
+                      <Field name="local" multiline fullWidth component={TextField} Obrigatório label="Local ou link" />
                     </Grid>
                     <MuiPickersUtilsProvider utils={DateFnsUtils}>
                       <Grid item xs={6}>
@@ -586,21 +498,10 @@ function ViewBoard() {
                         />
                       </Grid>
                       <Grid item xs={12}>
-                        <Field
-                          name="nota_nao_alteravel"
-                          disabled
-                          fullWidth
-                          component={TextField}
-                          label="Nota Final"
-                        />
+                        <Field name="nota_nao_alteravel" disabled fullWidth component={TextField} label="Nota Final" />
                       </Grid>
                     </MuiPickersUtilsProvider>
-                    <Box
-                      display="flex"
-                      justifyContent="flex-end"
-                      width="100%"
-                      gridGap={8}
-                    >
+                    <Box display="flex" justifyContent="flex-end" width="100%" gridGap={8}>
                       <ThemeProvider theme={theme}>
                         <Button
                           variant="contained"
@@ -620,8 +521,8 @@ function ViewBoard() {
                               variant="contained"
                               color="primary"
                               onClick={() => {
-                                setDone(false);
-                                generateReport();
+                                setDone(false)
+                                generateReport()
                               }}
                               style={{ marginLeft: 10, borderRadius: 10 }}
                             >
@@ -631,8 +532,8 @@ function ViewBoard() {
                               variant="contained"
                               color="primary"
                               onClick={() => {
-                                setDone(false);
-                                generateOrientationReport();
+                                setDone(false)
+                                generateOrientationReport()
                               }}
                               style={{ marginLeft: 10, borderRadius: 10 }}
                             >
@@ -642,8 +543,8 @@ function ViewBoard() {
                               variant="contained"
                               color="primary"
                               onClick={() => {
-                                setDone(false);
-                                generateParticipationReport();
+                                setDone(false)
+                                generateParticipationReport()
                               }}
                               style={{ marginLeft: 10, borderRadius: 10 }}
                             >
@@ -672,6 +573,6 @@ function ViewBoard() {
         </Container>
       )}
     </>
-  );
+  )
 }
-export default ViewBoard;
+export default ViewBoard

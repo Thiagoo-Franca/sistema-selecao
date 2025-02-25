@@ -1,62 +1,47 @@
-import React, { useEffect, useState } from "react";
-import "./styles.css";
-import Container from "@material-ui/core/Container";
-import ReactLoading from "react-loading";
-import { useHistory } from "react-router-dom";
-import { Form, Field } from "react-final-form";
-import { TextField, Radio, Select } from "final-form-material-ui";
-import {
-  Grid,
-  Button,
-  CssBaseline,
-  MenuItem,
-  ThemeProvider,
-  Checkbox,
-  FormControlLabel,
-} from "@material-ui/core";
+import { useHistory } from "@/utils"
+import { Button, Checkbox, CssBaseline, FormControlLabel, Grid, MenuItem, ThemeProvider } from "@material-ui/core"
+import Container from "@material-ui/core/Container"
+import { Radio, Select, TextField } from "final-form-material-ui"
+import { useEffect, useState } from "react"
+import { Field, Form } from "react-final-form"
+import ReactLoading from "react-loading"
+import "./styles.css"
 // Picker
-import DateFnsUtils from "@date-io/date-fns";
-import {
-  MuiPickersUtilsProvider,
-  TimePicker,
-  DatePicker,
-} from "@material-ui/pickers";
-import { makeStyles } from "@material-ui/core/styles";
-import { createTheme } from "@material-ui/core/styles";
-import api from "Config/http";
-import useTeachers from "Hooks/Users/useTeachers";
-import { isTeacher } from "Helpers/role";
-import { toast } from "react-toastify";
+import DateFnsUtils from "@date-io/date-fns"
+import { createTheme, makeStyles } from "@material-ui/core/styles"
+import { DatePicker, MuiPickersUtilsProvider, TimePicker } from "@material-ui/pickers"
+import api from "Config/http"
+import { isTeacher } from "Helpers/role"
+import useTeachers from "Hooks/Users/useTeachers"
+import { toast } from "react-toastify"
 
 /*
   Componente responsável pela página de criação de bancas
 */
 
 function ExaminingBoard() {
-  const { loading: loadingTeachers, users: teachers } = useTeachers();
-  const [tipo_banca, setTipo_banca] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [cursos, setCursos] = useState([]);
-  const history = useHistory();
+  const { loading: loadingTeachers, users: teachers } = useTeachers()
+  const [tipo_banca, setTipo_banca] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [cursos, setCursos] = useState([])
+  const history = useHistory()
 
   useEffect(() => {
-    api.get("cursos").then(({ data: { data } }) => setCursos(data));
-  }, []);
+    api.get("cursos").then(({ data: { data } }) => setCursos(data))
+  }, [])
 
   const goToDashboard = () => {
-    let path = `dashboard`;
-    history.push(path);
-  };
+    let path = `dashboard`
+    history.push(path)
+  }
 
   function DatePickerWrapper(props) {
     const {
       input: { name, onChange, value, ...restInput },
       meta,
       ...rest
-    } = props;
-    const showError =
-      ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) &&
-      meta.touched;
+    } = props
+    const showError = ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) && meta.touched
 
     return (
       <DatePicker
@@ -69,7 +54,7 @@ function ExaminingBoard() {
         onChange={onChange}
         value={value === "" ? null : value}
       />
-    );
+    )
   }
 
   function TimePickerWrapper(props) {
@@ -77,10 +62,8 @@ function ExaminingBoard() {
       input: { name, onChange, value, ...restInput },
       meta,
       ...rest
-    } = props;
-    const showError =
-      ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) &&
-      meta.touched;
+    } = props
+    const showError = ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) && meta.touched
 
     return (
       <TimePicker
@@ -92,7 +75,7 @@ function ExaminingBoard() {
         onChange={onChange}
         value={value === "" ? null : value}
       />
-    );
+    )
   }
 
   const theme = createTheme({
@@ -110,42 +93,42 @@ function ExaminingBoard() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   const handleChange = (e) => {
-    const { value } = e.target;
+    const { value } = e.target
     if (value === "remoto") {
-      setTipo_banca(false);
+      setTipo_banca(false)
     } else if (value === "local") {
-      setTipo_banca(true);
+      setTipo_banca(true)
     }
-  };
+  }
 
   const onSubmit = async (values) => {
-    const hour = new Date(values.hora);
-    const date = new Date(values.data_realizacao);
-    const userId = localStorage.getItem("userId");
-    values.user_id = userId;
+    const hour = new Date(values.hora)
+    const date = new Date(values.data_realizacao)
+    const userId = localStorage.getItem("userId")
+    values.user_id = userId
 
-    hour.setHours(hour.getHours() - 3);
-    hour.setDate(date.getDate());
-    hour.setMonth(date.getMonth());
-    hour.setFullYear(date.getFullYear());
-    values.data_realizacao = hour.toISOString().slice(0, 19).replace("T", " ");
-    values.visible = values.visible ? 1 : 0;
-    setLoading(true);
+    hour.setHours(hour.getHours() - 3)
+    hour.setDate(date.getDate())
+    hour.setMonth(date.getMonth())
+    hour.setFullYear(date.getFullYear())
+    values.data_realizacao = hour.toISOString().slice(0, 19).replace("T", " ")
+    values.visible = values.visible ? 1 : 0
+    setLoading(true)
 
     api
       .post("/banca", values)
       .then(function () {
-        setLoading(false);
-        goToDashboard();
+        setLoading(false)
+        goToDashboard()
       })
       .catch(() => {
-        setLoading(false);
-        toast.error("Ocorreu um erro ao tentar cadastrar a banca");
-      });
-  };
+        setLoading(false)
+        toast.error("Ocorreu um erro ao tentar cadastrar a banca")
+      })
+  }
 
   const validate = (values) => {
     const REQUIRED_FIELDS_VALIDATION = [
@@ -161,7 +144,7 @@ function ExaminingBoard() {
       "turma",
       "ano",
       "semestre_letivo",
-    ];
+    ]
 
     const FIELD_LENGHT_VALIDATION = {
       titulo_trabalho: 255,
@@ -174,56 +157,48 @@ function ExaminingBoard() {
       matricula: 10,
       turma: 45,
       ano: 4,
-    };
+    }
 
-    const errors = {};
+    const errors = {}
 
     REQUIRED_FIELDS_VALIDATION.forEach((key) => {
-      if (!values[key]) errors[key] = "Obrigatório";
-    });
+      if (!values[key]) errors[key] = "Obrigatório"
+    })
 
     Object.keys(FIELD_LENGHT_VALIDATION).forEach((key) => {
       if (values[key] && values[key].length > FIELD_LENGHT_VALIDATION[key])
-        errors[
-          key
-        ] = `O tamanho máximo deste campo é de ${FIELD_LENGHT_VALIDATION[key]} caracteres.`;
-    });
+        errors[key] = `O tamanho máximo deste campo é de ${FIELD_LENGHT_VALIDATION[key]} caracteres.`
+    })
 
     if (isTeacher() && !values.autor) {
-      errors.autor = "Obrigatório";
+      errors.autor = "Obrigatório"
     }
     if (isTeacher() && values.pronome_autor !== 0 && !values.pronome_autor) {
-      errors.pronome_autor = "Obrigatório";
+      errors.pronome_autor = "Obrigatório"
     }
     if (isTeacher() && !values.matricula) {
-      errors.matricula = "Obrigatório";
+      errors.matricula = "Obrigatório"
     }
 
-    if (values.ano && !Number(values.ano))
-      errors.ano = "Insira um valor válido";
+    if (values.ano && !Number(values.ano)) errors.ano = "Insira um valor válido"
 
-    return errors;
-  };
+    return errors
+  }
 
   const styles = makeStyles({
     root: {
       boxShadow: "0 0 4px rgb(0 0 0 / 12%), 0 2px 4px rgb(0 0 0 / 20%)",
       padding: "16px",
     },
-  });
+  })
 
-  const classesGrid = styles();
+  const classesGrid = styles()
 
   return (
     <Container className="App banca-form-container">
       {loading ? (
         <div className="center">
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={50}
-            width={50}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={50} width={50} />
         </div>
       ) : null}
       <div
@@ -242,12 +217,7 @@ function ExaminingBoard() {
           validate={validate}
           render={({ handleSubmit, submitting }) => (
             <form onSubmit={handleSubmit} noValidate>
-              <Grid
-                container
-                alignItems="flex-start"
-                spacing={2}
-                className={classesGrid.root}
-              >
+              <Grid container alignItems="flex-start" spacing={2} className={classesGrid.root}>
                 <Grid item xs={isTeacher() ? 10 : 12}>
                   <Field
                     fullWidth
@@ -276,15 +246,8 @@ function ExaminingBoard() {
                     <Field name="visible" onClick={handleChange}>
                       {({ input }) => (
                         <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={input.value}
-                              onChange={input.onChange}
-                            />
-                          }
-                          label={`Visibilidade: ${
-                            input.value ? "Pública" : "Privada"
-                          }`}
+                          control={<Checkbox checked={input.value} onChange={input.onChange} />}
+                          label={`Visibilidade: ${input.value ? "Pública" : "Privada"}`}
                         />
                       )}
                     </Field>
@@ -302,34 +265,15 @@ function ExaminingBoard() {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Field
-                    name="abstract"
-                    fullWidth
-                    multiline
-                    Obrigatório
-                    component={TextField}
-                    label="Abstract"
-                  />
+                  <Field name="abstract" fullWidth multiline Obrigatório component={TextField} label="Abstract" />
                 </Grid>
                 {isTeacher() ? (
                   <>
                     <Grid item xs={6}>
-                      <Field
-                        name="autor"
-                        fullWidth
-                        Obrigatório
-                        component={TextField}
-                        label="Autor"
-                      />
+                      <Field name="autor" fullWidth Obrigatório component={TextField} label="Autor" />
                     </Grid>
                     <Grid item xs={3}>
-                      <Field
-                        name="matricula"
-                        fullWidth
-                        Obrigatório
-                        component={TextField}
-                        label="Matrícula"
-                      />
+                      <Field name="matricula" fullWidth Obrigatório component={TextField} label="Matrícula" />
                     </Grid>
                     <Grid item xs={3}>
                       <Field
@@ -376,21 +320,10 @@ function ExaminingBoard() {
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <Field
-                    name="turma"
-                    fullWidth
-                    Obrigatório
-                    component={TextField}
-                    label="Turma"
-                  />
+                  <Field name="turma" fullWidth Obrigatório component={TextField} label="Turma" />
                 </Grid>
                 <Grid item xs={4}>
-                  <Field
-                    name="curso"
-                    label="Curso"
-                    formControlProps={{ className: "curso" }}
-                    component={Select}
-                  >
+                  <Field name="curso" label="Curso" formControlProps={{ className: "curso" }} component={Select}>
                     {cursos.map(({ id, sigla }) => (
                       <MenuItem key={id} value={id}>
                         {sigla}
@@ -398,37 +331,14 @@ function ExaminingBoard() {
                     ))}
                   </Field>
                 </Grid>
-                <Grid
-                  style={{ padding: 0, marginTop: "auto", fontSize: "13px" }}
-                  item
-                  xs={2}
-                >
+                <Grid style={{ padding: 0, marginTop: "auto", fontSize: "13px" }} item xs={2}>
                   Remoto
-                  <Field
-                    name="tipo_banca"
-                    component={Radio}
-                    type="radio"
-                    value="remoto"
-                    onClick={handleChange}
-                  ></Field>
+                  <Field name="tipo_banca" component={Radio} type="radio" value="remoto" onClick={handleChange}></Field>
                   Presencial
-                  <Field
-                    name="tipo_banca"
-                    component={Radio}
-                    type="radio"
-                    value="local"
-                    onClick={handleChange}
-                  ></Field>
+                  <Field name="tipo_banca" component={Radio} type="radio" value="local" onClick={handleChange}></Field>
                 </Grid>
                 <Grid item xs={3}>
-                  <Field
-                    name="ano"
-                    multiline
-                    fullWidth
-                    Obrigatório
-                    component={TextField}
-                    label="Ano"
-                  />
+                  <Field name="ano" multiline fullWidth Obrigatório component={TextField} label="Ano" />
                 </Grid>
                 <Grid item xs={3}>
                   <Field
@@ -506,6 +416,6 @@ function ExaminingBoard() {
         />
       </div>
     </Container>
-  );
+  )
 }
-export default ExaminingBoard;
+export default ExaminingBoard

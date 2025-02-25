@@ -1,51 +1,46 @@
-import React, { useState } from "react";
+import { useState } from "react"
 
-import { Avatar, Box, Menu, MenuItem, Tooltip } from "@material-ui/core";
+import { Avatar, Box, Menu, MenuItem, Tooltip } from "@material-ui/core"
 
-import { ROLES_DICT } from "Pages/Settings/PermissionsTab";
-import "./styles.css";
-import { useHistory } from "react-router-dom/cjs/react-router-dom";
-import { Create, ExitToApp } from "@material-ui/icons";
+import { useHistory } from "@/utils"
+import { Create, ExitToApp } from "@material-ui/icons"
+import { ROLES_DICT } from "Pages/Settings/PermissionsTab"
+import "./styles.css"
 
 function getInitials(name) {
-  if (!name) return "";
+  if (!name) return ""
 
-  const [first, second] = name.split(" ");
-  return `${first[0]}${second?.lenght ? second[0] : ""}`;
+  const [first, second] = name.split(" ")
+  return `${first[0]}${second?.lenght ? second[0] : ""}`
 }
 
 function getRoleName(role) {
-  return ROLES_DICT[role];
+  return ROLES_DICT[role]
 }
 
 export default function UserActions({ name, role, isLoggedIn, onClickLogout }) {
-  const [anchorEl, setAnchor] = useState(null);
-  const initials = getInitials(name);
-  const open = Boolean(anchorEl);
+  const [anchorEl, setAnchor] = useState(null)
+  const initials = getInitials(name)
+  const open = Boolean(anchorEl)
 
-  const history = useHistory();
+  const history = useHistory()
 
   const handleClose = () => {
-    setAnchor(null);
-  };
+    setAnchor(null)
+  }
 
   const handleClick = (e) => {
-    setAnchor(e.currentTarget);
-  };
+    setAnchor(e.currentTarget)
+  }
 
   const handleClickMyAccount = () => {
-    history.push("account");
-  };
+    history.push("account")
+  }
 
   return isLoggedIn ? (
     <div className="user-actions-wrapper">
       <Tooltip title="Opções da Conta" placement="bottom" arrow>
-        <Box
-          sx={{ boxShadow: 1 }}
-          display="flex"
-          justifyContent="center"
-          onClick={handleClick}
-        >
+        <Box sx={{ boxShadow: 1 }} display="flex" justifyContent="center" onClick={handleClick}>
           <Avatar autoCapitalize style={{ backgroundColor: "#6c7ae0" }}>
             {initials}
           </Avatar>
@@ -71,12 +66,7 @@ export default function UserActions({ name, role, isLoggedIn, onClickLogout }) {
       >
         <MenuItem onClick={handleClickMyAccount}>
           <Box display="flex" alignItems="center" justifyContent="center">
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              marginRight={1}
-            >
+            <Box display="flex" alignItems="center" justifyContent="center" marginRight={1}>
               <Create className="icon" />
             </Box>
             Editar informações
@@ -84,12 +74,7 @@ export default function UserActions({ name, role, isLoggedIn, onClickLogout }) {
         </MenuItem>
         <MenuItem onClick={onClickLogout}>
           <Box display="flex" alignItems="center" justifyContent="center">
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              marginRight={1}
-            >
+            <Box display="flex" alignItems="center" justifyContent="center" marginRight={1}>
               <ExitToApp className="icon" />
             </Box>
             Sair
@@ -99,5 +84,5 @@ export default function UserActions({ name, role, isLoggedIn, onClickLogout }) {
     </div>
   ) : (
     <>Enrtar??</>
-  );
+  )
 }

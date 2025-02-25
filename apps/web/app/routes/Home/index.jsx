@@ -1,23 +1,18 @@
-import React, { useEffect, useMemo, useState } from "react";
-import "./styles.css";
-import ReactLoading from "react-loading";
-import { useHistory } from "react-router-dom";
-import DataTable from "../../Components/Molecular/Table";
-import PropTypes from "prop-types";
-import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import TextField from "@material-ui/core/TextField";
-import api from "Config/http";
-import {
-  Button,
-  Container,
-  ThemeProvider,
-  createTheme,
-} from "@material-ui/core";
-import { isTeacher } from "Helpers/role";
+import { useHistory } from "@/utils"
+import { Button, Container, ThemeProvider, createTheme } from "@material-ui/core"
+import AppBar from "@material-ui/core/AppBar"
+import Box from "@material-ui/core/Box"
+import Tab from "@material-ui/core/Tab"
+import Tabs from "@material-ui/core/Tabs"
+import TextField from "@material-ui/core/TextField"
+import Typography from "@material-ui/core/Typography"
+import api from "Config/http"
+import { isTeacher } from "Helpers/role"
+import PropTypes from "prop-types"
+import React, { useEffect, useMemo, useState } from "react"
+import ReactLoading from "react-loading"
+import DataTable from "../../Components/Molecular/Table"
+import "./styles.css"
 
 /*
   Componente responsável pela homepage
@@ -29,18 +24,18 @@ const themeButton = createTheme({
       main: "#329F5B",
     },
   },
-});
+})
 
 const Home = () => {
-  const [rawData, setRawData] = useState([]);
-  const [data, setData] = useState([]);
-  const [done, setDone] = useState(undefined);
+  const [rawData, setRawData] = useState([])
+  const [data, setData] = useState([])
+  const [done, setDone] = useState(undefined)
 
-  const history = useHistory();
+  const history = useHistory()
 
   function goToViewBanca(banca) {
-    let path = `verbanca?id=` + banca;
-    history.push(path);
+    let path = `verbanca?id=` + banca
+    history.push(path)
   }
 
   const renderDetailsButton = (params) => {
@@ -61,28 +56,23 @@ const Home = () => {
           onClick={() => goToViewBanca(params.row.id)}
         />
       </div>
-    );
-  };
+    )
+  }
 
   const RenderLocal = ({ value, row }) => {
-    const isRemote = useMemo(() => row.tipo_banca === "remoto", [row]);
+    const isRemote = useMemo(() => row.tipo_banca === "remoto", [row])
     return (
       <>
         {isRemote ? (
-          <a
-            href={value}
-            target="_blank"
-            rel="noreferrer"
-            className="local-cell"
-          >
+          <a href={value} target="_blank" rel="noreferrer" className="local-cell">
             {value}
           </a>
         ) : (
           value
         )}
       </>
-    );
-  };
+    )
+  }
 
   const columns = [
     {
@@ -117,7 +107,7 @@ const Home = () => {
       renderCell: renderDetailsButton,
       disableClickEventBubbling: true,
     },
-  ];
+  ]
 
   const searchBoard = () => {
     const SEARCH_PROPERTIES = [
@@ -131,71 +121,63 @@ const Home = () => {
       "sigla_curso",
       "titulo_trabalho",
       "membros",
-    ];
+    ]
 
     const matchSearchQuery = (element, query) =>
       Boolean(
         SEARCH_PROPERTIES.find((property) => {
           if (Array.isArray(element[property]))
             return Boolean(
-              element[property].find((item) =>
-                item.toLocaleLowerCase().includes(query.toLocaleLowerCase())
-              )
-            );
+              element[property].find((item) => item.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
+            )
 
-          return String(element[property])
-            .toLocaleLowerCase()
-            .includes(query.toLocaleLowerCase());
+          return String(element[property]).toLocaleLowerCase().includes(query.toLocaleLowerCase())
         })
-      );
+      )
 
-    let inputValue = document.getElementById("banca-search").value;
-    let data1 = rawData[0].filter((element) =>
-      matchSearchQuery(element, inputValue)
-    );
-    let data2 = rawData[1].filter((element) =>
-      matchSearchQuery(element, inputValue)
-    );
-    var allEvents = [];
-    allEvents.push(data1);
-    allEvents.push(data2);
-    setData(allEvents);
-  };
+    let inputValue = document.getElementById("banca-search").value
+    let data1 = rawData[0].filter((element) => matchSearchQuery(element, inputValue))
+    let data2 = rawData[1].filter((element) => matchSearchQuery(element, inputValue))
+    var allEvents = []
+    allEvents.push(data1)
+    allEvents.push(data2)
+    setData(allEvents)
+  }
 
   const onSubmit = (event) => {
-    event.preventDefault();
-    searchBoard();
-  };
+    event.preventDefault()
+    searchBoard()
+  }
 
   useEffect(() => {
     api.get("/banca").then(function (response) {
-      var events = response.data.data;
+      var events = response.data.data
       if (events) {
         events.forEach((e) => {
-          e.data = new Date(e.data_realizacao);
-          e.data.setSeconds(0);
-          e.formatedData = `${e.data.toLocaleDateString()} às ${e.data.toLocaleTimeString(
-            [],
-            { hour: "2-digit", minute: "2-digit" }
-          )}h`;
+          e.data = new Date(e.data_realizacao)
+          e.data.setSeconds(0)
+          e.formatedData = `${e.data.toLocaleDateString()} às ${e.data.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}h`
           // e.autor = "Frederico Durão";
-        });
-        const dt = new Date();
-        events.sort((a, b) => (a.data_realizacao < b.data_realizacao ? -1 : 1));
-        var olderEvents = events.filter((a) => a.data < dt);
-        events = events.filter((a) => a.data > dt);
-        var allEvents = [];
-        allEvents.push(events);
-        allEvents.push(olderEvents);
-        setRawData(allEvents);
+        })
+        const dt = new Date()
+        events.sort((a, b) => (a.data_realizacao < b.data_realizacao ? -1 : 1))
+        var olderEvents = events.filter((a) => a.data < dt)
+        events = events.filter((a) => a.data > dt)
+        var allEvents = []
+        allEvents.push(events)
+        allEvents.push(olderEvents)
+        setRawData(allEvents)
       }
-      setDone(true);
-      return response;
-    });
-  }, []);
+      setDone(true)
+      return response
+    })
+  }, [])
 
   function TabPanel(props) {
-    const { children, value, index, ...other } = props;
+    const { children, value, index, ...other } = props
 
     return (
       <div
@@ -211,47 +193,37 @@ const Home = () => {
           </Box>
         )}
       </div>
-    );
+    )
   }
 
   TabPanel.propTypes = {
     children: PropTypes.node,
     index: PropTypes.any.isRequired,
     value: PropTypes.any.isRequired,
-  };
+  }
 
   function a11yProps(index) {
     return {
       id: `simple-tab-${index}`,
       "aria-controls": `simple-tabpanel-${index}`,
-    };
+    }
   }
 
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(0)
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+    setValue(newValue)
+  }
 
   return (
     <Container maxWidth="xl">
       {!done ? (
         <div className="center">
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={100}
-            width={100}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
         </div>
       ) : (
         <div className="container">
-          <form
-            className="search-form"
-            noValidate
-            autoComplete="off"
-            onSubmit={onSubmit}
-          >
+          <form className="search-form" noValidate autoComplete="off" onSubmit={onSubmit}>
             <div>
               <TextField
                 id="banca-search"
@@ -268,15 +240,8 @@ const Home = () => {
               ></button>
             </div>
           </form>
-          <AppBar
-            position="static"
-            style={{ background: "#fff", color: "#000" }}
-          >
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="simple tabs example"
-            >
+          <AppBar position="static" style={{ background: "#fff", color: "#000" }}>
+            <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
               <Tab label="Próximas defesas" {...a11yProps(0)} />
               <Tab label="Defesas anteriores" {...a11yProps(1)} />
               {isTeacher() && (
@@ -302,15 +267,12 @@ const Home = () => {
             />
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <DataTable
-              rows={data.length > 0 ? data[1] : rawData[1]}
-              columns={columns}
-            />
+            <DataTable rows={data.length > 0 ? data[1] : rawData[1]} columns={columns} />
           </TabPanel>
         </div>
       )}
     </Container>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

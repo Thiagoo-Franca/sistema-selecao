@@ -1,109 +1,107 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useHistory } from "react-router-dom";
-import "./styles.css";
-import ReactLoading from "react-loading";
-import { Button, Container } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import { DataGrid, GridEditInputCell, ptBR } from "@mui/x-data-grid";
-import Modal from "@material-ui/core/Modal";
-import Backdrop from "@material-ui/core/Backdrop";
-import Fade from "@material-ui/core/Fade";
-import { Form, Field } from "react-final-form";
-import { TextField } from "final-form-material-ui";
-import { Paper, Grid } from "@material-ui/core";
-import PropTypes from "prop-types";
-import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import api from "Config/http";
-import { isTeacher } from "Helpers/role";
-import { useBancas } from "Hooks/Banca/useBancas";
-import DataTable from "Components/Molecular/Table";
-import botonLock from "./components/lock-alt-regular-24.png";
-import botomunloked from "./components/lock-open-alt-regular-24.png";
-import { ptBRGrid } from "Assets/Locales/grid.locale";
-import { toast } from "react-toastify";
+import { useHistory } from "@/utils"
+import { Button, Container, Grid, Paper } from "@material-ui/core"
+import AppBar from "@material-ui/core/AppBar"
+import Backdrop from "@material-ui/core/Backdrop"
+import Box from "@material-ui/core/Box"
+import Fade from "@material-ui/core/Fade"
+import Modal from "@material-ui/core/Modal"
+import { createTheme, makeStyles, ThemeProvider } from "@material-ui/core/styles"
+import Tab from "@material-ui/core/Tab"
+import Tabs from "@material-ui/core/Tabs"
+import Typography from "@material-ui/core/Typography"
+import { DataGrid, GridEditInputCell, ptBR } from "@mui/x-data-grid"
+import { ptBRGrid } from "Assets/Locales/grid.locale"
+import DataTable from "Components/Molecular/Table"
+import api from "Config/http"
+import { TextField } from "final-form-material-ui"
+import { isTeacher } from "Helpers/role"
+import { useBancas } from "Hooks/Banca/useBancas"
+import PropTypes from "prop-types"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { Field, Form } from "react-final-form"
+import ReactLoading from "react-loading"
+import { toast } from "react-toastify"
+import botonLock from "./components/lock-alt-regular-24.png"
+import botomunloked from "./components/lock-open-alt-regular-24.png"
+import "./styles.css"
 /*
   Componente responsável pela página de gerenciamento das minhas defesas
 */
 
 function Dashboard() {
-  const [dataMinhasDefesas, setDataMinhasDefesas] = useState([]);
-  const [dataDefesasParticipo, setDataDefesasParticipo] = useState([]);
-  const [done, setDone] = useState(undefined);
-  const [open, setOpen] = useState(false);
-  const [openNota, setOpenNota] = useState(false);
-  const [openNotaOwner, setOpenNotaOwner] = useState(false);
-  const [inn, setInn] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingModal, setLoadingModal] = useState(false);
+  const [dataMinhasDefesas, setDataMinhasDefesas] = useState([])
+  const [dataDefesasParticipo, setDataDefesasParticipo] = useState([])
+  const [done, setDone] = useState(undefined)
+  const [open, setOpen] = useState(false)
+  const [openNota, setOpenNota] = useState(false)
+  const [openNotaOwner, setOpenNotaOwner] = useState(false)
+  const [inn, setInn] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [loadingModal, setLoadingModal] = useState(false)
 
-  const { bancas, loading: loadingBancas } = useBancas();
+  const { bancas, loading: loadingBancas } = useBancas()
 
-  const [notas, setNotas] = useState([]);
+  const [notas, setNotas] = useState([])
 
-  const history = useHistory();
-  localStorage.removeItem("bancaId");
+  const history = useHistory()
+  localStorage.removeItem("bancaId")
 
   const addBanca = () => {
-    let path = `addbanca`;
-    history.push(path);
-  };
+    let path = `addbanca`
+    history.push(path)
+  }
 
   const editBanca = (banca) => {
-    let path = `editarbanca/${banca.id}`;
-    history.push(path);
-  };
+    let path = `editarbanca/${banca.id}`
+    history.push(path)
+  }
 
   const addUser = (id) => {
-    localStorage.setItem("bancaId", id);
-    let path = `addition`;
-    history.push(path);
-  };
+    localStorage.setItem("bancaId", id)
+    let path = `addition`
+    history.push(path)
+  }
 
   const openModal = (banca) => {
-    localStorage.setItem("banca", JSON.stringify(banca));
-    setOpen(true);
-  };
+    localStorage.setItem("banca", JSON.stringify(banca))
+    setOpen(true)
+  }
 
   const openModalNota = (banca, titulo) => {
-    localStorage.setItem("banca", JSON.stringify(banca));
-    localStorage.setItem("titulo", titulo);
-    setOpenNota(true);
-  };
+    localStorage.setItem("banca", JSON.stringify(banca))
+    localStorage.setItem("titulo", titulo)
+    setOpenNota(true)
+  }
 
   const openModalNotaOwner = (banca, titulo) => {
-    localStorage.setItem("banca", JSON.stringify(banca));
-    localStorage.setItem("titulo", titulo);
-    getBancaUsuarios(banca);
-    setOpenNotaOwner(true);
-  };
+    localStorage.setItem("banca", JSON.stringify(banca))
+    localStorage.setItem("titulo", titulo)
+    getBancaUsuarios(banca)
+    setOpenNotaOwner(true)
+  }
 
   const closeModal = () => {
-    localStorage.removeItem("banca");
-    setOpen(false);
-  };
+    localStorage.removeItem("banca")
+    setOpen(false)
+  }
 
   const closeModalNota = () => {
-    localStorage.removeItem("banca");
-    localStorage.removeItem("titulo");
-    setOpenNota(false);
-  };
+    localStorage.removeItem("banca")
+    localStorage.removeItem("titulo")
+    setOpenNota(false)
+  }
 
   const closeModalNotaOwner = () => {
-    localStorage.removeItem("banca");
-    localStorage.removeItem("titulo");
-    setOpenNotaOwner(false);
-  };
+    localStorage.removeItem("banca")
+    localStorage.removeItem("titulo")
+    setOpenNotaOwner(false)
+  }
 
   const onSubmitSaveGradeBatch = () => {
-    onSubmitNotas(notas);
-  };
+    onSubmitNotas(notas)
+  }
 
-  const userId = localStorage.getItem("userId");
+  const userId = localStorage.getItem("userId")
 
   const themeButton = createTheme({
     palette: {
@@ -111,7 +109,7 @@ function Dashboard() {
         main: "#329F5B",
       },
     },
-  });
+  })
 
   const useStyles = makeStyles((theme) => ({
     modal: {
@@ -128,7 +126,7 @@ function Dashboard() {
     elevation1: {
       boxShadow: "0px 0px 0px",
     },
-  }));
+  }))
 
   const styles = makeStyles({
     root: {
@@ -141,148 +139,146 @@ function Dashboard() {
         color: "white",
       },
     },
-  });
+  })
 
-  const classes = useStyles();
+  const classes = useStyles()
 
   const getBancaUsuarios = async (bancaId) => {
-    setLoading(true);
+    setLoading(true)
     api.get(`/usuario-banca/usuarios/${bancaId}`).then(function (response) {
-      const notas = response.data.data;
-      setLoading(false);
-      setNotas(
-        notas.map(({ id, nota }) => ({ avaliador: id, nota: Number(nota) }))
-      );
-      setInn(notas);
-      return response;
-    });
-  };
+      const notas = response.data.data
+      setLoading(false)
+      setNotas(notas.map(({ id, nota }) => ({ avaliador: id, nota: Number(nota) })))
+      setInn(notas)
+      return response
+    })
+  }
 
   const refreshDefesasParticipo = useCallback(() => {
     api.get(`/usuario/${userId}/banca`).then((response) => {
-      var events = response.data.data;
+      var events = response.data.data
       if (events) {
         events.forEach((e) => {
-          e.data = new Date(e.data_realizacao);
-          e.data.setSeconds(0);
-          e.formatedData = `${e.data.toLocaleDateString()} às ${e.data.toLocaleTimeString(
-            [],
-            { hour: "2-digit", minute: "2-digit" }
-          )}h`;
-        });
+          e.data = new Date(e.data_realizacao)
+          e.data.setSeconds(0)
+          e.formatedData = `${e.data.toLocaleDateString()} às ${e.data.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}h`
+        })
       }
-      setDataDefesasParticipo(events);
-    });
-  }, [userId]);
+      setDataDefesasParticipo(events)
+    })
+  }, [userId])
 
   useEffect(() => {
-    refreshDefesasParticipo();
+    refreshDefesasParticipo()
 
     api.get(`/banca/${userId}/bancas`).then(function (response) {
-      var events = response.data.data;
+      var events = response.data.data
       if (events) {
         events.forEach((e) => {
-          e.data = new Date(e.data_realizacao);
-          e.data.setSeconds(0);
-          e.formatedData = `${e.data.toLocaleDateString()} às ${e.data.toLocaleTimeString(
-            [],
-            { hour: "2-digit", minute: "2-digit" }
-          )}h`;
-        });
+          e.data = new Date(e.data_realizacao)
+          e.data.setSeconds(0)
+          e.formatedData = `${e.data.toLocaleDateString()} às ${e.data.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}h`
+        })
       }
-      setDataMinhasDefesas(events);
-      setDone(true);
-    });
-  }, [userId, refreshDefesasParticipo]);
+      setDataMinhasDefesas(events)
+      setDone(true)
+    })
+  }, [userId, refreshDefesasParticipo])
 
   function getFormData(object) {
-    const formData = new FormData();
-    Object.keys(object).forEach((key) => formData.append(key, object[key]));
-    return formData;
+    const formData = new FormData()
+    Object.keys(object).forEach((key) => formData.append(key, object[key]))
+    return formData
   }
 
   const validate = (values) => {
-    const errors = {};
+    const errors = {}
     if (!values.assunto) {
-      errors.assunto = "Obrigatório";
+      errors.assunto = "Obrigatório"
     }
     if (!values.mensagem) {
-      errors.mensagem = "Obrigatório";
+      errors.mensagem = "Obrigatório"
     }
     if (!values.emails) {
-      errors.emails = "Obrigatório";
+      errors.emails = "Obrigatório"
     }
-    return errors;
-  };
+    return errors
+  }
 
   const validateNota = (values) => {
-    const errors = {};
+    const errors = {}
     if (!values.nota) {
-      errors.nota = "Obrigatório";
+      errors.nota = "Obrigatório"
     } else if (Number(values.nota) > 10 || Number(values.nota) < 0) {
-      errors.nota = "Insira um valor válido";
+      errors.nota = "Insira um valor válido"
     }
-    return errors;
-  };
+    return errors
+  }
 
   const onSubmitEmail = async (values) => {
-    setLoading(true);
+    setLoading(true)
     api
       .post("/usuario-banca/usuarios/email", {
         ...values,
         banca: JSON.parse(localStorage.getItem("banca")),
       })
       .then(function (response) {
-        setLoading(false);
-        toast.success(response.data.data);
-        closeModal();
+        setLoading(false)
+        toast.success(response.data.data)
+        closeModal()
       })
       .catch(function (error) {
-        setLoading(false);
-        toast.error("Ocorreu um erro ao tentar enviar o email");
-        closeModal();
-      });
-  };
+        setLoading(false)
+        toast.error("Ocorreu um erro ao tentar enviar o email")
+        closeModal()
+      })
+  }
 
   const onSubmitNota = async (values) => {
-    setLoadingModal(true);
-    const banca = JSON.parse(localStorage.getItem("banca"));
-    const id = values.avaliador;
+    setLoadingModal(true)
+    const banca = JSON.parse(localStorage.getItem("banca"))
+    const id = values.avaliador
 
     api
       .post(`/usuario-banca/nota/${banca}/${id}`, getFormData(values))
       .then(function (response) {
-        setLoadingModal(false);
-        toast.success("Nota enviada com sucesso");
-        closeModalNotaOwner();
-        if (!values.modalOwner) closeModalNota();
-        else closeModalNotaOwner();
+        setLoadingModal(false)
+        toast.success("Nota enviada com sucesso")
+        closeModalNotaOwner()
+        if (!values.modalOwner) closeModalNota()
+        else closeModalNotaOwner()
       })
       .catch(function (error) {
-        setLoadingModal(false);
-        toast.error("Ocorreu um erro ao tentar dar a nota");
-        if (!values.modalOwner) closeModalNota();
-        else closeModalNotaOwner();
-      });
-  };
+        setLoadingModal(false)
+        toast.error("Ocorreu um erro ao tentar dar a nota")
+        if (!values.modalOwner) closeModalNota()
+        else closeModalNotaOwner()
+      })
+  }
 
   const onSubmitNotas = async (notas) => {
-    setLoadingModal(true);
-    const banca = JSON.parse(localStorage.getItem("banca"));
+    setLoadingModal(true)
+    const banca = JSON.parse(localStorage.getItem("banca"))
 
     api
       .post(`/usuario-banca/notas/${banca}`, { notas })
       .then(function () {
-        toast.success("Notas enviadas com sucesso!");
-        setLoadingModal(false);
-        closeModalNotaOwner();
+        toast.success("Notas enviadas com sucesso!")
+        setLoadingModal(false)
+        closeModalNotaOwner()
       })
       .catch(function () {
-        toast.error("Não foi possível salvar as notas atribuídas.");
-        setLoadingModal(false);
-        closeModalNotaOwner();
-      });
-  };
+        toast.error("Não foi possível salvar as notas atribuídas.")
+        setLoadingModal(false)
+        closeModalNotaOwner()
+      })
+  }
 
   const theme = createTheme(
     {
@@ -291,10 +287,10 @@ function Dashboard() {
       },
     },
     ptBR
-  );
+  )
 
   function TabPanel(props) {
-    const { children, value, index, ...other } = props;
+    const { children, value, index, ...other } = props
 
     return (
       <div
@@ -310,90 +306,79 @@ function Dashboard() {
           </Box>
         )}
       </div>
-    );
+    )
   }
 
   TabPanel.propTypes = {
     children: PropTypes.node,
     index: PropTypes.any.isRequired,
     value: PropTypes.any.isRequired,
-  };
+  }
 
   function a11yProps(index) {
     return {
       id: `simple-tab-${index}`,
       "aria-controls": `simple-tabpanel-${index}`,
-    };
+    }
   }
 
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(0)
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+    setValue(newValue)
+  }
 
   const excluirBanca = (bancaId) => {
     api
       .delete(`/banca/${bancaId}/delete`)
       .then(function (response) {
-        toast.success("Banca removida com sucesso");
-        window.location.reload();
+        toast.success("Banca removida com sucesso")
+        window.location.reload()
       })
       .catch(function (error) {
-        toast.error(error.response.data.message);
-      });
-  };
+        toast.error(error.response.data.message)
+      })
+  }
 
   const RenderLocal = ({ value, row }) => {
-    const isRemote = useMemo(() => row.tipo_banca === "remoto", [row]);
+    const isRemote = useMemo(() => row.tipo_banca === "remoto", [row])
     return (
       <>
         {isRemote ? (
-          <a
-            href={value}
-            target="_blank"
-            rel="noreferrer"
-            className="local-cell"
-          >
+          <a href={value} target="_blank" rel="noreferrer" className="local-cell">
             {value}
           </a>
         ) : (
           value
         )}
       </>
-    );
-  };
+    )
+  }
   const handleVisibilityToggle = async (row) => {
     try {
-      const isWorkVisible = Boolean(row.visible !== "0");
+      const isWorkVisible = Boolean(row.visible !== "0")
 
       const response = await api.put(`/banca/visibilidade/${row.id}`, {
         visible: !isWorkVisible,
-      });
+      })
 
       if (response.status === 200 || response.status === 204) {
-        toast.success(
-          `A visibilidade foi alterada para ${
-            !isWorkVisible ? "Pública" : "Privada"
-          }`
-        );
-        refreshDefesasParticipo();
+        toast.success(`A visibilidade foi alterada para ${!isWorkVisible ? "Pública" : "Privada"}`)
+        refreshDefesasParticipo()
       } else {
-        throw new Error("Erro inesperado ao alterar a visibilidade.");
+        throw new Error("Erro inesperado ao alterar a visibilidade.")
       }
     } catch (error) {
-      console.error("Erro ao alterar a visibilidade: ", error);
-      toast.error("Erro ao alterar a visibilidade.");
+      console.error("Erro ao alterar a visibilidade: ", error)
+      toast.error("Erro ao alterar a visibilidade.")
     }
-  };
+  }
 
   const renderDetailsTeacher = (params) => {
     return (
       <div class="grid-actions">
         <button
-          title={`${
-            params.row.visible !== "0" ? "Bloquear" : "Permitir"
-          } visualização da banca`}
+          title={`${params.row.visible !== "0" ? "Bloquear" : "Permitir"} visualização da banca`}
           name="edit-publicprivate"
           type="button"
           onClick={() => handleVisibilityToggle(params.row)}
@@ -407,9 +392,7 @@ function Dashboard() {
         >
           <img
             src={params.row.visible !== "0" ? botomunloked : botonLock}
-            alt={`${
-              params.row.visible !== "0" ? "Bloquear" : "Permitir"
-            } visualização da banca`}
+            alt={`${params.row.visible !== "0" ? "Bloquear" : "Permitir"} visualização da banca`}
             style={{ width: 24, height: 24 }}
           />
         </button>
@@ -442,9 +425,7 @@ function Dashboard() {
           name="give-score"
           type="submit"
           id="give-score"
-          onClick={() =>
-            openModalNotaOwner(params.row.id, params.row.titulo_trabalho)
-          }
+          onClick={() => openModalNotaOwner(params.row.id, params.row.titulo_trabalho)}
           hidden={!isTeacher()}
         />
         <button
@@ -454,17 +435,17 @@ function Dashboard() {
           onClick={() => {
             const answer = window.confirm(
               `Você tem certeza que deseja excluir a banca do projeto '${params.row.titulo_trabalho}'?`
-            );
-            if (answer) excluirBanca(params.row.id);
+            )
+            if (answer) excluirBanca(params.row.id)
           }}
         />
       </div>
-    );
-  };
+    )
+  }
 
   function goToViewBanca(banca) {
-    let path = `verbanca?id=` + banca;
-    history.push(path);
+    let path = `verbanca?id=` + banca
+    history.push(path)
   }
 
   const renderDetailsReviewer = (params) => {
@@ -475,11 +456,11 @@ function Dashboard() {
         type="submit"
         id="give-score"
         onClick={() => {
-          openModalNota(params.row.id, params.row.titulo_trabalho);
+          openModalNota(params.row.id, params.row.titulo_trabalho)
         }}
       />
-    );
-  };
+    )
+  }
 
   const renderDetailsBanca = (params) => {
     return (
@@ -499,8 +480,8 @@ function Dashboard() {
           onClick={() => goToViewBanca(params.row.id)}
         />
       </div>
-    );
-  };
+    )
+  }
 
   const columns3 = [
     {
@@ -536,7 +517,7 @@ function Dashboard() {
       renderCell: renderDetailsBanca,
       disableClickEventBubbling: true,
     },
-  ];
+  ]
 
   const columns = [
     {
@@ -582,7 +563,7 @@ function Dashboard() {
       align: "center",
       renderCell: RenderLocal,
     },
-  ];
+  ]
 
   const columns2 = [
     {
@@ -590,10 +571,8 @@ function Dashboard() {
       headerName: "Ações",
       width: 200,
       renderCell: (params) => {
-        const { row } = params;
-        return row.funcao === "orientador"
-          ? renderDetailsTeacher(params)
-          : renderDetailsReviewer(params);
+        const { row } = params
+        return row.funcao === "orientador" ? renderDetailsTeacher(params) : renderDetailsReviewer(params)
       },
       disableClickEventBubbling: true,
       align: "center",
@@ -625,20 +604,17 @@ function Dashboard() {
       align: "center",
       renderCell: RenderLocal,
     },
-  ];
+  ]
 
   const RenderGradesCell = ({ row }) => {
-    const { nota } = row;
+    const { nota } = row
     return (
       <>
         {nota ?? "0"}
-        <span
-          style={{ marginLeft: "0.5rem", width: 12, height: 12 }}
-          id="edit-board"
-        />
+        <span style={{ marginLeft: "0.5rem", width: 12, height: 12 }} id="edit-board" />
       </>
-    );
-  };
+    )
+  }
 
   const RenderGradesEditCell = (params) => {
     return (
@@ -649,8 +625,8 @@ function Dashboard() {
           min: 0,
         }}
       />
-    );
-  };
+    )
+  }
 
   const columnsNota = [
     { field: "nome", headerName: "Avaliador", width: 400, align: "center" },
@@ -667,10 +643,10 @@ function Dashboard() {
       renderCell: RenderGradesCell,
       renderEditCell: RenderGradesEditCell,
       valueParser: (value) => {
-        return Math.min(10, Math.max(0, value));
+        return Math.min(10, Math.max(0, value))
       },
     },
-  ];
+  ]
 
   const onGradeCellEditCommit = ({ id, value }) => {
     setNotas((grades) => [
@@ -679,21 +655,16 @@ function Dashboard() {
         avaliador: id,
         nota: Number(Math.min(10, Math.max(0, value))).toFixed(2),
       },
-    ]);
-  };
+    ])
+  }
 
-  const classesGrid = styles();
+  const classesGrid = styles()
 
   return (
     <>
       {!done ? (
         <div className="center">
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={100}
-            width={100}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
         </div>
       ) : (
         <Container maxWidth="xl">
@@ -707,12 +678,7 @@ function Dashboard() {
                 display: "-webkit-box",
               }}
             >
-              <Tabs
-                value={value}
-                onChange={handleChange}
-                aria-label="simple tabs example"
-                style={{ width: "100%" }}
-              >
+              <Tabs value={value} onChange={handleChange} aria-label="simple tabs example" style={{ width: "100%" }}>
                 <Tab label="Defesas" {...a11yProps(0)} />
                 <Tab label="Minhas defesas" {...a11yProps(1)} />
                 <Tab label="Defesas em que participo" {...a11yProps(2)} />
@@ -730,11 +696,7 @@ function Dashboard() {
               </Tabs>
             </AppBar>
             <TabPanel value={value} index={0}>
-              <DataTable
-                rows={bancas}
-                columns={columns3}
-                loading={loadingBancas}
-              />
+              <DataTable rows={bancas} columns={columns3} loading={loadingBancas} />
             </TabPanel>
             <TabPanel value={value} index={1}>
               <div
@@ -815,20 +777,11 @@ function Dashboard() {
                 <div className={classes.paper}>
                   {loading ? (
                     <div className="center">
-                      <ReactLoading
-                        type={"spin"}
-                        color={"#41616c"}
-                        height={100}
-                        width={100}
-                      />
+                      <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
                     </div>
                   ) : null}
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <h2 id="transition-modal-title">
-                      Convidar pessoas para defesa
-                    </h2>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <h2 id="transition-modal-title">Convidar pessoas para defesa</h2>
                     <span style={{ cursor: "pointer" }} onClick={closeModal}>
                       x
                     </span>
@@ -836,22 +789,12 @@ function Dashboard() {
                   <Form
                     onSubmit={onSubmitEmail}
                     initialValues={{
-                      mensagem:
-                        "Olá, gostaria de convidá-lo(a) para a defesa de TCC abaixo.",
+                      mensagem: "Olá, gostaria de convidá-lo(a) para a defesa de TCC abaixo.",
                     }}
                     validate={validate}
-                    render={({
-                      handleSubmit,
-                      reset,
-                      submitting,
-                      pristine,
-                      values,
-                    }) => (
+                    render={({ handleSubmit, reset, submitting, pristine, values }) => (
                       <form onSubmit={handleSubmit} noValidate>
-                        <Paper
-                          className={classes.elevation1}
-                          style={{ padding: 16 }}
-                        >
+                        <Paper className={classes.elevation1} style={{ padding: 16 }}>
                           <Grid container alignItems="flex-start" spacing={2}>
                             <Grid item xs={12}>
                               <Field
@@ -923,24 +866,12 @@ function Dashboard() {
                 <div className={classes.paper}>
                   {loading ? (
                     <div className="center">
-                      <ReactLoading
-                        type={"spin"}
-                        color={"#41616c"}
-                        height={100}
-                        width={100}
-                      />
+                      <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
                     </div>
                   ) : null}
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <h3 id="transition-modal-title">
-                      Avaliar a banca: {localStorage.getItem("titulo")}
-                    </h3>
-                    <span
-                      style={{ cursor: "pointer" }}
-                      onClick={closeModalNota}
-                    >
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <h3 id="transition-modal-title">Avaliar a banca: {localStorage.getItem("titulo")}</h3>
+                    <span style={{ cursor: "pointer" }} onClick={closeModalNota}>
                       x
                     </span>
                   </div>
@@ -952,10 +883,7 @@ function Dashboard() {
                     validate={validateNota}
                     render={({ handleSubmit, submitting }) => (
                       <form onSubmit={handleSubmit} noValidate>
-                        <Paper
-                          className={classes.elevation1}
-                          style={{ padding: 16 }}
-                        >
+                        <Paper className={classes.elevation1} style={{ padding: 16 }}>
                           <Grid container alignItems="flex-start" spacing={2}>
                             <Grid item xs={12}>
                               <Field
@@ -997,12 +925,7 @@ function Dashboard() {
             </Modal>
             {loading ? (
               <div className="center">
-                <ReactLoading
-                  type={"spin"}
-                  color={"#41616c"}
-                  height={100}
-                  width={100}
-                />
+                <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
               </div>
             ) : (
               <Modal
@@ -1026,30 +949,17 @@ function Dashboard() {
                         justifyContent: "space-between",
                       }}
                     >
-                      <h3 id="transition-modal-title">
-                        Avaliar a banca: {localStorage.getItem("titulo")}
-                      </h3>
-                      <span
-                        style={{ cursor: "pointer" }}
-                        onClick={closeModalNotaOwner}
-                      >
+                      <h3 id="transition-modal-title">Avaliar a banca: {localStorage.getItem("titulo")}</h3>
+                      <span style={{ cursor: "pointer" }} onClick={closeModalNotaOwner}>
                         x
                       </span>
                     </div>
-                    <Paper
-                      className={classes.elevation1}
-                      style={{ padding: 16, width: "1050px" }}
-                    >
+                    <Paper className={classes.elevation1} style={{ padding: 16, width: "1050px" }}>
                       <Grid container alignItems="flex-start" spacing={2}>
                         <Grid item xs={12}>
                           {loadingModal ? (
                             <div className="center">
-                              <ReactLoading
-                                type={"spin"}
-                                color={"#41616c"}
-                                height={100}
-                                width={100}
-                              />
+                              <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
                             </div>
                           ) : null}
                           <div
@@ -1068,8 +978,7 @@ function Dashboard() {
                               className={classesGrid.root}
                               localeText={{
                                 ...ptBRGrid,
-                                noRowsLabel:
-                                  "Não há membros registrados na banca",
+                                noRowsLabel: "Não há membros registrados na banca",
                               }}
                               classes={{
                                 columnHeader: "dashboard-column",
@@ -1078,11 +987,7 @@ function Dashboard() {
                               disableColumnMenu={true}
                               disableColumnFilter={true}
                             />
-                            <Box
-                              marginTop={2}
-                              display="flex"
-                              justifyContent="flex-end"
-                            >
+                            <Box marginTop={2} display="flex" justifyContent="flex-end">
                               <ThemeProvider theme={themeButton}>
                                 <Button
                                   variant="contained"
@@ -1110,7 +1015,7 @@ function Dashboard() {
         </Container>
       )}
     </>
-  );
+  )
 }
 
-export default Dashboard;
+export default Dashboard

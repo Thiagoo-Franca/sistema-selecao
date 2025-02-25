@@ -1,25 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import ReactLoading from "react-loading";
-import {
-  Box,
-  Button,
-  Container,
-  Modal,
-  ThemeProvider,
-} from "@material-ui/core";
-import { DataGrid } from "@mui/x-data-grid";
-import SelectSearch, { fuzzySearch } from "react-select-search";
-import { createTheme } from "@material-ui/core/styles";
-import { makeStyles } from "@material-ui/core/styles";
-import api from "Config/http";
-import "./styles.css";
-import { MailOutline } from "@material-ui/icons";
-import usePreRegister from "Hooks/Addition/usePreRegister";
-import UserForm from "Components/User/UserForm";
-import { isTeacher } from "Helpers/role";
-import { ptBRGrid } from "Assets/Locales/grid.locale";
-import { toast } from "react-toastify";
+import { useHistory } from "@/utils"
+import { Box, Button, Container, Modal, ThemeProvider } from "@material-ui/core"
+import { createTheme, makeStyles } from "@material-ui/core/styles"
+import { MailOutline } from "@material-ui/icons"
+import { DataGrid } from "@mui/x-data-grid"
+import { ptBRGrid } from "Assets/Locales/grid.locale"
+import UserForm from "Components/User/UserForm"
+import api from "Config/http"
+import { isTeacher } from "Helpers/role"
+import usePreRegister from "Hooks/Addition/usePreRegister"
+import { useEffect, useState } from "react"
+import ReactLoading from "react-loading"
+import SelectSearch, { fuzzySearch } from "react-select-search"
+import { toast } from "react-toastify"
+import "./styles.css"
 /*
   Componente responsável pela página de adição de usuários à bancas
 */
@@ -33,28 +26,28 @@ const style = {
   bgcolor: "background.paper",
   borderRadius: 4,
   padding: "4px",
-};
+}
 
 function Addition() {
-  const { open, loading, openModal, closeModal, onSubmit } = usePreRegister();
+  const { open, loading, openModal, closeModal, onSubmit } = usePreRegister()
 
-  const [data, setData] = useState([]);
-  const [usuario, setUsuario] = useState({ name: "", value: 0 });
-  const [cargo, setCargo] = useState("");
-  const [inn, setInn] = useState([]);
-  const [userIds, setUserIds] = useState([]);
-  const [done, setDone] = useState(undefined);
-  const [done2, setDone2] = useState(undefined);
-  const [done3, setDone3] = useState(undefined);
-  const [optionsUsers, setOptionsUsers] = useState([]);
+  const [data, setData] = useState([])
+  const [usuario, setUsuario] = useState({ name: "", value: 0 })
+  const [cargo, setCargo] = useState("")
+  const [inn, setInn] = useState([])
+  const [userIds, setUserIds] = useState([])
+  const [done, setDone] = useState(undefined)
+  const [done2, setDone2] = useState(undefined)
+  const [done3, setDone3] = useState(undefined)
+  const [optionsUsers, setOptionsUsers] = useState([])
 
-  const history = useHistory();
+  const history = useHistory()
 
   const reload = () => {
-    window.location.reload();
-  };
+    window.location.reload()
+  }
 
-  const bancaId = localStorage.getItem("bancaId");
+  const bancaId = localStorage.getItem("bancaId")
 
   const optionsCargos = [
     {
@@ -69,7 +62,7 @@ function Addition() {
       name: "Avaliador",
       value: "avaliador",
     },
-  ];
+  ]
 
   const theme = createTheme({
     palette: {
@@ -86,7 +79,7 @@ function Addition() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   const themeRemover = createTheme({
     palette: {
@@ -97,7 +90,7 @@ function Addition() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   const theme2 = createTheme({
     palette: {
@@ -108,18 +101,18 @@ function Addition() {
         contrastText: "#fff",
       },
     },
-  });
+  })
 
   const removeUser = (id) => {
     api
       .delete(`/banca/${bancaId}/user/${id}`)
       .then(function (response) {
-        reload();
+        reload()
       })
       .catch(function (error) {
-        toast.error(error.response.data.message);
-      });
-  };
+        toast.error(error.response.data.message)
+      })
+  }
 
   const addUser = () => {
     api
@@ -129,37 +122,37 @@ function Addition() {
         role: cargo,
       })
       .then(function (response) {
-        reload();
+        reload()
       })
       .catch(function (error) {
-        toast.error(error.response.data.message);
-      });
-  };
+        toast.error(error.response.data.message)
+      })
+  }
 
   useEffect(() => {
     api.get("/usuario").then(function (response) {
-      setData(response.data.data);
-      setDone(true);
-    });
-  }, []);
+      setData(response.data.data)
+      setDone(true)
+    })
+  }, [])
 
   useEffect(() => {
     api.get(`/banca/${bancaId}`).then(function (response) {
-      setDone3(true);
+      setDone3(true)
       api.get(`/usuario-banca/usuarios/${bancaId}`).then(function (response2) {
-        let aluno = { role: "Aluno", nome: response.data.data.autor, id: 0 };
-        response2.data.data.push(aluno);
-        setInn(response2.data.data);
-        setDone2(true);
-        let ids = [];
+        let aluno = { role: "Aluno", nome: response.data.data.autor, id: 0 }
+        response2.data.data.push(aluno)
+        setInn(response2.data.data)
+        setDone2(true)
+        let ids = []
         for (var i = 0; i < response2.data.data.length; ++i) {
-          ids.push(parseInt(response2.data.data[i].id));
+          ids.push(parseInt(response2.data.data[i].id))
         }
-        setUserIds(ids);
-      });
-      return response;
-    });
-  }, [bancaId]);
+        setUserIds(ids)
+      })
+      return response
+    })
+  }, [bancaId])
 
   const renderDetailsButton = (params) => {
     return (
@@ -179,8 +172,8 @@ function Addition() {
           </ThemeProvider>
         ) : null}
       </div>
-    );
-  };
+    )
+  }
 
   const columnsNota = [
     { field: "role", headerName: "Função", width: 150 },
@@ -193,51 +186,51 @@ function Addition() {
       disableClickEventBubbling: true,
       sortable: false,
     },
-  ];
+  ]
 
   const goToDashboard = () => {
-    let path = `dashboard`;
-    history.push(path);
-    toast.success("Membros da banca atualizados com sucesso!");
-  };
+    let path = `dashboard`
+    history.push(path)
+    toast.success("Membros da banca atualizados com sucesso!")
+  }
 
   const userChange = (value, obj) => {
-    setUsuario(obj);
-  };
+    setUsuario(obj)
+  }
 
   const roleChange = (value) => {
-    setCargo(value);
-  };
+    setCargo(value)
+  }
 
   if (data && data.length > 0 && optionsUsers.length <= 0) {
     const options = data
       .filter(function (e) {
-        return !userIds.includes(e.id);
+        return !userIds.includes(e.id)
       })
-      .map((user) => ({ name: user.nome, value: user.id }));
-    setOptionsUsers(options);
+      .map((user) => ({ name: user.nome, value: user.id }))
+    setOptionsUsers(options)
   }
 
-  let missing = "";
+  let missing = ""
   if (inn.length < 4 && inn.length !== 1) {
-    missing += "Falta(m): ";
-    let orientador = 1;
-    let avaliador = 2;
+    missing += "Falta(m): "
+    let orientador = 1
+    let avaliador = 2
     for (let x = 0; x < inn.length; x++) {
-      let user = inn[x];
+      let user = inn[x]
       if (user.role === "orientador") {
-        orientador--;
+        orientador--
       } else if (user.role === "avaliador") {
-        avaliador--;
+        avaliador--
       }
     }
     if (orientador === 1) {
-      missing += "1 orientador, ";
+      missing += "1 orientador, "
     }
     if (avaliador === 1) {
-      missing += "1 avaliador";
+      missing += "1 avaliador"
     } else if (avaliador === 2) {
-      missing += "2 avaliadores";
+      missing += "2 avaliadores"
     }
   }
 
@@ -256,19 +249,14 @@ function Addition() {
         justifyContent: "center",
       },
     },
-  });
-  const classes = styles();
+  })
+  const classes = styles()
 
   return (
     <Container maxWidth="xl">
       {!done || !done2 || !done3 ? (
         <div className="center">
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={100}
-            width={100}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={100} width={100} />
         </div>
       ) : (
         <div className="container">
@@ -346,15 +334,10 @@ function Addition() {
           <div>
             <div>
               <h2 className="left-btn">
-                Componentes da banca{" "}
-                <small className="missing">
-                  {missing !== "" ? missing : null}
-                </small>
+                Componentes da banca <small className="missing">{missing !== "" ? missing : null}</small>
               </h2>
             </div>
-            <h4 className="right-head">
-              Limites: 1 orientador, 1 co-orientador, 2 avaliadores
-            </h4>
+            <h4 className="right-head">Limites: 1 orientador, 1 co-orientador, 2 avaliadores</h4>
           </div>
           <div className="members-list">
             <div style={{ width: "100%" }}>
@@ -388,7 +371,7 @@ function Addition() {
         </div>
       )}
     </Container>
-  );
+  )
 }
 
-export default Addition;
+export default Addition
