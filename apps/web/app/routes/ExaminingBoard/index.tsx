@@ -1,23 +1,74 @@
 import { useHistory } from "@/utils"
-import { Button, Checkbox, CssBaseline, FormControlLabel, Grid, MenuItem, ThemeProvider } from "@material-ui/core"
+import {
+  Button,
+  Checkbox,
+  CssBaseline,
+  FormControlLabel,
+  Grid,
+  MenuItem,
+  Radio as MuiRadio,
+  Select as MuiSelect,
+  TextField as MuiTextField,
+  ThemeProvider,
+} from "@material-ui/core"
 import Container from "@material-ui/core/Container"
-import { Radio, Select, TextField } from "final-form-material-ui"
 import { useEffect, useState } from "react"
+import type { FieldRenderProps } from "react-final-form"
 import { Field, Form } from "react-final-form"
 import ReactLoading from "react-loading"
 import "./styles.css"
 // Picker
+import api from "@/Config/http"
+import { isTeacher } from "@/Helpers/role"
+import useTeachers from "@/Hooks/Users/useTeachers"
 import DateFnsUtils from "@date-io/date-fns"
 import { createTheme, makeStyles } from "@material-ui/core/styles"
 import { DatePicker, MuiPickersUtilsProvider, TimePicker } from "@material-ui/pickers"
-import api from "Config/http"
-import { isTeacher } from "Helpers/role"
-import useTeachers from "Hooks/Users/useTeachers"
+import type { MouseEvent, ReactNode } from "react"
 import { toast } from "react-toastify"
 
 /*
   Componente responsável pela página de criação de bancas
 */
+
+// Custom Field Adapter interfaces
+interface FieldMetaState {
+  active?: boolean
+  data?: any
+  dirty?: boolean
+  dirtySinceLastSubmit?: boolean
+  error?: any
+  initial?: any
+  invalid?: boolean
+  pristine?: boolean
+  submitError?: any
+  submitFailed?: boolean
+  submitSucceeded?: boolean
+  submitting?: boolean
+  touched?: boolean
+  valid?: boolean
+  visited?: boolean
+}
+
+interface TextFieldProps extends FieldRenderProps<string, HTMLElement> {
+  label?: string
+  fullWidth?: boolean
+  multiline?: boolean
+  type?: string
+}
+
+interface SelectFieldProps extends FieldRenderProps<string, HTMLElement> {
+  label?: string
+  formControlProps?: any
+  children: ReactNode
+  loading?: boolean
+}
+
+interface RadioFieldProps extends FieldRenderProps<string, HTMLElement> {
+  value: string
+  type: string
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void
+}
 
 function ExaminingBoard() {
   const { loading: loadingTeachers, users: teachers } = useTeachers()
@@ -33,6 +84,53 @@ function ExaminingBoard() {
   const goToDashboard = () => {
     let path = `dashboard`
     history.push(path)
+  }
+
+  // Custom Field Adapters for Material-UI
+  const TextFieldAdapter = ({ input, meta, ...rest }: TextFieldProps) => {
+    const showError = ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) && meta.touched
+    return (
+      <MuiTextField
+        {...input}
+        {...rest}
+        error={showError}
+        helperText={showError ? meta.error || meta.submitError : undefined}
+      />
+    )
+  }
+
+  const SelectAdapter = ({ input, meta, children, formControlProps, ...rest }: SelectFieldProps) => {
+    const showError = ((meta.submitError && !meta.dirtySinceLastSubmit) || meta.error) && meta.touched
+    return (
+      <MuiSelect
+        {...input}
+        {...rest}
+        error={showError}
+        inputProps={rest}
+        onChange={(e) => input.onChange(e.target.value)}
+        FormHelperTextProps={{ error: showError }}
+        {...formControlProps}
+      >
+        {children}
+      </MuiSelect>
+    )
+  }
+
+  const RadioAdapter = ({ input, ...rest }: RadioFieldProps) => {
+    const { onClick, ...radioProps } = rest
+    return (
+      <MuiRadio
+        {...input}
+        {...radioProps}
+        checked={input.value === rest.value}
+        onChange={(e) => {
+          input.onChange(e)
+          if (onClick) {
+            onClick(e as any)
+          }
+        }}
+      />
+    )
   }
 
   function DatePickerWrapper(props) {
@@ -107,8 +205,12 @@ function ExaminingBoard() {
   const onSubmit = async (values) => {
     const hour = new Date(values.hora)
     const date = new Date(values.data_realizacao)
-    const userId = localStorage.getItem("userId")
-    values.user_id = userId
+
+    // Check if we're in browser environment before accessing localStorage
+    if (typeof window !== "undefined") {
+      const userId = localStorage.getItem("userId")
+      values.user_id = userId
+    }
 
     hour.setHours(hour.getHours() - 3)
     hour.setDate(date.getDate())
@@ -224,7 +326,7 @@ function ExaminingBoard() {
                     Obrigatório
                     multiline
                     name="titulo_trabalho"
-                    component={TextField}
+                    component={TextFieldAdapter}
                     type="text"
                     label="Título"
                   />
@@ -259,25 +361,32 @@ function ExaminingBoard() {
                     Obrigatório
                     multiline
                     name="resumo"
-                    component={TextField}
+                    component={TextFieldAdapter}
                     type="text"
                     label="Resumo"
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Field name="abstract" fullWidth multiline Obrigatório component={TextField} label="Abstract" />
+                  <Field
+                    name="abstract"
+                    fullWidth
+                    multiline
+                    Obrigatório
+                    component={TextFieldAdapter}
+                    label="Abstract"
+                  />
                 </Grid>
                 {isTeacher() ? (
                   <>
                     <Grid item xs={6}>
-                      <Field name="autor" fullWidth Obrigatório component={TextField} label="Autor" />
+                      <Field name="autor" fullWidth Obrigatório component={TextFieldAdapter} label="Autor" />
                     </Grid>
                     <Grid item xs={3}>
-                      <Field name="matricula" fullWidth Obrigatório component={TextField} label="Matrícula" />
+                      <Field name="matricula" fullWidth Obrigatório component={TextFieldAdapter} label="Matrícula" />
                     </Grid>
                     <Grid item xs={3}>
                       <Field
-                        component={Select}
+                        component={SelectAdapter}
                         label="Gênero"
                         name="pronome_autor"
                         formControlProps={{ className: "curso" }}
@@ -296,7 +405,7 @@ function ExaminingBoard() {
                     <Field
                       name="docente"
                       loading={loadingTeachers}
-                      component={Select}
+                      component={SelectAdapter}
                       label="Orientador"
                       formControlProps={{ className: "curso" }}
                     >
@@ -315,15 +424,15 @@ function ExaminingBoard() {
                     fullWidth
                     Obrigatório
                     multiline
-                    component={TextField}
+                    component={TextFieldAdapter}
                     label="Palavras Chave (Separadas por vírgula)"
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <Field name="turma" fullWidth Obrigatório component={TextField} label="Turma" />
+                  <Field name="turma" fullWidth Obrigatório component={TextFieldAdapter} label="Turma" />
                 </Grid>
                 <Grid item xs={4}>
-                  <Field name="curso" label="Curso" formControlProps={{ className: "curso" }} component={Select}>
+                  <Field name="curso" label="Curso" formControlProps={{ className: "curso" }} component={SelectAdapter}>
                     {cursos.map(({ id, sigla }) => (
                       <MenuItem key={id} value={id}>
                         {sigla}
@@ -333,16 +442,28 @@ function ExaminingBoard() {
                 </Grid>
                 <Grid style={{ padding: 0, marginTop: "auto", fontSize: "13px" }} item xs={2}>
                   Remoto
-                  <Field name="tipo_banca" component={Radio} type="radio" value="remoto" onClick={handleChange}></Field>
+                  <Field
+                    name="tipo_banca"
+                    component={RadioAdapter}
+                    type="radio"
+                    value="remoto"
+                    onClick={handleChange}
+                  ></Field>
                   Presencial
-                  <Field name="tipo_banca" component={Radio} type="radio" value="local" onClick={handleChange}></Field>
+                  <Field
+                    name="tipo_banca"
+                    component={RadioAdapter}
+                    type="radio"
+                    value="local"
+                    onClick={handleChange}
+                  ></Field>
                 </Grid>
                 <Grid item xs={3}>
-                  <Field name="ano" multiline fullWidth Obrigatório component={TextField} label="Ano" />
+                  <Field name="ano" multiline fullWidth Obrigatório component={TextFieldAdapter} label="Ano" />
                 </Grid>
                 <Grid item xs={3}>
                   <Field
-                    component={Select}
+                    component={SelectAdapter}
                     label="Semestre Letivo"
                     name="semestre_letivo"
                     formControlProps={{ className: "curso" }}
@@ -361,7 +482,7 @@ function ExaminingBoard() {
                     multiline
                     fullWidth
                     Obrigatório
-                    component={TextField}
+                    component={TextFieldAdapter}
                     label={tipo_banca ? "Local" : "Link"}
                   />
                 </Grid>

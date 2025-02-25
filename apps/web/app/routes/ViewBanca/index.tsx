@@ -3,10 +3,10 @@ import { useCallback, useEffect, useState } from "react"
 import ReactLoading from "react-loading"
 import "./styles.css"
 
+import api from "@/Config/http"
 import { useHistory } from "@/utils"
 import { Button, CssBaseline, Grid, ThemeProvider } from "@material-ui/core"
 import { createTheme, makeStyles } from "@material-ui/core/styles"
-import api from "Config/http"
 import { useLocation } from "react-router"
 import CardBanca from "../../Components/Card"
 

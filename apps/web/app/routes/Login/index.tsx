@@ -3,8 +3,8 @@ import { Field, Form } from "react-final-form"
 import ReactLoading from "react-loading"
 import { Link } from "react-router"
 
-import { useAuth } from "Hooks/Authentication/useAuth"
-import { useQuery } from "Hooks/Helpers/useQuery"
+import { useAuth } from "@/Hooks/Authentication/useAuth"
+import { useQuery } from "@/Hooks/Helpers/useQuery"
 
 const SignInButton = styled(Button)({
   backgroundColor: "#6c7ae0",

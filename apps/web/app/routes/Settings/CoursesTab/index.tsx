@@ -1,9 +1,10 @@
-import React, { useReducer } from "react";
+import { useReducer } from "react"
 
-import { makeStyles } from "@material-ui/styles";
-import { DataGrid } from "@mui/x-data-grid";
-import ReactLoading from "react-loading";
+import { makeStyles } from "@material-ui/styles"
+import { DataGrid } from "@mui/x-data-grid"
+import ReactLoading from "react-loading"
 
+import useCourses from "@/Hooks/Users/useCourses"
 import {
   Box,
   Button,
@@ -17,10 +18,9 @@ import {
   TextField,
   ThemeProvider,
   createTheme,
-} from "@material-ui/core";
-import useCourses from "Hooks/Users/useCourses";
-import CourseForm from "./CourseForm";
-import { ptBRGrid } from "Assets/Locales/grid.locale";
+} from "@material-ui/core"
+import { ptBRGrid } from "Assets/Locales/grid.locale"
+import CourseForm from "./CourseForm"
 
 const useStyles = makeStyles({
   root: {
@@ -33,7 +33,7 @@ const useStyles = makeStyles({
       color: "white",
     },
   },
-});
+})
 
 const themeButton = createTheme({
   palette: {
@@ -41,60 +41,51 @@ const themeButton = createTheme({
       main: "#329F5B",
     },
   },
-});
+})
 
 const COURSES_MODAL_ACTIONS = {
   OPEN_MODAL: "OPEN_MODAL",
   CLOSE_MODAL: "CLOSE_MODAL",
   UPDATE_SELECTED_COURSE: "UPDATE_SELECTED_COURSE",
-};
+}
 
 const INITIAL_STATE = {
   open: false,
   selectedCourse: undefined,
-};
+}
 
 function useCoursesModalReducer(state = INITIAL_STATE, action = null) {
   switch (action.type) {
     case COURSES_MODAL_ACTIONS.OPEN_MODAL:
-      return { ...state, open: true };
+      return { ...state, open: true }
     case COURSES_MODAL_ACTIONS.CLOSE_MODAL:
-      return { ...state, open: false };
+      return { ...state, open: false }
     case COURSES_MODAL_ACTIONS.UPDATE_SELECTED_COURSE:
-      return { ...state, selectedCourse: action.payload };
+      return { ...state, selectedCourse: action.payload }
     default:
-      return state;
+      return state
   }
 }
 
 function useCoursesModal() {
-  const [state, dispatch] = useReducer(useCoursesModalReducer, INITIAL_STATE);
+  const [state, dispatch] = useReducer(useCoursesModalReducer, INITIAL_STATE)
 
-  const openModal = () => dispatch({ type: COURSES_MODAL_ACTIONS.OPEN_MODAL });
-  const closeModal = () =>
-    dispatch({ type: COURSES_MODAL_ACTIONS.CLOSE_MODAL });
+  const openModal = () => dispatch({ type: COURSES_MODAL_ACTIONS.OPEN_MODAL })
+  const closeModal = () => dispatch({ type: COURSES_MODAL_ACTIONS.CLOSE_MODAL })
 
   const updateSelectedCourse = (course) =>
     dispatch({
       type: COURSES_MODAL_ACTIONS.UPDATE_SELECTED_COURSE,
       payload: course,
-    });
+    })
 
-  return { ...state, updateSelectedCourse, openModal, closeModal };
+  return { ...state, updateSelectedCourse, openModal, closeModal }
 }
 
 export default function CoursesTab() {
-  const classes = useStyles();
-  const {
-    courses,
-    loading,
-    handleSearch,
-    handleCreate,
-    handleEdit,
-    handleDelete,
-  } = useCourses();
-  const { open, updateSelectedCourse, selectedCourse, openModal, closeModal } =
-    useCoursesModal();
+  const classes = useStyles()
+  const { courses, loading, handleSearch, handleCreate, handleEdit, handleDelete } = useCourses()
+  const { open, updateSelectedCourse, selectedCourse, openModal, closeModal } = useCoursesModal()
 
   const {
     open: deleteConfirmationOpen,
@@ -102,7 +93,7 @@ export default function CoursesTab() {
     selectedCourse: selectedCourseToDelete,
     openModal: openDeleteConfirmation,
     closeModal: closeDeleteConfirmation,
-  } = useCoursesModal();
+  } = useCoursesModal()
 
   const columns = [
     {
@@ -150,7 +141,7 @@ export default function CoursesTab() {
       headerAlign: "center",
       align: "center",
     },
-  ];
+  ]
 
   const style = {
     position: "absolute",
@@ -161,7 +152,7 @@ export default function CoursesTab() {
     bgcolor: "background.paper",
     borderRadius: 4,
     padding: "4px",
-  };
+  }
 
   function CoursesAction({ row }) {
     return (
@@ -178,8 +169,8 @@ export default function CoursesTab() {
           name="edit-course"
           id="edit-board"
           onClick={() => {
-            updateSelectedCourse(row);
-            openModal();
+            updateSelectedCourse(row)
+            openModal()
           }}
         />
         <button
@@ -187,12 +178,12 @@ export default function CoursesTab() {
           name="delete-course"
           id="trash"
           onClick={() => {
-            updateSelectedCourseToDelete(row);
-            openDeleteConfirmation();
+            updateSelectedCourseToDelete(row)
+            openDeleteConfirmation()
           }}
         />
       </div>
-    );
+    )
   }
 
   return (
@@ -205,12 +196,7 @@ export default function CoursesTab() {
             justifyContent: "center",
           }}
         >
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={50}
-            width={50}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={50} width={50} />
         </div>
       ) : (
         <>
@@ -225,8 +211,7 @@ export default function CoursesTab() {
               {selectedCourseToDelete && (
                 <>
                   <DialogContentText id="alert-dialog-description">
-                    Tem certeza que deseja excluir o curso{" "}
-                    {selectedCourseToDelete.nome}?
+                    Tem certeza que deseja excluir o curso {selectedCourseToDelete.nome}?
                   </DialogContentText>
                 </>
               )}
@@ -235,8 +220,8 @@ export default function CoursesTab() {
               <Button onClick={closeDeleteConfirmation}>Cancelar</Button>
               <Button
                 onClick={() => {
-                  handleDelete(selectedCourseToDelete);
-                  closeDeleteConfirmation();
+                  handleDelete(selectedCourseToDelete)
+                  closeDeleteConfirmation()
                 }}
                 autoFocus
               >
@@ -249,11 +234,11 @@ export default function CoursesTab() {
               <CourseForm
                 course={selectedCourse}
                 onSubmit={(values) => {
-                  const { id } = values;
-                  if (id) handleEdit(values);
-                  else handleCreate(values);
+                  const { id } = values
+                  if (id) handleEdit(values)
+                  else handleCreate(values)
 
-                  closeModal();
+                  closeModal()
                 }}
               />
             </Box>
@@ -282,8 +267,8 @@ export default function CoursesTab() {
                         disciplina: "",
                         coordenacao: "",
                         cargo_coordenacao: "",
-                      });
-                      openModal();
+                      })
+                      openModal()
                     }}
                     style={{ borderRadius: 10, width: "100%", height: "56px" }}
                   >
@@ -310,5 +295,5 @@ export default function CoursesTab() {
         </>
       )}
     </>
-  );
+  )
 }

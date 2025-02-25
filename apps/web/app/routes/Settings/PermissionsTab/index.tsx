@@ -1,14 +1,13 @@
-import { Box, ThemeProvider, createTheme, Button } from "@material-ui/core";
-import React from "react";
+import { Box, Button, ThemeProvider, createTheme } from "@material-ui/core"
 
-import { makeStyles } from "@material-ui/styles";
-import { DataGrid } from "@mui/x-data-grid";
-import ReactLoading from "react-loading";
+import { makeStyles } from "@material-ui/styles"
+import { DataGrid } from "@mui/x-data-grid"
+import ReactLoading from "react-loading"
 
-import useUsers from "Hooks/Users/useUsers";
-import { TextField } from "@material-ui/core";
-import useAdminActions from "Hooks/Admin/useAdminActions";
-import { ptBRGrid } from "Assets/Locales/grid.locale";
+import useAdminActions from "@/Hooks/Admin/useAdminActions"
+import useUsers from "@/Hooks/Users/useUsers"
+import { TextField } from "@material-ui/core"
+import { ptBRGrid } from "Assets/Locales/grid.locale"
 
 const useStyles = makeStyles({
   root: {
@@ -21,30 +20,29 @@ const useStyles = makeStyles({
       color: "white",
     },
   },
-});
+})
 
 export const ROLES_DICT = {
   0: "Discente",
   1: "Orientador",
   2: "Avaliador",
   3: "Administrador",
-};
+}
 
 function RenderRolesCell({ row }) {
-  const { role } = row;
+  const { role } = row
   return (
     <>
       {ROLES_DICT[role] || "Indefinido"}
       <span style={{ marginLeft: "0.5rem" }} id="edit-board" />
     </>
-  );
+  )
 }
 
 export default function PermissionsTab() {
-  const { users, loading, handleEditRole, handleSearch } = useUsers();
-  const { loading: adminActionsLoading, generateInvitationLink } =
-    useAdminActions();
-  const classes = useStyles();
+  const { users, loading, handleEditRole, handleSearch } = useUsers()
+  const { loading: adminActionsLoading, generateInvitationLink } = useAdminActions()
+  const classes = useStyles()
 
   const columns = [
     { field: "nome", headerName: "Nome", minWidth: 150, flex: 1 },
@@ -62,7 +60,7 @@ export default function PermissionsTab() {
       align: "center",
       renderCell: RenderRolesCell,
     },
-  ];
+  ]
 
   const themeButton = createTheme({
     palette: {
@@ -70,7 +68,7 @@ export default function PermissionsTab() {
         main: "#329F5B",
       },
     },
-  });
+  })
 
   return (
     <>
@@ -82,21 +80,11 @@ export default function PermissionsTab() {
             justifyContent: "center",
           }}
         >
-          <ReactLoading
-            type={"spin"}
-            color={"#41616c"}
-            height={50}
-            width={50}
-          />
+          <ReactLoading type={"spin"} color={"#41616c"} height={50} width={50} />
         </div>
       ) : (
         <>
-          <Box
-            display="flex"
-            flexDirection="row"
-            marginBottom="1rem"
-            height="56px"
-          >
+          <Box display="flex" flexDirection="row" marginBottom="1rem" height="56px">
             <TextField
               id="banca-search"
               label="Buscar Usuários"
@@ -131,5 +119,5 @@ export default function PermissionsTab() {
         </>
       )}
     </>
-  );
+  )
 }

@@ -1,17 +1,8 @@
-import {
-  Button,
-  Container,
-  Grid,
-  MenuItem,
-  ThemeProvider,
-  createTheme,
-  makeStyles,
-} from "@material-ui/core";
-import { Select, TextField } from "final-form-material-ui";
-import { isEmailValid } from "Helpers/validators";
-import React from "react";
-import { Field, Form } from "react-final-form";
-import ReactLoading from "react-loading";
+import { isEmailValid } from "@/Helpers/validators"
+import { Button, Container, Grid, MenuItem, ThemeProvider, createTheme, makeStyles } from "@material-ui/core"
+import { Select, TextField } from "final-form-material-ui"
+import { Field, Form } from "react-final-form"
+import ReactLoading from "react-loading"
 
 function UserForm({
   withRegistrationId = false,
@@ -31,7 +22,7 @@ function UserForm({
         main: "#C5C5C5",
       },
     },
-  });
+  })
 
   const themeButton = createTheme({
     palette: {
@@ -39,7 +30,7 @@ function UserForm({
         main: "#329F5B",
       },
     },
-  });
+  })
 
   const styles = makeStyles({
     root: {
@@ -50,18 +41,14 @@ function UserForm({
         textAlign: "left",
       },
     },
-  });
+  })
 
-  const classesGrid = styles();
+  const classesGrid = styles()
 
   const validate = (values) => {
-    const REQUIRED_FIELDS_VALIDATION = [
-      "nome",
-      "pronoun",
-      "email",
-      "username",
-      "universidade",
-    ].filter((field) => withUsernameField || field !== "username");
+    const REQUIRED_FIELDS_VALIDATION = ["nome", "pronoun", "email", "username", "universidade"].filter(
+      (field) => withUsernameField || field !== "username"
+    )
 
     const FIELD_LENGHT_VALIDATION = {
       nome: 255,
@@ -69,43 +56,36 @@ function UserForm({
       username: 64,
       universidade: 64,
       registration_id: 9,
-    };
+    }
 
-    const errors = {};
+    const errors = {}
 
     REQUIRED_FIELDS_VALIDATION.forEach((field) => {
-      if (!values[field]) errors[field] = "Obrigatório";
-    });
+      if (!values[field]) errors[field] = "Obrigatório"
+    })
 
     Object.keys(FIELD_LENGHT_VALIDATION).forEach((key) => {
       if (values[key] && values[key].length > FIELD_LENGHT_VALIDATION[key])
-        errors[
-          key
-        ] = `O tamanho máximo deste campo é de ${FIELD_LENGHT_VALIDATION[key]} caracteres.`;
-    });
+        errors[key] = `O tamanho máximo deste campo é de ${FIELD_LENGHT_VALIDATION[key]} caracteres.`
+    })
 
     if (withRegistrationId && !values.registration_id) {
-      errors.registration_id = "Obrigatório";
+      errors.registration_id = "Obrigatório"
     }
 
-    if (withPassword && !values.password) errors.password = "Obrigatório";
+    if (withPassword && !values.password) errors.password = "Obrigatório"
     if (values.password && values.password.length > 16)
-      errors.password = `O tamanho máximo deste campo é de 16 caracteres.`;
+      errors.password = `O tamanho máximo deste campo é de 16 caracteres.`
 
-    if (values.email && !isEmailValid(values.email))
-      errors.email = "Insira um e-mail válido";
+    if (values.email && !isEmailValid(values.email)) errors.email = "Insira um e-mail válido"
 
-    return errors;
-  };
+    return errors
+  }
 
   return (
     <Container className="App">
       <div style={{ padding: 16, margin: "auto", maxWidth: 2000 }}>
-        {labels.title && (
-          <h2 style={{ display: "flex", alignItems: "center" }}>
-            {labels.title}
-          </h2>
-        )}
+        {labels.title && <h2 style={{ display: "flex", alignItems: "center" }}>{labels.title}</h2>}
         {loading && (
           <div
             style={{
@@ -114,12 +94,7 @@ function UserForm({
               justifyContent: "center",
             }}
           >
-            <ReactLoading
-              type={"spin"}
-              color={"#41616c"}
-              height={32}
-              width={32}
-            />
+            <ReactLoading type={"spin"} color={"#41616c"} height={32} width={32} />
           </div>
         )}
         <div hidden={loading}>
@@ -138,12 +113,7 @@ function UserForm({
             validate={validate}
             render={({ values, handleSubmit, submitting }) => (
               <form onSubmit={handleSubmit} noValidate>
-                <Grid
-                  container
-                  alignItems="flex-start"
-                  spacing={2}
-                  className={classesGrid.root}
-                >
+                <Grid container alignItems="flex-start" spacing={2} className={classesGrid.root}>
                   <Grid item xs={12}>
                     <Field
                       fullWidth
@@ -155,12 +125,7 @@ function UserForm({
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    <Field
-                      name="pronoun"
-                      value={values.pronoun}
-                      component={Select}
-                      label="Gênero"
-                    >
+                    <Field name="pronoun" value={values.pronoun} component={Select} label="Gênero">
                       <MenuItem value="0" alignItems="flex-start">
                         Masculino
                       </MenuItem>
@@ -263,12 +228,7 @@ function UserForm({
                       </Button>
                     </ThemeProvider>
                     <ThemeProvider theme={themeButton}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        disabled={submitting}
-                      >
+                      <Button variant="contained" color="primary" type="submit" disabled={submitting}>
                         {labels.submit}
                       </Button>
                     </ThemeProvider>
@@ -280,7 +240,7 @@ function UserForm({
         </div>
       </div>
     </Container>
-  );
+  )
 }
 
-export default UserForm;
+export default UserForm

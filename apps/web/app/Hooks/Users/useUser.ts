@@ -1,35 +1,35 @@
-import { useEffect, useState } from "react";
-import api from "Config/http";
+import api from "@/Config/http"
+import { useEffect, useState } from "react"
 
 export default function useUser(id) {
-  const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState();
+  const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState()
 
   useEffect(() => {
     if (id) {
-      setLoading(true);
+      setLoading(true)
       api
         .get(`/usuario/${id}`)
         .then(({ data: { data: user } }) => {
-          setUser(user);
+          setUser(user)
         })
         .finally(() => {
-          setLoading(false);
-        });
+          setLoading(false)
+        })
     }
-  }, [id]);
+  }, [id])
 
   const updateUser = async (user) => {
-    setLoading(true);
+    setLoading(true)
     return api
       .put(`/usuario/${id}`, user)
       .then(({ data: { data: user } }) => {
-        localStorage.setItem("nome", user.nome);
+        localStorage.setItem("nome", user.nome)
       })
       .finally(() => {
-        setLoading(false);
-      });
-  };
+        setLoading(false)
+      })
+  }
 
-  return { user, loading, updateUser };
+  return { user, loading, updateUser }
 }

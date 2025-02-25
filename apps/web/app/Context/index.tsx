@@ -1,5 +1,5 @@
-import api from "Config/http"
-import React, { Component, createContext } from "react"
+import api from "@/Config/http"
+import { Component, createContext } from "react"
 
 /*
   Componente que guarda as informações de login
