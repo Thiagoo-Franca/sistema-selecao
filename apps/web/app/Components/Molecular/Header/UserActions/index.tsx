@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-import { Avatar, Box, Menu, MenuItem, Tooltip } from "@material-ui/core"
+import { Avatar, Box, Menu, MenuItem, Tooltip } from "@mui/material"
 
 import { useHistory } from "@/utils"
 import { Create, ExitToApp } from "@material-ui/icons"

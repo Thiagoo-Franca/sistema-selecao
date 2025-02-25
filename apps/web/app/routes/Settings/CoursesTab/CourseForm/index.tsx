@@ -1,4 +1,4 @@
-import { Button, Grid, ThemeProvider, Typography, createTheme } from "@material-ui/core"
+import { Button, Grid, ThemeProvider, Typography, createTheme } from "@mui/material"
 import { Field, Form } from "react-final-form"
 
 import { TextFieldAdapter as TextField } from "@/Components/FormAdapters"

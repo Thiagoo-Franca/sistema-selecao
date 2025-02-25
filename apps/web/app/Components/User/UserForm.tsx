@@ -1,6 +1,6 @@
 import { SelectAdapter as Select, TextFieldAdapter as TextField } from "@/Components/FormAdapters"
 import { isEmailValid } from "@/Helpers/validators"
-import { Button, Container, Grid, MenuItem, ThemeProvider, createTheme, makeStyles } from "@material-ui/core"
+import { Button, Container, Grid, MenuItem, ThemeProvider, createTheme, makeStyles } from "@mui/material"
 import { Field, Form } from "react-final-form"
 import ReactLoading from "react-loading"
 

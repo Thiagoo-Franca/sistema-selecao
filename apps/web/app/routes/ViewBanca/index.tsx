@@ -1,12 +1,12 @@
-import Container from "@material-ui/core/Container"
+import Container from "@mui/material/Container"
 import { useCallback, useEffect, useState } from "react"
 import ReactLoading from "react-loading"
 import "./styles.css"
 
 import api from "@/Config/http"
 import { useHistory } from "@/utils"
-import { Button, CssBaseline, Grid, ThemeProvider } from "@material-ui/core"
-import { createTheme, makeStyles } from "@material-ui/core/styles"
+import { Button, CssBaseline, Grid, ThemeProvider } from "@mui/material"
+import { createTheme, makeStyles } from "@mui/material/styles"
 import { useLocation } from "react-router"
 import CardBanca from "../../Components/Card"
 

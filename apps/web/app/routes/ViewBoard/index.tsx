@@ -1,5 +1,5 @@
 import { useHistory } from "@/utils"
-import Container from "@material-ui/core/Container"
+import Container from "@mui/material/Container"
 import { useEffect, useState } from "react"
 import ReactLoading from "react-loading"
 import "./styles.css"
@@ -9,15 +9,15 @@ import {
   SelectAdapter as Select,
   TextFieldAdapter as TextField,
 } from "@/Components/FormAdapters"
-import { Box, Button, Checkbox, CssBaseline, FormControlLabel, Grid, MenuItem, ThemeProvider } from "@material-ui/core"
+import { Box, Button, Checkbox, CssBaseline, FormControlLabel, Grid, MenuItem, ThemeProvider } from "@mui/material"
 import { Field, Form } from "react-final-form"
 // Picker
 import api from "@/Config/http"
 import { isTeacher } from "@/Helpers/role"
 import { useBanca } from "@/Hooks/Banca/useBanca"
 import DateFnsUtils from "@date-io/date-fns"
-import { createTheme, makeStyles } from "@material-ui/core/styles"
 import { DatePicker, MuiPickersUtilsProvider, TimePicker } from "@material-ui/pickers"
+import { createTheme, makeStyles } from "@mui/material/styles"
 import { useParams } from "react-router"
 
 /*

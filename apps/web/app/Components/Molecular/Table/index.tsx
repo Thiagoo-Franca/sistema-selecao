@@ -1,5 +1,5 @@
 import { ptBRGrid } from "@/Assets/Locales/grid.locale"
-import { createTheme, makeStyles, ThemeProvider } from "@material-ui/core/styles"
+import { createTheme, makeStyles, ThemeProvider } from "@mui/material/styles"
 import { DataGrid, ptBR } from "@mui/x-data-grid"
 
 /*

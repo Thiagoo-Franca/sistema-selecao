@@ -10,8 +10,8 @@ import {
   Select as MuiSelect,
   TextField as MuiTextField,
   ThemeProvider,
-} from "@material-ui/core"
-import Container from "@material-ui/core/Container"
+} from "@mui/material"
+import Container from "@mui/material/Container"
 import { useEffect, useState } from "react"
 import type { FieldRenderProps } from "react-final-form"
 import { Field, Form } from "react-final-form"
@@ -22,8 +22,8 @@ import api from "@/Config/http"
 import { isTeacher } from "@/Helpers/role"
 import useTeachers from "@/Hooks/Users/useTeachers"
 import DateFnsUtils from "@date-io/date-fns"
-import { createTheme, makeStyles } from "@material-ui/core/styles"
 import { DatePicker, MuiPickersUtilsProvider, TimePicker } from "@material-ui/pickers"
+import { createTheme, makeStyles } from "@mui/material/styles"
 import type { MouseEvent, ReactNode } from "react"
 import { toast } from "react-toastify"
 

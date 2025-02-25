@@ -19,7 +19,7 @@ import {
   TextField,
   ThemeProvider,
   createTheme,
-} from "@material-ui/core"
+} from "@mui/material"
 import CourseForm from "./CourseForm"
 
 const useStyles = makeStyles({

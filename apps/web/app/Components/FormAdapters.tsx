@@ -1,4 +1,4 @@
-import { Radio as MuiRadio, Select as MuiSelect, TextField as MuiTextField } from "@material-ui/core"
+import { Radio as MuiRadio, Select as MuiSelect, TextField as MuiTextField } from "@mui/material"
 import type { MouseEvent, ReactNode } from "react"
 import type { FieldRenderProps } from "react-final-form"
 

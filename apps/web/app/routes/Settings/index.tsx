@@ -1,15 +1,15 @@
-import { Box, Container, Tab, Tabs } from "@material-ui/core";
-import React, { useState } from "react";
+import { Box, Container, Tab, Tabs } from "@mui/material"
+import { useState } from "react"
 
-import "./styles.css";
-import PermissionsTab from "./PermissionsTab";
-import CoursesTab from "./CoursesTab";
+import CoursesTab from "./CoursesTab"
+import PermissionsTab from "./PermissionsTab"
+import "./styles.css"
 
 function useTabViewer(defaultPage = 0) {
-  const [page, setPage] = useState(defaultPage);
-  const handlePageChange = (_, page) => setPage(page);
+  const [page, setPage] = useState(defaultPage)
+  const handlePageChange = (_, page) => setPage(page)
 
-  return { page, handlePageChange };
+  return { page, handlePageChange }
 }
 
 function TabPanel({ page, currentPage, children, ...props }) {
@@ -17,11 +17,11 @@ function TabPanel({ page, currentPage, children, ...props }) {
     <div role="tabpanel" hidden={page !== currentPage} {...props}>
       {page === currentPage && <Box marginTop={2}>{children}</Box>}
     </div>
-  );
+  )
 }
 
 export default function SettingsPage() {
-  const { page, handlePageChange } = useTabViewer();
+  const { page, handlePageChange } = useTabViewer()
 
   return (
     <Container maxWidth="xl">
@@ -38,5 +38,5 @@ export default function SettingsPage() {
         </TabPanel>
       </div>
     </Container>
-  );
+  )
 }

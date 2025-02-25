@@ -1,4 +1,4 @@
-import { Box, Button, Container, Paper, TextField, Typography, styled } from "@material-ui/core"
+import { Box, Button, Container, Paper, TextField, Typography, styled } from "@mui/material"
 import { Field, Form } from "react-final-form"
 import ReactLoading from "react-loading"
 import { Link } from "react-router"
