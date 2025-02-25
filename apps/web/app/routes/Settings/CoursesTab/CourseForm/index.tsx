@@ -1,14 +1,7 @@
-import {
-  Button,
-  Grid,
-  ThemeProvider,
-  Typography,
-  createTheme,
-} from "@material-ui/core";
-import { Field, Form } from "react-final-form";
-import React from "react";
+import { Button, Grid, ThemeProvider, Typography, createTheme } from "@material-ui/core"
+import { Field, Form } from "react-final-form"
 
-import { TextField } from "final-form-material-ui";
+import { TextFieldAdapter as TextField } from "@/Components/FormAdapters"
 
 const themeEditar = createTheme({
   palette: {
@@ -19,18 +12,12 @@ const themeEditar = createTheme({
       contrastText: "#fff",
     },
   },
-});
+})
 
 export default function CourseForm({ course, onSubmit }) {
   const validate = (values) => {
-    const errors = {};
-    const REQUIRED_FIELDS_VALIDATION = [
-      "nome",
-      "sigla",
-      "disciplina",
-      "coordenacao",
-      "cargo_coordenacao",
-    ];
+    const errors = {}
+    const REQUIRED_FIELDS_VALIDATION = ["nome", "sigla", "disciplina", "coordenacao", "cargo_coordenacao"]
 
     const FIELD_LENGHT_VALIDATION = {
       nome: 30,
@@ -38,21 +25,19 @@ export default function CourseForm({ course, onSubmit }) {
       disciplina: 10,
       coordenacao: 50,
       cargo_coordenacao: 100,
-    };
+    }
 
     REQUIRED_FIELDS_VALIDATION.forEach((field) => {
-      if (!values[field]) errors[field] = "Obrigatório";
-    });
+      if (!values[field]) errors[field] = "Obrigatório"
+    })
 
     Object.keys(FIELD_LENGHT_VALIDATION).forEach((key) => {
       if (values[key] && values[key].length > FIELD_LENGHT_VALIDATION[key])
-        errors[
-          key
-        ] = `O tamanho máximo deste campo é de ${FIELD_LENGHT_VALIDATION[key]} caracteres.`;
-    });
+        errors[key] = `O tamanho máximo deste campo é de ${FIELD_LENGHT_VALIDATION[key]} caracteres.`
+    })
 
-    return errors;
-  };
+    return errors
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", padding: "32px" }}>
@@ -75,41 +60,16 @@ export default function CourseForm({ course, onSubmit }) {
           <form onSubmit={handleSubmit} noValidate>
             <Grid container spacing={2}>
               <Grid item xs={9}>
-                <Field
-                  component={TextField}
-                  label="Nome do Curso"
-                  name="nome"
-                  type="text"
-                  fullWidth
-                />
+                <Field component={TextField} label="Nome do Curso" name="nome" type="text" fullWidth />
               </Grid>
               <Grid item xs={3}>
-                <Field
-                  component={TextField}
-                  label="Sigla"
-                  name="sigla"
-                  type="text"
-                  fullWidth
-                  value={values.sigla}
-                />
+                <Field component={TextField} label="Sigla" name="sigla" type="text" fullWidth value={values.sigla} />
               </Grid>
               <Grid item xs={12}>
-                <Field
-                  component={TextField}
-                  label="Disciplina Final"
-                  name="disciplina"
-                  type="text"
-                  fullWidth
-                />
+                <Field component={TextField} label="Disciplina Final" name="disciplina" type="text" fullWidth />
               </Grid>
               <Grid item xs={12}>
-                <Field
-                  component={TextField}
-                  label="Coordenador(a)"
-                  name="coordenacao"
-                  type="text"
-                  fullWidth
-                />
+                <Field component={TextField} label="Coordenador(a)" name="coordenacao" type="text" fullWidth />
               </Grid>
               <Grid item xs={12}>
                 <Field
@@ -141,5 +101,5 @@ export default function CourseForm({ course, onSubmit }) {
         )}
       />
     </div>
-  );
+  )
 }

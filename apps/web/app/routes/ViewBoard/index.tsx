@@ -4,8 +4,12 @@ import { useEffect, useState } from "react"
 import ReactLoading from "react-loading"
 import "./styles.css"
 
+import {
+  RadioAdapter as Radio,
+  SelectAdapter as Select,
+  TextFieldAdapter as TextField,
+} from "@/Components/FormAdapters"
 import { Box, Button, Checkbox, CssBaseline, FormControlLabel, Grid, MenuItem, ThemeProvider } from "@material-ui/core"
-import { Radio, Select, TextField } from "final-form-material-ui"
 import { Field, Form } from "react-final-form"
 // Picker
 import api from "@/Config/http"

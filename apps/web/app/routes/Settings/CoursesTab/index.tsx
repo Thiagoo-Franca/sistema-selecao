@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/styles"
 import { DataGrid } from "@mui/x-data-grid"
 import ReactLoading from "react-loading"
 
+import { ptBRGrid } from "@/Assets/Locales/grid.locale"
 import useCourses from "@/Hooks/Users/useCourses"
 import {
   Box,
@@ -19,7 +20,6 @@ import {
   ThemeProvider,
   createTheme,
 } from "@material-ui/core"
-import { ptBRGrid } from "Assets/Locales/grid.locale"
 import CourseForm from "./CourseForm"
 
 const useStyles = makeStyles({

@@ -4,10 +4,10 @@ import { makeStyles } from "@material-ui/styles"
 import { DataGrid } from "@mui/x-data-grid"
 import ReactLoading from "react-loading"
 
+import { ptBRGrid } from "@/Assets/Locales/grid.locale"
 import useAdminActions from "@/Hooks/Admin/useAdminActions"
 import useUsers from "@/Hooks/Users/useUsers"
 import { TextField } from "@material-ui/core"
-import { ptBRGrid } from "Assets/Locales/grid.locale"
 
 const useStyles = makeStyles({
   root: {

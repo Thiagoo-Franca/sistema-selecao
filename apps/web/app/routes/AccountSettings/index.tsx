@@ -1,18 +1,26 @@
+import { SelectAdapter as Select, TextFieldAdapter as TextField } from "@/Components/FormAdapters"
 import useUser from "@/Hooks/Users/useUser"
 import { useHistory } from "@/utils"
 import { Box, Button, Grid, MenuItem } from "@material-ui/core"
 import Container from "@material-ui/core/Container"
 import { createTheme, makeStyles, ThemeProvider } from "@material-ui/core/styles"
 import { SaveOutlined } from "@material-ui/icons"
-import { Select, TextField } from "final-form-material-ui"
-import { useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Field, Form } from "react-final-form"
 import ReactLoading from "react-loading"
 import "./styles.css"
 
 function AccountSettings() {
-  const { user, loading, updateUser } = useUser(localStorage.getItem("userId"))
+  const [userId, setUserId] = useState<string | null>(null)
+  const { user, loading, updateUser } = useUser(userId)
   const history = useHistory()
+
+  useEffect(() => {
+    // Safe access to localStorage in browser environment
+    if (typeof window !== "undefined") {
+      setUserId(localStorage.getItem("userId"))
+    }
+  }, [])
 
   const goToHome = useCallback(() => {
     history.push("")
