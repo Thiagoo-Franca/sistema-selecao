@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { TODO } from "../todo" // Assuming todo.ts is in src/
+import { TODO } from "../../todo"
 
 export const bancaRoutes = new Hono()
 

@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { TODO } from "../todo"
+import { TODO } from "../../todo"
 
 export const cursoRoutes = new Hono()
 

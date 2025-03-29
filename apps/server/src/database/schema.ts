@@ -1,7 +1,6 @@
 import { relations, sql } from "drizzle-orm"
-import { boolean, char, pgEnum, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core"
+import { boolean, char, integer, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core"
 
-const roleEnum = pgEnum("role", ["aluno", "coorientador", "orientador"])
 export const usuarios = pgTable("usuario", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 255 }).notNull().unique(),
@@ -15,7 +14,7 @@ export const usuarios = pgTable("usuario", {
   status: varchar("status", { length: 12 }).notNull().default("active"), // Ex: active, inactive
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
-  role: roleEnum("role").notNull(),
+  role: varchar("role", { length: 64 }).notNull(), // Papel oferecido (orientador, avaliador)
 })
 
 export const cursos = pgTable(
@@ -37,7 +36,7 @@ export const bancas = pgTable("banca", {
   // user_id no dump original parece redundante se temos a relação N:N em usuario_banca
   // Mantendo por ora para refletir o dump, mas pode ser removido.
   // userId: int('user_id').notNull().references(() => usuarios.id), // FK para usuario (Proprietário?)
-  cursoId: varchar("curso_id", { length: 10 })
+  cursoId: integer("curso_id")
     .notNull()
     .references(() => cursos.id), // FK para curso (ajustado de varchar)
   disciplina: varchar("disciplina", { length: 10 }).notNull(), // Código da disciplina? Ex: MATA62

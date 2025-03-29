@@ -8,15 +8,6 @@ import { invites, resetPasswords, usuarios } from "../../database/schema"
 import { AppVariables } from "../../types"
 import { JWT_AUDIENCE, JWT_EXPIRY_SECONDS, JWT_ISSUER, JWT_SECRET } from "./jwt"
 
-interface UserRecord {
-  id: number
-  email: string
-  password_has: string | null
-  role: string
-  nome: string
-  status: string
-}
-
 interface LoginResponse {
   id: number
   token: string
