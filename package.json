@@ -2,12 +2,7 @@
   "name": "@tcc/root",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types",
-    "transform-to-ts": "ts-node apps/web/scripts/transform-to-typescript.ts"
+    "dev": "turbo run dev"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",

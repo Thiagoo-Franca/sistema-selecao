@@ -7,10 +7,12 @@
     "dev": "tsx watch src/index.ts ",
     "migration:gen": "drizzle-kit generate",
     "migration:run": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
     "test": "vitest --run"
   },
   "license": "MIT",
   "dependencies": {
+    "@hono/node-server": "^1.14.0",
     "drizzle-orm": "^0.41.0",
     "hono": "^4.2.4",
     "pg": "^8.14.1"
