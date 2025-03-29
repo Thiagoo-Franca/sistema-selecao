@@ -1,5 +1,5 @@
 {
-  "name": "tcc",
+  "name": "@tcc/root",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -19,7 +19,7 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "npm@10.8.2",
+  "packageManager": "bun@1.2.3",
   "workspaces": [
     "apps/*",
     "packages/*"

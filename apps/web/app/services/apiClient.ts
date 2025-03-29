@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const API_BASE_URL = "https://sistema-de-defesas-api.app.ic.ufba.br" // Using the provided production URL
+const API_BASE_URL = "http://localhost:8080" // Using the provided production URL
 
 // Create an axios instance
 const apiClient = axios.create({

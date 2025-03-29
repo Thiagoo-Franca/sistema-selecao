@@ -15,7 +15,7 @@ interface ApiResponse {
  * @throws {Error} Throws an error if the network request fails or the API returns an error status.
  */
 export const fetchBancas = async (): Promise<Banca[]> => {
-  const url = `/api/banca` // Use relative path, base URL is handled by apiClient
+  const url = `/banca` // Use relative path, base URL is handled by apiClient
 
   try {
     const response = await apiClient.get<ApiResponse>(url) // Use apiClient.get

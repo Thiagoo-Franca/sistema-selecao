@@ -1,0 +1,26 @@
+{
+  "name": "@tcc/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts ",
+    "migration:gen": "drizzle-kit generate",
+    "migration:run": "drizzle-kit migrate",
+    "test": "vitest --run"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "drizzle-orm": "^0.41.0",
+    "hono": "^4.2.4",
+    "pg": "^8.14.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240405.0",
+    "tsx": "^4.19.2",
+    "@types/pg": "^8.11.11",
+    "drizzle-kit": "^0.30.6",
+    "vitest": "^1.5.0",
+    "wrangler": "^3.53.0"
+  }
+}
