@@ -7,12 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
+import { fetchBancas } from "../services/bancaService"
 
 // Placeholder function for teacher check - replace with your actual auth logic
 const isTeacher = () => true
 
 // Define the data structure for a 'Banca'
-interface Banca {
+export interface Banca {
   id: string | number // Assuming ID can be string or number
   data_realizacao: string // ISO string format from backend
   titulo_trabalho: string
@@ -71,18 +72,14 @@ export default function Home() {
     navigate(`/verbanca?id=${bancaId}`) // Adjust path if needed
   }
 
-  // Data fetching and processing
+  // Data fetching and processing using the service
   useEffect(() => {
-    fetch("/api/banca") // Ensure this endpoint exists in your Next.js setup
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        return response.json()
-      })
-      .then((apiResponse) => {
-        // Assuming the API returns { data: Banca[] } similar to the old code
-        let events: Banca[] = apiResponse.data || []
+    setLoading(true) // Ensure loading is true at the start
+
+    fetchBancas() // Call the service function
+      .then((fetchedEvents: Banca[]) => {
+        // The service now directly returns the array of bancas
+        let events: Banca[] = fetchedEvents || []
 
         if (events && Array.isArray(events)) {
           // Process events: format date, sort, split
@@ -103,16 +100,18 @@ export default function Home() {
 
           const allEvents: [Banca[], Banca[]] = [upcomingEvents, pastEvents]
           setRawData(allEvents)
-          setFilteredData(allEvents) // Initially, filtered data is the same as raw data
+          setFilteredData(allEvents)
         } else {
-          console.error("API response is not in the expected format:", apiResponse)
-          setRawData([[], []]) // Set empty data on unexpected format
+          // This case might be less likely now as the service handles empty arrays
+          console.error("Fetched data is not in the expected format:", events)
+          setRawData([[], []])
           setFilteredData([[], []])
         }
       })
       .catch((error) => {
-        console.error("Failed to fetch bancas:", error)
-        // Handle error state appropriately, maybe show a message to the user
+        // Error is already logged in the service, but you can add component-specific handling here
+        console.error("Error fetching data in component:", error)
+        // Optionally set an error state to display a message to the user
         setRawData([[], []])
         setFilteredData([[], []])
       })
