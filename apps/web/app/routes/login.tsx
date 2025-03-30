@@ -10,14 +10,14 @@ import { useLoginMutation } from "../services/authService"
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const longinMutation = useLoginMutation()
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     longinMutation.mutate(
-      { json: { email: username, password } },
+      { json: { email: email, password } },
       {
         onSuccess: () => {
           navigate("/")
@@ -46,14 +46,14 @@ export default function LoginPage() {
               </Alert>
             )}
             <div className="grid gap-2">
-              <Label htmlFor="email">Usuário</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                type="text"
+                id="email"
+                type="email"
                 placeholder="exemplo@ufba.br"
                 required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={longinMutation.isPending}
               />
             </div>

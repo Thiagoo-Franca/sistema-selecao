@@ -12,8 +12,8 @@ export function Header(p: { className?: string }) {
   const { data: user, isLoading, isError } = useUser()
 
   const handleLogout = () => {
+    useUser.removeQueries(queryClient)
     removeAuthToken()
-    queryClient.invalidateQueries({ queryKey: ["user"] })
     navigate("/")
   }
 

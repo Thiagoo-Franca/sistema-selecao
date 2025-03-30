@@ -1,18 +1,14 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { QueryClient, useQuery, useQueryClient, type Updater } from "@tanstack/react-query"
 import { rpcReturn } from "../lib/utils"
 import apiClient from "./apiClient"
 import { getAuthToken, removeAuthToken } from "./authService"
 
 export const useUser = () => {
   const queryClient = useQueryClient()
-  const token = getAuthToken()
 
   return useQuery({
-    queryKey: ["user", token],
+    queryKey: useUser.queryKey(),
     queryFn: async () => {
-      if (!token) {
-        return null
-      }
       try {
         const response = await apiClient.usuario.me.$get()
         return rpcReturn(response)
@@ -23,8 +19,18 @@ export const useUser = () => {
         throw error
       }
     },
-    enabled: !!token,
+    enabled: !!getAuthToken(),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   })
+}
+useUser.queryKey = () => ["user", getAuthToken()]
+useUser.setData = (
+  queryClient: QueryClient,
+  data: Updater<ReturnType<typeof useUser>["data"], ReturnType<typeof useUser>["data"]>
+) => {
+  return queryClient.setQueryData(useUser.queryKey(), data)
+}
+useUser.removeQueries = (queryClient: QueryClient) => {
+  return queryClient.removeQueries({ queryKey: useUser.queryKey() })
 }
