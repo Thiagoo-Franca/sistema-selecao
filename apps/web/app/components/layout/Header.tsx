@@ -1,10 +1,21 @@
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { GraduationCap } from "lucide-react"
+import { removeAuthToken } from "@/services/authService"
+import { useUser } from "@/services/useUser"
+import { useQueryClient } from "@tanstack/react-query"
+import { GraduationCap, LogOut } from "lucide-react"
 import { Link, useNavigate } from "react-router"
 
 export function Header(p: { className?: string }) {
-  const navigate = useNavigate() // Optional: if you need programmatic navigation from header later
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { data: user, isLoading, isError } = useUser()
+
+  const handleLogout = () => {
+    removeAuthToken()
+    queryClient.invalidateQueries({ queryKey: ["user"] })
+    navigate("/")
+  }
 
   return (
     <header
@@ -22,12 +33,25 @@ export function Header(p: { className?: string }) {
 
         {/* Right Side: Action Buttons */}
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Button variant="ghost" onClick={() => navigate("/login")}>
-            Login
-          </Button>
-          <Button variant="outline" onClick={() => navigate("/register")}>
-            Registre-se
-          </Button>
+          {isLoading ? (
+            <span>Loading...</span>
+          ) : user && !isError ? (
+            <>
+              <span className="font-medium">Olá, {user.nome || "Usuário"}</span>
+              <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={() => navigate("/login")}>
+                Login
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/register")}>
+                Registre-se
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
