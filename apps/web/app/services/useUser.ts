@@ -14,7 +14,7 @@ export const useUser = () => {
         return null
       }
       try {
-        const response = await apiClient.usuario.$get({})
+        const response = await apiClient.usuario.me.$get()
         return rpcReturn(response)
       } catch (error) {
         console.error("Auth error fetching user, removing token:", error)

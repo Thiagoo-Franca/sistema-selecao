@@ -1,3 +1,4 @@
+import { AUTH_TOKEN_KEY } from "@/config/env"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate } from "react-router"
 import { rpcReturn, type RpcType } from "../lib/utils"
@@ -36,7 +37,7 @@ export const useRegisterMutation = () => {
 
 export const storeAuthToken = (token: string): void => {
   try {
-    localStorage.setItem("authToken", token)
+    localStorage.setItem(AUTH_TOKEN_KEY, token)
   } catch (error) {
     console.error("Failed to store auth token:", error)
   }
@@ -44,7 +45,7 @@ export const storeAuthToken = (token: string): void => {
 
 export const getAuthToken = (): string | null => {
   try {
-    return localStorage.getItem("authToken")
+    return localStorage.getItem(AUTH_TOKEN_KEY)
   } catch (error) {
     console.error("Failed to retrieve auth token:", error)
     return null
@@ -53,7 +54,7 @@ export const getAuthToken = (): string | null => {
 
 export const removeAuthToken = (): void => {
   try {
-    localStorage.removeItem("authToken")
+    localStorage.removeItem(AUTH_TOKEN_KEY)
   } catch (error) {
     console.error("Failed to remove auth token:", error)
   }
