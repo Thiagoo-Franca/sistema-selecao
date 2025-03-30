@@ -1,7 +1,20 @@
 import { relations, sql } from "drizzle-orm"
-import { boolean, char, integer, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  char,
+  integer,
+  pgEnum,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/pg-core"
 
-export const usuarios = pgTable("usuario", {
+export const userRole = pgEnum("user_role", ["STUDENT", "TEACHER", "ADMIN"])
+export type UserRole = (typeof userRole.enumValues)[number]
+export const Users = pgTable("usuario", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 255 }).notNull().unique(),
   passwordHash: varchar("password_has", { length: 255 }).notNull(), // Nome da coluna original era password_has
@@ -16,6 +29,8 @@ export const usuarios = pgTable("usuario", {
   updatedAt: timestamp("updated_at").notNull(),
   role: varchar("role", { length: 64 }).notNull(), // Papel oferecido (orientador, avaliador)
 })
+export type InsertUser = typeof Users.$inferInsert
+export type SelectUser = typeof Users.$inferSelect
 
 export const cursos = pgTable(
   "cursos",
@@ -71,7 +86,7 @@ export const invites = pgTable(
   "invite",
   {
     id: serial("id").primaryKey(),
-    userId: integer("user_id").references(() => usuarios.id), // Quem foi convidado (opcional até aceitar?)
+    userId: integer("user_id").references(() => Users.id), // Quem foi convidado (opcional até aceitar?)
     bancaId: integer("banca_id")
       .notNull()
       .references(() => bancas.id), // Para qual banca
@@ -95,7 +110,7 @@ export const resetPasswords = pgTable(
     id: serial("id").primaryKey(),
     userId: integer("user_id")
       .notNull()
-      .references(() => usuarios.id),
+      .references(() => Users.id),
     resetPasswordHash: varchar("reset_password_hash", { length: 255 }).unique(),
     createdAt: timestamp("created_at")
       .notNull()
@@ -110,7 +125,7 @@ export const resetPasswords = pgTable(
 // --- Tabela de Sessão (Opcional, se usar DB session) ---
 export const sessions = pgTable("session", {
   id: varchar("id", { length: 128 }).primaryKey(), // Aumentado tamanho
-  userId: integer("user_id").references(() => usuarios.id), // Associar sessão a usuário
+  userId: integer("user_id").references(() => Users.id), // Associar sessão a usuário
   expire: timestamp("expire").notNull(),
   data: text("data"), // Usar text em vez de blob para JSON
   // token_access removido, geralmente gerenciado por JWT em header
@@ -121,7 +136,7 @@ export const usuariosBancas = pgTable("usuario_banca", {
   id: serial("id").primaryKey(),
   usuarioId: integer("id_usuario")
     .notNull()
-    .references(() => usuarios.id),
+    .references(() => Users.id),
   bancaId: integer("id_banca")
     .notNull()
     .references(() => bancas.id),
@@ -144,7 +159,7 @@ export const bancasDocumentos = pgTable("banca_documento", {
 
 // === DEFINIÇÃO DAS RELAÇÕES ===
 
-export const usuariosRelations = relations(usuarios, ({ one, many }) => ({
+export const usuariosRelations = relations(Users, ({ one, many }) => ({
   sessoes: many(sessions),
   convitesEnviados: many(invites), // Se um admin pode convidar
   resetsSenha: many(resetPasswords),
@@ -175,9 +190,9 @@ export const documentosRelations = relations(documentos, ({ many }) => ({
 }))
 
 export const invitesRelations = relations(invites, ({ one }) => ({
-  usuarioConvidado: one(usuarios, {
+  usuarioConvidado: one(Users, {
     fields: [invites.userId],
-    references: [usuarios.id],
+    references: [Users.id],
   }),
   banca: one(bancas, {
     fields: [invites.bancaId],
@@ -186,24 +201,24 @@ export const invitesRelations = relations(invites, ({ one }) => ({
 }))
 
 export const resetPasswordsRelations = relations(resetPasswords, ({ one }) => ({
-  usuario: one(usuarios, {
+  usuario: one(Users, {
     fields: [resetPasswords.userId],
-    references: [usuarios.id],
+    references: [Users.id],
   }),
 }))
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
-  usuario: one(usuarios, {
+  usuario: one(Users, {
     fields: [sessions.userId],
-    references: [usuarios.id],
+    references: [Users.id],
   }),
 }))
 
 // Relações para a tabela de junção usuario_banca
 export const usuariosBancasRelations = relations(usuariosBancas, ({ one }) => ({
-  usuario: one(usuarios, {
+  usuario: one(Users, {
     fields: [usuariosBancas.usuarioId],
-    references: [usuarios.id],
+    references: [Users.id],
   }),
   banca: one(bancas, {
     fields: [usuariosBancas.bancaId],

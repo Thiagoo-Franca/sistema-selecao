@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm"
 import { testClient } from "hono/testing"
 import { beforeEach, describe, expect, it } from "vitest"
 import { app } from "../.."
-import { usuarios } from "../../database/schema"
+import { Users } from "../../database/schema"
 import { fakeDeps, getFakeDb } from "../../tests/utils"
 
 const TEST_USER = {
@@ -23,7 +23,7 @@ describe("Auth Routes", async () => {
 
   beforeEach(async () => {
     TEST_USER.passwordHash = await bcrypt.hash(TEST_USER.password, 10)
-    await db.insert(usuarios).values({
+    await db.insert(Users).values({
       username: TEST_USER.username,
       email: TEST_USER.email,
       passwordHash: TEST_USER.passwordHash,
@@ -38,7 +38,7 @@ describe("Auth Routes", async () => {
     })
   })
   afterEach(async () => {
-    await db.delete(usuarios)
+    await db.delete(Users)
   })
 
   it("should allow login with valid credentials", async () => {
@@ -95,7 +95,7 @@ describe("Auth Routes", async () => {
   })
 
   it("should reject login for inactive user", async () => {
-    await db.update(usuarios).set({ status: "inactive" }).where(eq(usuarios.email, TEST_USER.email))
+    await db.update(Users).set({ status: "inactive" }).where(eq(Users.email, TEST_USER.email))
 
     const response = await client.auth.login.$post({
       json: {
@@ -117,7 +117,7 @@ describe("Auth Register Routes", async () => {
 
   // Clean DB before each test in this suite
   beforeEach(async () => {
-    await db.delete(usuarios)
+    await db.delete(Users)
   })
 
   const newUser = {
@@ -142,7 +142,7 @@ describe("Auth Register Routes", async () => {
     const userId = data.userId
 
     // Verify in DB
-    const [dbUser] = await db.select().from(usuarios).where(eq(usuarios.id, userId)).limit(1)
+    const [dbUser] = await db.select().from(Users).where(eq(Users.id, userId)).limit(1)
     expect(dbUser.email).toBe(newUser.email)
     expect(dbUser.username).toBe(newUser.username)
     expect(dbUser.nome).toBe(newUser.nome)
@@ -166,7 +166,7 @@ describe("Auth Register Routes", async () => {
     const data = await response.json()
     expect(data).toHaveProperty("userId")
 
-    const [dbUser] = await db.select().from(usuarios).where(eq(usuarios.id, data.userId)).limit(1)
+    const [dbUser] = await db.select().from(Users).where(eq(Users.id, data.userId)).limit(1)
     expect(dbUser.lattesUrl).toBeNull()
   })
 

@@ -3,7 +3,7 @@ import crypto from "crypto"
 import { and, eq, gte } from "drizzle-orm"
 import { Context } from "hono"
 import { sign } from "hono/jwt"
-import { invites, resetPasswords, usuarios } from "../../database/schema"
+import { invites, resetPasswords, Users } from "../../database/schema"
 import { AppResult, err, ok } from "../../result"
 import { AppVariables } from "../../types"
 import { JWT_AUDIENCE, JWT_EXPIRY_SECONDS, JWT_ISSUER, JWT_SECRET } from "./jwt"
@@ -30,7 +30,7 @@ export const loginUserService = async (
   const dbInstance = c.get("db")
 
   try {
-    const [user] = await dbInstance.select().from(usuarios).where(eq(usuarios.email, email)).limit(1)
+    const [user] = await dbInstance.select().from(Users).where(eq(Users.email, email)).limit(1)
 
     if (!user) {
       console.log(`Login attempt failed: User not found for email ${email}`)
@@ -94,9 +94,9 @@ export const requestPasswordResetService = async (
 
   try {
     const potentialUsers = await dbInstance
-      .select({ id: usuarios.id, status: usuarios.status })
-      .from(usuarios)
-      .where(eq(usuarios.email, email))
+      .select({ id: Users.id, status: Users.status })
+      .from(Users)
+      .where(eq(Users.email, email))
       .limit(1)
     const user = potentialUsers[0]
 
@@ -224,9 +224,9 @@ export const resetPasswordService = async (
       const userId = resetRecord.userId
 
       const updateResult = await dbInstance
-        .update(usuarios)
+        .update(Users)
         .set({ passwordHash: newPasswordHash, updatedAt: new Date() })
-        .where(eq(usuarios.id, userId))
+        .where(eq(Users.id, userId))
 
       if (updateResult.rowCount === 0) {
         console.error(`Password reset failed: User with ID ${userId} not found during update.`)
@@ -341,11 +341,7 @@ export const registerUserService = async (
 
   try {
     // Check for duplicate email
-    const existingEmail = await dbInstance
-      .select({ id: usuarios.id })
-      .from(usuarios)
-      .where(eq(usuarios.email, email))
-      .limit(1)
+    const existingEmail = await dbInstance.select({ id: Users.id }).from(Users).where(eq(Users.email, email)).limit(1)
 
     if (existingEmail.length > 0) {
       console.log(`Registration failed: Email ${email} already exists.`)
@@ -354,9 +350,9 @@ export const registerUserService = async (
 
     // Check for duplicate username
     const existingUsername = await dbInstance
-      .select({ id: usuarios.id })
-      .from(usuarios)
-      .where(eq(usuarios.username, username))
+      .select({ id: Users.id })
+      .from(Users)
+      .where(eq(Users.username, username))
       .limit(1)
 
     if (existingUsername.length > 0) {
@@ -379,7 +375,7 @@ export const registerUserService = async (
     // Insert new user
     const now = new Date()
     const newUserResult = await dbInstance
-      .insert(usuarios)
+      .insert(Users)
       .values({
         username: username,
         passwordHash: passwordHash,
@@ -394,7 +390,7 @@ export const registerUserService = async (
         updatedAt: now,
         role: role,
       })
-      .returning({ insertedId: usuarios.id })
+      .returning({ insertedId: Users.id })
 
     const insertedUser = newUserResult[0]
     if (!insertedUser || !insertedUser.insertedId) {

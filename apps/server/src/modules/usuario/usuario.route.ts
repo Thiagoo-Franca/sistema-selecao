@@ -1,27 +1,45 @@
-import { Hono } from "hono"
-import { TODO } from "../../todo"
+import { zValidator } from "@hono/zod-validator"
 
-export const usuarioRoutes = new Hono()
-  .get("/", (c) => TODO({ c, path: "/usuario", method: "GET" }))
-  .post("/", (c) => TODO({ c, path: "/usuario", method: "POST" }))
-  .post("/pre-cadastro", (c) => TODO({ c, path: "/usuario/pre-cadastro", method: "POST" }))
-  .get("/:id", (c) => {
-    const id = c.req.param("id")
-    return TODO({ c, path: "/usuario/:id", method: "GET", params: { id } })
+import { Hono } from "hono"
+import { AppVariables } from "../../types"
+import { checkRole } from "../auth/auth.middleware"
+import * as schema from "./usuario.schema"
+import * as service from "./usuario.service"
+
+export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
+  .get("/", checkRole(["ADMIN"]), async (c) => {
+    const users = await service.getAllUsers(c)
+    return c.json(users)
   })
-  .put("/:id", (c) => {
-    const id = c.req.param("id")
-    return TODO({ c, path: "/usuario/:id", method: "PUT", params: { id } })
+  .post("/", checkRole(["ADMIN", "TEACHER"]), zValidator("json", schema.createUserSchema), async (c) => {
+    const validatedUserData = c.req.valid("json")
+    const newUser = await service.createUser(c, validatedUserData)
+    return c.json(newUser, 201)
   })
-  .delete("/:id", (c) => {
-    const id = c.req.param("id")
-    return TODO({ c, path: "/usuario/:id", method: "DELETE", params: { id } })
+  .get("/:id", zValidator("param", schema.idParamSchema.shape.param), async (c) => {
+    const { id } = c.req.valid("param")
+    const user = await service.getUserById(c, id)
+    return c.json(user)
   })
-  .put("/:id/role", (c) => {
-    const id = c.req.param("id")
-    return TODO({ c, path: "/usuario/:id/role", method: "PUT", params: { id } })
+  .put(
+    "/:id",
+    checkRole(["ADMIN"]),
+    zValidator("param", schema.updateUserSchema.shape.param),
+    zValidator("json", schema.updateUserSchema.shape.body),
+    async (c) => {
+      const { id } = c.req.valid("param")
+      const validatedUpdateData = c.req.valid("json")
+      const updatedUser = await service.updateUser(c, id, validatedUpdateData)
+      return c.json(updatedUser)
+    }
+  )
+  .delete("/:id", checkRole(["ADMIN"]), zValidator("param", schema.idParamSchema.shape.param), async (c) => {
+    const { id } = c.req.valid("param")
+    await service.deleteUser(c, id)
+    return c.body(null, 204)
   })
-  .get("/:id/bancas", (c) => {
-    const id = c.req.param("id")
-    return TODO({ c, path: "/usuario/:id/bancas", method: "GET", params: { id } })
+  .get("/:id/bancas", zValidator("param", schema.idParamSchema.shape.param), async (c) => {
+    const { id } = c.req.valid("param")
+    const bancas = await service.getUserBancas(c, id)
+    return c.json(bancas)
   })
