@@ -16,7 +16,17 @@ export default function LoginPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    longinMutation.mutate({ json: { email: username, password } })
+    longinMutation.mutate(
+      { json: { email: username, password } },
+      {
+        onSuccess: () => {
+          navigate("/")
+        },
+        onError: (error) => {
+          console.error(error)
+        },
+      }
+    )
   }
 
   return (
