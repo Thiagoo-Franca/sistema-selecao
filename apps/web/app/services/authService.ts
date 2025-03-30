@@ -9,6 +9,9 @@ export const useLoginMutation = () => {
       const response = await apiClient.auth.login.$post(request)
       return rpcReturn(response)
     },
+    onSuccess: (response) => {
+      storeAuthToken(response.token)
+    },
   })
 }
 

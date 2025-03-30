@@ -19,10 +19,8 @@ export default function LoginPage() {
     longinMutation.mutate(
       { json: { email: username, password } },
       {
-        onSuccess: (data) => {
-          console.log(data)
-          // storeAuthToken(data.token)
-          // navigate("/")
+        onSuccess: () => {
+          navigate("/")
         },
         onError: (error) => {
           console.error(error)

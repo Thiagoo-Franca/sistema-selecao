@@ -109,3 +109,108 @@ describe("Auth Routes", async () => {
     expect(data).toHaveProperty("message", "Seu usuário está inativo.")
   })
 })
+
+// Added registration tests
+describe("Auth Register Routes", async () => {
+  const db = await getFakeDb()
+  const client = testClient(app(fakeDeps(db)))
+
+  // Clean DB before each test in this suite
+  beforeEach(async () => {
+    await db.delete(usuarios)
+  })
+
+  const newUser = {
+    email: "newuser@example.com",
+    password: "NewPassword123!",
+    username: "newusername",
+    nome: "New User",
+    school: "New School",
+    academicTitle: "MSc",
+    role: "student",
+    lattesUrl: "http://lattes.cnpq.br/123456",
+  }
+
+  it("should register a new user with valid data", async () => {
+    const response = await client.auth.register.$post({
+      json: newUser,
+    })
+
+    expect(response.status).toBe(201)
+    const data = await response.json()
+    expect(data).toHaveProperty("userId")
+    const userId = data.userId
+
+    // Verify in DB
+    const [dbUser] = await db.select().from(usuarios).where(eq(usuarios.id, userId)).limit(1)
+    expect(dbUser.email).toBe(newUser.email)
+    expect(dbUser.username).toBe(newUser.username)
+    expect(dbUser.nome).toBe(newUser.nome)
+    expect(dbUser.role).toBe(newUser.role)
+    expect(dbUser.status).toBe("active")
+    // Verify password was hashed
+    expect(dbUser.passwordHash).not.toBe(newUser.password)
+    const isPasswordCorrect = await bcrypt.compare(newUser.password, dbUser.passwordHash ?? "")
+    expect(isPasswordCorrect).toBe(true)
+    expect(dbUser.authKey).toBeDefined()
+    expect(dbUser.lattesUrl).toBe(newUser.lattesUrl)
+  })
+
+  it("should register a user without optional lattesUrl", async () => {
+    const { lattesUrl, ...userWithoutLattes } = newUser
+    const response = await client.auth.register.$post({
+      json: userWithoutLattes,
+    })
+
+    expect(response.status).toBe(201)
+    const data = await response.json()
+    expect(data).toHaveProperty("userId")
+
+    const [dbUser] = await db.select().from(usuarios).where(eq(usuarios.id, data.userId)).limit(1)
+    expect(dbUser.lattesUrl).toBeNull()
+  })
+
+  it("should reject registration with duplicate email", async () => {
+    // Insert a user first
+    await client.auth.register.$post({ json: newUser })
+
+    // Attempt to register again with the same email
+    const response = await client.auth.register.$post({
+      json: { ...newUser, username: "anotherusername" },
+    })
+
+    expect(response.status).toBe(409)
+    const data = await response.json()
+    expect(data).toHaveProperty("message", "Este email já está em uso.")
+  })
+
+  it("should reject registration with duplicate username", async () => {
+    // Insert a user first
+    await client.auth.register.$post({ json: newUser })
+
+    // Attempt to register again with the same username
+    const response = await client.auth.register.$post({
+      json: { ...newUser, email: "another@example.com" },
+    })
+
+    expect(response.status).toBe(409)
+    const data = await response.json()
+    expect(data).toHaveProperty("message", "Este nome de usuário já está em uso.")
+  })
+
+  it("should validate registration inputs (e.g., short password)", async () => {
+    const response = await client.auth.register.$post({
+      json: { ...newUser, password: "short" },
+    })
+
+    expect(response.status).toBe(400) // Zod validation error
+  })
+
+  it("should validate registration inputs (e.g., invalid email)", async () => {
+    const response = await client.auth.register.$post({
+      json: { ...newUser, email: "not-an-email" },
+    })
+
+    expect(response.status).toBe(400) // Zod validation error
+  })
+})

@@ -10,12 +10,12 @@ export const TODO = <const T>(_: T & { __brand: "TODO" }) => {}
 
 export type RpcType<T extends (...args: any[]) => any> = {
   input: Parameters<T>[0]
-  output: Awaited<ReturnType<T>>["json"]
+  output: Awaited<Awaited<ReturnType<T>>["json"]>
 }
-export const rpcReturn = async (clientResponse: ClientResponse<any, any, any>) => {
+export const rpcReturn = async <T extends unknown>(clientResponse: ClientResponse<T, any, "json">) => {
   const data = await clientResponse.json()
   if (!clientResponse.ok) {
-    throw new Error(data.message)
+    throw new Error((data as { message: string })?.message || "Ops, algo deu errado")
   }
   return data
 }

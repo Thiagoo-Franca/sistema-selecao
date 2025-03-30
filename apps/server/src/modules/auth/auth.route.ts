@@ -7,6 +7,7 @@ import { AppVariables } from "../../types"
 
 import {
   loginUserService,
+  registerUserService,
   requestPasswordResetService,
   resetPasswordService,
   verifyInviteHashService,
@@ -25,6 +26,17 @@ const requestResetSchema = z.object({
 const resetPasswordSchema = z.object({
   hash: z.string().min(1, { message: "Token de reset é obrigatório." }),
   newPassword: z.string().min(6, { message: "Nova senha deve ter pelo menos 6 caracteres." }),
+})
+
+const registerSchema = z.object({
+  email: z.string().email({ message: "Email inválido." }),
+  password: z.string().min(6, { message: "Senha deve ter pelo menos 6 caracteres." }),
+  username: z.string().min(3, { message: "Nome de usuário deve ter pelo menos 3 caracteres." }),
+  nome: z.string().min(1, { message: "Nome é obrigatório." }),
+  school: z.string().min(1, { message: "Instituição é obrigatória." }),
+  academicTitle: z.string().min(1, { message: "Título acadêmico é obrigatório." }),
+  role: z.string().min(1, { message: "Papel é obrigatório." }),
+  lattesUrl: z.string().url({ message: "URL do Lattes inválida." }).optional().or(z.literal("")),
 })
 
 export const authRoutes = new Hono<{ Variables: AppVariables }>()
@@ -88,4 +100,21 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
         .otherwise(() => new AppError(500, "Erro interno ao redefinir a senha."))
     }
     return c.json({ message: "Senha redefinida com sucesso." }, 200)
+  })
+  .post("/register", zValidator("json", registerSchema), async (c) => {
+    const userData = c.req.valid("json")
+    const [error, result] = await registerUserService(c, userData)
+
+    if (error) {
+      throw match(error)
+        .with({ type: "duplicate_email" }, () => new AppError(409, "Este email já está em uso."))
+        .with({ type: "duplicate_username" }, () => new AppError(409, "Este nome de usuário já está em uso."))
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao criar o usuário. Tente novamente mais tarde.")
+        )
+        .otherwise(() => new AppError(500, "Ocorreu um erro inesperado."))
+    }
+
+    return c.json({ userId: result.userId }, 201)
   })

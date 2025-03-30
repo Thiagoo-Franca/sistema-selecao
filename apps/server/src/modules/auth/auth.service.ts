@@ -30,7 +30,6 @@ export const loginUserService = async (
   const dbInstance = c.get("db")
 
   try {
-    debugger
     const [user] = await dbInstance.select().from(usuarios).where(eq(usuarios.email, email)).limit(1)
 
     if (!user) {
@@ -310,7 +309,103 @@ export const verifyInviteHashService = async (
   }
 }
 
-export const logoutUserService = async (_c: Context<{ Variables: AppVariables }>): Promise<AppResult<void, never>> => {
-  console.log("Logout request received.")
-  return ok(undefined)
+// --- Register Types ---
+interface RegisterUserInput {
+  email: string
+  password: string
+  username: string
+  nome: string
+  school: string
+  academicTitle: string
+  role: string
+  lattesUrl?: string | null // Adjusted to match schema
+}
+
+interface RegisterUserResponse {
+  userId: number
+}
+
+type RegisterUserServiceError =
+  | { type: "duplicate_email" }
+  | { type: "duplicate_username" }
+  | { type: "hashing_error" }
+  | { type: "database_error" }
+
+// --- Register User Service ---
+export const registerUserService = async (
+  c: Context<{ Variables: AppVariables }>,
+  userData: RegisterUserInput
+): Promise<AppResult<RegisterUserResponse, RegisterUserServiceError>> => {
+  const dbInstance = c.get("db")
+  const { email, password, username, nome, school, academicTitle, role, lattesUrl } = userData
+
+  try {
+    // Check for duplicate email
+    const existingEmail = await dbInstance
+      .select({ id: usuarios.id })
+      .from(usuarios)
+      .where(eq(usuarios.email, email))
+      .limit(1)
+
+    if (existingEmail.length > 0) {
+      console.log(`Registration failed: Email ${email} already exists.`)
+      return err({ type: "duplicate_email" })
+    }
+
+    // Check for duplicate username
+    const existingUsername = await dbInstance
+      .select({ id: usuarios.id })
+      .from(usuarios)
+      .where(eq(usuarios.username, username))
+      .limit(1)
+
+    if (existingUsername.length > 0) {
+      console.log(`Registration failed: Username ${username} already exists.`)
+      return err({ type: "duplicate_username" })
+    }
+
+    // Hash password
+    let passwordHash: string
+    try {
+      passwordHash = await bcrypt.hash(password, 10)
+    } catch (hashError) {
+      console.error("Password hashing failed during registration:", hashError)
+      return err({ type: "hashing_error" })
+    }
+
+    // Generate authKey
+    const authKey = crypto.randomBytes(32).toString("hex")
+
+    // Insert new user
+    const now = new Date()
+    const newUserResult = await dbInstance
+      .insert(usuarios)
+      .values({
+        username: username,
+        passwordHash: passwordHash,
+        authKey: authKey,
+        email: email,
+        nome: nome,
+        school: school,
+        academicTitle: academicTitle,
+        lattesUrl: lattesUrl || null, // Ensure null if empty or undefined
+        status: "active", // Default status
+        createdAt: now,
+        updatedAt: now,
+        role: role,
+      })
+      .returning({ insertedId: usuarios.id })
+
+    const insertedUser = newUserResult[0]
+    if (!insertedUser || !insertedUser.insertedId) {
+      console.error("Failed to insert user or retrieve ID after insert.")
+      return err({ type: "database_error" })
+    }
+
+    console.log(`User registered successfully: ${email}, ID: ${insertedUser.insertedId}`)
+    return ok({ userId: insertedUser.insertedId })
+  } catch (dbError) {
+    console.error("Database error during registration:", dbError)
+    return err({ type: "database_error" })
+  }
 }
