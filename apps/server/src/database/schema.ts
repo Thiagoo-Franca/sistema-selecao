@@ -45,7 +45,6 @@ export const cursos = pgTable(
   })
 )
 
-// --- Tabela de Bancas ---
 export const Bancas = pgTable("banca", {
   id: serial("id").primaryKey(),
   // user_id no dump original parece redundante se temos a relação N:N em usuario_banca
@@ -72,8 +71,9 @@ export const Bancas = pgTable("banca", {
   modalidade: varchar("modalidade", { length: 10 }).notNull(), // 'remoto' or 'local'
   visible: boolean("visible").notNull().default(true),
 })
+export type InsertBanca = typeof Bancas.$inferInsert
+export type SelectBanca = typeof Bancas.$inferSelect
 
-// --- Tabela de Documentos ---
 export const documentos = pgTable("documento", {
   id: serial("id").primaryKey(),
   path: varchar("path", { length: 255 }), // Caminho no storage
@@ -82,7 +82,6 @@ export const documentos = pgTable("documento", {
   dataSubmissao: timestamp("data_submissao").notNull(),
 })
 
-// --- Tabela de Convites (Invite) ---
 export const invites = pgTable(
   "invite",
   {
@@ -104,7 +103,6 @@ export const invites = pgTable(
   })
 )
 
-// --- Tabela de Reset de Senha ---
 export const resetPasswords = pgTable(
   "reset_password",
   {
@@ -123,7 +121,6 @@ export const resetPasswords = pgTable(
   })
 )
 
-// --- Tabela de Sessão (Opcional, se usar DB session) ---
 export const sessions = pgTable("session", {
   id: varchar("id", { length: 128 }).primaryKey(), // Aumentado tamanho
   userId: integer("user_id").references(() => Users.id), // Associar sessão a usuário
@@ -132,7 +129,6 @@ export const sessions = pgTable("session", {
   // token_access removido, geralmente gerenciado por JWT em header
 })
 
-// --- Tabela de Junção: Usuário <-> Banca (N:N) ---
 export const usuariosBancas = pgTable("usuario_banca", {
   id: serial("id").primaryKey(),
   usuarioId: integer("id_usuario")
@@ -146,7 +142,6 @@ export const usuariosBancas = pgTable("usuario_banca", {
   // Adicionar unique constraint para (usuarioId, bancaId) ?
 })
 
-// --- Tabela de Junção: Banca <-> Documento (N:N) ---
 export const bancasDocumentos = pgTable("banca_documento", {
   id: serial("id").primaryKey(),
   bancaId: integer("id_banca")

@@ -16,11 +16,7 @@ const teacherCreateSchema = baseBancaSchema.extend({
   pronome_autor: z.enum(["0", "1"], { errorMap: () => ({ message: "Gênero do autor inválido" }) }),
 })
 
-const studentCreateSchema = baseBancaSchema.extend({
-  id_orientador: z.string().refine((val) => !Number.isNaN(parseInt(val, 10)), {
-    message: "ID do Orientador deve ser um número",
-  }),
-})
+const studentCreateSchema = baseBancaSchema.extend({})
 
 export const createBancaSchema = z.union([teacherCreateSchema, studentCreateSchema])
 
