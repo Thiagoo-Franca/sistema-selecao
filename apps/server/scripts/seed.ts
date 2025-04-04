@@ -10,23 +10,18 @@ import {
   usuariosBancas,
 } from "../src/database"
 
-async function clearDatabase(db: any) {
-  await db.delete(Users)
-  await db.delete(Bancas)
-  await db.delete(usuariosBancas)
-  await db.delete(cursos)
-}
-
 async function seed() {
   await db.transaction(async (db) => {
-    await clearDatabase(db)
     // --- Seed Cursos ---
     console.log("Seeding cursos...")
-    await db.insert(cursos).values({
-      id: 1,
-      nome: "Ciência da Computação",
-      sigla: "BCC",
-    })
+    await db
+      .insert(cursos)
+      .values({
+        id: 1,
+        nome: "Ciência da Computação",
+        sigla: "BCC",
+      })
+      .onConflictDoNothing()
     console.log(`Seeded ${cursosData.length} cursos.`)
 
     // --- Seed ACTIVEs ---
