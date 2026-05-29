@@ -17,6 +17,7 @@ import { usuarioRoutes } from "./modules/usuario/usuario.route"
 import studentInvitationRoutes from "./modules/student-invitation/student-invitation.route"
 import teacherInvitationRoutes from "./modules/teacher-invitation/teacher-invitation.route"
 import { type AppVariables } from "./types"
+import { candidatoRoutes } from "./modules/candidato/candidato.route"
 
 export const app = (depsMiddleware: MiddlewareHandler<{ Variables: AppVariables }>) =>
   new Hono<{ Variables: AppVariables }>()
@@ -27,6 +28,7 @@ export const app = (depsMiddleware: MiddlewareHandler<{ Variables: AppVariables 
     .use("*", prettyJSON())
     .use("*", appJwt({ secret: JWT_SECRET }))
     .route("/auth", authRoutes)
+    .route("/candidato", candidatoRoutes)
     .route("/banca", bancaRoutes)
     .route("/calendar", calendarRoutes)
     .route("/cursos", cursoRoutes)

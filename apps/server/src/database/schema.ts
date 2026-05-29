@@ -1,6 +1,63 @@
 import { relations, sql } from "drizzle-orm"
 import { boolean, integer, pgEnum, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core"
 
+export const tipoCursoEnum = pgEnum("tipo_curso", ["Doutorado", "Mestrado"])
+export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number]
+
+export const sexoEnum = pgEnum("sexo", ["Masculino", "Feminino", "Outro"])
+export type Sexo = (typeof sexoEnum.enumValues)[number]
+
+export const estadoCivilEnum = pgEnum("estado_civil", ["Solteiro", "Casado", "Divorciado"])
+export type EstadoCivil = (typeof estadoCivilEnum.enumValues)[number]
+
+export const Candidatos = pgTable("candidato", {
+  // dados da inscricao
+  id: serial("id").primaryKey(),
+  status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
+  dataInscricao: timestamp("data_inscricao").notNull(),
+  tipoCurso: tipoCursoEnum("tipo_curso").notNull(), // Doutorado ou mestrado'
+
+  
+  // dados pessoais
+  cpf: text("cpf").notNull().unique(),
+  sexo: sexoEnum("sexo").notNull(), // Ex: 'Masculino', 'Feminino', 'Outro'
+  nome: text("nome").notNull(),
+  estadoCivil: estadoCivilEnum("estado_civil").notNull(), // Ex: 'Solteiro', 'Casado', 'Divorciado'
+  email: text("email").notNull().unique(),
+  dataNascimento: timestamp("data_nascimento").notNull(),
+  raca: text("raca").notNull(), // Ex: 'Branco', 'Preto', 'Pardo', 'Amarelo', 'Indígena'
+  NomeMae: text("nome_mae").notNull(),
+  NomePai: text("nome_pai"),
+  tipoEscolaEnsinoMedio: text("tipo_escola_ensino_medio").notNull(), // Ex: 'Publica', 'Privada', 'Particular'
+  pais: text("pais").notNull(), // Ex: 'Brasil', 'Argentina', etc.
+  estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
+  municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
+  
+  // documentos
+  rg: text("rg").notNull().unique(),
+  orgaoExpedidor: text("orgao_expedidor").notNull(), // Ex: 'SSP', 'DETRAN', etc.
+  estadoExpedicao: text("estado_expedicao").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
+  dataExpedicao: timestamp("data_expedicao").notNull(),
+  tituloEleitor: text("titulo_eleitor").notNull().unique(),
+  secaoEleitoral: text("secao_eleitoral").notNull(),
+  passaporte: text("passaporte").unique(),
+  
+  // endereco
+  cep: text("cep").notNull(),
+  logradouro: text("logradouro").notNull(),
+  numero: text("numero").notNull(),
+  bairro: text("bairro").notNull(),
+  complemento: text("complemento"),
+  estadoEndereco: text("estado_endereco").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
+  municipioEndereco: text("municipio_endereco").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
+  telefoneFixo: text("telefone_fixo"),
+  telefoneCelular: text("telefone_celular").notNull(),
+
+  // outras informacoes para o processo seletivo
+  linhaPesquisa: text("linha_pesquisa").notNull(), // Ex: 'Inteligência Artificial', 'Sistemas de Informação', etc.
+
+})
+
 export const userRole = pgEnum("user_role", ["STUDENT", "TEACHER", "ADMIN"])
 export type UserRole = (typeof userRole.enumValues)[number]
 export const Users = pgTable("usuario", {
