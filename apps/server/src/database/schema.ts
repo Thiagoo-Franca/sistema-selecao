@@ -10,29 +10,44 @@ export type Sexo = (typeof sexoEnum.enumValues)[number]
 export const estadoCivilEnum = pgEnum("estado_civil", ["Solteiro", "Casado", "Divorciado"])
 export type EstadoCivil = (typeof estadoCivilEnum.enumValues)[number]
 
-export const Candidatos = pgTable("candidato", {
+export const AreaPreferencia = pgEnum("area_preferencia", [
+  "CVIS - Computação Visual",
+  "CD - Ciência de Dados",
+  "ICOT - Inteligência Computacional e Otimização",
+  "SIBW - Sistemas de Informação, Banco de Dados Web",
+  "IEDU - Informática & Educação",
+  "ES - Engenharia de Software",
+  "RCSD - Redes de Computadores e Sistemas Distribuídos",
+  "SCTR - Sistemas Ciberfísicos e de Tempo Real",
+  "SSEG - Segurança de Sistemas e Redes",
+])
+export type AreaPreferencia = (typeof AreaPreferencia.enumValues)[number]
+
+const candidatoBaseColumns = {
   // dados da inscricao
   id: serial("id").primaryKey(),
+  numeroInscricao: text("numero_inscricao").notNull().unique(),
   status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
   dataInscricao: timestamp("data_inscricao").notNull(),
-  tipoCurso: tipoCursoEnum("tipo_curso").notNull(), // Doutorado ou mestrado'
+  tipoCurso: tipoCursoEnum("tipo_curso").notNull(),
 
-  
   // dados pessoais
   cpf: text("cpf").notNull().unique(),
   sexo: sexoEnum("sexo").notNull(), // Ex: 'Masculino', 'Feminino', 'Outro'
   nome: text("nome").notNull(),
   estadoCivil: estadoCivilEnum("estado_civil").notNull(), // Ex: 'Solteiro', 'Casado', 'Divorciado'
   email: text("email").notNull().unique(),
-  dataNascimento: timestamp("data_nascimento").notNull(),
+  dataNascimento: timestamp("data_n ascimento").notNull(),
   raca: text("raca").notNull(), // Ex: 'Branco', 'Preto', 'Pardo', 'Amarelo', 'Indígena'
   NomeMae: text("nome_mae").notNull(),
   NomePai: text("nome_pai"),
   tipoEscolaEnsinoMedio: text("tipo_escola_ensino_medio").notNull(), // Ex: 'Publica', 'Privada', 'Particular'
+
+  // naturalidade
   pais: text("pais").notNull(), // Ex: 'Brasil', 'Argentina', etc.
   estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
   municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
-  
+
   // documentos
   rg: text("rg").notNull().unique(),
   orgaoExpedidor: text("orgao_expedidor").notNull(), // Ex: 'SSP', 'DETRAN', etc.
@@ -41,11 +56,10 @@ export const Candidatos = pgTable("candidato", {
   tituloEleitor: text("titulo_eleitor").notNull().unique(),
   secaoEleitoral: text("secao_eleitoral").notNull(),
   passaporte: text("passaporte").unique(),
-  
+
   // endereco
   cep: text("cep").notNull(),
   logradouro: text("logradouro").notNull(),
-  numero: text("numero").notNull(),
   bairro: text("bairro").notNull(),
   complemento: text("complemento"),
   estadoEndereco: text("estado_endereco").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
@@ -56,6 +70,56 @@ export const Candidatos = pgTable("candidato", {
   // outras informacoes para o processo seletivo
   linhaPesquisa: text("linha_pesquisa").notNull(), // Ex: 'Inteligência Artificial', 'Sistemas de Informação', etc.
 
+  // formulario de inscricao para mestrado/doutorado em ciencia da computacao
+  comprovantePagTaxaInscricao: text("comprovante_pag_taxa_inscricao").notNull(), // link para PDF do comprovante
+  copiaCPF: text("copia_cpf").notNull(), // link para PDF da cópia do CPF
+  copiaPassaporteOuRNE: text("copia_passaporte_ou_rne"), // link para PDF da cópia do passaporte ou RNE, apenas para estrangeiros
+  copiaDocumentoIdentificacao: text("copia_documento_identificacao"), // link para PDF da cópia do RG ou CNH, apenas para brasileiros
+  solicitouIsencaoTaxaInscricao: boolean("solicitou_isencao_taxa_inscricao").notNull().default(false),
+  comprovacaoPesquisas: text("comprovacao_pesquisas").notNull(), // link para PDF de comprovação de participação em pesquisas, publicações, etc.
+  possuiNecessidadesEspeciais: boolean("possui_necessidades_especiais").notNull().default(false),
+  vagasNegrosPardos: boolean("vagas_negros_pardos").notNull().default(false),
+  vagasSupranumerarias: boolean("vagas_supranumerarias").notNull().default(false),  
+}
+
+export const CandidatoDoutorado = pgTable("candidato_doutorado", {
+  ...candidatoBaseColumns,
+  // dados inscricao
+  tipoCurso: tipoCursoEnum("tipo_curso").default("Doutorado").notNull(),
+
+  // endereco
+  numero: text("numero").notNull(),
+  
+  // formulario de inscricao para doutorado em ciencia da computacao
+  historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
+  copiaDiplomaMestrado: text("copia_diploma_mestrado").notNull(), // link para PDF da cópia do diploma do mestrado ou declaracao de conclusão
+  historicoMestrado: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado ou declaração de conclusão
+  nomeUniversidadeMestrado: text("nome_universidade_mestrado").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
+  nomeCursoMestrado: text("nome_curso_mestrado").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
+  anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
+  conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
+  primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
+  segundaOpcaoOrientardor: text("segunda_opcao_orientardor").notNull(),
+  terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
+})
+
+export const CandidatoMestrado = pgTable("candidato_mestrado", {
+  ...candidatoBaseColumns,
+  // dados da inscricao
+  tipoCurso: tipoCursoEnum("tipo_curso").default("Mestrado").notNull(),
+
+  // formulario de inscricao para mestrado em ciencia da computacao
+  copiaDiplomaGraduacao: text("copia_diploma_graduacao").notNull(), // link para PDF da cópia do diploma da graduação
+  historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
+  nomeUniversidadeGraduacao: text("nome_universidade_graduacao").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
+  nomeCursoGraduacao: text("nome_curso_graduacao").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
+  cidadeOndeRealizouGraduacao: text("cidade_onde_realizou_graduacao").notNull(), // Ex: 'Salvador', 'São Paulo', etc.
+  enadeDoCursoGraduacao: text("enade_do_curso_graduacao").notNull(), // link  para enedade so curos de graduacao, portal EMEC
+  valorDoEnadeDoCursoGraduacao: text("valor_do_enade_do_curso_graduacao").notNull(), // Ex: '3.5', '4.0', etc.
+  notaPOSCOMP: text("nota_poscomp").notNull(),
+  primeiraAreaPreferencia: AreaPreferencia("primeira_area_preferencia").notNull(),
+  segundaAreaPreferencia: AreaPreferencia("segunda_area_preferencia").notNull(),
+  cartaMotivacao: text("carta_motivacao").notNull(), // Link para PDF 
 })
 
 export const userRole = pgEnum("user_role", ["STUDENT", "TEACHER", "ADMIN"])
