@@ -29,7 +29,6 @@ const candidatoBaseColumns = {
   numeroInscricao: text("numero_inscricao").notNull().unique(),
   status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
   dataInscricao: timestamp("data_inscricao").notNull(),
-  tipoCurso: tipoCursoEnum("tipo_curso").notNull(),
 
   // dados pessoais
   cpf: text("cpf").notNull().unique(),
@@ -37,10 +36,10 @@ const candidatoBaseColumns = {
   nome: text("nome").notNull(),
   estadoCivil: estadoCivilEnum("estado_civil").notNull(), // Ex: 'Solteiro', 'Casado', 'Divorciado'
   email: text("email").notNull().unique(),
-  dataNascimento: timestamp("data_n ascimento").notNull(),
+  dataNascimento: timestamp("data_nascimento").notNull(),
   raca: text("raca").notNull(), // Ex: 'Branco', 'Preto', 'Pardo', 'Amarelo', 'Indígena'
-  NomeMae: text("nome_mae").notNull(),
-  NomePai: text("nome_pai"),
+  nomeMae: text("nome_mae").notNull(),
+  nomePai: text("nome_pai"),
   tipoEscolaEnsinoMedio: text("tipo_escola_ensino_medio").notNull(), // Ex: 'Publica', 'Privada', 'Particular'
 
   // naturalidade
@@ -55,6 +54,7 @@ const candidatoBaseColumns = {
   dataExpedicao: timestamp("data_expedicao").notNull(),
   tituloEleitor: text("titulo_eleitor").notNull().unique(),
   secaoEleitoral: text("secao_eleitoral").notNull(),
+  zonaEleitoral: text("zona_eleitoral"),
   passaporte: text("passaporte").unique(),
 
   // endereco
@@ -79,7 +79,7 @@ const candidatoBaseColumns = {
   comprovacaoPesquisas: text("comprovacao_pesquisas").notNull(), // link para PDF de comprovação de participação em pesquisas, publicações, etc.
   possuiNecessidadesEspeciais: boolean("possui_necessidades_especiais").notNull().default(false),
   vagasNegrosPardos: boolean("vagas_negros_pardos").notNull().default(false),
-  vagasSupranumerarias: boolean("vagas_supranumerarias").notNull().default(false),  
+  vagasSupranumerarias: boolean("vagas_supranumerarias").notNull().default(false),
 }
 
 export const CandidatoDoutorado = pgTable("candidato_doutorado", {
@@ -89,7 +89,7 @@ export const CandidatoDoutorado = pgTable("candidato_doutorado", {
 
   // endereco
   numero: text("numero").notNull(),
-  
+
   // formulario de inscricao para doutorado em ciencia da computacao
   historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
   copiaDiplomaMestrado: text("copia_diploma_mestrado").notNull(), // link para PDF da cópia do diploma do mestrado ou declaracao de conclusão
@@ -99,7 +99,7 @@ export const CandidatoDoutorado = pgTable("candidato_doutorado", {
   anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
   conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
   primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
-  segundaOpcaoOrientardor: text("segunda_opcao_orientardor").notNull(),
+  segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
   terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
 })
 
@@ -116,9 +116,9 @@ export const CandidatoMestrado = pgTable("candidato_mestrado", {
   cidadeOndeRealizouGraduacao: text("cidade_onde_realizou_graduacao").notNull(), // Ex: 'Salvador', 'São Paulo', etc.
   enadeDoCursoGraduacao: text("enade_do_curso_graduacao").notNull(), // link  para enedade so curos de graduacao, portal EMEC
   valorDoEnadeDoCursoGraduacao: text("valor_do_enade_do_curso_graduacao").notNull(), // Ex: '3.5', '4.0', etc.
-  notaPOSCOMP: text("nota_poscomp").notNull(),
+  notaPOSCOMP: text("nota_poscomp"),
   primeiraAreaPreferencia: AreaPreferencia("primeira_area_preferencia").notNull(),
-  segundaAreaPreferencia: AreaPreferencia("segunda_area_preferencia").notNull(),
+  segundaAreaPreferencia: AreaPreferencia("segunda_area_preferencia"),
   cartaMotivacao: text("carta_motivacao").notNull(), // Link para PDF 
 })
 
