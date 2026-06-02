@@ -1,7 +1,7 @@
 import { asc, desc, eq, ilike, or } from "drizzle-orm"
 import { type Context } from "hono"
 import { type AppResult, err, ok } from "../../result"
-import { Candidatos, type SelectCandidato } from "../../database"
+import { CandidatoMestrado, CandidatoDoutorado } from "../../database"
 import { type AppVariables } from "../../types"
 import type { ListCandidatosQuery } from "./candidato.schema"
 
@@ -18,6 +18,10 @@ type ListCandidatosError = { type: "database_error"; error: unknown }
 /**
  * Obter detalhes de um candidato específico
  */
+type SelectCandidatoMestrado = typeof CandidatoMestrado.$inferSelect
+type SelectCandidatoDoutorado = typeof CandidatoDoutorado.$inferSelect
+export type SelectCandidato = SelectCandidatoMestrado | SelectCandidatoDoutorado
+
 export const getCandidatoById = async (
   c: Context<{ Variables: AppVariables }>,
   candidatoId: number,
@@ -25,20 +29,27 @@ export const getCandidatoById = async (
   const db = c.get("db")
 
   try {
-    const [candidato] = await db
+    // Try mestrado first
+    const [mestrado] = await db
       .select()
-      .from(Candidatos)
-      .where(eq(Candidatos.id, candidatoId))
+      .from(CandidatoMestrado)
+      .where(eq(CandidatoMestrado.id, candidatoId))
       .limit(1)
 
-    if (!candidato) {
-      return err({ type: "candidato_not_found" })
-    }
+    if (mestrado) return ok(mestrado)
 
-    return ok(candidato)
+    const [doutorado] = await db
+      .select()
+      .from(CandidatoDoutorado)
+      .where(eq(CandidatoDoutorado.id, candidatoId))
+      .limit(1)
+
+    if (doutorado) return ok(doutorado)
+
+    return err({ type: "candidato_not_found" })
 
   } catch (error) {
-    console.error("❌ Get candidato error:", error)
+    console.error("Get candidato error:", error)
     return err({ type: "database_error", error })
   }
 }
@@ -71,55 +82,45 @@ export const listCandidatos = async (
     const offset = (page - 1) * limit
 
     // Build WHERE conditions
-    const conditions = []
-
-    // Filter por status
-    if (query.status) {
-      conditions.push(eq(Candidatos.status, query.status))
+    const buildConditionsFor = (table: any) => {
+      const conds: any[] = []
+      if (query.status) conds.push(eq(table.status, query.status))
+      if (query.tipoCurso) conds.push(eq(table.tipoCurso, query.tipoCurso as any))
+      if (query.search) {
+        conds.push(or(ilike(table.nome, `%${query.search}%`), ilike(table.email, `%${query.search}%`))!)
+      }
+      return conds
     }
 
-    // Filter por tipo de curso
-    if (query.tipoCurso) {
-      conditions.push(eq(Candidatos.tipoCurso, query.tipoCurso as any))
-    }
+    const condsM = buildConditionsFor(CandidatoMestrado)
+    const condsD = buildConditionsFor(CandidatoDoutorado)
 
-    // Filter por busca (nome, email)
-    if (query.search) {
-      conditions.push(
-        or(
-          ilike(Candidatos.nome, `%${query.search}%`),
-          ilike(Candidatos.email, `%${query.search}%`),
-        )!
-      )
-    }
+    const rowsM = await db.select().from(CandidatoMestrado).where(condsM.length > 0 ? or(...condsM) : undefined)
+    const rowsD = await db.select().from(CandidatoDoutorado).where(condsD.length > 0 ? or(...condsD) : undefined)
 
-    // Count total
-    const countResult = await db
-      .select({ count: Candidatos.id })
-      .from(Candidatos)
-      .where(conditions.length > 0 ? or(...conditions) : undefined)
+    // Combine and sort in-memory
+    const combined: SelectCandidato[] = [...rowsM, ...rowsD]
 
-    const total = countResult.length
+    const sortBy = query.sortBy || "dataInscricao"
+    const sortOrder = query.sortOrder === "desc" ? -1 : 1
 
-    // Ordenação
-    const sortColumn = 
-      query.sortBy === "nome" ? Candidatos.nome :
-      query.sortBy === "email" ? Candidatos.email :
-      Candidatos.dataInscricao
+    combined.sort((a: any, b: any) => {
+      const va = a[sortBy as string]
+      const vb = b[sortBy as string]
+      if (va == null && vb == null) return 0
+      if (va == null) return -1 * sortOrder
+      if (vb == null) return 1 * sortOrder
+      if (va instanceof Date && vb instanceof Date) return (va.getTime() - vb.getTime()) * sortOrder
+      if (va < vb) return -1 * sortOrder
+      if (va > vb) return 1 * sortOrder
+      return 0
+    })
 
-    const sortDirection = query.order === "desc" ? desc : asc
-
-    // Query com paginação
-    const rows = await db
-      .select()
-      .from(Candidatos)
-      .where(conditions.length > 0 ? or(...conditions) : undefined)
-      .orderBy(sortDirection(sortColumn))
-      .limit(limit)
-      .offset(offset)
+    const total = combined.length
+    const paged = combined.slice(offset, offset + limit)
 
     return ok({
-      candidatos: rows,
+      candidatos: paged,
       total,
       page,
       limit,
@@ -127,7 +128,7 @@ export const listCandidatos = async (
     })
 
   } catch (error) {
-    console.error("❌ List candidatos error:", error)
+    console.error("List candidatos error:", error)
     return err({ type: "database_error", error })
   }
 }

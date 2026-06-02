@@ -1,8 +1,11 @@
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { Candidatos } from "../../database";
+import { CandidatoMestrado, CandidatoDoutorado } from "../../database";
 
-export const selectCandidatoSchema = createSelectSchema(Candidatos)
+const selectCandidatoMestradoSchema = createSelectSchema(CandidatoMestrado)
+const selectCandidatoDoutoradoSchema = createSelectSchema(CandidatoDoutorado)
+
+export const selectCandidatoSchema = z.union([selectCandidatoMestradoSchema, selectCandidatoDoutoradoSchema])
 
 export type SelectCandidatoInput = z.infer<typeof selectCandidatoSchema>
 
