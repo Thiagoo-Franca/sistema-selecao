@@ -44,7 +44,7 @@ import { match } from "ts-pattern"
 import { z } from "zod"
 import type { Route } from "./+types/admin.users._index"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Gerenciar Usuários" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Gerenciar Usuários" }]
 
 export default function AdminUsersIndexPage() {
   const navigate = useNavigate()

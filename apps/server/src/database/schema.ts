@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm"
-import { boolean, integer, pgEnum, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core"
+import { boolean, integer, numeric, pgEnum, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core"
 
 export const tipoCursoEnum = pgEnum("tipo_curso", ["Doutorado", "Mestrado"])
 export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number]
@@ -29,6 +29,10 @@ const candidatoBaseColumns = {
   numeroInscricao: text("numero_inscricao").notNull().unique(),
   status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
   dataInscricao: timestamp("data_inscricao").notNull(),
+  
+  // pontuacao e classificacao
+  pontuacao: numeric("pontuacao", { precision: 5, scale: 2 }), // Ex: 85.50, 90.00, etc.
+  dataPontuacao: timestamp("data_pontuacao"),
 
   // dados pessoais
   cpf: text("cpf").notNull().unique(),

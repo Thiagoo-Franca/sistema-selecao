@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react"
 import { Navigate } from "react-router"
 import type { Route } from "./+types/feedback"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Feedback" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Feedback" }]
 
 export default function FeedbackPage() {
   const { data: user, isLoading: userLoading } = useUser()

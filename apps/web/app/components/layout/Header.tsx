@@ -51,7 +51,7 @@ export function Header(props: HeaderProps) {
             className="h-9 w-6"
             aria-hidden="true"
           />
-          <span className="font-bold text-sm sm:text-base lg:inline-block">Sistema de Defesas de TCC</span>
+          <span className="font-bold text-sm sm:text-base lg:inline-block">Sistema de seleção</span>
         </Link>
 
         {/* Mobile Menu Button */}

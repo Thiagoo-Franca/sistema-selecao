@@ -2,7 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { Route } from "./+types/reset-password.$token"
 
 export const meta: Route.MetaFunction = () => [
-  { title: "SISDEF - Redefinir Senha" },
+  { title: "SISSEL - Redefinir Senha" },
 ]
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

@@ -17,7 +17,7 @@ import { match } from "ts-pattern"
 import { useBancasQueParticipei, useMyDefesas, usePastBancasDefesa, useUpcomingBancasDefesa } from "@/hooks"
 import type { Route } from "./+types/_index"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL" }]
 
 type BancasDefesa = ReturnType<typeof useUpcomingBancasDefesa>["data"] & {}
 
