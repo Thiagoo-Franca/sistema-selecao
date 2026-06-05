@@ -7,7 +7,7 @@ export const createUserSchema = createInsertSchema(Users)
     createdAt: true,
     updatedAt: true,
   })
-  .extend({
+  .extend({ 
     password: z.string().min(8),
   })
 export const preRegisterUserSchema = createUserSchema.pick({
