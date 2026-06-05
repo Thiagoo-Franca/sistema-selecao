@@ -25,3 +25,20 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data)
   })
+  .get("/mestrado/:id", async (c) => {
+    const id = c.req.param("id")
+    const result = await service.getCandidatoMestradoById(c, id)
+    if (!result.ok) {
+      throw new Error("Erro ao buscar candidato de mestrado por ID")
+    }
+    return c.json(result.data)
+  })
+  .get("/doutorado/:id", async (c) => {
+    const id = c.req.param("id")
+    const result = await service.getCandidatoDoutoradoById(c, id)
+    if (!result.ok) {
+      throw new Error("Erro ao buscar candidato de doutorado por ID")
+    }
+    return c.json(result.data)
+  })
+  

@@ -2,6 +2,7 @@ import type { Context } from "hono"
 import type { AppVariables } from "../../types"
 import { err, ok, type AppResult } from "../../result"
 import { CandidatoDoutorado, CandidatoMestrado } from "../../database"
+import { eq } from "drizzle-orm"
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown }
 
@@ -33,6 +34,47 @@ export const getAllCandidatosMestrado = async (c: Context<{ Variables: AppVariab
     return err({ type: "database_error", error })
   }
 }
+export const getCandidatoMestradoById = async (
+  c: Context<{ Variables: AppVariables }>,
+  id: string
+): Promise<AppResult<typeof CandidatoMestrado.$inferSelect | null, GetAllCandidatosError>> => {
+  
+  const dbInstance = c.get("db")
+
+  try {
+    const result = await dbInstance
+      .select()
+      .from(CandidatoMestrado)
+      .where(eq(CandidatoMestrado.id, Number(id))) // 1
+      .limit(1)                                     // 2
+
+    return ok(result[0] ?? null)                    // 3
+  } catch (error) {
+    console.error(`Error fetching mestrado candidato with ID ${id}:`, error)
+    return err({ type: "database_error", error })
+  }
+}
+
+export const getCandidatoDoutoradoById = async (
+  c: Context<{ Variables: AppVariables }>,
+  id: string
+): Promise<AppResult<typeof CandidatoDoutorado.$inferSelect | null, GetAllCandidatosError>> => {
+  
+  const dbInstance = c.get("db")
+
+  try {
+    const result = await dbInstance
+      .select()
+      .from(CandidatoDoutorado)
+      .where(eq(CandidatoDoutorado.id, Number(id))) // 1
+      .limit(1)                                     // 2
+      
+    return ok(result[0] ?? null)                    // 3
+  } catch (error) {
+    console.error(`Error fetching doutorado candidato with ID ${id}:`, error)
+    return err({ type: "database_error", error })
+  }
+}
 
 export const getAllCandidatosDoutorado = async (c: Context<{ Variables: AppVariables }>): Promise<AppResult<(typeof CandidatoDoutorado.$inferSelect)[], GetAllCandidatosError>> => {
   
@@ -46,3 +88,4 @@ export const getAllCandidatosDoutorado = async (c: Context<{ Variables: AppVaria
     return err({ type: "database_error", error })
   }
 }
+
