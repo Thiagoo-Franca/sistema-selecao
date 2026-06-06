@@ -16,6 +16,7 @@ import { match } from "ts-pattern"
 
 import { useBancasQueParticipei, useMyDefesas, usePastBancasDefesa, useUpcomingBancasDefesa } from "@/hooks"
 import type { Route } from "./+types/_index"
+import { useCandidatos } from "@/hooks/candidato.hooks"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL" }]
 
@@ -62,13 +63,13 @@ export default function Home() {
           <Input
             id="banca-search"
             type="search"
-            placeholder="Buscar defesas, alunos, orientadores ou avaliadores..."
+            placeholder="Buscar candidatos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full sm:w-[400px] self-stretch"
           />
         </div>
-        {!!userQuery.data && <Button onClick={() => navigate("/add-banca")}>Cadastrar Defesa de TCC</Button>}
+        {!!userQuery.data && isTeacherOrAdmin && <Button onClick={() => navigate("/add-banca")}>Adicionar Candidato</Button>}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -84,6 +85,9 @@ export default function Home() {
                 </TabsTrigger>
                 <TabsTrigger value="my-participations" data-testid="my-participations-tab">
                   Participações
+                </TabsTrigger>
+                <TabsTrigger value="candidatos" data-testid="all-candidatos-tab">
+                  Candidatos
                 </TabsTrigger>
               </>
             )}
@@ -125,6 +129,13 @@ export default function Home() {
               rowsPerPage={rowsPerPage}
             />
             <MyParticipationsTab
+              searchQuery={searchQuery}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+              rowsPerPage={rowsPerPage}
+            />
+            <CandidatosTab
               searchQuery={searchQuery}
               sortField={sortField}
               sortOrder={sortOrder}
@@ -464,6 +475,197 @@ function MyDefensesTab(props: MyDefensesTabProps) {
   )
 }
 
+// ─── Enums (matching DB enum types) ───────────────────────────────────────────
+
+export type Sexo = "Masculino" | "Feminino" | "Outro";
+export type EstadoCivil = "Solteiro" | "Casado" | "Divorciado" | "Viúvo" | "União Estável";
+export type TipoCurso = "Mestrado" | "Doutorado";
+export type AreaPreferencia = string; // ajuste conforme o enum real no DB
+
+// ─── Base ──────────────────────────────────────────────────────────────────────
+
+interface Candidato {
+  // dados da inscrição
+  id: number;
+  numeroInscricao: string;
+  status: string; // 'Inscricao Submetida' | 'Aprovada' | 'Rejeitada'
+  dataInscricao: string; // ISO timestamp
+
+  // pontuação e classificação
+  pontuacao: string | null;       // numeric(5,2) → string no Drizzle/Postgres
+  dataPontuacao: string | null;   // ISO timestamp
+
+  // dados pessoais
+  cpf: string;
+  sexo: Sexo;
+  nome: string;
+  estadoCivil: EstadoCivil;
+  email: string;
+  dataNascimento: string;         // ISO timestamp
+  raca: string;
+  nomeMae: string;
+  nomePai: string | null;
+  tipoEscolaEnsinoMedio: string;  // 'Publica' | 'Privada' | 'Particular'
+
+  // naturalidade
+  pais: string;
+  estado: string;
+  municipio: string;
+
+  // documentos
+  rg: string;
+  orgaoExpedidor: string;
+  estadoExpedicao: string;
+  dataExpedicao: string;          // ISO timestamp
+  tituloEleitor: string;
+  secaoEleitoral: string;
+  zonaEleitoral: string | null;
+  passaporte: string | null;
+
+  // endereço
+  cep: string;
+  logradouro: string;
+  bairro: string;
+  complemento: string | null;
+  estadoEndereco: string;
+  municipioEndereco: string;
+  telefoneFixo: string | null;
+  telefoneCelular: string;
+
+  // processo seletivo
+  linhaPesquisa: string;
+
+  // formulário comum
+  comprovantePagTaxaInscricao: string;  // URL do PDF
+  copiaCPF: string;                     // URL do PDF
+  copiaPassaporteOuRNE: string | null;  // URL do PDF (apenas estrangeiros)
+  copiaDocumentoIdentificacao: string | null; // URL do PDF (apenas brasileiros)
+  solicitouIsencaoTaxaInscricao: boolean;
+  comprovacaoPesquisas: string;         // URL do PDF
+  possuiNecessidadesEspeciais: boolean;
+  vagasNegrosPardos: boolean;
+  vagasSupranumerarias: boolean;
+}
+
+// ─── Doutorado ─────────────────────────────────────────────────────────────────
+
+export interface CandidatoDoutorado extends Candidato {
+  tipoCurso: "doutorado";
+
+  // endereço
+  numero: string;
+
+  // formulário de doutorado
+  historicoGraduacao: string;           // URL do PDF
+  copiaDiplomaMestrado: string;         // URL do PDF
+  historicoMestrado: string;            // URL do PDF
+  nomeUniversidadeMestrado: string;
+  nomeCursoMestrado: string;
+  anteprojetoTese: string;              // URL do PDF
+  conceitoCapesMestrado: string | null;
+  primeiraOpcaoOrientador: string;
+  segundaOpcaoOrientador: string;
+  terceiraOpcaoOrientador: string;
+}
+
+// ─── Mestrado ──────────────────────────────────────────────────────────────────
+
+export interface CandidatoMestrado extends Candidato {
+  tipoCurso: "mestrado";
+
+  // formulário de mestrado
+  copiaDiplomaGraduacao: string;        // URL do PDF
+  historicoGraduacao: string;           // URL do PDF
+  nomeUniversidadeGraduacao: string;
+  nomeCursoGraduacao: string;
+  cidadeOndeRealizouGraduacao: string;
+  enadeDoCursoGraduacao: string;        // URL portal EMEC
+  valorDoEnadeDoCursoGraduacao: string;
+  notaPOSCOMP: string | null;
+  primeiraAreaPreferencia: AreaPreferencia;
+  segundaAreaPreferencia: AreaPreferencia | null;
+  cartaMotivacao: string;               // URL do PDF
+}
+interface CandidatosTabProps {
+  searchQuery: string
+  sortField: string
+  sortOrder: "asc" | "desc"
+  onSort: (field: string) => void
+  rowsPerPage: number
+}
+
+function CandidatosTab(props: CandidatosTabProps) {
+  const candidatosQuery = useCandidatos()
+
+  console.log("Dados de candidatos:", candidatosQuery.data) // Log para verificar os dados retornados
+
+  if (candidatosQuery.isLoading) {
+    return (
+      <TabsContent value="candidatos">
+        <div className="border rounded-md p-4">
+          <Skeleton className="h-8 w-full mb-2" />
+          <Skeleton className="h-12 w-full mb-2" />
+          <Skeleton className="h-12 w-full mb-2" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      </TabsContent>
+    )
+  }
+
+  if (candidatosQuery.isError) {
+    return (
+      <TabsContent value="candidatos">
+        <div className="text-red-600 p-4">
+          Erro ao carregar candidatos: {candidatosQuery.error?.message || "Erro desconhecido"}
+        </div>
+      </TabsContent>
+    )
+  }
+
+  const mestradoData = candidatosQuery.data?.mestrado || []
+  const doutoradoData = candidatosQuery.data?.doutorado || []
+
+  return (
+    <TabsContent value="candidatos">
+      <div className="space-y-4">
+        <div>
+          <div className="border rounded-md">
+            <div className="p-4 border-b">
+              <h3 className="text-lg font-semibold">Candidatos de Mestrado</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <HomeTableCandidatos
+                data={mestradoData}
+                searchQuery={props.searchQuery}
+                sortField={props.sortField}
+                sortOrder={props.sortOrder}
+                onSort={props.onSort} />
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="border rounded-md">
+            <div className="p-4 border-b">
+              <h3 className="text-lg font-semibold">Candidatos de Doutorado</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <HomeTableCandidatos
+                data={doutoradoData}
+                searchQuery={props.searchQuery}
+                sortField={props.sortField}
+                sortOrder={props.sortOrder}
+                onSort={props.onSort}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </TabsContent>
+  )
+}
+
+
+
 interface MyParticipationsTabProps {
   searchQuery: string
   sortField: string
@@ -712,3 +914,67 @@ function TableWithInfo(props: {
     </div>
   )
 }
+
+
+function HomeTableCandidatos(props: {
+  data: CandidatoMestrado[] | CandidatoDoutorado[]
+  searchQuery: string
+  sortField: string
+  sortOrder: "asc" | "desc"
+  onSort: (field: string) => void
+  rowsPerPage?: number
+}) {
+  const navigate = useNavigate()
+
+  const goToViewCandidato = (tipo: "mestrado" | "doutorado", candidatoId: string | number) => {
+    navigate(href(`/${tipo}/:id`, { id: String(candidatoId) }))
+  }
+
+  const getSortIcon = (columnKey: string) => {
+    if (props.sortField !== columnKey) {
+      return <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+    }
+    return props.sortOrder === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+  }
+
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + "..."
+  }
+  const paginatedData = props.data
+  console.log("Paginated Data:", paginatedData)
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Nome</TableHead>
+          <TableHead>Nivel</TableHead>
+          <TableHead>Situação</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        { paginatedData?.length > 0 ? (
+          paginatedData.map((candidato) => (
+            <TableRow
+              key={candidato.id}
+              onClick={() => goToViewCandidato(candidato.tipoCurso.toLowerCase() as "mestrado" | "doutorado", candidato.id)}
+              className="cursor-pointer hover:bg-muted/50"
+            >
+              <TableCell>{candidato.nome}</TableCell>
+              <TableCell>{candidato.tipoCurso}</TableCell>
+              <TableCell>{candidato.status}</TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={3} className="h-24 text-center">
+              Nenhum candidato encontrado{props.searchQuery ? " para esta busca." : "."}
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  )
+}
+
