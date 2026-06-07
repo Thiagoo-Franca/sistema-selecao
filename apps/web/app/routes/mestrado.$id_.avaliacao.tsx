@@ -18,20 +18,22 @@ function formatBoolean(valor: boolean) {
     return "Não"
 }
 
-export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Candidato de mestrado" }]
+export const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato` } ]
 
-export default function CandidatoMestradoPage() {
+export default function AvaliacaoCandidatoMestradoPage() {
     const navigate = useNavigate()
     const { id } = useParams<{ id: string | undefined }>()
     const { toast } = useToast()
     const [copiedId, setCopiedId] = useState<string | null>(null)
 
     const userQuery = useUser()
+
     const userLoading = userQuery.isLoading
     if (id === undefined) {
         navigate("/")
         return null
     }
+
     const candidatoQuery = useCandidatoMestradoById(id)
 
     const user = userQuery.data
@@ -119,9 +121,7 @@ export default function CandidatoMestradoPage() {
                     </Button>
                     <h1 className="text-2xl font-bold">{candidato.nome}</h1>
                 </div>
-                <Button className="" onClick={() => navigate(`/mestrado/${candidato.id}/avaliacao`)}>
-                    Avaliar
-                </Button>
+                <Button className="">Avaliar </Button>
             </div>
             <section>
                 <div className="grid grid-cols-3 gap-4">

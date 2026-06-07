@@ -31,8 +31,7 @@ const candidatoBaseColumns = {
   dataInscricao: timestamp("data_inscricao").notNull(),
   
   // pontuacao e classificacao
-  pontuacao: numeric("pontuacao", { precision: 5, scale: 2 }), // Ex: 85.50, 90.00, etc.
-  dataPontuacao: timestamp("data_pontuacao"),
+  avaliado: boolean("avaliado").notNull().default(false),
 
   // dados pessoais
   cpf: text("cpf").notNull().unique(),

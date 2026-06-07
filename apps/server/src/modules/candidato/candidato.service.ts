@@ -30,7 +30,7 @@ export const getAllCandidatosMestrado = async (c: Context<{ Variables: AppVariab
     return ok(result)
   }
   catch (error) {
-    console.error("Error fetching all mestrado candidatos:", error)
+    console.error("Error fetching all mestrado candidatos:", error )
     return err({ type: "database_error", error })
   }
 }
