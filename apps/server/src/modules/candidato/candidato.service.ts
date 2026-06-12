@@ -3,6 +3,8 @@ import type { AppVariables } from "../../types"
 import { err, ok, type AppResult } from "../../result"
 import { CandidatoDoutorado, CandidatoMestrado } from "../../database"
 import { eq } from "drizzle-orm"
+import type { CandidatoMestradoNotaEtapa1 } from "./candidato.utils"
+import calcularMestradoNotaEtapa1 from "./candidato.utils"
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown }
 
@@ -89,3 +91,15 @@ export const getAllCandidatosDoutorado = async (c: Context<{ Variables: AppVaria
   }
 }
 
+export const processarResCandidatoMestradoEtapaI = async (
+  c: Context<{ Variables: AppVariables }>,
+  dados: CandidatoMestradoNotaEtapa1
+): Promise<AppResult<{ pontuacao: number; aprovado: boolean }, never>> => {
+  try {
+    const resultado = calcularMestradoNotaEtapa1(dados)
+    return ok(resultado)
+  } catch (error) {
+    console.error("Error processing mestrado etapa I:", error)
+    throw error // ou retorne um err() se quiser manter o padrão de AppResult
+  }
+}

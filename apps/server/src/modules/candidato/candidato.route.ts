@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import type { AppVariables } from "../../types"
 import * as service from "./candidato.service"
+import type { CandidatoMestradoNotaEtapa1 } from "./candidato.utils"
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   .get("/", async (c) => {
@@ -41,4 +42,12 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data)
   })
+  .post("/mestrado/calcular-etapa1", async (c) => {
+  const body = await c.req.json<CandidatoMestradoNotaEtapa1>()
+  const result = await service.processarResCandidatoMestradoEtapaI(c, body)
+  if (!result.ok) {
+    throw new Error("Erro ao calcular nota da etapa I")
+  }
+  return c.json(result.data)
+})
   
