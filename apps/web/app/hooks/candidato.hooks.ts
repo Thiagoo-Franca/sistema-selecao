@@ -29,7 +29,6 @@ export const useCandidatoMestradoById = (id: string | number) => {
 
 // Mestrado
 
-
 export const useCalcularEtapa1 = () => {
   return useMutation({
     mutationFn: async (dados: CandidatoMestradoNotaEtapa1) => {

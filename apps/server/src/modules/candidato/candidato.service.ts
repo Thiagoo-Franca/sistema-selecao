@@ -3,8 +3,6 @@ import type { AppVariables } from "../../types"
 import { err, ok, type AppResult } from "../../result"
 import { CandidatoDoutorado, CandidatoMestrado } from "../../database"
 import { eq } from "drizzle-orm"
-import type { CandidatoMestradoNotaEtapa1 } from "./candidato.utils"
-import calcularMestradoNotaEtapa1 from "./candidato.utils"
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown }
 
