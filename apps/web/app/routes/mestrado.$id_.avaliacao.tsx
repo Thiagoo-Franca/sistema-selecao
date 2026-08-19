@@ -2,12 +2,11 @@ import { useNavigate, useParams } from "react-router"
 import type { Route } from "./+types/banca.$id"
 import { useToast } from "@/hooks"
 import { useEffect, useState } from "react"
-import { useCalcularEtapa1, useCandidatoMestradoById } from "@/hooks/candidato.hooks"
+import { useCandidatoMestradoById } from "@/hooks/candidato.hooks"
 import { useUser } from "@/services/useUser"
 import { Header } from "@/components/layout/Header"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import type { CandidatoMestrado } from "./_index"
-import { formatDate } from "./banca.$id"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel, FieldLegend } from "@/components/ui/field"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -77,20 +76,20 @@ export default function AvaliacaoCandidatoMestradoPage() {
             reset({
                 avaliador1: "",
                 avaliador2: "",
-                area1: "",
-                area2: "",
-                id: "",
-                cpf: "",
-                nome: candidato.nome,
-                email: "",
-                cidade: candidato.municipio,
-                isencao: "",
+                area1: candidato.primeiraAreaPreferencia ? candidato.primeiraAreaPreferencia : "",
+                area2: candidato.segundaAreaPreferencia ? candidato.segundaAreaPreferencia : "",
+                id: candidato.numeroInscricao ? candidato.numeroInscricao : "",
+                cpf: candidato.cpf ? candidato.cpf : "",
+                nome: candidato.nome ? candidato.nome : "",
+                email: candidato.email ? candidato.email : "",
+                cidade: candidato.municipio ? candidato.municipio : "",
+                isencao: candidato.solicitouIsencaoTaxaInscricao ? "sim" : "nao",
                 isencaoAprovada: "",
                 GRU: "",
                 Homologa: "",
-                universidade: candidato.nomeUniversidadeGraduacao,
-                cursoGrad: candidato.nomeCursoGraduacao,
-                cidadeGrad: candidato.cidadeOndeRealizouGraduacao,
+                universidade: candidato.nomeUniversidadeGraduacao ? candidato.nomeUniversidadeGraduacao : "",
+                cursoGrad: candidato.nomeCursoGraduacao ? candidato.nomeCursoGraduacao : "",
+                cidadeGrad: candidato.cidadeOndeRealizouGraduacao ? candidato.cidadeOndeRealizouGraduacao : "",
                 especiais: "",
                 cotas: "",
                 SUPRA: "",

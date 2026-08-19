@@ -99,6 +99,7 @@ export const CandidatoDoutorado = pgTable("candidato_doutorado", {
   historicoMestrado: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado ou declaração de conclusão
   nomeUniversidadeMestrado: text("nome_universidade_mestrado").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
   nomeCursoMestrado: text("nome_curso_mestrado").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
+  // falta comprovações de pesquisa
   anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
   conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
   primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
