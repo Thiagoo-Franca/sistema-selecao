@@ -1,134 +1,103 @@
-import { asc, desc, eq, ilike, or } from "drizzle-orm"
-import { type Context } from "hono"
-import { type AppResult, err, ok } from "../../result"
-import { CandidatoMestrado, CandidatoDoutorado } from "../../database"
-import { type AppVariables } from "../../types"
-import type { ListCandidatosQuery } from "./candidato.schema"
+import type { Context } from "hono"
+import type { AppVariables } from "../../types"
+import { err, ok, type AppResult } from "../../result"
+import { CandidatoDoutorado, CandidatoMestrado } from "../../database"
+import { eq } from "drizzle-orm"
 
-// ============ TIPOS DE ERRO ============
+type GetAllCandidatosError = { type: "database_error"; error: unknown }
 
-type GetCandidatoError =
-  | { type: "candidato_not_found" }
-  | { type: "database_error"; error: unknown }
-
-type ListCandidatosError = { type: "database_error"; error: unknown }
-
-// ============ GET CANDIDATO BY ID ============
-
-/**
- * Obter detalhes de um candidato específico
- */
-type SelectCandidatoMestrado = typeof CandidatoMestrado.$inferSelect
-type SelectCandidatoDoutorado = typeof CandidatoDoutorado.$inferSelect
-export type SelectCandidato = SelectCandidatoMestrado | SelectCandidatoDoutorado
-
-export const getCandidatoById = async (
-  c: Context<{ Variables: AppVariables }>,
-  candidatoId: number,
-): Promise<AppResult<SelectCandidato, GetCandidatoError>> => {
-  const db = c.get("db")
+export const getAllCandidatos = async (c: Context<{ Variables: AppVariables }>): Promise<AppResult<{ mestrado: (typeof CandidatoMestrado.$inferSelect)[]; doutorado: (typeof CandidatoDoutorado.$inferSelect)[] }, GetAllCandidatosError>> => {
+  
+  const dbInstance = c.get("db")
 
   try {
-    // Try mestrado first
-    const [mestrado] = await db
-      .select()
-      .from(CandidatoMestrado)
-      .where(eq(CandidatoMestrado.id, candidatoId))
-      .limit(1)
-
-    if (mestrado) return ok(mestrado)
-
-    const [doutorado] = await db
-      .select()
-      .from(CandidatoDoutorado)
-      .where(eq(CandidatoDoutorado.id, candidatoId))
-      .limit(1)
-
-    if (doutorado) return ok(doutorado)
-
-    return err({ type: "candidato_not_found" })
-
-  } catch (error) {
-    console.error("Get candidato error:", error)
+    const mestradoResult = await dbInstance.select().from(CandidatoMestrado).orderBy(CandidatoMestrado.nome)
+    const doutoradoResult = await dbInstance.select().from(CandidatoDoutorado).orderBy(CandidatoDoutorado.nome)
+    return ok({ mestrado: mestradoResult, doutorado: doutoradoResult })
+  }
+  catch (error) {
+    console.error("Error fetching all candidatos:", error)
     return err({ type: "database_error", error })
   }
 }
 
-// ============ LIST CANDIDATOS ============
-
-/**
- * Listar candidatos com filtros, busca, paginação e ordenação
- */
-export const listCandidatos = async (
-  c: Context<{ Variables: AppVariables }>,
-  query: ListCandidatosQuery,
-): Promise<
-  AppResult<
-    {
-      candidatos: SelectCandidato[]
-      total: number
-      page: number
-      limit: number
-      totalPages: number
-    },
-    ListCandidatosError
-  >
-> => {
-  const db = c.get("db")
+export const getAllCandidatosMestrado = async (c: Context<{ Variables: AppVariables }>): Promise<AppResult<(typeof CandidatoMestrado.$inferSelect)[], GetAllCandidatosError>> => {
+  
+  const dbInstance = c.get("db")
 
   try {
-    const page = query.page
-    const limit = query.limit
-    const offset = (page - 1) * limit
-
-    // Build WHERE conditions
-    const buildConditionsFor = (table: any) => {
-      const conds: any[] = []
-      if (query.status) conds.push(eq(table.status, query.status))
-      if (query.tipoCurso) conds.push(eq(table.tipoCurso, query.tipoCurso as any))
-      if (query.search) {
-        conds.push(or(ilike(table.nome, `%${query.search}%`), ilike(table.email, `%${query.search}%`))!)
-      }
-      return conds
-    }
-
-    const condsM = buildConditionsFor(CandidatoMestrado)
-    const condsD = buildConditionsFor(CandidatoDoutorado)
-
-    const rowsM = await db.select().from(CandidatoMestrado).where(condsM.length > 0 ? or(...condsM) : undefined)
-    const rowsD = await db.select().from(CandidatoDoutorado).where(condsD.length > 0 ? or(...condsD) : undefined)
-
-    // Combine and sort in-memory
-    const combined: SelectCandidato[] = [...rowsM, ...rowsD]
-
-    const sortBy = query.sortBy || "dataInscricao"
-    const sortOrder = query.sortOrder === "desc" ? -1 : 1
-
-    combined.sort((a: any, b: any) => {
-      const va = a[sortBy as string]
-      const vb = b[sortBy as string]
-      if (va == null && vb == null) return 0
-      if (va == null) return -1 * sortOrder
-      if (vb == null) return 1 * sortOrder
-      if (va instanceof Date && vb instanceof Date) return (va.getTime() - vb.getTime()) * sortOrder
-      if (va < vb) return -1 * sortOrder
-      if (va > vb) return 1 * sortOrder
-      return 0
-    })
-
-    const total = combined.length
-    const paged = combined.slice(offset, offset + limit)
-
-    return ok({
-      candidatos: paged,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    })
-
-  } catch (error) {
-    console.error("List candidatos error:", error)
+    const result = await dbInstance.select().from(CandidatoMestrado).orderBy(CandidatoMestrado.nome)
+    return ok(result)
+  }
+  catch (error) {
+    console.error("Error fetching all mestrado candidatos:", error )
     return err({ type: "database_error", error })
+  }
+}
+export const getCandidatoMestradoById = async (
+  c: Context<{ Variables: AppVariables }>,
+  id: string
+): Promise<AppResult<typeof CandidatoMestrado.$inferSelect | null, GetAllCandidatosError>> => {
+  
+  const dbInstance = c.get("db")
+
+  try {
+    const result = await dbInstance
+      .select()
+      .from(CandidatoMestrado)
+      .where(eq(CandidatoMestrado.id, Number(id))) // 1
+      .limit(1)                                     // 2
+
+    return ok(result[0] ?? null)                    // 3
+  } catch (error) {
+    console.error(`Error fetching mestrado candidato with ID ${id}:`, error)
+    return err({ type: "database_error", error })
+  }
+}
+
+export const getCandidatoDoutoradoById = async (
+  c: Context<{ Variables: AppVariables }>,
+  id: string
+): Promise<AppResult<typeof CandidatoDoutorado.$inferSelect | null, GetAllCandidatosError>> => {
+  
+  const dbInstance = c.get("db")
+
+  try {
+    const result = await dbInstance
+      .select()
+      .from(CandidatoDoutorado)
+      .where(eq(CandidatoDoutorado.id, Number(id))) // 1
+      .limit(1)                                     // 2
+      
+    return ok(result[0] ?? null)                    // 3
+  } catch (error) {
+    console.error(`Error fetching doutorado candidato with ID ${id}:`, error)
+    return err({ type: "database_error", error })
+  }
+}
+
+export const getAllCandidatosDoutorado = async (c: Context<{ Variables: AppVariables }>): Promise<AppResult<(typeof CandidatoDoutorado.$inferSelect)[], GetAllCandidatosError>> => {
+  
+  const dbInstance = c.get("db")
+
+  try {
+    const result = await dbInstance.select().from(CandidatoDoutorado).orderBy(CandidatoDoutorado.nome)
+    return ok(result)
+  } catch (error) {
+    console.error("Error fetching all doutorado candidatos:", error)
+    return err({ type: "database_error", error })
+  }
+}
+
+export const processarResCandidatoMestradoEtapaI = async (
+  c: Context<{ Variables: AppVariables }>,
+  dados: CandidatoMestradoNotaEtapa1
+): Promise<AppResult<{ pontuacao: number; aprovado: boolean }, never>> => {
+  try {
+    const resultado = calcularMestradoNotaEtapa1(dados)
+    return ok(resultado)
+  } catch (error) {
+    console.error("Error processing mestrado etapa I:", error)
+    throw error // ou retorne um err() se quiser manter o padrão de AppResult
   }
 }

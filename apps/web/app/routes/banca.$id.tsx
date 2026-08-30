@@ -415,7 +415,7 @@ export const BancaSkeleton = () => {
   )
 }
 
-const formatDate = (dateString?: string | Date) => {
+export const formatDate = (dateString?: string | Date) => {
   if (!dateString) return "Data não disponível"
   const date = new Date(dateString)
   return date.toLocaleDateString("pt-BR", {
