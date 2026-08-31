@@ -1,0 +1,2023 @@
+{
+  "id": "73860007-f2d4-467d-a655-f35057355f6c",
+  "prevId": "4b8734a7-aa8d-42b4-bb7f-06e4d1f51d78",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.banca": {
+      "name": "banca",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "orientador_id": {
+          "name": "orientador_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "curso_id": {
+          "name": "curso_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor": {
+          "name": "autor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aluno_id": {
+          "name": "aluno_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "matricula": {
+          "name": "matricula",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "turma": {
+          "name": "turma",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "periodo_academico": {
+          "name": "periodo_academico",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo_trabalho": {
+          "name": "titulo_trabalho",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resumo": {
+          "name": "resumo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "abstract": {
+          "name": "abstract",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "palavras_chave": {
+          "name": "palavras_chave",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_realizacao": {
+          "name": "data_realizacao",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nota_final": {
+          "name": "nota_final",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "local": {
+          "name": "local",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "modalidade": {
+          "name": "modalidade",
+          "type": "modalidade",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "visible": {
+          "name": "visible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banca_orientador_id_usuario_id_fk": {
+          "name": "banca_orientador_id_usuario_id_fk",
+          "tableFrom": "banca",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "orientador_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "banca_curso_id_cursos_id_fk": {
+          "name": "banca_curso_id_cursos_id_fk",
+          "tableFrom": "banca",
+          "tableTo": "cursos",
+          "columnsFrom": [
+            "curso_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "banca_aluno_id_usuario_id_fk": {
+          "name": "banca_aluno_id_usuario_id_fk",
+          "tableFrom": "banca",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "aluno_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "aluno_curso_unique": {
+          "name": "aluno_curso_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "aluno_id",
+            "curso_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.candidato_doutorado": {
+      "name": "candidato_doutorado",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "numero_inscricao": {
+          "name": "numero_inscricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_inscricao": {
+          "name": "data_inscricao",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avaliado": {
+          "name": "avaliado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "cpf": {
+          "name": "cpf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sexo": {
+          "name": "sexo",
+          "type": "sexo",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado_civil": {
+          "name": "estado_civil",
+          "type": "estado_civil",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_nascimento": {
+          "name": "data_nascimento",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raca": {
+          "name": "raca",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_mae": {
+          "name": "nome_mae",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_pai": {
+          "name": "nome_pai",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo_escola_ensino_medio": {
+          "name": "tipo_escola_ensino_medio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pais": {
+          "name": "pais",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "municipio": {
+          "name": "municipio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rg": {
+          "name": "rg",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "orgao_expedidor": {
+          "name": "orgao_expedidor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado_expedicao": {
+          "name": "estado_expedicao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_expedicao": {
+          "name": "data_expedicao",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo_eleitor": {
+          "name": "titulo_eleitor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "secao_eleitoral": {
+          "name": "secao_eleitoral",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zona_eleitoral": {
+          "name": "zona_eleitoral",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "passaporte": {
+          "name": "passaporte",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cep": {
+          "name": "cep",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "logradouro": {
+          "name": "logradouro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bairro": {
+          "name": "bairro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "complemento": {
+          "name": "complemento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estado_endereco": {
+          "name": "estado_endereco",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "municipio_endereco": {
+          "name": "municipio_endereco",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telefone_fixo": {
+          "name": "telefone_fixo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefone_celular": {
+          "name": "telefone_celular",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "linha_pesquisa": {
+          "name": "linha_pesquisa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "comprovante_pag_taxa_inscricao": {
+          "name": "comprovante_pag_taxa_inscricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "copia_cpf": {
+          "name": "copia_cpf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "copia_passaporte_ou_rne": {
+          "name": "copia_passaporte_ou_rne",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "copia_documento_identificacao": {
+          "name": "copia_documento_identificacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solicitou_isencao_taxa_inscricao": {
+          "name": "solicitou_isencao_taxa_inscricao",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "comprovacao_pesquisas": {
+          "name": "comprovacao_pesquisas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "possui_necessidades_especiais": {
+          "name": "possui_necessidades_especiais",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "vagas_negros_pardos": {
+          "name": "vagas_negros_pardos",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "vagas_supranumerarias": {
+          "name": "vagas_supranumerarias",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "tipo_curso": {
+          "name": "tipo_curso",
+          "type": "tipo_curso",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Doutorado'"
+        },
+        "numero": {
+          "name": "numero",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "historico_graduacao": {
+          "name": "historico_graduacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "copia_diploma_mestrado": {
+          "name": "copia_diploma_mestrado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "historico_mestrado": {
+          "name": "historico_mestrado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_universidade_mestrado": {
+          "name": "nome_universidade_mestrado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_curso_mestrado": {
+          "name": "nome_curso_mestrado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "anteprojeto_tese": {
+          "name": "anteprojeto_tese",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "conceito_capes_mestrado": {
+          "name": "conceito_capes_mestrado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primeira_opcao_orientador": {
+          "name": "primeira_opcao_orientador",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "segunda_opcao_orientador": {
+          "name": "segunda_opcao_orientador",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "terceira_opcao_orientador": {
+          "name": "terceira_opcao_orientador",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "candidato_doutorado_numero_inscricao_unique": {
+          "name": "candidato_doutorado_numero_inscricao_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "numero_inscricao"
+          ]
+        },
+        "candidato_doutorado_cpf_unique": {
+          "name": "candidato_doutorado_cpf_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cpf"
+          ]
+        },
+        "candidato_doutorado_email_unique": {
+          "name": "candidato_doutorado_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        },
+        "candidato_doutorado_rg_unique": {
+          "name": "candidato_doutorado_rg_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "rg"
+          ]
+        },
+        "candidato_doutorado_titulo_eleitor_unique": {
+          "name": "candidato_doutorado_titulo_eleitor_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "titulo_eleitor"
+          ]
+        },
+        "candidato_doutorado_passaporte_unique": {
+          "name": "candidato_doutorado_passaporte_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "passaporte"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.candidato_mestrado": {
+      "name": "candidato_mestrado",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "numero_inscricao": {
+          "name": "numero_inscricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_inscricao": {
+          "name": "data_inscricao",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avaliado": {
+          "name": "avaliado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "cpf": {
+          "name": "cpf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sexo": {
+          "name": "sexo",
+          "type": "sexo",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado_civil": {
+          "name": "estado_civil",
+          "type": "estado_civil",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_nascimento": {
+          "name": "data_nascimento",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raca": {
+          "name": "raca",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_mae": {
+          "name": "nome_mae",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_pai": {
+          "name": "nome_pai",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo_escola_ensino_medio": {
+          "name": "tipo_escola_ensino_medio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pais": {
+          "name": "pais",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "municipio": {
+          "name": "municipio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rg": {
+          "name": "rg",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "orgao_expedidor": {
+          "name": "orgao_expedidor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado_expedicao": {
+          "name": "estado_expedicao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_expedicao": {
+          "name": "data_expedicao",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo_eleitor": {
+          "name": "titulo_eleitor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "secao_eleitoral": {
+          "name": "secao_eleitoral",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zona_eleitoral": {
+          "name": "zona_eleitoral",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "passaporte": {
+          "name": "passaporte",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cep": {
+          "name": "cep",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "logradouro": {
+          "name": "logradouro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bairro": {
+          "name": "bairro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "complemento": {
+          "name": "complemento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estado_endereco": {
+          "name": "estado_endereco",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "municipio_endereco": {
+          "name": "municipio_endereco",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telefone_fixo": {
+          "name": "telefone_fixo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefone_celular": {
+          "name": "telefone_celular",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "linha_pesquisa": {
+          "name": "linha_pesquisa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "comprovante_pag_taxa_inscricao": {
+          "name": "comprovante_pag_taxa_inscricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "copia_cpf": {
+          "name": "copia_cpf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "copia_passaporte_ou_rne": {
+          "name": "copia_passaporte_ou_rne",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "copia_documento_identificacao": {
+          "name": "copia_documento_identificacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solicitou_isencao_taxa_inscricao": {
+          "name": "solicitou_isencao_taxa_inscricao",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "comprovacao_pesquisas": {
+          "name": "comprovacao_pesquisas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "possui_necessidades_especiais": {
+          "name": "possui_necessidades_especiais",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "vagas_negros_pardos": {
+          "name": "vagas_negros_pardos",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "vagas_supranumerarias": {
+          "name": "vagas_supranumerarias",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "tipo_curso": {
+          "name": "tipo_curso",
+          "type": "tipo_curso",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Mestrado'"
+        },
+        "copia_diploma_graduacao": {
+          "name": "copia_diploma_graduacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "historico_graduacao": {
+          "name": "historico_graduacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_universidade_graduacao": {
+          "name": "nome_universidade_graduacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome_curso_graduacao": {
+          "name": "nome_curso_graduacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cidade_onde_realizou_graduacao": {
+          "name": "cidade_onde_realizou_graduacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enade_do_curso_graduacao": {
+          "name": "enade_do_curso_graduacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_do_enade_do_curso_graduacao": {
+          "name": "valor_do_enade_do_curso_graduacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nota_poscomp": {
+          "name": "nota_poscomp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primeira_area_preferencia": {
+          "name": "primeira_area_preferencia",
+          "type": "area_preferencia",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "segunda_area_preferencia": {
+          "name": "segunda_area_preferencia",
+          "type": "area_preferencia",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "carta_motivacao": {
+          "name": "carta_motivacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "candidato_doutorado_numero_inscricao_unique": {
+          "name": "candidato_doutorado_numero_inscricao_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "numero_inscricao"
+          ]
+        },
+        "candidato_doutorado_cpf_unique": {
+          "name": "candidato_doutorado_cpf_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cpf"
+          ]
+        },
+        "candidato_doutorado_email_unique": {
+          "name": "candidato_doutorado_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        },
+        "candidato_doutorado_rg_unique": {
+          "name": "candidato_doutorado_rg_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "rg"
+          ]
+        },
+        "candidato_doutorado_titulo_eleitor_unique": {
+          "name": "candidato_doutorado_titulo_eleitor_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "titulo_eleitor"
+          ]
+        },
+        "candidato_doutorado_passaporte_unique": {
+          "name": "candidato_doutorado_passaporte_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "passaporte"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.cursos": {
+      "name": "cursos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sigla": {
+          "name": "sigla",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "cursos_sigla_unique": {
+          "name": "cursos_sigla_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "sigla"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.usuario": {
+      "name": "usuario",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "password_has": {
+          "name": "password_has",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "school": {
+          "name": "school",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "matricula": {
+          "name": "matricula",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "academic_title": {
+          "name": "academic_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "user_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "usuario_email_unique": {
+          "name": "usuario_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.banca_documento": {
+      "name": "banca_documento",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_banca": {
+          "name": "id_banca",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_documento": {
+          "name": "id_documento",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banca_documento_id_banca_banca_id_fk": {
+          "name": "banca_documento_id_banca_banca_id_fk",
+          "tableFrom": "banca_documento",
+          "tableTo": "banca",
+          "columnsFrom": [
+            "id_banca"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "banca_documento_id_documento_documento_id_fk": {
+          "name": "banca_documento_id_documento_documento_id_fk",
+          "tableFrom": "banca_documento",
+          "tableTo": "documento",
+          "columnsFrom": [
+            "id_documento"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.documento": {
+      "name": "documento",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_submissao": {
+          "name": "data_submissao",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.feature_request_vote": {
+      "name": "feature_request_vote",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "feature_request_id": {
+          "name": "feature_request_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "feature_request_vote_user_id_usuario_id_fk": {
+          "name": "feature_request_vote_user_id_usuario_id_fk",
+          "tableFrom": "feature_request_vote",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "feature_request_vote_feature_request_id_feature_request_id_fk": {
+          "name": "feature_request_vote_feature_request_id_feature_request_id_fk",
+          "tableFrom": "feature_request_vote",
+          "tableTo": "feature_request",
+          "columnsFrom": [
+            "feature_request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_feature_request_unique": {
+          "name": "user_feature_request_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id",
+            "feature_request_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.feature_request": {
+      "name": "feature_request",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vote_count": {
+          "name": "vote_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "feature_request_user_id_usuario_id_fk": {
+          "name": "feature_request_user_id_usuario_id_fk",
+          "tableFrom": "feature_request",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.feedback_submission": {
+      "name": "feedback_submission",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "task_complexity_rating": {
+          "name": "task_complexity_rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "interface_consistency_rating": {
+          "name": "interface_consistency_rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "response_time_rating": {
+          "name": "response_time_rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "satisfaction_rating": {
+          "name": "satisfaction_rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usage_purposes": {
+          "name": "usage_purposes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usage_purpose_other": {
+          "name": "usage_purpose_other",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_all_tasks": {
+          "name": "completed_all_tasks",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "feedback_submission_user_id_usuario_id_fk": {
+          "name": "feedback_submission_user_id_usuario_id_fk",
+          "tableFrom": "feedback_submission",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "feedback_submission_user_id_unique": {
+          "name": "feedback_submission_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.invite": {
+      "name": "invite",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "banca_id": {
+          "name": "banca_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_convidado": {
+          "name": "email_convidado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role_convidado": {
+          "name": "role_convidado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invite_hash": {
+          "name": "invite_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "invite_user_id_usuario_id_fk": {
+          "name": "invite_user_id_usuario_id_fk",
+          "tableFrom": "invite",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "invite_banca_id_banca_id_fk": {
+          "name": "invite_banca_id_banca_id_fk",
+          "tableFrom": "invite",
+          "tableTo": "banca",
+          "columnsFrom": [
+            "banca_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "invite_invite_hash_unique": {
+          "name": "invite_invite_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "invite_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.reset_password": {
+      "name": "reset_password",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reset_password_hash": {
+          "name": "reset_password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "reset_password_user_id_usuario_id_fk": {
+          "name": "reset_password_user_id_usuario_id_fk",
+          "tableFrom": "reset_password",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "reset_password_reset_password_hash_unique": {
+          "name": "reset_password_reset_password_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "reset_password_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.session": {
+      "name": "session",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expire": {
+          "name": "expire",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "session_user_id_usuario_id_fk": {
+          "name": "session_user_id_usuario_id_fk",
+          "tableFrom": "session",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.student_invitation": {
+      "name": "student_invitation",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "matricula": {
+          "name": "matricula",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invitation_hash": {
+          "name": "invitation_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "invited_by": {
+          "name": "invited_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "student_invitation_invited_by_usuario_id_fk": {
+          "name": "student_invitation_invited_by_usuario_id_fk",
+          "tableFrom": "student_invitation",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "invited_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "student_invitation_user_id_usuario_id_fk": {
+          "name": "student_invitation_user_id_usuario_id_fk",
+          "tableFrom": "student_invitation",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "student_invitation_email_unique": {
+          "name": "student_invitation_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        },
+        "student_invitation_invitation_hash_unique": {
+          "name": "student_invitation_invitation_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "invitation_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.teacher_invitation": {
+      "name": "teacher_invitation",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invitation_hash": {
+          "name": "invitation_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invited_by": {
+          "name": "invited_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "teacher_invitation_invited_by_usuario_id_fk": {
+          "name": "teacher_invitation_invited_by_usuario_id_fk",
+          "tableFrom": "teacher_invitation",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "invited_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "teacher_invitation_user_id_usuario_id_fk": {
+          "name": "teacher_invitation_user_id_usuario_id_fk",
+          "tableFrom": "teacher_invitation",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "teacher_invitation_email_unique": {
+          "name": "teacher_invitation_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        },
+        "teacher_invitation_invitation_hash_unique": {
+          "name": "teacher_invitation_invitation_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "invitation_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.usuario_banca": {
+      "name": "usuario_banca",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_usuario": {
+          "name": "id_usuario",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_banca": {
+          "name": "id_banca",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "usuario_banca_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nota": {
+          "name": "nota",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "usuario_banca_id_usuario_usuario_id_fk": {
+          "name": "usuario_banca_id_usuario_usuario_id_fk",
+          "tableFrom": "usuario_banca",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "id_usuario"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "usuario_banca_id_banca_banca_id_fk": {
+          "name": "usuario_banca_id_banca_banca_id_fk",
+          "tableFrom": "usuario_banca",
+          "tableTo": "banca",
+          "columnsFrom": [
+            "id_banca"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.area_preferencia": {
+      "name": "area_preferencia",
+      "schema": "public",
+      "values": [
+        "CVIS - Computação Visual",
+        "CD - Ciência de Dados",
+        "ICOT - Inteligência Computacional e Otimização",
+        "SIBW - Sistemas de Informação, Banco de Dados Web",
+        "IEDU - Informática & Educação",
+        "ES - Engenharia de Software",
+        "RCSD - Redes de Computadores e Sistemas Distribuídos",
+        "SCTR - Sistemas Ciberfísicos e de Tempo Real",
+        "SSEG - Segurança de Sistemas e Redes"
+      ]
+    },
+    "public.estado_civil": {
+      "name": "estado_civil",
+      "schema": "public",
+      "values": [
+        "Solteiro",
+        "Casado",
+        "Divorciado"
+      ]
+    },
+    "public.modalidade": {
+      "name": "modalidade",
+      "schema": "public",
+      "values": [
+        "remoto",
+        "local"
+      ]
+    },
+    "public.sexo": {
+      "name": "sexo",
+      "schema": "public",
+      "values": [
+        "Masculino",
+        "Feminino",
+        "Outro"
+      ]
+    },
+    "public.tipo_curso": {
+      "name": "tipo_curso",
+      "schema": "public",
+      "values": [
+        "Doutorado",
+        "Mestrado"
+      ]
+    },
+    "public.user_role": {
+      "name": "user_role",
+      "schema": "public",
+      "values": [
+        "STUDENT",
+        "TEACHER",
+        "ADMIN"
+      ]
+    },
+    "public.usuario_banca_role": {
+      "name": "usuario_banca_role",
+      "schema": "public",
+      "values": [
+        "orientador",
+        "coorientador",
+        "aluno",
+        "avaliador"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
