@@ -206,7 +206,7 @@ export const seedTestData = async (db: Database) => {
 
     // Seed UsuarioBanca relations - only for successfully inserted bancas
     const usuariosBancasData: InsertUsuarioBanca[] = []
-
+ 
     // Add relations for each successfully inserted banca
     bancaIds.forEach((bancaId, index) => {
       if (bancaId) {
