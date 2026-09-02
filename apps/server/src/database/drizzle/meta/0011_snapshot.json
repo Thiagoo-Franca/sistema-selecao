@@ -927,43 +927,43 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "candidato_doutorado_numero_inscricao_unique": {
-          "name": "candidato_doutorado_numero_inscricao_unique",
+        "candidato_mestrado_numero_inscricao_unique": {
+          "name": "candidato_mestrado_numero_inscricao_unique",
           "nullsNotDistinct": false,
           "columns": [
             "numero_inscricao"
           ]
         },
-        "candidato_doutorado_cpf_unique": {
-          "name": "candidato_doutorado_cpf_unique",
+        "candidato_mestrado_cpf_unique": {
+          "name": "candidato_mestrado_cpf_unique",
           "nullsNotDistinct": false,
           "columns": [
             "cpf"
           ]
         },
-        "candidato_doutorado_email_unique": {
-          "name": "candidato_doutorado_email_unique",
+        "candidato_mestrado_email_unique": {
+          "name": "candidato_mestrado_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"
           ]
         },
-        "candidato_doutorado_rg_unique": {
-          "name": "candidato_doutorado_rg_unique",
+        "candidato_mestrado_rg_unique": {
+          "name": "candidato_mestrado_rg_unique",
           "nullsNotDistinct": false,
           "columns": [
             "rg"
           ]
         },
-        "candidato_doutorado_titulo_eleitor_unique": {
-          "name": "candidato_doutorado_titulo_eleitor_unique",
+        "candidato_mestrado_titulo_eleitor_unique": {
+          "name": "candidato_mestrado_titulo_eleitor_unique",
           "nullsNotDistinct": false,
           "columns": [
             "titulo_eleitor"
           ]
         },
-        "candidato_doutorado_passaporte_unique": {
-          "name": "candidato_doutorado_passaporte_unique",
+        "candidato_mestrado_passaporte_unique": {
+          "name": "candidato_mestrado_passaporte_unique",
           "nullsNotDistinct": false,
           "columns": [
             "passaporte"

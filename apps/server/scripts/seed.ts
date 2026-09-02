@@ -217,6 +217,10 @@ async function seed() {
     }).onConflictDoNothing()
     console.log("Seeded 4 candidato doutorado.")
 
+       console.log("Seeding usuarios...")
+   await db.insert(Users).values(UserData).onConflictDoNothing()
+   console.log(`Seeded ${UserData.length} usuarios.`)
+
     // --- Seed Bancas ---
     console.log("Seeding bancas...")
 

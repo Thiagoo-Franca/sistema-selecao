@@ -124,10 +124,10 @@ CREATE TABLE "candidato_mestrado" (
 	"primeira_area_preferencia" "area_preferencia" NOT NULL,
 	"segunda_area_preferencia" "area_preferencia",
 	"carta_motivacao" text NOT NULL,
-	CONSTRAINT "candidato_doutorado_numero_inscricao_unique" UNIQUE("numero_inscricao"),
-	CONSTRAINT "candidato_doutorado_cpf_unique" UNIQUE("cpf"),
-	CONSTRAINT "candidato_doutorado_email_unique" UNIQUE("email"),
-	CONSTRAINT "candidato_doutorado_rg_unique" UNIQUE("rg"),
-	CONSTRAINT "candidato_doutorado_titulo_eleitor_unique" UNIQUE("titulo_eleitor"),
-	CONSTRAINT "candidato_doutorado_passaporte_unique" UNIQUE("passaporte")
+	CONSTRAINT "candidato_mestrado_numero_inscricao_unique" UNIQUE("numero_inscricao"),
+	CONSTRAINT "candidato_mestrado_cpf_unique" UNIQUE("cpf"),
+	CONSTRAINT "candidato_mestrado_email_unique" UNIQUE("email"),
+	CONSTRAINT "candidato_mestrado_rg_unique" UNIQUE("rg"),
+	CONSTRAINT "candidato_mestrado_titulo_eleitor_unique" UNIQUE("titulo_eleitor"),
+	CONSTRAINT "candidato_mestrado_passaporte_unique" UNIQUE("passaporte")
 );
