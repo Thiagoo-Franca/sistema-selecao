@@ -1,6 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
@@ -101,13 +100,31 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/30 p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Sistema de seleção</CardTitle>
-          <CardDescription>Insira seu email e senha para acessar sua conta.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <main className="min-h-screen bg-white lg:grid lg:grid-cols-2">
+      <section
+        aria-labelledby="brand-title"
+        className="flex flex-col items-center justify-center bg-white px-6 py-6 text-center lg:min-h-screen lg:bg-green-50 lg:px-12 lg:py-16"
+      >
+        <div className="flex flex-col items-center">
+          <img
+            src="/icc-ufba.png"
+            alt="Logo do Instituto de Computação da UFBA"
+            className="h-auto w-44 object-contain sm:w-52 lg:w-56"
+          />
+          <h1 id="brand-title" className="mt-3 hidden text-4xl font-bold tracking-tight lg:block lg:text-5xl">
+            Sistema Seleção
+          </h1>
+        </div>
+      </section>
+      <section
+        aria-labelledby="login-title"
+        className="flex items-center justify-center bg-white px-6 py-6 lg:min-h-screen lg:px-16 lg:py-16"
+      >
+        <div className="w-full max-w-md">
+          <h1 id="login-title" className="mb-8 text-center text-3xl font-bold tracking-tight lg:text-left lg:text-4xl">
+            <span className="lg:hidden">Sistema de seleção</span>
+            <span className="hidden lg:inline">Login</span>
+          </h1>
           {showPasswordReset ? (
             <form onSubmit={handleResetSubmit(onPasswordResetSubmit)} className="grid gap-4">
               <div className="text-center">
@@ -190,7 +207,11 @@ export default function LandingPage() {
                 />
                 {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
               </div>
-              <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                disabled={loginMutation.isPending}
+              >
                 {loginMutation.isPending ? "Entrando..." : "Entrar"}
               </Button>
               <Button
@@ -203,8 +224,8 @@ export default function LandingPage() {
               </Button>
             </form>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </main>
   )
 }
