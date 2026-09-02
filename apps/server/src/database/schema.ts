@@ -26,7 +26,9 @@ export type AreaPreferencia = (typeof AreaPreferencia.enumValues)[number]
 const candidatoBaseColumns = {
   // dados da inscricao
   id: serial("id").primaryKey(),
-  numeroInscricao: text("numero_inscricao").notNull().unique(),
+  // The candidate tables share these columns, so their unique constraints
+  // must be explicitly table-scoped (constraint names are schema-global).
+  numeroInscricao: text("numero_inscricao").notNull(),
   status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
   dataInscricao: timestamp("data_inscricao").notNull(),
   
@@ -34,11 +36,11 @@ const candidatoBaseColumns = {
   avaliado: boolean("avaliado").notNull().default(false),
 
   // dados pessoais
-  cpf: text("cpf").notNull().unique(),
+  cpf: text("cpf").notNull(),
   sexo: sexoEnum("sexo").notNull(), // Ex: 'Masculino', 'Feminino', 'Outro'
   nome: text("nome").notNull(),
   estadoCivil: estadoCivilEnum("estado_civil").notNull(), // Ex: 'Solteiro', 'Casado', 'Divorciado'
-  email: text("email").notNull().unique(),
+  email: text("email").notNull(),
   dataNascimento: timestamp("data_nascimento").notNull(),
   raca: text("raca").notNull(), // Ex: 'Branco', 'Preto', 'Pardo', 'Amarelo', 'Indígena'
   nomeMae: text("nome_mae").notNull(),
@@ -51,14 +53,14 @@ const candidatoBaseColumns = {
   municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
 
   // documentos
-  rg: text("rg").notNull().unique(),
+  rg: text("rg").notNull(),
   orgaoExpedidor: text("orgao_expedidor").notNull(), // Ex: 'SSP', 'DETRAN', etc.
   estadoExpedicao: text("estado_expedicao").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
   dataExpedicao: timestamp("data_expedicao").notNull(),
-  tituloEleitor: text("titulo_eleitor").notNull().unique(),
+  tituloEleitor: text("titulo_eleitor").notNull(),
   secaoEleitoral: text("secao_eleitoral").notNull(),
   zonaEleitoral: text("zona_eleitoral"),
-  passaporte: text("passaporte").unique(),
+  passaporte: text("passaporte"),
 
   // endereco
   cep: text("cep").notNull(),
@@ -105,7 +107,14 @@ export const CandidatoDoutorado = pgTable("candidato_doutorado", {
   primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
   segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
   terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
-})
+}, (table) => ({
+  numeroInscricaoUnique: unique("candidato_doutorado_numero_inscricao_unique").on(table.numeroInscricao),
+  cpfUnique: unique("candidato_doutorado_cpf_unique").on(table.cpf),
+  emailUnique: unique("candidato_doutorado_email_unique").on(table.email),
+  rgUnique: unique("candidato_doutorado_rg_unique").on(table.rg),
+  tituloEleitorUnique: unique("candidato_doutorado_titulo_eleitor_unique").on(table.tituloEleitor),
+  passaporteUnique: unique("candidato_doutorado_passaporte_unique").on(table.passaporte),
+}))
 
 export const CandidatoMestrado = pgTable("candidato_mestrado", {
   ...candidatoBaseColumns,
@@ -124,7 +133,14 @@ export const CandidatoMestrado = pgTable("candidato_mestrado", {
   primeiraAreaPreferencia: AreaPreferencia("primeira_area_preferencia").notNull(),
   segundaAreaPreferencia: AreaPreferencia("segunda_area_preferencia"),
   cartaMotivacao: text("carta_motivacao").notNull(), // Link para PDF 
-})
+}, (table) => ({
+  numeroInscricaoUnique: unique("candidato_mestrado_numero_inscricao_unique").on(table.numeroInscricao),
+  cpfUnique: unique("candidato_mestrado_cpf_unique").on(table.cpf),
+  emailUnique: unique("candidato_mestrado_email_unique").on(table.email),
+  rgUnique: unique("candidato_mestrado_rg_unique").on(table.rg),
+  tituloEleitorUnique: unique("candidato_mestrado_titulo_eleitor_unique").on(table.tituloEleitor),
+  passaporteUnique: unique("candidato_mestrado_passaporte_unique").on(table.passaporte),
+}))
 
 export const userRole = pgEnum("user_role", ["STUDENT", "TEACHER", "ADMIN"])
 export type UserRole = (typeof userRole.enumValues)[number]
