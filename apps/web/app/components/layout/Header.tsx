@@ -14,7 +14,7 @@ import { useUser } from "@/services/useUser"
 import { useQueryClient } from "@tanstack/react-query"
 import { ChevronDown, LogOut, Menu, MessageSquare, User, Users, X } from "lucide-react"
 import { useState } from "react"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { match } from "ts-pattern"
 import { LoginForm } from "../auth/LoginForm"
 import { RegisterForm } from "../auth/RegisterForm"
@@ -147,10 +147,12 @@ interface RightSideButtonsProps {
 
 function RightSideButtons(props: RightSideButtonsProps) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const { data: user, isLoading, isError } = useUser()
   const handleLogout = () => {
     removeAuthToken()
     useUser.removeQueries(queryClient)
+    navigate("/")
   }
 
   // Always render the same container structure to prevent hydration mismatch
@@ -244,11 +246,13 @@ interface MobileRightSideButtonsProps {
 
 function MobileRightSideButtons(props: MobileRightSideButtonsProps) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const { data: user, isLoading, isError } = useUser()
   const handleLogout = () => {
     removeAuthToken()
     useUser.removeQueries(queryClient)
     props.onClose()
+    navigate("/")
   }
 
   if (isLoading) {
