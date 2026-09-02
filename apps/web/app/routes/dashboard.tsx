@@ -69,25 +69,39 @@ export default function Home() {
             className="w-full sm:w-[400px] self-stretch"
           />
         </div>
-        {!!userQuery.data && isTeacherOrAdmin && <Button onClick={() => navigate("/add-banca")}>Adicionar Candidato</Button>}
+        {!!userQuery.data && isTeacherOrAdmin && <Button onClick={() => navigate("/")}>Adicionar Candidato</Button>}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex items-center justify-between mb-4">
           <TabsList>
-            <TabsTrigger value="all-defenses" data-testid="all-defenses-tab">
+            {
+              /*
+              <TabsTrigger value="all-defenses" data-testid="all-defenses-tab">
               Defesas
             </TabsTrigger>
+            */
+            }
             {isTeacherOrAdmin && (
               <>
+              {
+                /*
                 <TabsTrigger value="my-defesas" data-testid="my-defesas-tab">
                   Minhas defesas
                 </TabsTrigger>
                 <TabsTrigger value="my-participations" data-testid="my-participations-tab">
                   Participações
                 </TabsTrigger>
+                */
+                }
                 <TabsTrigger value="candidatos" data-testid="all-candidatos-tab">
                   Candidatos
+                </TabsTrigger>
+                <TabsTrigger value="candidatos-mestrado" data-testid="all-candidatos-mestrado-tab">
+                  Candidatos Mestrado
+                </TabsTrigger>
+                <TabsTrigger value="candidatos-doutorado" data-testid="all-candidatos-doutorado-tab">
+                  Candidatos Doutorado
                 </TabsTrigger>
               </>
             )}
@@ -121,6 +135,8 @@ export default function Home() {
         />
         {isTeacherOrAdmin && (
           <>
+            {
+              /*
             <MyDefensesTab
               searchQuery={searchQuery}
               sortField={sortField}
@@ -128,6 +144,11 @@ export default function Home() {
               onSort={handleSort}
               rowsPerPage={rowsPerPage}
             />
+            */
+            }
+            {
+              /*
+            
             <MyParticipationsTab
               searchQuery={searchQuery}
               sortField={sortField}
@@ -135,6 +156,7 @@ export default function Home() {
               onSort={handleSort}
               rowsPerPage={rowsPerPage}
             />
+            */}
             <CandidatosTab
               searchQuery={searchQuery}
               sortField={sortField}
