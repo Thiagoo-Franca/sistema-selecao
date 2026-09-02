@@ -38,17 +38,17 @@ export function Header(props: HeaderProps) {
       role="banner"
       aria-label="Cabeçalho principal"
     >
-      <div className="container flex h-14 items-center justify-between px-4 sm:px-6">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Left Side: Logo and Title */}
         <Link
-          to="/"
+          to="/dashboard"
           className="mr-6 flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md p-1"
           aria-label="Ir para página inicial"
         >
           <img
             src="/icc-ufba.png"
             alt="Logo do Instituto de Computação da UFBA"
-            className="h-9 w-6"
+            className="h-12 w-8"
             aria-hidden="true"
           />
           <span className="font-bold text-sm sm:text-base lg:inline-block">Sistema de seleção</span>
