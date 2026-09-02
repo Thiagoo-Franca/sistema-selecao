@@ -109,7 +109,7 @@ export default function LandingPage() {
           <img
             src="/icc-ufba.png"
             alt="Logo do Instituto de Computação da UFBA"
-            className="h-auto w-44 object-contain sm:w-52 lg:w-56"
+            className="h-auto w-42 object-contain sm:w-48 lg:w-50"
           />
           <h1 id="brand-title" className="mt-3 hidden text-4xl font-bold tracking-tight lg:block lg:text-5xl">
             Sistema Seleção
