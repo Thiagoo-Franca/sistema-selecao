@@ -20,7 +20,8 @@ import { useCandidatos } from "@/hooks/candidato.hooks"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL" }]
 
-type BancasDefesa = ReturnType<typeof useUpcomingBancasDefesa>["data"] & {}
+// type BancasDefesa = ReturnType<typeof useUpcomingBancasDefesa>["data"] & {}
+
 
 // Tipo mínimo para renderizar tabela (sem membros)
 type BancaTableItem = {
@@ -33,10 +34,11 @@ type BancaTableItem = {
   curso: { sigla: string }
 }
 
+
 export default function Home() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useQueryParamsState("searchQuery", "")
-  const [activeTab, setActiveTab] = useQueryParamsState("activeTab", "all-defenses")
+  const [activeTab, setActiveTab] = useQueryParamsState("activeTab", "candidatos")
   const [sortField, setSortField] = useState<string>("")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
@@ -54,6 +56,8 @@ export default function Home() {
       setSortOrder("asc")
     }
   }
+  
+  console.log("activeTab atual:", JSON.stringify(activeTab))
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -61,7 +65,7 @@ export default function Home() {
       <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6">
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full self-stretch">
           <Input
-            id="banca-search"
+            id="candidato-search"
             type="search"
             placeholder="Buscar candidatos..."
             value={searchQuery}
@@ -76,31 +80,23 @@ export default function Home() {
         <div className="flex items-center justify-between mb-4">
           <TabsList>
             {
-              /*
+              // Apenas professor ou admin tem acesso a todos os candidatos
+              /* 
               <TabsTrigger value="all-defenses" data-testid="all-defenses-tab">
               Defesas
             </TabsTrigger>
-            */
+              */
             }
             {isTeacherOrAdmin && (
               <>
-              {
-                /*
-                <TabsTrigger value="my-defesas" data-testid="my-defesas-tab">
-                  Minhas defesas
-                </TabsTrigger>
-                <TabsTrigger value="my-participations" data-testid="my-participations-tab">
-                  Participações
-                </TabsTrigger>
-                */
-                }
+                
                 <TabsTrigger value="candidatos" data-testid="all-candidatos-tab">
                   Candidatos
                 </TabsTrigger>
-                <TabsTrigger value="candidatos-mestrado" data-testid="all-candidatos-mestrado-tab">
+                <TabsTrigger value="candidatos-mestrado" data-testid="candidatos-mestrado-tab">
                   Candidatos Mestrado
                 </TabsTrigger>
-                <TabsTrigger value="candidatos-doutorado" data-testid="all-candidatos-doutorado-tab">
+                <TabsTrigger value="candidatos-doutorado" data-testid="candidatos-doutorado-tab">
                   Candidatos Doutorado
                 </TabsTrigger>
               </>
@@ -126,38 +122,23 @@ export default function Home() {
             <span className="text-sm text-muted-foreground">linhas</span>
           </div>
         </div>
-        <AllDefensesTab
-          searchQuery={searchQuery}
-          sortField={sortField}
-          sortOrder={sortOrder}
-          onSort={handleSort}
-          rowsPerPage={rowsPerPage}
-        />
         {isTeacherOrAdmin && (
           <>
-            {
-              /*
-            <MyDefensesTab
-              searchQuery={searchQuery}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              onSort={handleSort}
-              rowsPerPage={rowsPerPage}
-            />
-            */
-            }
-            {
-              /*
-            
-            <MyParticipationsTab
-              searchQuery={searchQuery}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              onSort={handleSort}
-              rowsPerPage={rowsPerPage}
-            />
-            */}
             <CandidatosTab
+              searchQuery={searchQuery}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+              rowsPerPage={rowsPerPage}
+            />
+            <CandidatosMestradoTab
+              searchQuery={searchQuery}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+              rowsPerPage={rowsPerPage}
+            />
+            <CandidatosDoutoradoTab
               searchQuery={searchQuery}
               sortField={sortField}
               sortOrder={sortOrder}
@@ -171,6 +152,7 @@ export default function Home() {
   )
 }
 
+/*
 interface AllDefensesTabProps {
   searchQuery: string
   sortField: string
@@ -238,7 +220,9 @@ function AllDefensesTab(props: AllDefensesTabProps) {
   return (
     <TabsContent value="all-defenses">
       <div className="space-y-4" data-testid="defense-table">
-        {/* Próximas defesas - só exibe se houver dados */}
+        {
+      // Próximas defesas - só exibe se houver dados 
+      }
         {hasUpcomingDefenses && (
           <div>
             <div className="border rounded-md">
@@ -289,7 +273,9 @@ function AllDefensesTab(props: AllDefensesTabProps) {
           </div>
         )}
 
-        {/* Defesas anteriores */}
+        {
+          //Defesas anteriores
+           }
         <div>
           <div className="border rounded-md">
             <div className="p-4 border-b">
@@ -496,7 +482,7 @@ function MyDefensesTab(props: MyDefensesTabProps) {
     </TabsContent>
   )
 }
-
+*/
 // ─── Enums (matching DB enum types) ───────────────────────────────────────────
 
 export type Sexo = "Masculino" | "Feminino" | "Outro";
@@ -621,6 +607,7 @@ function CandidatosTab(props: CandidatosTabProps) {
 
   console.log("Dados de candidatos:", candidatosQuery.data) // Log para verificar os dados retornados
 
+  
   if (candidatosQuery.isLoading) {
     return (
       <TabsContent value="candidatos">
@@ -643,12 +630,83 @@ function CandidatosTab(props: CandidatosTabProps) {
       </TabsContent>
     )
   }
-
-  const mestradoData = candidatosQuery.data?.mestrado || []
-  const doutoradoData = candidatosQuery.data?.doutorado || []
+  
+  const candidatos = candidatosQuery.data.mestrado.concat(candidatosQuery.data.doutorado) // Combina mestrado e doutorado em um único array
+  
+  if (!candidatosQuery.data || candidatos.length === 0) {
+    return (
+      <TabsContent value="candidatos">
+        <div className="text-gray-600 p-4">
+          Nenhum candidato encontrado.
+        </div>
+      </TabsContent>
+    )
+  }
 
   return (
     <TabsContent value="candidatos">
+      <div className="space-y-4">
+        <div>
+          <div className="border rounded-md">
+            <div className="p-4 border-b">
+              <h3 className="text-lg font-semibold">Candidatos (Todos)</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <HomeTableCandidatos
+                data={candidatos}
+                searchQuery={props.searchQuery}
+                sortField={props.sortField}
+                sortOrder={props.sortOrder}
+                rowsPerPage={props.rowsPerPage}
+                onSort={props.onSort} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </TabsContent>
+  )
+}
+
+
+
+interface CandidatosMestradoTabProps {
+  searchQuery: string
+  sortField: string
+  sortOrder: "asc" | "desc"
+  onSort: (field: string) => void
+  rowsPerPage: number
+}
+
+function CandidatosMestradoTab(props: CandidatosMestradoTabProps) {
+  const candidatosQuery = useCandidatos()
+  const mestradoData = candidatosQuery.data?.mestrado || []
+
+  console.log ("Dados de candidatos de mestrado:", mestradoData) // Log para verificar os dados retornados
+  if (candidatosQuery.isLoading) {
+    return (
+      <TabsContent value="candidatos-mestrado">
+        <div className="border rounded-md p-4">
+          <Skeleton className="h-8 w-full mb-2" />
+          <Skeleton className="h-12 w-full mb-2" />
+          <Skeleton className="h-12 w-full mb-2" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      </TabsContent>
+    )
+  }
+
+  if (candidatosQuery.isError) {
+    return (
+      <TabsContent value="candidatos-mestrado">
+        <div className="text-red-600 p-4">
+          Erro ao carregar candidatos de mestrado: {candidatosQuery.error?.message || "Erro desconhecido"}
+        </div>
+      </TabsContent>
+    )
+  }
+
+  return (
+    <TabsContent value="candidatos-mestrado">
       <div className="space-y-4">
         <div>
           <div className="border rounded-md">
@@ -661,10 +719,55 @@ function CandidatosTab(props: CandidatosTabProps) {
                 searchQuery={props.searchQuery}
                 sortField={props.sortField}
                 sortOrder={props.sortOrder}
+                rowsPerPage={props.rowsPerPage} 
                 onSort={props.onSort} />
             </div>
           </div>
         </div>
+      </div>
+    </TabsContent>
+  )
+}
+
+
+interface CandidatosDoutoradoTabProps {
+  searchQuery: string
+  sortField: string
+  sortOrder: "asc" | "desc"
+  onSort: (field: string) => void
+  rowsPerPage: number
+}
+
+function CandidatosDoutoradoTab(props: CandidatosDoutoradoTabProps) {
+  const candidatosQuery = useCandidatos()
+  const doutoradoData = candidatosQuery.data?.doutorado || []
+
+  if (candidatosQuery.isLoading) {
+    return (
+      <TabsContent value="candidatos-doutorado">
+        <div className="border rounded-md p-4">
+          <Skeleton className="h-8 w-full mb-2" />
+          <Skeleton className="h-12 w-full mb-2" />
+          <Skeleton className="h-12 w-full mb-2" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      </TabsContent>
+    )
+  }
+
+  if (candidatosQuery.isError) {
+    return (
+      <TabsContent value="candidatos-doutorado">
+        <div className="text-red-600 p-4">
+          Erro ao carregar candidatos de doutorado: {candidatosQuery.error?.message || "Erro desconhecido"}
+        </div>
+      </TabsContent>
+    )
+  }
+
+  return (
+    <TabsContent value="candidatos-doutorado">
+      <div className="space-y-4">
         <div>
           <div className="border rounded-md">
             <div className="p-4 border-b">
@@ -676,8 +779,8 @@ function CandidatosTab(props: CandidatosTabProps) {
                 searchQuery={props.searchQuery}
                 sortField={props.sortField}
                 sortOrder={props.sortOrder}
-                onSort={props.onSort}
-              />
+                rowsPerPage={props.rowsPerPage} 
+                onSort={props.onSort} />
             </div>
           </div>
         </div>
@@ -686,8 +789,7 @@ function CandidatosTab(props: CandidatosTabProps) {
   )
 }
 
-
-
+/*
 interface MyParticipationsTabProps {
   searchQuery: string
   sortField: string
@@ -775,6 +877,8 @@ function MyParticipationsTab(props: MyParticipationsTabProps) {
     </TabsContent>
   )
 }
+
+*/
 
 const columns = [
   { key: "dataRealizacao", header: "Data", minWidth: "100px", sortable: true },
@@ -939,7 +1043,7 @@ function TableWithInfo(props: {
 
 
 function HomeTableCandidatos(props: {
-  data: CandidatoMestrado[] | CandidatoDoutorado[]
+  data: CandidatoMestrado[] | CandidatoDoutorado[] | Candidato[]
   searchQuery: string
   sortField: string
   sortOrder: "asc" | "desc"
@@ -972,12 +1076,13 @@ function HomeTableCandidatos(props: {
         <TableRow>
           <TableHead>Nome</TableHead>
           <TableHead>Nivel</TableHead>
-          <TableHead>Situação</TableHead>
+          <TableHead>Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         { paginatedData?.length > 0 ? (
-          paginatedData.map((candidato) => (
+          paginatedData.map((candidato) =>  (
+            
             <TableRow
               key={candidato.id}
               onClick={() => goToViewCandidato(candidato.tipoCurso.toLowerCase() as "mestrado" | "doutorado", candidato.id)}

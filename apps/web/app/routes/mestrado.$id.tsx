@@ -29,7 +29,7 @@ export default function CandidatoMestradoPage() {
     const userQuery = useUser()
     const userLoading = userQuery.isLoading
     if (id === undefined) {
-        navigate("/")
+        navigate("/dashboard")
         return null
     }
     const candidatoQuery = useCandidatoMestradoById(id)
@@ -119,7 +119,7 @@ export default function CandidatoMestradoPage() {
                     </Button>
                     <h1 className="text-2xl font-bold">{candidato.nome}</h1>
                 </div>
-                <Button className="" onClick={() => navigate(`/mestrado/${candidato.id}/avaliacao`)}>
+                <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => navigate(`/mestrado/${candidato.id}/avaliacao`)}>
                     Avaliar
                 </Button>
             </div>
