@@ -509,10 +509,10 @@ export default function AvaliacaoCandidatoMestradoPage() {
 
                 {/* Prévia Nota */}
                 <Field className="flex flex-col gap-4">
-                    <FieldLabel htmlFor="posCapes3a5" className="font-bold text-muted-foreground">{`Nota (Prévia): ${nota.toFixed(2)}`}</FieldLabel>
+                    <FieldLabel htmlFor="posCapes3a5" className="font-bold text-muted-foreground text-lg">{`Nota (Prévia): ${nota.toFixed(2)}`}</FieldLabel>
                 </Field>
 
-                <Button type="submit" className="col-span-3 my-2" disabled={isSubmitting}>
+                <Button type="submit" className="col-span-3 my-2 bg-green-500 hover:bg-green-600" disabled={isSubmitting}>
                     {isSubmitting ? "Salvando..." : "Salvar Avaliação"}
                 </Button>
 
