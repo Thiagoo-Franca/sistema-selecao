@@ -12,7 +12,9 @@ export type RpcType<T extends (...args: any[]) => any> = {
   input: Parameters<T>[0]
   output: Awaited<Awaited<ReturnType<T>>["json"]>
 }
-export const rpcReturn = async <T extends unknown>(clientResponse: ClientResponse<T, any, "json">) => {
+export const rpcReturn = async <T extends unknown>(
+  clientResponse: ClientResponse<T, any, "json">
+) => {
   const data = await clientResponse.json()
   if (!clientResponse.ok) {
     // Handle zod errors

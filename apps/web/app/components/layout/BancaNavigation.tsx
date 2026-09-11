@@ -24,7 +24,7 @@ export function BancaNavigation(props: BancaNavigationProps) {
         <nav className="flex items-center gap-1">
           <Button
             variant="ghost"
-            className={`flex items-center gap-2 relative px-4 py-2 hover:bg-muted border-b-2 ${
+            className={`relative flex items-center gap-2 border-b-2 px-4 py-2 hover:bg-muted ${
               props.currentPage === "detalhes"
                 ? "border-primary bg-primary/5"
                 : "border-transparent hover:border-muted-foreground/20"
@@ -38,7 +38,7 @@ export function BancaNavigation(props: BancaNavigationProps) {
           {(props.user?.role === "ADMIN" || props.user?.role === "TEACHER") && (
             <Button
               variant="ghost"
-              className={`flex items-center gap-2 relative px-4 py-2 hover:bg-muted border-b-2 ${
+              className={`relative flex items-center gap-2 border-b-2 px-4 py-2 hover:bg-muted ${
                 props.currentPage === "avaliacoes"
                   ? "border-primary bg-primary/5"
                   : "border-transparent hover:border-muted-foreground/20"
@@ -53,7 +53,7 @@ export function BancaNavigation(props: BancaNavigationProps) {
           {(props.user?.role === "ADMIN" || props.user?.role === "TEACHER") && (
             <Button
               variant="ghost"
-              className={`flex items-center gap-2 relative px-4 py-2 hover:bg-muted border-b-2 ${
+              className={`relative flex items-center gap-2 border-b-2 px-4 py-2 hover:bg-muted ${
                 props.currentPage === "documentos"
                   ? "border-primary bg-primary/5"
                   : "border-transparent hover:border-muted-foreground/20"

@@ -15,12 +15,12 @@ export const useGoogleCalendarUrl = () => {
   return useMutation({
     mutationFn: async (bancaId: string) => {
       const response = await apiClient.calendar[":bancaId"].google.$get({
-        param: { bancaId }
+        param: { bancaId },
       })
       return rpcReturn(response)
     },
     onSuccess: (data) => {
-      window.open(data.url, '_blank')
+      window.open(data.url, "_blank")
     },
     onError: (error: any) => {
       toast({
@@ -39,12 +39,12 @@ export const useOutlookCalendarUrl = () => {
   return useMutation({
     mutationFn: async (bancaId: string) => {
       const response = await apiClient.calendar[":bancaId"].outlook.$get({
-        param: { bancaId }
+        param: { bancaId },
       })
       return rpcReturn(response)
     },
     onSuccess: (data) => {
-      window.open(data.url, '_blank')
+      window.open(data.url, "_blank")
     },
     onError: (error: any) => {
       toast({
@@ -61,10 +61,14 @@ export const useSendCalendarInvite = () => {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async ({ bancaId, email, recipientName }: { bancaId: string } & SendCalendarInviteData) => {
+    mutationFn: async ({
+      bancaId,
+      email,
+      recipientName,
+    }: { bancaId: string } & SendCalendarInviteData) => {
       const response = await apiClient.calendar[":bancaId"].email.$post({
         param: { bancaId },
-        json: { email, recipientName }
+        json: { email, recipientName },
       })
       return rpcReturn(response)
     },

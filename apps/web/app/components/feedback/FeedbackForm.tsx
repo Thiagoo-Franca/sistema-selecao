@@ -1,7 +1,14 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
@@ -64,7 +71,8 @@ export function FeedbackForm() {
           navigate("/")
         },
         onError: (error) => {
-          const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro ao enviar seu feedback."
+          const errorMessage =
+            error instanceof Error ? error.message : "Ocorreu um erro ao enviar seu feedback."
 
           if (errorMessage.includes("400") || errorMessage.toLowerCase().includes("já enviou")) {
             toast({
@@ -89,7 +97,8 @@ export function FeedbackForm() {
       <CardHeader>
         <CardTitle>Feedback do Sistema</CardTitle>
         <CardDescription>
-          Sua opinião é muito importante para melhorar o sistema. Por favor, responda as perguntas abaixo.
+          Sua opinião é muito importante para melhorar o sistema. Por favor, responda as perguntas
+          abaixo.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -123,7 +132,7 @@ interface FormSectionProps {
 function RatingScalesSection({ form }: FormSectionProps) {
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold border-b pb-2">Avaliação do Sistema</h3>
+      <h3 className="border-b pb-2 text-lg font-semibold">Avaliação do Sistema</h3>
 
       <RatingScale
         form={form}
@@ -178,13 +187,13 @@ function RatingScale({ form, name, label, minLabel, maxLabel }: RatingScaleProps
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <div className="space-y-2">
-              <div className="flex justify-between items-center gap-2">
+              <div className="flex items-center justify-between gap-2">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     key={value}
                     type="button"
                     onClick={() => field.onChange(value)}
-                    className={`flex-1 h-12 rounded-md border-2 transition-colors ${
+                    className={`h-12 flex-1 rounded-md border-2 transition-colors ${
                       field.value === value
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-input hover:border-primary hover:bg-accent"
@@ -213,7 +222,7 @@ function SystemUsageSection({ form }: FormSectionProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold border-b pb-2">Uso do Sistema</h3>
+      <h3 className="border-b pb-2 text-lg font-semibold">Uso do Sistema</h3>
 
       <FormField
         control={form.control}
@@ -242,7 +251,7 @@ function SystemUsageSection({ form }: FormSectionProps) {
                           }}
                         />
                       </FormControl>
-                      <Label className="font-normal cursor-pointer">{option.label}</Label>
+                      <Label className="cursor-pointer font-normal">{option.label}</Label>
                     </FormItem>
                   )}
                 />
@@ -275,7 +284,7 @@ function SystemUsageSection({ form }: FormSectionProps) {
 function TaskCompletionSection({ form }: FormSectionProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold border-b pb-2">Conclusão das Tarefas</h3>
+      <h3 className="border-b pb-2 text-lg font-semibold">Conclusão das Tarefas</h3>
 
       <FormField
         control={form.control}
@@ -284,16 +293,19 @@ function TaskCompletionSection({ form }: FormSectionProps) {
           <FormItem>
             <FormLabel>Você conseguiu completar todas as tarefas propostas?</FormLabel>
             <FormControl>
-              <RadioGroup onValueChange={(value) => field.onChange(value === "true")} value={String(field.value)}>
+              <RadioGroup
+                onValueChange={(value) => field.onChange(value === "true")}
+                value={String(field.value)}
+              >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="true" id="completed-yes" />
-                  <Label htmlFor="completed-yes" className="font-normal cursor-pointer">
+                  <Label htmlFor="completed-yes" className="cursor-pointer font-normal">
                     Sim
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="false" id="completed-no" />
-                  <Label htmlFor="completed-no" className="font-normal cursor-pointer">
+                  <Label htmlFor="completed-no" className="cursor-pointer font-normal">
                     Não
                   </Label>
                 </div>

@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useBancaDocumentInfo } from "@/hooks/documento.hooks"
 import { useToast } from "@/hooks/use-toast"
 import { pdf } from "@react-pdf/renderer"
@@ -16,14 +22,19 @@ interface PDFGeneratorProps {
   onParticipantSelect?: (participantId: number | null) => void
 }
 
-export function PDFGenerator({ bancaId, className, showParticipantSelection = false, onParticipantSelect }: PDFGeneratorProps) {
+export function PDFGenerator({
+  bancaId,
+  className,
+  showParticipantSelection = false,
+  onParticipantSelect,
+}: PDFGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedMembro, setSelectedMembro] = useState<number | null>(null)
   const { data: bancaInfo, isLoading, error } = useBancaDocumentInfo(bancaId)
   const { toast } = useToast()
 
   // Get eligible participants (exclude students)
-  const eligibleParticipants = bancaInfo?.membros.filter(m => m.role !== "aluno") || []
+  const eligibleParticipants = bancaInfo?.membros.filter((m) => m.role !== "aluno") || []
 
   const handleParticipantSelect = (participantId: string) => {
     const id = participantId ? Number(participantId) : null
@@ -31,7 +42,10 @@ export function PDFGenerator({ bancaId, className, showParticipantSelection = fa
     onParticipantSelect?.(id)
   }
 
-  const generateAndDownloadPDF = async (type: "ata" | "participacao" | "orientacao", membroId?: number) => {
+  const generateAndDownloadPDF = async (
+    type: "ata" | "participacao" | "orientacao",
+    membroId?: number
+  ) => {
     if (!bancaInfo) {
       toast({
         title: "Erro",
@@ -53,15 +67,21 @@ export function PDFGenerator({ bancaId, className, showParticipantSelection = fa
           break
         case "participacao":
           const participanteId =
-            membroId || bancaInfo.membros.find((m) => m.role !== "aluno")?.id || bancaInfo.membros[0]?.id
+            membroId ||
+            bancaInfo.membros.find((m) => m.role !== "aluno")?.id ||
+            bancaInfo.membros[0]?.id
           if (!participanteId) throw new Error("Membro não encontrado")
-          pdfComponent = <DeclaracaoParticipacaoPDF bancaInfo={bancaInfo} membroId={participanteId} />
+          pdfComponent = (
+            <DeclaracaoParticipacaoPDF bancaInfo={bancaInfo} membroId={participanteId} />
+          )
           fileName = `declaracao-participacao.pdf`
           break
         case "orientacao":
           const orientador = bancaInfo.membros.find((m) => m.role === "orientador")
           if (!orientador) throw new Error("Orientador não encontrado")
-          pdfComponent = <DeclaracaoOrientacaoPDF bancaInfo={bancaInfo} orientadorId={orientador.id} />
+          pdfComponent = (
+            <DeclaracaoOrientacaoPDF bancaInfo={bancaInfo} orientadorId={orientador.id} />
+          )
           fileName = `declaracao-orientacao.pdf`
           break
         default:
@@ -109,14 +129,16 @@ export function PDFGenerator({ bancaId, className, showParticipantSelection = fa
   }
 
   if (error) {
-    return <div className={`text-sm text-destructive ${className}`}>Erro ao carregar dados da banca</div>
+    return (
+      <div className={`text-sm text-destructive ${className}`}>Erro ao carregar dados da banca</div>
+    )
   }
 
   return (
     <div className={className}>
       {showParticipantSelection && eligibleParticipants.length > 0 && (
         <div className="mb-4">
-          <label className="text-sm font-medium mb-2 block">Selecione o participante:</label>
+          <label className="mb-2 block text-sm font-medium">Selecione o participante:</label>
           <Select value={selectedMembro?.toString() || ""} onValueChange={handleParticipantSelect}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Escolha um participante" />
@@ -124,14 +146,15 @@ export function PDFGenerator({ bancaId, className, showParticipantSelection = fa
             <SelectContent>
               {eligibleParticipants.map((membro) => (
                 <SelectItem key={membro.id} value={membro.id.toString()}>
-                  {membro.usuario.nome} ({membro.role === "orientador" ? "Orientador" : "Avaliador"})
+                  {membro.usuario.nome} ({membro.role === "orientador" ? "Orientador" : "Avaliador"}
+                  )
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
       )}
-      
+
       <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"
@@ -141,7 +164,11 @@ export function PDFGenerator({ bancaId, className, showParticipantSelection = fa
           className="flex items-center gap-2"
           data-document-type="ata"
         >
-          {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+          {isGenerating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileText className="h-4 w-4" />
+          )}
           Ata de Defesa
         </Button>
 
@@ -153,7 +180,11 @@ export function PDFGenerator({ bancaId, className, showParticipantSelection = fa
           className="flex items-center gap-2"
           data-document-type="participacao"
         >
-          {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {isGenerating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
           Decl. Participação
         </Button>
 
@@ -165,7 +196,11 @@ export function PDFGenerator({ bancaId, className, showParticipantSelection = fa
           className="flex items-center gap-2"
           data-document-type="orientacao"
         >
-          {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {isGenerating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
           Decl. Orientação
         </Button>
       </div>

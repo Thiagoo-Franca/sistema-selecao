@@ -42,7 +42,7 @@ export function Header(props: HeaderProps) {
         {/* Left Side: Logo and Title */}
         <Link
           to="/dashboard"
-          className="mr-6 flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md p-1"
+          className="mr-6 flex items-center space-x-2 rounded-md p-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           aria-label="Ir para página inicial"
         >
           <img
@@ -51,7 +51,7 @@ export function Header(props: HeaderProps) {
             className="h-12 w-8"
             aria-hidden="true"
           />
-          <span className="font-bold text-sm sm:text-base lg:inline-block">Sistema de seleção</span>
+          <span className="text-sm font-bold sm:text-base lg:inline-block">Sistema de seleção</span>
         </Link>
 
         {/* Mobile Menu Button */}
@@ -72,7 +72,7 @@ export function Header(props: HeaderProps) {
         </Button>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex lg:items-center lg:gap-4 lg:flex-1">
+        <div className="hidden lg:flex lg:flex-1 lg:items-center lg:gap-4">
           <DesktopNavLinks />
           <RightSideButtons
             loginDialogOpen={loginDialogOpen}
@@ -86,11 +86,11 @@ export function Header(props: HeaderProps) {
         {mobileMenuOpen && (
           <div
             id="mobile-menu"
-            className="absolute top-full left-0 right-0 bg-background border-b lg:hidden"
+            className="absolute left-0 right-0 top-full border-b bg-background lg:hidden"
             role="navigation"
             aria-label="Menu de navegação móvel"
           >
-            <div className="container px-4 py-4 space-y-2">
+            <div className="container space-y-2 px-4 py-4">
               <MobileRightSideButtons
                 onClose={() => setMobileMenuOpen(false)}
                 setLoginDialogOpen={setLoginDialogOpen}
@@ -176,7 +176,7 @@ function RightSideButtons(props: RightSideButtonsProps) {
               className="flex items-center gap-2 px-2 focus:ring-2 focus:ring-primary focus:ring-offset-2"
               aria-label={`Menu do usuário: ${user.nome || "Usuário"}`}
             >
-              <span className="font-medium hidden sm:inline">Olá, {user.nome || "Usuário"}</span>
+              <span className="hidden font-medium sm:inline">Olá, {user.nome || "Usuário"}</span>
               <span className="font-medium sm:hidden">{user.nome?.split(" ")[0] || "Usuário"}</span>
               {user.role && (
                 <Badge variant="outline" className="hidden sm:inline-flex">
@@ -221,7 +221,7 @@ function RightSideButtons(props: RightSideButtonsProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleLogout}
-              className="text-destructive focus:text-destructive focus:bg-destructive/10"
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   handleLogout()

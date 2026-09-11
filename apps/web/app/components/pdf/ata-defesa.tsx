@@ -89,7 +89,9 @@ export const AtaDefesaPDF = ({ bancaInfo }: { bancaInfo: DocumentInfo }) => {
 
           <View style={styles.row}>
             <Text style={styles.label}>Modalidade:</Text>
-            <Text style={styles.value}>{bancaInfo.modalidade === "local" ? "Presencial" : "Remoto"}</Text>
+            <Text style={styles.value}>
+              {bancaInfo.modalidade === "local" ? "Presencial" : "Remoto"}
+            </Text>
           </View>
         </View>
 

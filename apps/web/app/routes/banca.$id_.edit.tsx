@@ -1,15 +1,26 @@
 import { Header } from "@/components/layout/Header"
 import type { Route } from "./+types/banca.$id_.edit"
 
-export const meta: Route.MetaFunction = () => [
-  { title: "SISDEF - Editar Defesa" },
-]
+export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Editar Defesa" }]
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { cn, rpcReturn, type RpcType } from "@/lib/utils"
@@ -33,7 +44,10 @@ const formSchema = z.object({
   dataRealizacao: z.date({ required_error: "Data de realização é obrigatória" }),
   local: z.string().min(1, "Local é obrigatório"),
   turma: z.string().min(1, "Turma é obrigatória"),
-  periodoAcademico: z.string().min(1, "Período acadêmico é obrigatório").regex(/^\d{4}\.[12]$/, "Formato inválido. Use YYYY.S (S=1 ou 2)"),
+  periodoAcademico: z
+    .string()
+    .min(1, "Período acadêmico é obrigatório")
+    .regex(/^\d{4}\.[12]$/, "Formato inválido. Use YYYY.S (S=1 ou 2)"),
   cursoId: z.string().min(1, "Curso é obrigatório"),
   orientadorId: z.string().min(1, "Orientador é obrigatório"),
   autor: z.string().min(1, "Autor é obrigatório"),
@@ -103,7 +117,10 @@ export default function EditBancaPage() {
     let value = e.target.value.replace(/[^\d.]/g, "") // Remove non-digit and non-dot characters
 
     // Handle backspace correctly (if the dot is the last character, remove it)
-    if (e.nativeEvent instanceof InputEvent && e.nativeEvent.inputType === "deleteContentBackward") {
+    if (
+      e.nativeEvent instanceof InputEvent &&
+      e.nativeEvent.inputType === "deleteContentBackward"
+    ) {
       if (value.endsWith(".")) {
         value = value.slice(0, -1)
       }
@@ -169,7 +186,7 @@ export default function EditBancaPage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <h1 className="text-2xl font-bold mb-6">Editar Defesa de TCC</h1>
+      <h1 className="mb-6 text-2xl font-bold">Editar Defesa de TCC</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit, console.error)} className="space-y-8">
           <FormField
@@ -228,7 +245,7 @@ export default function EditBancaPage() {
             )}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <FormField
               control={form.control}
               name="autor"
@@ -258,7 +275,7 @@ export default function EditBancaPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <FormField
               control={form.control}
               name="turma"
@@ -321,7 +338,7 @@ export default function EditBancaPage() {
             )}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <FormField
               control={form.control}
               name="orientadorId"
@@ -358,7 +375,10 @@ export default function EditBancaPage() {
                       <FormControl>
                         <Button
                           variant={"outline"}
-                          className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
                         >
                           {field.value ? format(field.value, "PPP") : <span>Selecione a data</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -366,7 +386,12 @@ export default function EditBancaPage() {
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
                     </PopoverContent>
                   </Popover>
                   <FormMessage />
@@ -391,7 +416,7 @@ export default function EditBancaPage() {
 
           <div>
             <FormLabel>Membros da Banca Avaliadora</FormLabel>
-            <div className="space-y-4 mt-2">
+            <div className="mt-2 space-y-4">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex items-center gap-4">
                   <FormField
@@ -417,12 +442,22 @@ export default function EditBancaPage() {
                       </FormItem>
                     )}
                   />
-                  <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)}>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => remove(index)}
+                  >
                     Remover
                   </Button>
                 </div>
               ))}
-              <Button type="button" variant="outline" size="sm" onClick={() => append({ usuarioId: "" })}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ usuarioId: "" })}
+              >
                 Adicionar Avaliador
               </Button>
             </div>

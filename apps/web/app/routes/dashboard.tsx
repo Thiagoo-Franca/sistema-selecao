@@ -3,9 +3,22 @@
 import { Header } from "@/components/layout/Header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useQueryParamsState } from "@/hooks/use-query-param-state"
 import { useUser } from "@/services/useUser"
@@ -14,14 +27,18 @@ import { useEffect, useState } from "react"
 import { href, useNavigate } from "react-router"
 import { match } from "ts-pattern"
 
-import { useBancasQueParticipei, useMyDefesas, usePastBancasDefesa, useUpcomingBancasDefesa } from "@/hooks"
+import {
+  useBancasQueParticipei,
+  useMyDefesas,
+  usePastBancasDefesa,
+  useUpcomingBancasDefesa,
+} from "@/hooks"
 import type { Route } from "./+types/dashboard"
 import { useCandidatos } from "@/hooks/candidato.hooks"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL" }]
 
 // type BancasDefesa = ReturnType<typeof useUpcomingBancasDefesa>["data"] & {}
-
 
 // Tipo mínimo para renderizar tabela (sem membros)
 type BancaTableItem = {
@@ -33,7 +50,6 @@ type BancaTableItem = {
   orientador: { nome: string }
   curso: { sigla: string }
 }
-
 
 export default function Home() {
   const navigate = useNavigate()
@@ -56,28 +72,30 @@ export default function Home() {
       setSortOrder("asc")
     }
   }
-  
+
   console.log("activeTab atual:", JSON.stringify(activeTab))
 
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full self-stretch">
+      <div className="mb-6 flex flex-col items-center justify-between gap-4 lg:flex-row">
+        <div className="flex w-full flex-col items-center gap-4 self-stretch sm:flex-row">
           <Input
             id="candidato-search"
             type="search"
             placeholder="Buscar candidatos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full sm:w-[400px] self-stretch"
+            className="w-full self-stretch sm:w-[400px]"
           />
         </div>
-        {!!userQuery.data && isTeacherOrAdmin && <Button onClick={() => navigate("/")}>Adicionar Candidato</Button>}
+        {!!userQuery.data && isTeacherOrAdmin && (
+          <Button onClick={() => navigate("/")}>Adicionar Candidato</Button>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <TabsList>
             {
               // Apenas professor ou admin tem acesso a todos os candidatos
@@ -89,7 +107,6 @@ export default function Home() {
             }
             {isTeacherOrAdmin && (
               <>
-                
                 <TabsTrigger value="candidatos" data-testid="all-candidatos-tab">
                   Candidatos
                 </TabsTrigger>
@@ -485,136 +502,152 @@ function MyDefensesTab(props: MyDefensesTabProps) {
 */
 // ─── Enums (matching DB enum types) ───────────────────────────────────────────
 
-export type Sexo = "Masculino" | "Feminino" | "Outro";
-export type EstadoCivil = "Solteiro" | "Casado" | "Divorciado";
-export type TipoCurso = "Mestrado" | "Doutorado";
-export type AreaPreferencia = string; // ajuste conforme o enum real no DB
+export type Sexo = "Masculino" | "Feminino" | "Outro"
+export type EstadoCivil = "Solteiro" | "Casado" | "Divorciado"
+export type TipoCurso = "Mestrado" | "Doutorado"
+export type AreaPreferencia = string // ajuste conforme o enum real no DB
 
 // ─── Base ──────────────────────────────────────────────────────────────────────
 
 export type NotaDoutorado = {
-  id: number;
-  idCandidato: number;
-  msc: string | null; // numeric(5,2) → string no Drizzle/Postgres
-  areaFormacaoGraduacao: string | null;
-  conceitoCapesMestrado: string | null;
-  a1a2a3a4: string | null;
-  b1b2b3b4: string | null;
-  notaAnteprojeto: string | null;
-};
+  id: number
+  idCandidato: number
+  msc: number | null
+  areaFormacaoGraduacao: number | null
+  conceitoCapesMestrado: number | null
+  a1a2a3a4: number | null
+  b1b2b3b4: number | null
+  notaAnteprojeto: number | null
+}
 export type NotaMestrado = {
-  id: number;
-  idCandidato: number;
-  grad: string | null;
-  area: string | null;
-  enade: string | null;
-  a1a2a3a4: string | null;
-  b1b2b3b4: string | null;
-  icIt: string | null;
-  poscomp: string | null;
-  disciplinaPosCapes6Mais: string | null;
-  disciplinaPosCapes3a5: string | null;
+  id: number
+  idCandidato: number
+  grad: string | null
+  area: string | null
+  enade: string | null
+  a1a2a3a4: string | null
+  b1b2b3b4: string | null
+  icIt: string | null
+  poscomp: string | null
+  disciplinaPosCapes6Mais: string | null
+  disciplinaPosCapes3a5: string | null
 }
 
 export type Endereco = {
-  id: number;
-  cep: string;
-  logradouro: string;
-  numero: string | null;
-  bairro: string;
-  complemento: string | null;
-  estado: string;
-  municipio: string;
+  id: number
+  cep: string
+  logradouro: string
+  numero: string | null
+  bairro: string
+  complemento: string | null
+  estado: string
+  municipio: string
 }
 
 interface Candidato {
   // dados da inscrição
-  id: number;
-  numeroInscricao: string;
-  status: string; // 'Inscricao Submetida' | 'Aprovada' | 'Rejeitada'
-  dataInscricao: string; // ISO timestamp
+  id: number
+  numeroInscricao: string
+  status: string // 'Inscricao Submetida' | 'Aprovada' | 'Rejeitada'
+  dataInscricao: string // ISO timestamp
 
   // dados pessoais
-  cpf: string;
-  sexo: Sexo;
-  nome: string;
-  estadoCivil: EstadoCivil;
-  email: string;
-  endereco: Endereco;
-  dataNascimento: string;         // ISO timestamp
-  raca: string;
-  nomeMae: string;
-  nomePai: string | null;
-  tipoEscolaEnsinoMedio: string;  // 'Publica' | 'Privada' | 'Particular'
+  cpf: string
+  sexo: Sexo
+  nome: string
+  estadoCivil: EstadoCivil
+  email: string
+  endereco: Endereco
+  dataNascimento: string // ISO timestamp
+  raca: string
+  nomeMae: string
+  nomePai: string | null
+  tipoEscolaEnsinoMedio: string // 'Publica' | 'Privada' | 'Particular'
 
   // naturalidade
-  pais: string;
-  estado: string;
-  municipio: string;
+  pais: string
+  estado: string
+  municipio: string
 
   // documentos
-  rg: string;
-  orgaoExpedidor: string;
-  estadoExpedicao: string;
-  dataExpedicao: string;          // ISO timestamp
-  tituloEleitor: string;
-  secaoEleitoral: string;
-  zonaEleitoral: string | null;
-  passaporte: string | null;
+  rg: string
+  orgaoExpedidor: string
+  estadoExpedicao: string
+  dataExpedicao: string // ISO timestamp
+  tituloEleitor: string
+  secaoEleitoral: string
+  zonaEleitoral: string | null
+  passaporte: string | null
 
-  telefoneFixo: string | null;
-  telefoneCelular: string;
+  telefoneFixo: string | null
+  telefoneCelular: string
 
   // processo seletivo
-  linhaPesquisa: string;
+  linhaPesquisa: string
 
   // formulário comum
-  comprovantePagTaxaInscricao: string;  // URL do PDF
-  copiaCPF: string;                     // URL do PDF
-  copiaPassaporteOuRNE: string | null;  // URL do PDF (apenas estrangeiros)
-  copiaDocumentoIdentificacao: string | null; // URL do PDF (apenas brasileiros)
-  solicitouIsencaoTaxaInscricao: boolean;
-  comprovacaoPesquisas: string;         // URL do PDF
-  possuiNecessidadesEspeciais: boolean;
-  vagasNegrosPardos: boolean;
-  vagasSupranumerarias: boolean;
+  comprovantePagTaxaInscricao: string // URL do PDF
+  copiaCPF: string // URL do PDF
+  copiaPassaporteOuRNE: string | null // URL do PDF (apenas estrangeiros)
+  copiaDocumentoIdentificacao: string | null // URL do PDF (apenas brasileiros)
+  solicitouIsencaoTaxaInscricao: boolean
+  comprovacaoPesquisas: string // URL do PDF
+  possuiNecessidadesEspeciais: boolean
+  vagasNegrosPardos: boolean
+  vagasSupranumerarias: boolean
 }
 
 // ─── Doutorado ─────────────────────────────────────────────────────────────────
 
 export interface CandidatoDoutorado extends Candidato {
-  tipoCurso: "Doutorado";
+  tipoCurso: "Doutorado"
 
   // formulário de doutorado
-  historicoGraduacao: string;           // URL do PDF
-  copiaDiplomaMestrado: string;         // URL do PDF
-  historicoMestrado: string;            // URL do PDF
-  nomeUniversidadeMestrado: string;
-  nomeCursoMestrado: string;
-  anteprojetoTese: string;              // URL do PDF
-  conceitoCapesMestrado: string | null;
-  primeiraOpcaoOrientador: string;
-  segundaOpcaoOrientador: string;
-  terceiraOpcaoOrientador: string;
+  historicoGraduacao: string // URL do PDF
+  copiaDiplomaMestrado: string // URL do PDF
+  historicoMestrado: string // URL do PDF
+  nomeUniversidadeMestrado: string
+  nomeCursoMestrado: string
+  anteprojetoTese: string // URL do PDF
+  conceitoCapesMestrado: string | null
+  primeiraOpcaoOrientador: string
+  segundaOpcaoOrientador: string
+  terceiraOpcaoOrientador: string
+
+  notas: NotaDoutorado | null
+
+  avaliador1: string | null
+  avaliador2: string | null
+  insecaoAprovada: string | null
+  GRU: string | null
+  homologa: string | null
+  areaPGCOMP: string | null
+  orientadorMestrado: string | null
+  especiais: string | null
+  cotas: string | null
+  supra: string | null
+  universidade: string | null
+  cursoGrad: string | null
+  cidadeGrad: string | null
 }
 
 // ─── Mestrado ──────────────────────────────────────────────────────────────────
 
 export interface CandidatoMestrado extends Candidato {
-  tipoCurso: "Mestrado";
+  tipoCurso: "Mestrado"
 
   // formulário de mestrado
-  copiaDiplomaGraduacao: string;        // URL do PDF
-  historicoGraduacao: string;           // URL do PDF
-  nomeUniversidadeGraduacao: string;
-  nomeCursoGraduacao: string;
-  cidadeOndeRealizouGraduacao: string;
-  enadeDoCursoGraduacao: string;        // URL portal EMEC
-  valorDoEnadeDoCursoGraduacao: string;
-  notaPOSCOMP: string | null;
-  primeiraAreaPreferencia: AreaPreferencia;
-  segundaAreaPreferencia: AreaPreferencia | null;
-  cartaMotivacao: string;               // URL do PDF
+  copiaDiplomaGraduacao: string // URL do PDF
+  historicoGraduacao: string // URL do PDF
+  nomeUniversidadeGraduacao: string
+  nomeCursoGraduacao: string
+  cidadeOndeRealizouGraduacao: string
+  enadeDoCursoGraduacao: string // URL portal EMEC
+  valorDoEnadeDoCursoGraduacao: string
+  notaPOSCOMP: string | null
+  primeiraAreaPreferencia: AreaPreferencia
+  segundaAreaPreferencia: AreaPreferencia | null
+  cartaMotivacao: string // URL do PDF
 }
 interface CandidatosTabProps {
   searchQuery: string
@@ -629,14 +662,13 @@ function CandidatosTab(props: CandidatosTabProps) {
 
   console.log("Dados de candidatos:", candidatosQuery.data) // Log para verificar os dados retornados
 
-  
   if (candidatosQuery.isLoading) {
     return (
       <TabsContent value="candidatos">
-        <div className="border rounded-md p-4">
-          <Skeleton className="h-8 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
+        <div className="rounded-md border p-4">
+          <Skeleton className="mb-2 h-8 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
       </TabsContent>
@@ -646,21 +678,19 @@ function CandidatosTab(props: CandidatosTabProps) {
   if (candidatosQuery.isError) {
     return (
       <TabsContent value="candidatos">
-        <div className="text-red-600 p-4">
+        <div className="p-4 text-red-600">
           Erro ao carregar candidatos: {candidatosQuery.error?.message || "Erro desconhecido"}
         </div>
       </TabsContent>
     )
   }
-  
-  const candidatos = candidatosQuery.data.mestrado.concat(candidatosQuery.data.doutorado) // Combina mestrado e doutorado em um único array
-  
-  if (!candidatosQuery.data || candidatos.length === 0) {
+
+  const candidatos = candidatosQuery.data?.mestrado.concat(candidatosQuery.data?.doutorado || []) // Combina mestrado e doutorado em um único array
+
+  if (!candidatosQuery.data || candidatos?.length === 0) {
     return (
       <TabsContent value="candidatos">
-        <div className="text-gray-600 p-4">
-          Nenhum candidato encontrado.
-        </div>
+        <div className="p-4 text-gray-600">Nenhum candidato encontrado.</div>
       </TabsContent>
     )
   }
@@ -669,8 +699,8 @@ function CandidatosTab(props: CandidatosTabProps) {
     <TabsContent value="candidatos">
       <div className="space-y-4">
         <div>
-          <div className="border rounded-md">
-            <div className="p-4 border-b">
+          <div className="rounded-md border">
+            <div className="border-b p-4">
               <h3 className="text-lg font-semibold">Candidatos (Todos)</h3>
             </div>
             <div className="overflow-x-auto">
@@ -680,7 +710,8 @@ function CandidatosTab(props: CandidatosTabProps) {
                 sortField={props.sortField}
                 sortOrder={props.sortOrder}
                 rowsPerPage={props.rowsPerPage}
-                onSort={props.onSort} />
+                onSort={props.onSort}
+              />
             </div>
           </div>
         </div>
@@ -688,8 +719,6 @@ function CandidatosTab(props: CandidatosTabProps) {
     </TabsContent>
   )
 }
-
-
 
 interface CandidatosMestradoTabProps {
   searchQuery: string
@@ -703,14 +732,14 @@ function CandidatosMestradoTab(props: CandidatosMestradoTabProps) {
   const candidatosQuery = useCandidatos()
   const mestradoData = candidatosQuery.data?.mestrado || []
 
-  console.log ("Dados de candidatos de mestrado:", mestradoData) // Log para verificar os dados retornados
+  console.log("Dados de candidatos de mestrado:", mestradoData) // Log para verificar os dados retornados
   if (candidatosQuery.isLoading) {
     return (
       <TabsContent value="candidatos-mestrado">
-        <div className="border rounded-md p-4">
-          <Skeleton className="h-8 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
+        <div className="rounded-md border p-4">
+          <Skeleton className="mb-2 h-8 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
       </TabsContent>
@@ -720,8 +749,9 @@ function CandidatosMestradoTab(props: CandidatosMestradoTabProps) {
   if (candidatosQuery.isError) {
     return (
       <TabsContent value="candidatos-mestrado">
-        <div className="text-red-600 p-4">
-          Erro ao carregar candidatos de mestrado: {candidatosQuery.error?.message || "Erro desconhecido"}
+        <div className="p-4 text-red-600">
+          Erro ao carregar candidatos de mestrado:{" "}
+          {candidatosQuery.error?.message || "Erro desconhecido"}
         </div>
       </TabsContent>
     )
@@ -731,8 +761,8 @@ function CandidatosMestradoTab(props: CandidatosMestradoTabProps) {
     <TabsContent value="candidatos-mestrado">
       <div className="space-y-4">
         <div>
-          <div className="border rounded-md">
-            <div className="p-4 border-b">
+          <div className="rounded-md border">
+            <div className="border-b p-4">
               <h3 className="text-lg font-semibold">Candidatos de Mestrado</h3>
             </div>
             <div className="overflow-x-auto">
@@ -741,8 +771,9 @@ function CandidatosMestradoTab(props: CandidatosMestradoTabProps) {
                 searchQuery={props.searchQuery}
                 sortField={props.sortField}
                 sortOrder={props.sortOrder}
-                rowsPerPage={props.rowsPerPage} 
-                onSort={props.onSort} />
+                rowsPerPage={props.rowsPerPage}
+                onSort={props.onSort}
+              />
             </div>
           </div>
         </div>
@@ -750,7 +781,6 @@ function CandidatosMestradoTab(props: CandidatosMestradoTabProps) {
     </TabsContent>
   )
 }
-
 
 interface CandidatosDoutoradoTabProps {
   searchQuery: string
@@ -767,10 +797,10 @@ function CandidatosDoutoradoTab(props: CandidatosDoutoradoTabProps) {
   if (candidatosQuery.isLoading) {
     return (
       <TabsContent value="candidatos-doutorado">
-        <div className="border rounded-md p-4">
-          <Skeleton className="h-8 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
+        <div className="rounded-md border p-4">
+          <Skeleton className="mb-2 h-8 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
       </TabsContent>
@@ -780,8 +810,9 @@ function CandidatosDoutoradoTab(props: CandidatosDoutoradoTabProps) {
   if (candidatosQuery.isError) {
     return (
       <TabsContent value="candidatos-doutorado">
-        <div className="text-red-600 p-4">
-          Erro ao carregar candidatos de doutorado: {candidatosQuery.error?.message || "Erro desconhecido"}
+        <div className="p-4 text-red-600">
+          Erro ao carregar candidatos de doutorado:{" "}
+          {candidatosQuery.error?.message || "Erro desconhecido"}
         </div>
       </TabsContent>
     )
@@ -791,8 +822,8 @@ function CandidatosDoutoradoTab(props: CandidatosDoutoradoTabProps) {
     <TabsContent value="candidatos-doutorado">
       <div className="space-y-4">
         <div>
-          <div className="border rounded-md">
-            <div className="p-4 border-b">
+          <div className="rounded-md border">
+            <div className="border-b p-4">
               <h3 className="text-lg font-semibold">Candidatos de Doutorado</h3>
             </div>
             <div className="overflow-x-auto">
@@ -801,8 +832,9 @@ function CandidatosDoutoradoTab(props: CandidatosDoutoradoTabProps) {
                 searchQuery={props.searchQuery}
                 sortField={props.sortField}
                 sortOrder={props.sortOrder}
-                rowsPerPage={props.rowsPerPage} 
-                onSort={props.onSort} />
+                rowsPerPage={props.rowsPerPage}
+                onSort={props.onSort}
+              />
             </div>
           </div>
         </div>
@@ -929,7 +961,11 @@ function HomeTable(props: {
     if (props.sortField !== columnKey) {
       return <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
     }
-    return props.sortOrder === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+    return props.sortOrder === "asc" ? (
+      <ChevronUp className="h-4 w-4" />
+    ) : (
+      <ChevronDown className="h-4 w-4" />
+    )
   }
 
   const truncateText = (text: string, maxLength: number) => {
@@ -985,8 +1021,12 @@ function HomeTable(props: {
                       </span>
                     ))
                     .with("autor", () => <span className="whitespace-nowrap">{banca.autor}</span>)
-                    .with("orientador", () => <span className="whitespace-nowrap">{banca.orientador.nome}</span>)
-                    .with("curso", () => <span className="whitespace-nowrap">{banca.curso.sigla}</span>)
+                    .with("orientador", () => (
+                      <span className="whitespace-nowrap">{banca.orientador.nome}</span>
+                    ))
+                    .with("curso", () => (
+                      <span className="whitespace-nowrap">{banca.curso.sigla}</span>
+                    ))
                     .with("local", () => <span className="whitespace-nowrap">{banca.local}</span>)
                     .otherwise(() => null)}
                 </TableCell>
@@ -1027,7 +1067,7 @@ function TableWithInfo(props: {
 
   return (
     <div>
-      <div className="border rounded-md overflow-x-auto">
+      <div className="overflow-x-auto rounded-md border">
         <HomeTable {...props} />
       </div>
       {meta && (
@@ -1063,7 +1103,6 @@ function TableWithInfo(props: {
   )
 }
 
-
 function HomeTableCandidatos(props: {
   data: CandidatoMestrado[] | CandidatoDoutorado[] | Candidato[]
   searchQuery: string
@@ -1082,7 +1121,11 @@ function HomeTableCandidatos(props: {
     if (props.sortField !== columnKey) {
       return <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
     }
-    return props.sortOrder === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+    return props.sortOrder === "asc" ? (
+      <ChevronUp className="h-4 w-4" />
+    ) : (
+      <ChevronDown className="h-4 w-4" />
+    )
   }
 
   const truncateText = (text: string, maxLength: number) => {
@@ -1102,12 +1145,16 @@ function HomeTableCandidatos(props: {
         </TableRow>
       </TableHeader>
       <TableBody>
-        { paginatedData?.length > 0 ? (
-          paginatedData.map((candidato) =>  (
-            
+        {paginatedData?.length > 0 ? (
+          paginatedData.map((candidato) => (
             <TableRow
               key={candidato.id}
-              onClick={() => goToViewCandidato(candidato.tipoCurso.toLowerCase() as "mestrado" | "doutorado", candidato.id)}
+              onClick={() =>
+                goToViewCandidato(
+                  candidato.tipoCurso.toLowerCase() as "mestrado" | "doutorado",
+                  candidato.id
+                )
+              }
               className="cursor-pointer hover:bg-muted/50"
             >
               <TableCell>{candidato.nome}</TableCell>

@@ -73,7 +73,7 @@ export default function LandingPage() {
             description: "Ocorreu um erro ao fazer login",
           })
         },
-      },
+      }
     )
   }
 
@@ -95,7 +95,7 @@ export default function LandingPage() {
             description: error.message || "Ocorreu um erro ao enviar o email",
           })
         },
-      },
+      }
     )
   }
 
@@ -109,9 +109,12 @@ export default function LandingPage() {
           <img
             src="/icc-ufba.png"
             alt="Logo do Instituto de Computação da UFBA"
-            className="h-auto w-42 object-contain sm:w-48 lg:w-50"
+            className="w-42 lg:w-50 h-auto object-contain sm:w-48"
           />
-          <h1 id="brand-title" className="mt-3 hidden text-4xl font-bold tracking-tight lg:block lg:text-5xl">
+          <h1
+            id="brand-title"
+            className="mt-3 hidden text-4xl font-bold tracking-tight lg:block lg:text-5xl"
+          >
             Sistema Seleção
           </h1>
         </div>
@@ -121,7 +124,10 @@ export default function LandingPage() {
         className="flex items-center justify-center bg-white px-6 py-6 lg:min-h-screen lg:px-16 lg:py-16"
       >
         <div className="w-full max-w-md">
-          <h1 id="login-title" className="mb-8 text-center text-3xl font-bold tracking-tight lg:text-left lg:text-4xl">
+          <h1
+            id="login-title"
+            className="mb-8 text-center text-3xl font-bold tracking-tight lg:text-left lg:text-4xl"
+          >
             <span className="lg:hidden">Sistema de seleção</span>
             <span className="hidden lg:inline">Login</span>
           </h1>
@@ -152,8 +158,14 @@ export default function LandingPage() {
                   <p className="text-sm text-destructive">{resetErrors.email.message}</p>
                 )}
               </div>
-              <Button type="submit" className="w-full" disabled={requestPasswordResetMutation.isPending}>
-                {requestPasswordResetMutation.isPending ? "Enviando..." : "Enviar Email de Recuperação"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={requestPasswordResetMutation.isPending}
+              >
+                {requestPasswordResetMutation.isPending
+                  ? "Enviando..."
+                  : "Enviar Email de Recuperação"}
               </Button>
               <Button
                 type="button"
@@ -205,7 +217,9 @@ export default function LandingPage() {
                     required: "Senha é obrigatória",
                   })}
                 />
-                {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                )}
               </div>
               <Button
                 type="submit"

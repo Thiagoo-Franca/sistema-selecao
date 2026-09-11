@@ -1,12 +1,19 @@
 import { useNavigate, useParams } from "react-router"
 import type { Route } from "./+types/banca.$id"
-import { useToast } from "@/hooks"
 import { useEffect, useState } from "react"
-import { useCandidatoMestradoById } from "@/hooks/candidato.hooks"
+import { useToast } from "@/hooks"
 import { useUser } from "@/services/useUser"
+import { useCandidatoDoutoradoById } from "@/hooks/candidato.hooks"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import {
+  CandidatoDoutoradoNotaEtapa1Schema,
+  type CandidatoDoutoradoNotaEtapa1,
+} from "@/schema/schema"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+import { calcularNotaDoutoradoEtapa1, paraNumeroSeguro } from "@/lib/calculoNotas"
 import { Header } from "@/components/layout/Header"
 import { ArrowLeft, Loader2 } from "lucide-react"
-import type { CandidatoMestrado } from "./_index"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel, FieldLegend } from "@/components/ui/field"
 import {
@@ -18,17 +25,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  CandidatoMestradoNotaEtapa1Schema,
-  type CandidatoMestradoNotaEtapa1,
-} from "@/schema/schema"
-import { calcularMestradoNotaEtapa1, paraNumeroSeguro } from "@/lib/calculoNotas"
+import type { CandidatoDoutorado } from "./dashboard"
 
-export const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato Mestrado` }]
+export const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato Doutorado` }]
 
-export default function AvaliacaoCandidatoMestradoPage() {
+export default function AvaliacaoCandidatoDoutoradoPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string | undefined }>()
   const [nota, setNota] = useState(0)
@@ -36,10 +37,10 @@ export default function AvaliacaoCandidatoMestradoPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const userQuery = useUser()
-  const candidatoQuery = useCandidatoMestradoById(id ?? "")
+  const candidatoQuery = useCandidatoDoutoradoById(id ?? "")
 
-  const form = useForm<CandidatoMestradoNotaEtapa1>({
-    resolver: zodResolver(CandidatoMestradoNotaEtapa1Schema),
+  const form = useForm<CandidatoDoutoradoNotaEtapa1>({
+    resolver: zodResolver(CandidatoDoutoradoNotaEtapa1Schema),
   })
 
   const {
@@ -51,9 +52,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
   } = form
 
   const user = userQuery.data
-  const candidato: CandidatoMestrado | null | undefined = candidatoQuery.data
-  const isLoading = candidatoQuery.isLoading || userQuery.isLoading
+  const candidato: CandidatoDoutorado | null | undefined = candidatoQuery.data
   const isAdmin = user?.role === "ADMIN"
+  const isLoading = candidatoQuery.isLoading || userQuery.isLoading
 
   useEffect(() => {
     if (!id || (!userQuery.isLoading && !user)) {
@@ -66,40 +67,40 @@ export default function AvaliacaoCandidatoMestradoPage() {
       reset({
         avaliador1: candidato.avaliador1 ? candidato.avaliador1 : "",
         avaliador2: candidato.avaliador2 ? candidato.avaliador2 : "",
-        area1: candidato.primeiraAreaPreferencia ? candidato.primeiraAreaPreferencia : "",
-        area2: candidato.segundaAreaPreferencia ? candidato.segundaAreaPreferencia : "",
-        id: candidato.numeroInscricao ? candidato.numeroInscricao : "",
         cpf: candidato.cpf ? candidato.cpf : "",
         nome: candidato.nome ? candidato.nome : "",
         email: candidato.email ? candidato.email : "",
-        cidade: candidato.municipio ? candidato.municipio : "",
-        isencao: candidato.solicitouIsencaoTaxaInscricao ? "sim" : "nao",
-        isencaoAprovada: candidato.isencaoAprovada ? "sim" : "nao",
-        GRU: candidato.GRU ? candidato.GRU : "",
-        Homologa: candidato.homologado ? "sim" : "nao",
-        universidade: candidato.nomeUniversidadeGraduacao
-          ? candidato.nomeUniversidadeGraduacao
+        insecao: candidato.solicitouIsencaoTaxaInscricao ? "Sim" : "Não",
+        insecaoAprovada: candidato.insecaoAprovada ? "Sim" : "Não",
+        GRU: candidato.GRU ? candidato.GRU : "", // ajustar GRU
+        homologa: candidato.homologa ? "Sim" : "Não", // ajustar homologa
+        areaPGCOMP: candidato.areaPGCOMP ? candidato.areaPGCOMP : "", // ajustar areaPGCOMP
+        orientadorMestrado: candidato.orientadorMestrado ? candidato.orientadorMestrado : "", // ajustar orientadorMestrado
+        PotencialOrientador1: candidato.primeiraOpcaoOrientador
+          ? candidato.primeiraOpcaoOrientador
           : "",
-        cursoGrad: candidato.nomeCursoGraduacao ? candidato.nomeCursoGraduacao : "",
-        cidadeGrad: candidato.cidadeOndeRealizouGraduacao
-          ? candidato.cidadeOndeRealizouGraduacao
+        PotencialOrientador2: candidato.segundaOpcaoOrientador
+          ? candidato.segundaOpcaoOrientador
           : "",
-        especiais: candidato.especiais ? candidato.especiais : "",
+        PotencialOrientador3: candidato.terceiraOpcaoOrientador
+          ? candidato.terceiraOpcaoOrientador
+          : "",
+        Especiais: candidato.especiais ? candidato.especiais : "",
         cotas: candidato.cotas ? candidato.cotas : "",
-        SUPRA: candidato.SUPRA ? candidato.SUPRA : "",
-        grad: candidato.notaGraduacao ? candidato.notaGraduacao : 0,
-        area: candidato.notaArea ? candidato.notaArea : 0,
-        enade: candidato.notaEnade ? candidato.notaEnade : 0,
-        a1a2a3a4: candidato.notaA1A2A3A4 ? candidato.notaA1A2A3A4 : 0,
-        b1b2b3b4: candidato.notaB1B2B3B4 ? candidato.notaB1B2B3B4 : 0,
-        ic_it: candidato.notaIcIt ? candidato.notaIcIt : 0,
-        poscomp: candidato.notaPoscomp ? candidato.notaPoscomp : 0,
-        DISCIPLINA_PÓS_CAPES_6: candidato.notaDisciplinaPósCapes6
-          ? candidato.notaDisciplinaPósCapes6
+        Supra: candidato.supra ? candidato.supra : "",
+        Universidade: candidato.universidade ? candidato.universidade : "",
+        curso: candidato.cursoGrad ? candidato.cursoGrad : "",
+        cidade: candidato.cidadeGrad ? candidato.cidadeGrad : "", // cidade da universidade
+        msc: candidato.notas?.msc ? candidato.notas?.msc : 0,
+        areaFormacaoGraduacao: candidato.notas?.areaFormacaoGraduacao
+          ? candidato.notas?.areaFormacaoGraduacao
           : 0,
-        DISCIPLINA_PÓS_CAPES_3_5: candidato.notaDisciplinaPósCapes3_5
-          ? candidato.notaDisciplinaPósCapes3_5
+        conceitoCapesMestrado: candidato.notas?.conceitoCapesMestrado
+          ? candidato.notas?.conceitoCapesMestrado
           : 0,
+        a1a2a3a4: candidato.notas?.a1a2a3a4 ? candidato.notas?.a1a2a3a4 : 0,
+        b1b2b3b4: candidato.notas?.b1b2b3b4 ? candidato.notas?.b1b2b3b4 : 0,
+        notaAnteprojeto: candidato.notas?.notaAnteprojeto ? candidato.notas?.notaAnteprojeto : 0,
       })
     }
   }, [candidato, reset])
@@ -107,48 +108,35 @@ export default function AvaliacaoCandidatoMestradoPage() {
   const camposNotaEtapa1 = useWatch({
     control,
     name: [
-      "grad",
-      "area",
-      "enade",
+      "msc",
+      "areaFormacaoGraduacao",
+      "conceitoCapesMestrado",
+      "notaAnteprojeto",
       "a1a2a3a4",
       "b1b2b3b4",
-      "ic_it",
-      "poscomp",
-      "DISCIPLINA_PÓS_CAPES_6",
-      "DISCIPLINA_PÓS_CAPES_3_5",
     ],
   })
 
   useEffect(() => {
-    const [
-      grad,
-      area,
-      enade,
-      a1a2a3a4,
-      b1b2b3b4,
-      ic_it,
-      poscomp,
-      DISCIPLINA_PÓS_CAPES_6,
-      DISCIPLINA_PÓS_CAPES_3_5,
-    ] = camposNotaEtapa1
+    if (!camposNotaEtapa1) return
 
-    const resultado = calcularMestradoNotaEtapa1({
-      grad: paraNumeroSeguro(grad),
-      area: paraNumeroSeguro(area),
-      enade: paraNumeroSeguro(enade),
+    const [MSC, areaFormacaoGraduacao, conceitoCapesMestrado, notaAnteprojeto, a1a2a3a4, b1b2b3b4] =
+      camposNotaEtapa1
+
+    const resultado = calcularNotaDoutoradoEtapa1({
+      msc: paraNumeroSeguro(MSC),
+      areaFormacaoGraduacao: paraNumeroSeguro(areaFormacaoGraduacao),
+      conceitoCapesMestrado: paraNumeroSeguro(conceitoCapesMestrado),
       a1a2a3a4: paraNumeroSeguro(a1a2a3a4),
       b1b2b3b4: paraNumeroSeguro(b1b2b3b4),
-      ic_it: paraNumeroSeguro(ic_it),
-      poscomp: paraNumeroSeguro(poscomp),
-      DISCIPLINA_PÓS_CAPES_6: paraNumeroSeguro(DISCIPLINA_PÓS_CAPES_6),
-      DISCIPLINA_PÓS_CAPES_3_5: paraNumeroSeguro(DISCIPLINA_PÓS_CAPES_3_5),
+      notaAnteprojeto: paraNumeroSeguro(notaAnteprojeto),
     })
 
     setNota(resultado.pontuacao)
   }, [camposNotaEtapa1])
 
-  function onSubmit(dados: CandidatoMestradoNotaEtapa1) {
-    const resultado = calcularMestradoNotaEtapa1(dados)
+  function onSubmit(dados: CandidatoDoutoradoNotaEtapa1) {
+    const resultado = calcularNotaDoutoradoEtapa1(dados)
     console.log("Pontuação:", resultado.pontuacao)
     console.log("Aprovado:", resultado.aprovado)
   }
@@ -189,17 +177,11 @@ export default function AvaliacaoCandidatoMestradoPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
       </div>
-
-      {
-        // AGRUPAR CAMPOS PARA FICAR MAIS CLARO CADA SEÇÂO, por exemplo dados do candidato
-        // REALIZAR CALCULO NO FRONTEND MESMO, PARA APARECER INSTANTANEAMENTE A PONTUAÇÃO E SE FOI APROVADO OU NÃO, SEM PRECISAR FICAR ESPERANDO O BACKEND RESPONDER, PARA DEPOIS MOSTRAR ESSAS INFORMAÇÕES PARA O USUÁRIO
-      }
-
       <form className="flex flex-col gap-y-4" onSubmit={handleSubmit(onSubmit)}>
         <FieldLegend className="font-bold text-muted-foreground">Avaliadores</FieldLegend>
+
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
           {/* Avaliador 1 */}
-
           <Field className="flex flex-col gap-4">
             <FieldLabel htmlFor="avaliador1" className="font-bold text-muted-foreground">
               Avaliador 1
@@ -225,52 +207,10 @@ export default function AvaliacaoCandidatoMestradoPage() {
             />
           </Field>
         </div>
-        <FieldLegend className="font-bold text-muted-foreground">Áreas de Interesse</FieldLegend>
 
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          {/* Área 1 */}
-
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="area1" className="font-bold text-muted-foreground">
-              ÁREA 1 OPÇÃO
-            </FieldLabel>
-            <Input
-              {...register("area1")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="area1"
-            />
-          </Field>
-
-          {/* Área 2 */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="area2" className="font-bold text-muted-foreground">
-              ÁREA 2 OPÇÃO
-            </FieldLabel>
-            <Input
-              {...register("area2")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="area2"
-            />
-          </Field>
-        </div>
         <FieldLegend className="font-bold text-muted-foreground">Dados do candidato</FieldLegend>
 
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          {/* ID */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="id" className="font-bold text-muted-foreground">
-              ID
-            </FieldLabel>
-            <Input
-              {...register("id")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="id"
-            />
-          </Field>
-
           {/* CPF */}
           <Field className="flex flex-col gap-4">
             <FieldLabel htmlFor="cpf" className="font-bold text-muted-foreground">
@@ -307,19 +247,6 @@ export default function AvaliacaoCandidatoMestradoPage() {
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="email"
               id="email"
-            />
-          </Field>
-
-          {/* Cidade */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="cidade" className="font-bold text-muted-foreground">
-              CIDADE DE RESIDÊNCIA
-            </FieldLabel>
-            <Input
-              {...register("cidade")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="cidade"
             />
           </Field>
         </div>
@@ -372,7 +299,6 @@ export default function AvaliacaoCandidatoMestradoPage() {
               </Field>
             )}
           />
-
           {/* GRU */}
           <Controller
             control={control}
@@ -399,74 +325,106 @@ export default function AvaliacaoCandidatoMestradoPage() {
               </Field>
             )}
           />
-        </div>
-
-        {/* Homologa */}
-        <Controller
-          control={control}
-          name="Homologa"
-          render={({ field }) => (
-            <Field className="flex flex-col gap-4">
-              <FieldLabel htmlFor="Homologa" className="font-bold text-muted-foreground">
-                Homologa?
-              </FieldLabel>
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                <SelectTrigger className="w-full max-w-[400px]">
-                  <SelectValue placeholder="Homologa?" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="sim">SIM</SelectItem>
-                    <SelectItem value="nao">NÃO</SelectItem>
-                    <SelectItem value="nao-solicitou">NÃO SOLICITOU</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
-        />
-        <FieldLegend className="font-bold text-muted-foreground">Dados sobre graduação</FieldLegend>
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          {/* Universidade */}
+          {/* Homologa */}
+          <Controller
+            control={control}
+            name="Homologa"
+            render={({ field }) => (
+              <Field className="flex flex-col gap-4">
+                <FieldLabel htmlFor="Homologa" className="font-bold text-muted-foreground">
+                  Homologa?
+                </FieldLabel>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                  <SelectTrigger className="w-full max-w-[400px]">
+                    <SelectValue placeholder="Homologa?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="sim">SIM</SelectItem>
+                      <SelectItem value="nao">NÃO</SelectItem>
+                      <SelectItem value="nao-solicitou">NÃO SOLICITOU</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          />
+          {/* Area PGCOMP */}
+          <Controller
+            control={control}
+            name="areaPGCOMP"
+            render={({ field }) => (
+              <Field className="flex flex-col gap-4">
+                <FieldLabel htmlFor="areaPGCOMP" className="font-bold text-muted-foreground">
+                  Area PGCOMP
+                </FieldLabel>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                  <SelectTrigger className="w-full max-w-[400px]">
+                    <SelectValue placeholder="Area PGCOMP?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="engenharia-de-software">ENGENHARIA DE SOFTWARE</SelectItem>
+                      <SelectItem value="computacao-aplicada">COMPUTACAO APLICADA</SelectItem>
+                      <SelectItem value="sistemas-computacionais">
+                        SISTEMAS COMPUTACIONAIS
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          />
+          {/* Orientador(a) do Mestrado */}
           <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="universidade" className="font-bold text-muted-foreground">
-              UNIVERSIDADE
+            <FieldLabel htmlFor="orientadorMestrado" className="font-bold text-muted-foreground">
+              Orientador(a) do Mestrado
             </FieldLabel>
             <Input
-              {...register("universidade")}
+              {...register("orientadorMestrado")}
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="text"
-              id="universidade"
+              id="orientadorMestrado"
+            />
+          </Field>
+          {/* Potencial orientador 1 */}
+          <Field className="flex flex-col gap-4">
+            <FieldLabel htmlFor="potencialOrientador1" className="font-bold text-muted-foreground">
+              Potencial Orientador 1
+            </FieldLabel>
+            <Input
+              {...register("PotencialOrientador1")}
+              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
+              type="text"
+              id="potencialOrientador1"
             />
           </Field>
 
-          {/* Curso de Graduação */}
+          {/* Potencial orientador 2 */}
           <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="cursoGrad" className="font-bold text-muted-foreground">
-              CURSO DE GRADUAÇÃO
+            <FieldLabel htmlFor="potencialOrientador2" className="font-bold text-muted-foreground">
+              Potencial Orientador 2
             </FieldLabel>
             <Input
-              {...register("cursoGrad")}
+              {...register("PotencialOrientador2")}
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="text"
-              id="cursoGrad"
+              id="potencialOrientador2"
+            />
+          </Field>
+          {/* Potencial orientador 3 */}
+          <Field className="flex flex-col gap-4">
+            <FieldLabel htmlFor="potencialOrientador3" className="font-bold text-muted-foreground">
+              Potencial Orientador 3
+            </FieldLabel>
+            <Input
+              {...register("PotencialOrientador3")}
+              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
+              type="text"
+              id="potencialOrientador3"
             />
           </Field>
 
-          {/* Cidade de Graduação */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="cidadeGrad" className="font-bold text-muted-foreground">
-              Cidade de graduação
-            </FieldLabel>
-            <Input
-              {...register("cidadeGrad")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="cidadeGrad"
-            />
-          </Field>
-        </div>
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
           {/* Especiais */}
           <Controller
             control={control}
@@ -541,30 +499,52 @@ export default function AvaliacaoCandidatoMestradoPage() {
               </Field>
             )}
           />
+          {/* Universidade */}
+          <Field className="flex flex-col gap-4">
+            <FieldLabel htmlFor="universidade" className="font-bold text-muted-foreground">
+              Universidade
+            </FieldLabel>
+            <Input
+              {...register("Universidade")}
+              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
+              type="text"
+              id="universidade"
+            />
+          </Field>
+          {/* Curso */}
+          <Field className="flex flex-col gap-4">
+            <FieldLabel htmlFor="curso" className="font-bold text-muted-foreground">
+              Curso
+            </FieldLabel>
+            <Input
+              {...register("Curso")}
+              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
+              type="text"
+              id="curso"
+            />
+          </Field>
+          {/* Cidade Universiade */}
+          <Field className="flex flex-col gap-4">
+            <FieldLabel htmlFor="cidadeUniversidade" className="font-bold text-muted-foreground">
+              Cidade da Universidade
+            </FieldLabel>
+            <Input
+              {...register("Cidade")}
+              className="masx-w-[400px] w-full rounded-[8px] border border-gray-800 p-2"
+              type="text"
+              id="cidadeUniversidade"
+            />
+          </Field>
         </div>
         <FieldLegend className="font-bold text-muted-foreground">Notas da Etapa I</FieldLegend>
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          {/* GRAD */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="grad" className="font-bold text-muted-foreground">
-              GRAD
-            </FieldLabel>
-            <Input
-              {...register("grad", { valueAsNumber: true })}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="number"
-              step="0.01"
-              id="grad"
-            />
-          </Field>
-
-          {/* AREA */}
+          {/* Nota mestrado*/}
           <Field className="flex flex-col gap-4">
             <FieldLabel htmlFor="area" className="font-bold text-muted-foreground">
-              AREA
+              MSC (NOTA MESTRADO)
             </FieldLabel>
             <Input
-              {...register("area", { valueAsNumber: true })}
+              {...register("msc", { valueAsNumber: true })}
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="number"
               step="0.01"
@@ -572,29 +552,49 @@ export default function AvaliacaoCandidatoMestradoPage() {
             />
           </Field>
 
-          {/* ENADE */}
+          {/* AREA */}
+          <Field className="flex flex-col gap-4">
+            <FieldLabel htmlFor="areaFormacaoGraduacao" className="font-bold text-muted-foreground">
+              AREA DE FORMAÇÃO DA GRADUAÇÃO
+            </FieldLabel>
+            <Input
+              {...register("areaFormacaoGraduacao", { valueAsNumber: true })}
+              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
+              type="number"
+              step="0.01"
+              id="areaFormacaoGraduacao"
+            />
+          </Field>
+
+          {/* Conceito CAPES */}
           <Controller
             control={control}
-            name="enade"
+            name="conceitoCapesMestrado"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
-                <FieldLabel htmlFor="enade" className="font-bold text-muted-foreground">
-                  ENADE
+                <FieldLabel
+                  htmlFor="conceitoCapesMestrado"
+                  className="font-bold text-muted-foreground"
+                >
+                  CONCEITO CAPES
                 </FieldLabel>
                 <Select
                   onValueChange={(v) => field.onChange(Number(v))}
                   value={field.value ? String(field.value) : ""}
                 >
                   <SelectTrigger className="w-full max-w-[400px]">
-                    <SelectValue placeholder="Enade" />
+                    <SelectValue placeholder="Conceito CAPES" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
+                      <SelectItem value="7">7</SelectItem>
+                      <SelectItem value="6">6</SelectItem>
                       <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="4">4</SelectItem>
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="2">2</SelectItem>
+                      <SelectItem value="1">1</SelectItem>
+                      <SelectItem value="0">0</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -627,56 +627,16 @@ export default function AvaliacaoCandidatoMestradoPage() {
               id="b1b2b3b4"
             />
           </Field>
-
-          {/* IC/IT */}
+          {/* Nota anteprojeto */}
           <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="icit" className="font-bold text-muted-foreground">
-              IC/IT
+            <FieldLabel htmlFor="notaAnteprojeto" className="font-bold text-muted-foreground">
+              Nota do Anteprojeto
             </FieldLabel>
             <Input
-              {...register("ic_it", { valueAsNumber: true })}
+              {...register("notaAnteprojeto", { valueAsNumber: true })}
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="number"
-              id="icit"
-            />
-          </Field>
-
-          {/* POSCOMP */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="poscomp" className="font-bold text-muted-foreground">
-              POSCOMP
-            </FieldLabel>
-            <Input
-              {...register("poscomp", { valueAsNumber: true })}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="number"
-              id="poscomp"
-            />
-          </Field>
-
-          {/* DISCIPLINA PÓS CAPES 6+ */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="posCapes" className="font-bold text-muted-foreground">
-              DISCIPLINA PÓS CAPES 6+
-            </FieldLabel>
-            <Input
-              {...register("DISCIPLINA_PÓS_CAPES_6", { valueAsNumber: true })}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="number"
-              id="posCapes"
-            />
-          </Field>
-
-          {/* DISCIPLINA PÓS CAPES 3 a 5 */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="posCapes3a5" className="font-bold text-muted-foreground">
-              DISCIPLINA PÓS CAPES 3 a 5
-            </FieldLabel>
-            <Input
-              {...register("DISCIPLINA_PÓS_CAPES_3_5", { valueAsNumber: true })}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="number"
-              id="posCapes3a5"
+              id="notaAnteprojeto"
             />
           </Field>
         </div>
@@ -697,7 +657,6 @@ export default function AvaliacaoCandidatoMestradoPage() {
           {isSubmitting ? "Salvando..." : "Salvar Avaliação"}
         </Button>
       </form>
-      <hr className="my-4" />
     </div>
   )
 }

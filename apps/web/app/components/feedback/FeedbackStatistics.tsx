@@ -8,7 +8,7 @@ export function FeedbackStatistics() {
 
   if (statsLoading) {
     return (
-      <div className="flex items-center justify-center h-48">
+      <div className="flex h-48 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
@@ -24,11 +24,13 @@ export function FeedbackStatistics() {
         <CardContent>
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <p className="text-lg font-semibold text-muted-foreground">Dados insuficientes</p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="mt-2 text-sm text-muted-foreground">
               São necessários pelo menos 3 feedbacks para exibir as estatísticas.
             </p>
             {statistics && (
-              <p className="text-sm text-muted-foreground mt-1">Feedbacks recebidos: {statistics.totalSubmissions}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Feedbacks recebidos: {statistics.totalSubmissions}
+              </p>
             )}
           </div>
         </CardContent>
@@ -85,7 +87,7 @@ interface StatisticsProps {
 function OverviewSection({ statistics }: StatisticsProps) {
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <span className="text-sm font-medium">Total de Feedbacks</span>
         <span className="text-2xl font-bold">{statistics.totalSubmissions}</span>
       </div>
@@ -120,7 +122,12 @@ function RatingsSection({ statistics }: StatisticsProps) {
   return (
     <div className="space-y-6">
       {ratings.map((rating) => (
-        <RatingBar key={rating.label} label={rating.label} value={rating.value} description={rating.description} />
+        <RatingBar
+          key={rating.label}
+          label={rating.label}
+          value={rating.value}
+          description={rating.description}
+        />
       ))}
     </div>
   )
@@ -137,16 +144,16 @@ function RatingBar({ label, value, description }: RatingBarProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium">{label}</p>
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
         <span className="text-lg font-semibold">{value.toFixed(2)}</span>
       </div>
-      <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
+      <div className="h-3 w-full overflow-hidden rounded-full bg-secondary">
         <div
-          className="bg-primary h-full transition-all duration-300 rounded-full"
+          className="h-full rounded-full bg-primary transition-all duration-300"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -155,15 +162,20 @@ function RatingBar({ label, value, description }: RatingBarProps) {
 }
 
 function SystemUsageSection({ statistics }: StatisticsProps) {
-  const completedPercentage = (statistics.completedAllTasksCount / statistics.totalSubmissions) * 100
+  const completedPercentage =
+    (statistics.completedAllTasksCount / statistics.totalSubmissions) * 100
   const notCompletedPercentage = 100 - completedPercentage
 
   return (
     <div className="space-y-6">
       <div>
-        <h4 className="text-sm font-medium mb-3">Completou todas as tarefas?</h4>
+        <h4 className="mb-3 text-sm font-medium">Completou todas as tarefas?</h4>
         <div className="space-y-2">
-          <PercentageBar label="Sim" count={statistics.completedAllTasksCount} percentage={completedPercentage} />
+          <PercentageBar
+            label="Sim"
+            count={statistics.completedAllTasksCount}
+            percentage={completedPercentage}
+          />
           <PercentageBar
             label="Não"
             count={statistics.totalSubmissions - statistics.completedAllTasksCount}
@@ -184,15 +196,15 @@ interface PercentageBarProps {
 function PercentageBar({ label, count, percentage }: PercentageBarProps) {
   return (
     <div className="space-y-1">
-      <div className="flex justify-between items-center text-sm">
+      <div className="flex items-center justify-between text-sm">
         <span>{label}</span>
         <span className="font-medium">
           {count} ({percentage.toFixed(1)}%)
         </span>
       </div>
-      <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
         <div
-          className="bg-primary h-full transition-all duration-300 rounded-full"
+          className="h-full rounded-full bg-primary transition-all duration-300"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -207,8 +219,16 @@ function AcademicProfileSection({ statistics }: StatisticsProps) {
 
   return (
     <div className="space-y-2">
-      <PercentageBar label="Estudantes" count={statistics.studentSubmissions} percentage={studentPercentage} />
-      <PercentageBar label="Professores" count={statistics.teacherSubmissions} percentage={teacherPercentage} />
+      <PercentageBar
+        label="Estudantes"
+        count={statistics.studentSubmissions}
+        percentage={studentPercentage}
+      />
+      <PercentageBar
+        label="Professores"
+        count={statistics.teacherSubmissions}
+        percentage={teacherPercentage}
+      />
     </div>
   )
 }

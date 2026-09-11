@@ -12,13 +12,28 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/services/useUser"
-import { ArrowLeft, Calendar, Check, ChevronDown, Clock, Copy, Mail, MapPin, School, User } from "lucide-react"
+import {
+  ArrowLeft,
+  Calendar,
+  Check,
+  ChevronDown,
+  Clock,
+  Copy,
+  Mail,
+  MapPin,
+  School,
+  User,
+} from "lucide-react"
 import { useState } from "react"
 import { useNavigate, useParams } from "react-router"
 import type { Route } from "./+types/banca.$id"
@@ -98,9 +113,13 @@ export default function BancaDetalhesPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4">
-          <h2 className="text-xl font-bold mb-2">Erro ao carregar dados da banca</h2>
-          <p>{error instanceof Error ? error.message : "Erro desconhecido ao carregar dados da banca."}</p>
+        <div className="mb-4 rounded-md bg-destructive/10 p-4 text-destructive">
+          <h2 className="mb-2 text-xl font-bold">Erro ao carregar dados da banca</h2>
+          <p>
+            {error instanceof Error
+              ? error.message
+              : "Erro desconhecido ao carregar dados da banca."}
+          </p>
         </div>
         <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
@@ -133,7 +152,9 @@ export default function BancaDetalhesPage() {
                 />
                 <Label htmlFor="visibility-switch" className="flex flex-col">
                   <span>Visibilidade</span>
-                  <span className="text-xs text-muted-foreground">{banca.visible ? "Visível" : "Oculta"}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {banca.visible ? "Visível" : "Oculta"}
+                  </span>
                 </Label>
               </div>
               <Button variant="outline" onClick={() => navigate(`/banca/${id}/edit`)}>
@@ -147,7 +168,8 @@ export default function BancaDetalhesPage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Essa ação não pode ser desfeita. Isso irá excluir permanentemente a banca de defesa.
+                      Essa ação não pode ser desfeita. Isso irá excluir permanentemente a banca de
+                      defesa.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -161,17 +183,17 @@ export default function BancaDetalhesPage() {
         </div>
       </BancaNavigation>
 
-      <div className="bg-card shadow-md rounded-lg overflow-hidden">
+      <div className="overflow-hidden rounded-lg bg-card shadow-md">
         {/* Cabeçalho com título do trabalho */}
-        <div className="bg-muted p-6 border-b">
+        <div className="border-b bg-muted p-6">
           <div className="flex items-start gap-4">
-            <img src="/brasao_ufba.png" alt="Brasão da UFBA" className="w-16 h-16 object-contain" />
+            <img src="/brasao_ufba.png" alt="Brasão da UFBA" className="h-16 w-16 object-contain" />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold">{banca.tituloTrabalho}</h1>
                 <button
                   onClick={() => handleCopy(banca.tituloTrabalho, "titulo")}
-                  className="p-1 hover:bg-muted rounded transition-colors"
+                  className="rounded p-1 transition-colors hover:bg-muted"
                   title="Copiar título"
                 >
                   {copiedId === "titulo" ? (
@@ -181,15 +203,15 @@ export default function BancaDetalhesPage() {
                   )}
                 </button>
               </div>
-              <div className="flex flex-col gap-1 mt-2 text-muted-foreground">
-                <div className="flex items-center flex-wrap gap-x-4 gap-y-1">
+              <div className="mt-2 flex flex-col gap-1 text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                   <div className="flex items-center">
-                    <User className="h-4 w-4 mr-1 shrink-0" />
+                    <User className="mr-1 h-4 w-4 shrink-0" />
                     <span>{banca.autor}</span>
                   </div>
                   {aluno?.email && (
                     <div className="flex items-center">
-                      <Mail className="h-4 w-4 mr-1 shrink-0" />
+                      <Mail className="mr-1 h-4 w-4 shrink-0" />
                       <span>{aluno.email}</span>
                     </div>
                   )}
@@ -203,9 +225,9 @@ export default function BancaDetalhesPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
-                      <Calendar className="h-4 w-4 mr-2" />
+                      <Calendar className="mr-2 h-4 w-4" />
                       Adicionar ao Calendário
-                      <ChevronDown className="h-4 w-4 ml-2" />
+                      <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="p-0">
@@ -219,14 +241,14 @@ export default function BancaDetalhesPage() {
 
         {/* Conteúdo principal */}
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             {/* Coluna da esquerda - Informações da Banca */}
             <div className="space-y-6 md:col-span-2 lg:col-span-1">
               <section>
-                <h2 className="text-xl font-semibold mb-4">Detalhes da Defesa</h2>
+                <h2 className="mb-4 text-xl font-semibold">Detalhes da Defesa</h2>
                 <div className="grid grid-cols-1 gap-3">
                   <div className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2 text-primary" />
+                    <Calendar className="mr-2 h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium">Data</p>
                       <p className="text-muted-foreground">{formatDate(banca.dataRealizacao)}</p>
@@ -234,7 +256,7 @@ export default function BancaDetalhesPage() {
                   </div>
 
                   <div className="flex items-center">
-                    <Clock className="h-5 w-5 mr-2 text-primary" />
+                    <Clock className="mr-2 h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium">Horário</p>
                       <p className="text-muted-foreground">{formatTime(banca.dataRealizacao)}</p>
@@ -242,9 +264,11 @@ export default function BancaDetalhesPage() {
                   </div>
 
                   <div className="flex items-center">
-                    <MapPin className="h-5 w-5 mr-2 text-primary" />
+                    <MapPin className="mr-2 h-5 w-5 text-primary" />
                     <div>
-                      <p className="font-medium">{banca.modalidade === "remoto" ? "Link" : "Local"}</p>
+                      <p className="font-medium">
+                        {banca.modalidade === "remoto" ? "Link" : "Local"}
+                      </p>
                       {banca.modalidade === "remoto" && banca.local?.startsWith("http") ? (
                         <a
                           href={banca.local}
@@ -263,7 +287,7 @@ export default function BancaDetalhesPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-4">Orientação</h2>
+                <h2 className="mb-4 text-xl font-semibold">Orientação</h2>
                 <div className="space-y-3">
                   {orientador ? (
                     <div>
@@ -287,7 +311,7 @@ export default function BancaDetalhesPage() {
 
               {avaliadores.length > 0 && (
                 <section>
-                  <h2 className="text-xl font-semibold mb-4">Comissão Avaliadora</h2>
+                  <h2 className="mb-4 text-xl font-semibold">Comissão Avaliadora</h2>
                   <div className="space-y-3">
                     {avaliadores.map(({ usuario }) => (
                       <div key={usuario.id}>
@@ -303,11 +327,11 @@ export default function BancaDetalhesPage() {
             {/* Coluna da direita - Conteúdo Acadêmico */}
             <div className="space-y-6 md:col-span-2 lg:col-span-3">
               <section>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <h2 className="text-xl font-semibold">Resumo</h2>
                   <button
                     onClick={() => handleCopy(banca.resumo || "", "resumo")}
-                    className="p-1 hover:bg-muted rounded transition-colors"
+                    className="rounded p-1 transition-colors hover:bg-muted"
                     title="Copiar resumo"
                   >
                     {copiedId === "resumo" ? (
@@ -317,15 +341,17 @@ export default function BancaDetalhesPage() {
                     )}
                   </button>
                 </div>
-                <p className="whitespace-pre-line text-muted-foreground text-justify">{banca.resumo}</p>
+                <p className="whitespace-pre-line text-justify text-muted-foreground">
+                  {banca.resumo}
+                </p>
               </section>
 
               <section>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <h2 className="text-xl font-semibold">Abstract</h2>
                   <button
                     onClick={() => handleCopy(banca.abstract || "", "abstract")}
-                    className="p-1 hover:bg-muted rounded transition-colors"
+                    className="rounded p-1 transition-colors hover:bg-muted"
                     title="Copiar abstract"
                   >
                     {copiedId === "abstract" ? (
@@ -335,15 +361,17 @@ export default function BancaDetalhesPage() {
                     )}
                   </button>
                 </div>
-                <p className="whitespace-pre-line text-muted-foreground text-justify">{banca.abstract}</p>
+                <p className="whitespace-pre-line text-justify text-muted-foreground">
+                  {banca.abstract}
+                </p>
               </section>
 
               <section>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <h2 className="text-xl font-semibold">Palavras-chave</h2>
                   <button
                     onClick={() => handleCopy(banca.palavrasChave || "", "palavras-chave")}
-                    className="p-1 hover:bg-muted rounded transition-colors"
+                    className="rounded p-1 transition-colors hover:bg-muted"
                     title="Copiar palavras-chave"
                   >
                     {copiedId === "palavras-chave" ? (
@@ -355,7 +383,7 @@ export default function BancaDetalhesPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {banca.palavrasChave?.split(",").map((palavra, index) => (
-                    <span key={index} className="bg-muted px-3 py-1 rounded-full text-sm">
+                    <span key={index} className="rounded-full bg-muted px-3 py-1 text-sm">
                       {palavra.trim()}
                     </span>
                   ))}
@@ -393,11 +421,11 @@ export const BancaSkeleton = () => {
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
       <div className="space-y-6">
-        <div className="flex items-center space-x-4 mb-6">
+        <div className="mb-6 flex items-center space-x-4">
           <Skeleton className="h-10 w-10 rounded-full" />
           <Skeleton className="h-10 w-64" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div className="space-y-4">
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-20 w-full" />

@@ -3,7 +3,10 @@ import { useLocation } from "react-router"
 
 type UseQueryParamsStateReturnType<T> = [T, Dispatch<SetStateAction<T>>]
 
-export const useQueryParamsState = <T>(param: string, initialState: T): UseQueryParamsStateReturnType<T> => {
+export const useQueryParamsState = <T>(
+  param: string,
+  initialState: T
+): UseQueryParamsStateReturnType<T> => {
   const location = useLocation()
 
   // State for managing the value derived from the query parameter
@@ -30,7 +33,9 @@ export const useQueryParamsState = <T>(param: string, initialState: T): UseQuery
     }
 
     // Update the URL with the modified search parameters
-    const newUrl = [window.location.pathname, currentSearchParams.toString()].filter(Boolean).join("?")
+    const newUrl = [window.location.pathname, currentSearchParams.toString()]
+      .filter(Boolean)
+      .join("?")
 
     // Update the browser's history without triggering a page reload
     window.history.replaceState(window.history.state, "", newUrl)

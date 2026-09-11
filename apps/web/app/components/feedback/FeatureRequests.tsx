@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
@@ -17,7 +24,10 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 const featureRequestSchema = z.object({
-  title: z.string().min(1, { message: "Título é obrigatório." }).max(200, { message: "Título muito longo." }),
+  title: z
+    .string()
+    .min(1, { message: "Título é obrigatório." })
+    .max(200, { message: "Título muito longo." }),
   description: z.string().min(1, { message: "Descrição é obrigatória." }),
 })
 
@@ -75,7 +85,8 @@ function SubmissionSection({ user }: SubmissionSectionProps) {
         onError: (error) => {
           toast({
             title: "Erro ao enviar solicitação",
-            description: error instanceof Error ? error.message : "Ocorreu um erro ao enviar sua solicitação.",
+            description:
+              error instanceof Error ? error.message : "Ocorreu um erro ao enviar sua solicitação.",
             variant: "destructive",
           })
         },
@@ -103,7 +114,11 @@ function SubmissionSection({ user }: SubmissionSectionProps) {
                 <FormItem>
                   <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Adicionar filtro de busca por data" {...field} disabled={!user} />
+                    <Input
+                      placeholder="Ex: Adicionar filtro de busca por data"
+                      {...field}
+                      disabled={!user}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,7 +144,11 @@ function SubmissionSection({ user }: SubmissionSectionProps) {
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={createFeatureRequestMutation.isPending || !user}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={createFeatureRequestMutation.isPending || !user}
+            >
               {createFeatureRequestMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -175,7 +194,7 @@ function FeatureRequestsList({ user }: FeatureRequestsListProps) {
           <CardTitle>Solicitações de Funcionalidades</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-center text-muted-foreground py-8">
+          <p className="py-8 text-center text-muted-foreground">
             Nenhuma solicitação de funcionalidade ainda. Seja o primeiro a sugerir!
           </p>
         </CardContent>
@@ -189,7 +208,9 @@ function FeatureRequestsList({ user }: FeatureRequestsListProps) {
     <Card>
       <CardHeader>
         <CardTitle>Solicitações de Funcionalidades</CardTitle>
-        <CardDescription>Vote nas funcionalidades que você gostaria de ver implementadas.</CardDescription>
+        <CardDescription>
+          Vote nas funcionalidades que você gostaria de ver implementadas.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -243,7 +264,8 @@ function FeatureRequestItem({ request, user }: FeatureRequestItemProps) {
         onError: (error) => {
           toast({
             title: "Erro ao votar",
-            description: error instanceof Error ? error.message : "Ocorreu um erro ao registrar seu voto.",
+            description:
+              error instanceof Error ? error.message : "Ocorreu um erro ao registrar seu voto.",
             variant: "destructive",
           })
         },
@@ -252,7 +274,7 @@ function FeatureRequestItem({ request, user }: FeatureRequestItemProps) {
   }
 
   return (
-    <div className="flex gap-4 p-4 border rounded-lg">
+    <div className="flex gap-4 rounded-lg border p-4">
       <div className="flex flex-col items-center gap-1">
         <Button
           variant={request.userVoted ? "secondary" : "outline"}

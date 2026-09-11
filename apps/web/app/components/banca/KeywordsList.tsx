@@ -33,7 +33,11 @@ export function KeywordsList({
       {showLabel && <p className="text-sm text-muted-foreground">{label}</p>}
       <div className="flex flex-wrap gap-2">
         {keywordArray.map((keyword, index) => (
-          <Badge key={index} variant="secondary" className={cn("text-xs font-normal", badgeClassName)}>
+          <Badge
+            key={index}
+            variant="secondary"
+            className={cn("text-xs font-normal", badgeClassName)}
+          >
             {keyword}
           </Badge>
         ))}

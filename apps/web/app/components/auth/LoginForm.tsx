@@ -34,7 +34,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
       password: "",
     },
   })
-  
+
   const {
     register: resetRegister,
     handleSubmit: handleResetSubmit,
@@ -69,7 +69,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
       }
     )
   }
-  
+
   const onPasswordResetSubmit = (data: PasswordResetFormValues) => {
     requestPasswordResetMutation.mutate(
       { json: { email: data.email } },
@@ -95,7 +95,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
   if (showPasswordReset) {
     return (
       <form onSubmit={handleResetSubmit(onPasswordResetSubmit)} className="grid gap-4">
-        <div className="text-center mb-4">
+        <div className="mb-4 text-center">
           <h3 className="text-lg font-semibold">Recuperar Senha</h3>
           <p className="text-sm text-muted-foreground">
             Digite seu email para receber instruções de recuperação
@@ -116,15 +116,17 @@ export function LoginForm(p: { onSuccess?: () => void }) {
               },
             })}
           />
-          {resetErrors.email && <p className="text-sm text-destructive mt-1">{resetErrors.email.message}</p>}
+          {resetErrors.email && (
+            <p className="mt-1 text-sm text-destructive">{resetErrors.email.message}</p>
+          )}
         </div>
         <Button type="submit" className="w-full" disabled={requestPasswordResetMutation.isPending}>
           {requestPasswordResetMutation.isPending ? "Enviando..." : "Enviar Email de Recuperação"}
         </Button>
-        <Button 
-          type="button" 
-          variant="outline" 
-          className="w-full" 
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
           onClick={() => setShowPasswordReset(false)}
           disabled={requestPasswordResetMutation.isPending}
         >
@@ -133,7 +135,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
       </form>
     )
   }
-  
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
       {loginMutation.error && (
@@ -162,7 +164,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
             },
           })}
         />
-        {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
+        {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>}
       </div>
       <div className="grid gap-2">
         <Label htmlFor="login-password">Senha</Label>
@@ -174,15 +176,17 @@ export function LoginForm(p: { onSuccess?: () => void }) {
             required: "Senha é obrigatória",
           })}
         />
-        {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
+        {errors.password && (
+          <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
+        )}
       </div>
       <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
         {loginMutation.isPending ? "Entrando..." : "Entrar"}
       </Button>
-      <Button 
-        type="button" 
-        variant="link" 
-        className="w-full text-sm" 
+      <Button
+        type="button"
+        variant="link"
+        className="w-full text-sm"
         onClick={() => setShowPasswordReset(true)}
       >
         Esqueci minha senha

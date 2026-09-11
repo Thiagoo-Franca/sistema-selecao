@@ -1,10 +1,21 @@
 import { Header } from "@/components/layout/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAcceptTeacherInvitation, useVerifyTeacherInvitation, type AcceptTeacherInvitationData } from "@/hooks"
+import {
+  useAcceptTeacherInvitation,
+  useVerifyTeacherInvitation,
+  type AcceptTeacherInvitationData,
+} from "@/hooks"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CheckCircle, Clock, Mail, XCircle } from "lucide-react"
 import { useEffect } from "react"
@@ -61,7 +72,7 @@ export default function TeacherInvitationAcceptPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <Card className="max-w-md mx-auto">
+        <Card className="mx-auto max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-destructive" />
@@ -69,7 +80,9 @@ export default function TeacherInvitationAcceptPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">O link do convite está incompleto ou é inválido.</p>
+            <p className="mb-4 text-muted-foreground">
+              O link do convite está incompleto ou é inválido.
+            </p>
             <Button onClick={() => navigate("/")} className="w-full">
               Voltar ao Início
             </Button>
@@ -83,7 +96,7 @@ export default function TeacherInvitationAcceptPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <Card className="max-w-md mx-auto">
+        <Card className="mx-auto max-w-md">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Skeleton className="h-5 w-5 rounded-full" />
@@ -111,15 +124,19 @@ export default function TeacherInvitationAcceptPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <Card className="max-w-md mx-auto">
+        <Card className="mx-auto max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-destructive" />
-              {isExpired ? "Convite Expirado" : isUsed ? "Convite Já Utilizado" : "Convite Inválido"}
+              {isExpired
+                ? "Convite Expirado"
+                : isUsed
+                  ? "Convite Já Utilizado"
+                  : "Convite Inválido"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               {isExpired
                 ? "Este convite expirou. Entre em contato com o administrador para receber um novo convite."
                 : isUsed
@@ -139,7 +156,7 @@ export default function TeacherInvitationAcceptPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <Card className="max-w-md mx-auto">
+        <Card className="mx-auto max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -147,8 +164,9 @@ export default function TeacherInvitationAcceptPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Sua conta de professor foi criada com sucesso. Você será redirecionado para a página de login em breve.
+            <p className="mb-4 text-muted-foreground">
+              Sua conta de professor foi criada com sucesso. Você será redirecionado para a página
+              de login em breve.
             </p>
             <Button onClick={() => navigate("/")} className="w-full">
               Ir para Login
@@ -184,19 +202,21 @@ export default function TeacherInvitationAcceptPage() {
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
 
-      <Card className="max-w-lg mx-auto">
+      <Card className="mx-auto max-w-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-blue-600" />
             Convite para Professor
           </CardTitle>
-          <CardDescription>Olá, {invitation?.nome}! Complete seu cadastro para acessar o sistema.</CardDescription>
+          <CardDescription>
+            Olá, {invitation?.nome}! Complete seu cadastro para acessar o sistema.
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
           {expiresAt && (
-            <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-800 flex items-center gap-2">
+            <div className="mb-6 rounded-md border border-blue-200 bg-blue-50 p-3">
+              <p className="flex items-center gap-2 text-sm text-blue-800">
                 <Clock className="h-4 w-4" />
                 Este convite expira em{" "}
                 {expiresAt.toLocaleDateString("pt-BR", {

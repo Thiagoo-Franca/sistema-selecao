@@ -36,13 +36,13 @@ export default function UserProfilePage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="mx-auto max-w-4xl space-y-6">
           <Button onClick={() => navigate(-1)} variant="outline" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
           </Button>
           <Card>
             <CardHeader>
-              <Skeleton className="h-8 w-48 mb-2" />
+              <Skeleton className="mb-2 h-8 w-48" />
               <Skeleton className="h-4 w-32" />
             </CardHeader>
             <CardContent>
@@ -70,14 +70,14 @@ export default function UserProfilePage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           <Button onClick={() => navigate(-1)} variant="outline" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
           </Button>
           <Card>
             <CardContent className="pt-6">
-              <div className="bg-destructive/10 text-destructive p-4 rounded-md">
-                <h2 className="text-xl font-bold mb-2">
+              <div className="rounded-md bg-destructive/10 p-4 text-destructive">
+                <h2 className="mb-2 text-xl font-bold">
                   {userQuery.error?.message?.includes("404") || !user
                     ? "Usuário não encontrado"
                     : "Erro ao carregar dados do usuário"}
@@ -104,7 +104,7 @@ export default function UserProfilePage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <Button onClick={() => navigate(-1)} variant="outline" className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
@@ -114,7 +114,7 @@ export default function UserProfilePage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-2xl">
                   <User className="h-6 w-6" />
                   {user.nome}
                 </CardTitle>
@@ -126,30 +126,30 @@ export default function UserProfilePage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <Mail className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Email</p>
                   <p className="text-sm">{user.email}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Hash className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <Hash className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Matrícula</p>
                   <p className="text-sm">{user.matricula}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <School className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <School className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Escola/Instituição</p>
                   <p className="text-sm">{user.school}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <GraduationCap className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <GraduationCap className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Título Acadêmico</p>
                   <p className="text-sm">{user.academicTitle}</p>
@@ -179,4 +179,3 @@ export default function UserProfilePage() {
     </div>
   )
 }
-

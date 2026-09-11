@@ -30,7 +30,7 @@ export const useRegisterMutation = () => {
 }
 
 export const useRequestPasswordResetMutation = () => {
-  type Query = RpcType<typeof apiClient.usuario["request-password-reset"]["$post"]>
+  type Query = RpcType<(typeof apiClient.usuario)["request-password-reset"]["$post"]>
   return useMutation({
     mutationFn: async (request: Query["input"]) => {
       const response = await apiClient.usuario["request-password-reset"]["$post"](request)
@@ -40,7 +40,7 @@ export const useRequestPasswordResetMutation = () => {
 }
 
 export const useResetPasswordMutation = () => {
-  type Query = RpcType<typeof apiClient.usuario["reset-password"]["$post"]>
+  type Query = RpcType<(typeof apiClient.usuario)["reset-password"]["$post"]>
   return useMutation({
     mutationFn: async (request: Query["input"]) => {
       const response = await apiClient.usuario["reset-password"]["$post"](request)
@@ -77,10 +77,11 @@ export const removeAuthToken = (): void => {
 }
 
 export const useSendCeagDeclarationsMutation = () => {
-  type Query = RpcType<typeof apiClient.documentos["send-ceag-declarations"][":bancaId"]["$post"]>
+  type Query = RpcType<(typeof apiClient.documentos)["send-ceag-declarations"][":bancaId"]["$post"]>
   return useMutation({
     mutationFn: async (request: Query["input"]) => {
-      const response = await apiClient.documentos["send-ceag-declarations"][":bancaId"]["$post"](request)
+      const response =
+        await apiClient.documentos["send-ceag-declarations"][":bancaId"]["$post"](request)
       return rpcReturn(response)
     },
   })

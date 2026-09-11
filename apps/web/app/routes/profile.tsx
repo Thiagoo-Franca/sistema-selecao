@@ -1,12 +1,24 @@
 import { Header } from "@/components/layout/Header"
 import type { Route } from "./+types/profile"
 
-export const meta: Route.MetaFunction = () => [
-  { title: "SISDEF - Perfil" },
-]
+export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Perfil" }]
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
@@ -94,7 +106,8 @@ export default function ProfilePage() {
     onError: (error) => {
       toast({
         title: "Erro ao atualizar perfil",
-        description: error instanceof Error ? error.message : "Ocorreu um erro ao atualizar seu perfil.",
+        description:
+          error instanceof Error ? error.message : "Ocorreu um erro ao atualizar seu perfil.",
         variant: "destructive",
       })
     },
@@ -120,7 +133,8 @@ export default function ProfilePage() {
     onError: (error) => {
       toast({
         title: "Erro ao alterar senha",
-        description: error instanceof Error ? error.message : "Ocorreu um erro ao alterar sua senha.",
+        description:
+          error instanceof Error ? error.message : "Ocorreu um erro ao alterar sua senha.",
         variant: "destructive",
       })
     },
@@ -138,7 +152,7 @@ export default function ProfilePage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="flex items-center justify-center h-48">
+        <div className="flex h-48 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       </div>
@@ -153,7 +167,7 @@ export default function ProfilePage() {
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
 
-      <div className="max-w-2xl mx-auto">
+      <div className="mx-auto max-w-2xl">
         <Tabs defaultValue="profile" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile">Meu Perfil</TabsTrigger>
@@ -185,7 +199,7 @@ export default function ProfilePage() {
                       )}
                     />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <FormField
                         control={profileForm.control}
                         name="school"
@@ -217,7 +231,7 @@ export default function ProfilePage() {
 
                     <div className="flex flex-col">
                       <FormLabel>Email</FormLabel>
-                      <p className="text-sm text-muted-foreground break-all">{user.email}</p>
+                      <p className="break-all text-sm text-muted-foreground">{user.email}</p>
                     </div>
 
                     <div className="flex flex-col">
@@ -225,7 +239,11 @@ export default function ProfilePage() {
                       <p className="text-sm text-muted-foreground">{user.matricula}</p>
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={updateProfileMutation.isPending}>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={updateProfileMutation.isPending}
+                    >
                       {updateProfileMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -261,7 +279,10 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <Form {...passwordForm}>
-                  <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)} className="space-y-6">
+                  <form
+                    onSubmit={passwordForm.handleSubmit(onSubmitPassword)}
+                    className="space-y-6"
+                  >
                     <FormField
                       control={passwordForm.control}
                       name="currentPassword"
@@ -269,7 +290,11 @@ export default function ProfilePage() {
                         <FormItem>
                           <FormLabel>Senha atual</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Digite sua senha atual" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Digite sua senha atual"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -297,14 +322,22 @@ export default function ProfilePage() {
                         <FormItem>
                           <FormLabel>Confirmar nova senha</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Confirme sua nova senha" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Confirme sua nova senha"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    <Button type="submit" className="w-full" disabled={changePasswordMutation.isPending}>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={changePasswordMutation.isPending}
+                    >
                       {changePasswordMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

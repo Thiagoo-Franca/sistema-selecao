@@ -20,7 +20,12 @@ interface EmailInviteDialogProps {
   bancaTitle: string
 }
 
-export function EmailInviteDialog({ bancaId, isOpen, onClose, bancaTitle }: EmailInviteDialogProps) {
+export function EmailInviteDialog({
+  bancaId,
+  isOpen,
+  onClose,
+  bancaTitle,
+}: EmailInviteDialogProps) {
   const [email, setEmail] = useState("")
   const [recipientName, setRecipientName] = useState("")
   const [emailError, setEmailError] = useState("")
@@ -34,30 +39,33 @@ export function EmailInviteDialog({ bancaId, isOpen, onClose, bancaTitle }: Emai
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!email.trim()) {
       setEmailError("Email é obrigatório")
       return
     }
-    
+
     if (!validateEmail(email)) {
       setEmailError("Email inválido")
       return
     }
-    
+
     setEmailError("")
-    
-    sendInviteMutation.mutate({
-      bancaId,
-      email: email.trim(),
-      recipientName: recipientName.trim() || undefined
-    }, {
-      onSuccess: () => {
-        setEmail("")
-        setRecipientName("")
-        onClose()
+
+    sendInviteMutation.mutate(
+      {
+        bancaId,
+        email: email.trim(),
+        recipientName: recipientName.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          setEmail("")
+          setRecipientName("")
+          onClose()
+        },
       }
-    })
+    )
   }
 
   const handleClose = () => {
@@ -81,7 +89,7 @@ export function EmailInviteDialog({ bancaId, isOpen, onClose, bancaTitle }: Emai
             Envie um convite para adicionar a defesa "{bancaTitle}" ao calendário.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
@@ -98,11 +106,9 @@ export function EmailInviteDialog({ bancaId, isOpen, onClose, bancaTitle }: Emai
               disabled={sendInviteMutation.isPending}
               required
             />
-            {emailError && (
-              <p className="text-sm text-red-500">{emailError}</p>
-            )}
+            {emailError && <p className="text-sm text-red-500">{emailError}</p>}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="name">Nome do destinatário (opcional)</Label>
             <Input
@@ -115,9 +121,9 @@ export function EmailInviteDialog({ bancaId, isOpen, onClose, bancaTitle }: Emai
             />
           </div>
 
-          <div className="bg-muted p-3 rounded-md text-sm text-muted-foreground">
-            <p className="font-medium mb-1">O que será enviado:</p>
-            <ul className="list-disc list-inside space-y-1">
+          <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+            <p className="mb-1 font-medium">O que será enviado:</p>
+            <ul className="list-inside list-disc space-y-1">
               <li>Email com detalhes completos da defesa</li>
               <li>Arquivo .ics anexo para qualquer calendário</li>
               <li>Compatível com Google, Outlook, Apple Calendar e outros</li>
@@ -126,15 +132,15 @@ export function EmailInviteDialog({ bancaId, isOpen, onClose, bancaTitle }: Emai
         </form>
 
         <DialogFooter className="flex-col-reverse sm:flex-row">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={handleClose}
             disabled={sendInviteMutation.isPending}
           >
             Cancelar
           </Button>
-          <Button 
+          <Button
             type="submit"
             onClick={handleSubmit}
             disabled={sendInviteMutation.isPending || !email.trim()}
