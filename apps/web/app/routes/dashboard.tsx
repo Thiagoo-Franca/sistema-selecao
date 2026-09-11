@@ -486,11 +486,46 @@ function MyDefensesTab(props: MyDefensesTabProps) {
 // ─── Enums (matching DB enum types) ───────────────────────────────────────────
 
 export type Sexo = "Masculino" | "Feminino" | "Outro";
-export type EstadoCivil = "Solteiro" | "Casado" | "Divorciado" | "Viúvo" | "União Estável";
+export type EstadoCivil = "Solteiro" | "Casado" | "Divorciado";
 export type TipoCurso = "Mestrado" | "Doutorado";
 export type AreaPreferencia = string; // ajuste conforme o enum real no DB
 
 // ─── Base ──────────────────────────────────────────────────────────────────────
+
+export type NotaDoutorado = {
+  id: number;
+  idCandidato: number;
+  msc: string | null; // numeric(5,2) → string no Drizzle/Postgres
+  areaFormacaoGraduacao: string | null;
+  conceitoCapesMestrado: string | null;
+  a1a2a3a4: string | null;
+  b1b2b3b4: string | null;
+  notaAnteprojeto: string | null;
+};
+export type NotaMestrado = {
+  id: number;
+  idCandidato: number;
+  grad: string | null;
+  area: string | null;
+  enade: string | null;
+  a1a2a3a4: string | null;
+  b1b2b3b4: string | null;
+  icIt: string | null;
+  poscomp: string | null;
+  disciplinaPosCapes6Mais: string | null;
+  disciplinaPosCapes3a5: string | null;
+}
+
+export type Endereco = {
+  id: number;
+  cep: string;
+  logradouro: string;
+  numero: string | null;
+  bairro: string;
+  complemento: string | null;
+  estado: string;
+  municipio: string;
+}
 
 interface Candidato {
   // dados da inscrição
@@ -499,16 +534,13 @@ interface Candidato {
   status: string; // 'Inscricao Submetida' | 'Aprovada' | 'Rejeitada'
   dataInscricao: string; // ISO timestamp
 
-  // pontuação e classificação
-  pontuacao: string | null;       // numeric(5,2) → string no Drizzle/Postgres
-  dataPontuacao: string | null;   // ISO timestamp
-
   // dados pessoais
   cpf: string;
   sexo: Sexo;
   nome: string;
   estadoCivil: EstadoCivil;
   email: string;
+  endereco: Endereco;
   dataNascimento: string;         // ISO timestamp
   raca: string;
   nomeMae: string;
@@ -530,13 +562,6 @@ interface Candidato {
   zonaEleitoral: string | null;
   passaporte: string | null;
 
-  // endereço
-  cep: string;
-  logradouro: string;
-  bairro: string;
-  complemento: string | null;
-  estadoEndereco: string;
-  municipioEndereco: string;
   telefoneFixo: string | null;
   telefoneCelular: string;
 
@@ -558,10 +583,7 @@ interface Candidato {
 // ─── Doutorado ─────────────────────────────────────────────────────────────────
 
 export interface CandidatoDoutorado extends Candidato {
-  tipoCurso: "doutorado";
-
-  // endereço
-  numero: string;
+  tipoCurso: "Doutorado";
 
   // formulário de doutorado
   historicoGraduacao: string;           // URL do PDF
@@ -579,7 +601,7 @@ export interface CandidatoDoutorado extends Candidato {
 // ─── Mestrado ──────────────────────────────────────────────────────────────────
 
 export interface CandidatoMestrado extends Candidato {
-  tipoCurso: "mestrado";
+  tipoCurso: "Mestrado";
 
   // formulário de mestrado
   copiaDiplomaGraduacao: string;        // URL do PDF
