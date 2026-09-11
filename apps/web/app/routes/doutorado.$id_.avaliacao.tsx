@@ -70,12 +70,12 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
         cpf: candidato.cpf ? candidato.cpf : "",
         nome: candidato.nome ? candidato.nome : "",
         email: candidato.email ? candidato.email : "",
-        insecao: candidato.solicitouIsencaoTaxaInscricao ? "Sim" : "Não",
-        insecaoAprovada: candidato.insecaoAprovada ? "Sim" : "Não",
+        solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ? "Sim" : "Não",
+        isencaoAprovada: candidato.isencaoAprovada ? "Sim" : "Não",
         GRU: candidato.GRU ? candidato.GRU : "", // ajustar GRU
         homologa: candidato.homologa ? "Sim" : "Não", // ajustar homologa
         areaPGCOMP: candidato.areaPGCOMP ? candidato.areaPGCOMP : "", // ajustar areaPGCOMP
-        orientadorMestrado: candidato.orientadorMestrado ? candidato.orientadorMestrado : "", // ajustar orientadorMestrado
+        OrientadorMestrado: candidato.orientadorMestrado ? candidato.orientadorMestrado : "", // ajustar orientadorMestrado
         PotencialOrientador1: candidato.primeiraOpcaoOrientador
           ? candidato.primeiraOpcaoOrientador
           : "",
@@ -85,12 +85,12 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
         PotencialOrientador3: candidato.terceiraOpcaoOrientador
           ? candidato.terceiraOpcaoOrientador
           : "",
-        Especiais: candidato.especiais ? candidato.especiais : "",
-        cotas: candidato.cotas ? candidato.cotas : "",
-        Supra: candidato.supra ? candidato.supra : "",
-        Universidade: candidato.universidade ? candidato.universidade : "",
-        curso: candidato.cursoGrad ? candidato.cursoGrad : "",
-        cidade: candidato.cidadeGrad ? candidato.cidadeGrad : "", // cidade da universidade
+        Especiais: candidato.possuiNecessidadesEspeciais ? "Sim" : "Não",
+        Cotas: candidato.vagasNegrosPardos ? "Sim" : "Não",
+        Supra: candidato.vagasSupranumerarias ? "Sim" : "Não",
+        Universidade: candidato.nomeUniversidadeMestrado ? candidato.nomeUniversidadeMestrado : "",
+        Curso: candidato.nomeCursoMestrado ? candidato.nomeCursoMestrado : "",
+        Cidade: candidato.cidadeOndeRealizouMestrado ? candidato.cidadeOndeRealizouMestrado : "", // cidade da universidade
         msc: candidato.notas?.msc ? candidato.notas?.msc : 0,
         areaFormacaoGraduacao: candidato.notas?.areaFormacaoGraduacao
           ? candidato.notas?.areaFormacaoGraduacao
@@ -254,10 +254,13 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
           {/* Pediu Isenção */}
           <Controller
             control={control}
-            name="isencao"
+            name="solicitouIsencaoTaxaInscricao"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
-                <FieldLabel htmlFor="isencao" className="font-bold text-muted-foreground">
+                <FieldLabel
+                  htmlFor="solicitouIsencaoTaxaInscricao"
+                  className="font-bold text-muted-foreground"
+                >
                   PEDIU ISENÇÃO?
                 </FieldLabel>
                 <Select onValueChange={field.onChange} value={field.value ?? ""}>
@@ -328,10 +331,10 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
           {/* Homologa */}
           <Controller
             control={control}
-            name="Homologa"
+            name="homologa"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
-                <FieldLabel htmlFor="Homologa" className="font-bold text-muted-foreground">
+                <FieldLabel htmlFor="homologa" className="font-bold text-muted-foreground">
                   Homologa?
                 </FieldLabel>
                 <Select onValueChange={field.onChange} value={field.value ?? ""}>
@@ -381,7 +384,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
               Orientador(a) do Mestrado
             </FieldLabel>
             <Input
-              {...register("orientadorMestrado")}
+              {...register("OrientadorMestrado")}
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="text"
               id="orientadorMestrado"
@@ -428,7 +431,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
           {/* Especiais */}
           <Controller
             control={control}
-            name="especiais"
+            name="Especiais"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
                 <FieldLabel htmlFor="especiais" className="font-bold text-muted-foreground">
@@ -453,7 +456,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
           {/* Cotas */}
           <Controller
             control={control}
-            name="cotas"
+            name="Cotas"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
                 <FieldLabel htmlFor="cotas" className="font-bold text-muted-foreground">
@@ -478,7 +481,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
           {/* SUPRA */}
           <Controller
             control={control}
-            name="SUPRA"
+            name="Supra"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
                 <FieldLabel htmlFor="SUPRA" className="font-bold text-muted-foreground">

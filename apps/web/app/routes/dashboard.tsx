@@ -608,6 +608,7 @@ export interface CandidatoDoutorado extends Candidato {
   historicoMestrado: string // URL do PDF
   nomeUniversidadeMestrado: string
   nomeCursoMestrado: string
+  cidadeOndeRealizouMestrado: string
   anteprojetoTese: string // URL do PDF
   conceitoCapesMestrado: string | null
   primeiraOpcaoOrientador: string
@@ -618,17 +619,11 @@ export interface CandidatoDoutorado extends Candidato {
 
   avaliador1: string | null
   avaliador2: string | null
-  insecaoAprovada: string | null
+  isencaoAprovada: boolean | null
   GRU: string | null
   homologa: string | null
   areaPGCOMP: string | null
   orientadorMestrado: string | null
-  especiais: string | null
-  cotas: string | null
-  supra: string | null
-  universidade: string | null
-  cursoGrad: string | null
-  cidadeGrad: string | null
 }
 
 // ─── Mestrado ──────────────────────────────────────────────────────────────────

@@ -1,6 +1,8 @@
 import { Hono } from "hono"
 import type { AppVariables } from "../../types"
 import * as service from "./candidato.service"
+import { zValidator } from "@hono/zod-validator"
+import { updateCandidatoDoutoradoSchema } from "./candidato.schema"
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   .get("/", async (c) => {
@@ -41,5 +43,24 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data)
   })
-
   
+.patch("/doutorado/:id", zValidator("json", updateCandidatoDoutoradoSchema), async (c) => {
+  const id = c.req.param("id")
+  const body = c.req.valid("json")
+  const result = await service.updateCandidatoDoutorado(c, id, body)
+  if (!result.ok) {
+    console.error(`Error updating doutorado candidato with ID ${id}:`, result.error)
+    throw new Error("Erro ao atualizar candidato de doutorado")
+  }
+  return c.json(result.data)
+})
+
+.patch("/doutorado/:id/nota", async (c) => {
+  const id = c.req.param("id")
+  const body = await c.req.json()
+  const result = await service.updateNotaDoutorado(c, id, body)
+  if (!result.ok) {
+    throw new Error("Erro ao atualizar nota do candidato de doutorado")
+  }
+  return c.json(result.data)
+})

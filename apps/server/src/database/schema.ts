@@ -145,6 +145,13 @@ export const CandidatoDoutorado = pgTable("candidato_doutorado", {
   primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
   segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
   terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
+  avaliador1: text("avaliador_1"),
+  avaliador2: text("avaliador_2"),
+  isencaoAprovada: boolean("isencao_aprovada"),
+  gru: text("gru"),
+  homologa: text("homologa"),
+  areaPgcomp: text("area_pgcomp"),
+  orientadorMestrado: text("orientador_mestrado"),
 }, (table) => ({
   numeroInscricaoUnique: unique("candidato_doutorado_numero_inscricao_unique").on(table.numeroInscricao),
   cpfUnique: unique("candidato_doutorado_cpf_unique").on(table.cpf),

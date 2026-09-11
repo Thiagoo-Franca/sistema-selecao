@@ -1,7 +1,7 @@
 import type { Context } from "hono"
 import type { AppVariables } from "../../types"
 import { err, ok, type AppResult } from "../../result"
-import { CandidatoDoutorado, CandidatoMestrado, Endereco } from "../../database"
+import { CandidatoDoutorado, CandidatoMestrado, Endereco, NotaDoutorado } from "../../database"
 import { eq } from "drizzle-orm"
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown }
@@ -66,7 +66,7 @@ export const getCandidatoMestradoById = async (
 export const getCandidatoDoutoradoById = async (
   c: Context<{ Variables: AppVariables }>,
   id: string
-): Promise<AppResult<(typeof CandidatoDoutorado.$inferSelect & { endereco: typeof Endereco.$inferSelect | null }) | null, GetAllCandidatosError>> => {  
+): Promise<AppResult<CandidatoDoutoradoComRelacoes | null, GetAllCandidatosError>> => {
   const dbInstance = c.get("db")
 
   try {
@@ -74,6 +74,7 @@ export const getCandidatoDoutoradoById = async (
       .select()
       .from(CandidatoDoutorado)
       .leftJoin(Endereco, eq(CandidatoDoutorado.idEndereco, Endereco.id))
+      .leftJoin(NotaDoutorado, eq(NotaDoutorado.idCandidato, CandidatoDoutorado.id))
       .where(eq(CandidatoDoutorado.id, Number(id)))
       .limit(1)
 
@@ -82,6 +83,7 @@ export const getCandidatoDoutoradoById = async (
     const candidato = {
       ...result[0].candidato_doutorado,
       endereco: result[0].endereco,
+      notas: result[0].nota_doutorado,
     }
 
     return ok(candidato)
@@ -90,7 +92,6 @@ export const getCandidatoDoutoradoById = async (
     return err({ type: "database_error", error })
   }
 }
-
 export const getAllCandidatosDoutorado = async (c: Context<{ Variables: AppVariables }>): Promise<AppResult<(typeof CandidatoDoutorado.$inferSelect)[], GetAllCandidatosError>> => {
   
   const dbInstance = c.get("db")
@@ -100,6 +101,53 @@ export const getAllCandidatosDoutorado = async (c: Context<{ Variables: AppVaria
     return ok(result)
   } catch (error) {
     console.error("Error fetching all doutorado candidatos:", error)
+    return err({ type: "database_error", error })
+  }
+}
+export const updateCandidatoDoutorado = async (
+  c: Context<{ Variables: AppVariables }>,
+  id: string,
+  body: Partial<typeof CandidatoDoutorado.$inferInsert>
+): Promise<AppResult<(typeof CandidatoDoutorado.$inferSelect & { endereco: typeof Endereco.$inferSelect | null }) | null, GetAllCandidatosError>> => {
+  const dbInstance = c.get("db")
+
+  try {
+    const [candidatoAtualizado] = await dbInstance
+      .update(CandidatoDoutorado)
+      .set(body)
+      .where(eq(CandidatoDoutorado.id, Number(id)))
+      .returning()
+
+    if (!candidatoAtualizado) return ok(null)
+
+    const [enderecoAtual] = await dbInstance
+      .select()
+      .from(Endereco)
+      .where(eq(Endereco.id, candidatoAtualizado.idEndereco))
+
+    return ok({ ...candidatoAtualizado, endereco: enderecoAtual ?? null })
+  } catch (error) {
+    console.error(`Error updating doutorado candidato with ID ${id}:`, error)
+    return err({ type: "database_error", error })
+  }
+}
+export const updateNotaDoutorado = async (
+  c: Context<{ Variables: AppVariables }>,
+  idCandidato: string,
+  body: Partial<typeof NotaDoutorado.$inferInsert>
+): Promise<AppResult<typeof NotaDoutorado.$inferSelect | null, GetAllCandidatosError>> => {
+  const dbInstance = c.get("db")
+
+  try {
+    const [notaAtualizada] = await dbInstance
+      .update(NotaDoutorado)
+      .set(body)
+      .where(eq(NotaDoutorado.idCandidato, Number(idCandidato)))
+      .returning()
+
+    return ok(notaAtualizada ?? null)
+  } catch (error) {
+    console.error(`Error updating nota doutorado for candidato ID ${idCandidato}:`, error)
     return err({ type: "database_error", error })
   }
 }
