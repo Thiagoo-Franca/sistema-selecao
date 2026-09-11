@@ -85,6 +85,13 @@
       "when": 1788194524510,
       "tag": "0011_violet_quasimodo",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789075668163,
+      "tag": "0012_chemical_nitro",
+      "breakpoints": true
     }
   ]
 }

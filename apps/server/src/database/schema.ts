@@ -23,6 +23,49 @@ export const AreaPreferencia = pgEnum("area_preferencia", [
 ])
 export type AreaPreferencia = (typeof AreaPreferencia.enumValues)[number]
 
+export const Endereco = pgTable("endereco", {
+  id: serial("id").primaryKey(),
+  cep: text("cep").notNull(),
+  logradouro: text("logradouro").notNull(),
+  numero: text("numero"),
+  bairro: text("bairro").notNull(),
+  complemento: text("complemento"),
+  estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
+  municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
+})
+
+export const NotaMestrado = pgTable("nota_mestrado", {
+  id: serial("id").primaryKey(),
+  idCandidato: integer("id_candidato")
+    .notNull()
+    .references(() => CandidatoMestrado.id)
+    .unique(), // garante 1:1 com o candidato
+
+  grad: numeric("grad"),
+  area: numeric("area"),
+  enade: numeric("enade"),
+  a1a2a3a4: numeric("a1a2a3a4"),
+  b1b2b3b4: numeric("b1b2b3b4"),
+  icIt: numeric("ic_it"),
+  poscomp: numeric("poscomp"),
+  disciplinaPosCapes6Mais: numeric("disciplina_pos_capes_6_mais"),
+  disciplinaPosCapes3a5: numeric("disciplina_pos_capes_3_a_5"),
+})
+
+export const NotaDoutorado = pgTable("nota_doutorado", {
+  id: serial("id").primaryKey(),
+  idCandidato: integer("id_candidato")
+    .notNull()
+    .references(() => CandidatoDoutorado.id)
+    .unique(), // garante 1:1 com o candidato
+
+  msc: numeric("msc"), // nota do mestrado
+  areaFormacaoGraduacao: numeric("area_formacao_graduacao"),
+  conceitoCapesMestrado: numeric("conceito_capes_mestrado"),
+  a1a2a3a4: numeric("a1a2a3a4"),
+  b1b2b3b4: numeric("b1b2b3b4"),
+  notaAnteprojeto: numeric("nota_anteprojeto"),
+})
 const candidatoBaseColumns = {
   // dados da inscricao
   id: serial("id").primaryKey(),
@@ -63,12 +106,10 @@ const candidatoBaseColumns = {
   passaporte: text("passaporte"),
 
   // endereco
-  cep: text("cep").notNull(),
-  logradouro: text("logradouro").notNull(),
-  bairro: text("bairro").notNull(),
-  complemento: text("complemento"),
-  estadoEndereco: text("estado_endereco").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
-  municipioEndereco: text("municipio_endereco").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
+  idEndereco: integer("id_endereco")
+    .notNull()
+    .references(() => Endereco.id),
+  
   telefoneFixo: text("telefone_fixo"),
   telefoneCelular: text("telefone_celular").notNull(),
 
@@ -91,9 +132,6 @@ export const CandidatoDoutorado = pgTable("candidato_doutorado", {
   ...candidatoBaseColumns,
   // dados inscricao
   tipoCurso: tipoCursoEnum("tipo_curso").default("Doutorado").notNull(),
-
-  // endereco
-  numero: text("numero").notNull(),
 
   // formulario de inscricao para doutorado em ciencia da computacao
   historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação

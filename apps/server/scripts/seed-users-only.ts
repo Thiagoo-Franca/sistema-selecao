@@ -6,11 +6,11 @@ async function seedUsersOnly() {
   try {
     console.log("Creating admin users...")
     
-    const passwordHash = await bcrypt.hash("root@root.com", 10)
+    const passwordHash = await bcrypt.hash("admin@admin.com", 10)
     
     const users: InsertUser[] = [
       {
-        email: "root@root.com",
+        email: "admin@admin.com",
         nome: "Root ACTIVE",
         passwordHash,
         school: "Root",
@@ -39,8 +39,8 @@ async function seedUsersOnly() {
     
     console.log("✅ Admin users created successfully!")
     console.log("\nYou can login with:")
-    console.log("Email: root@root.com")
-    console.log("Password: root@root.com")
+    console.log("Email: admin@admin.com")
+    console.log("Password: admin@admin.com")
     
     process.exit(0)
   } catch (error) {

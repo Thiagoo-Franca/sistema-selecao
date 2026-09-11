@@ -70,6 +70,7 @@ export default function CandidatoMestradoPage() {
 
     const candidato: CandidatoMestrado | null | undefined = candidatoQuery.data
     console.log("Candidato: ", candidato)
+    console.log("candidato endereço, ", candidato?.endereco)
 
     //const orientador = banca?.membros?.find((m) => m.role === "orientador")?.usuario
     // const aluno = banca?.membros?.find((m) => m.role === "aluno")?.usuario
@@ -248,27 +249,27 @@ export default function CandidatoMestradoPage() {
                 <div className="grid grid-cols-3 gap-4">
                     <div>
                         <h3 className="font-semibold">CEP</h3>
-                        <p className="text-muted-foreground">{candidato.cep}</p>
+                        <p className="text-muted-foreground">{candidato.endereco.cep}</p>
                     </div>
                     <div>
                         <h3 className="font-semibold">Logradouro</h3>
-                        <p className="text-muted-foreground">{candidato.logradouro}</p>
+                        <p className="text-muted-foreground">{candidato.endereco.logradouro}</p>
                     </div>
                     <div>
                         <h3 className="font-semibold">Bairro</h3>
-                        <p className="text-muted-foreground">{candidato.bairro}</p>
+                        <p className="text-muted-foreground">{candidato.endereco.bairro}</p>
                     </div>
                     <div>
                         <h3 className="font-semibold">Complemento</h3>
-                        <p className="text-muted-foreground">{candidato.complemento}</p>
+                        <p className="text-muted-foreground">{candidato.endereco.complemento}</p>
                     </div>
                     <div>
                         <h3 className="font-semibold">UF</h3>
-                        <p className="text-muted-foreground">{candidato.estado}</p>
+                        <p className="text-muted-foreground">{candidato.endereco.estado}</p>
                     </div>
                     <div>
                         <h3 className="font-semibold">Município</h3>
-                        <p className="text-muted-foreground">{candidato.municipio}</p>
+                        <p className="text-muted-foreground">{candidato.endereco.municipio}</p>
                     </div>
                     {
                         candidato.telefoneFixo && (
