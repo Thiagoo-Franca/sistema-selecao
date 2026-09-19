@@ -2,7 +2,11 @@ import { useNavigate, useParams } from "react-router"
 import type { Route } from "./+types/banca.$id"
 import { useToast } from "@/hooks"
 import { useEffect, useState } from "react"
-import { useCandidatoMestradoById } from "@/hooks/candidato.hooks"
+import {
+  useCandidatoMestradoById,
+  useUpdateCandidatoMestrado,
+  useUpdateCandidatoMestradoNota,
+} from "@/hooks/candidato.hooks"
 import { useUser } from "@/services/useUser"
 import { Header } from "@/components/layout/Header"
 import { ArrowLeft, Loader2 } from "lucide-react"
@@ -68,15 +72,14 @@ export default function AvaliacaoCandidatoMestradoPage() {
         avaliador2: candidato.avaliador2 ? candidato.avaliador2 : "",
         area1: candidato.primeiraAreaPreferencia ? candidato.primeiraAreaPreferencia : "",
         area2: candidato.segundaAreaPreferencia ? candidato.segundaAreaPreferencia : "",
-        id: candidato.numeroInscricao ? candidato.numeroInscricao : "",
         cpf: candidato.cpf ? candidato.cpf : "",
         nome: candidato.nome ? candidato.nome : "",
         email: candidato.email ? candidato.email : "",
         cidade: candidato.municipio ? candidato.municipio : "",
-        isencao: candidato.solicitouIsencaoTaxaInscricao ? "sim" : "nao",
+        isencao: candidato.solicitouIsencaoTaxaInscricao === true ? "sim" : "nao",
         isencaoAprovada: candidato.isencaoAprovada ? "sim" : "nao",
         GRU: candidato.GRU ? candidato.GRU : "",
-        Homologa: candidato.homologado ? "sim" : "nao",
+        Homologa: candidato.homologa ? "sim" : "nao",
         universidade: candidato.nomeUniversidadeGraduacao
           ? candidato.nomeUniversidadeGraduacao
           : "",
@@ -84,21 +87,21 @@ export default function AvaliacaoCandidatoMestradoPage() {
         cidadeGrad: candidato.cidadeOndeRealizouGraduacao
           ? candidato.cidadeOndeRealizouGraduacao
           : "",
-        especiais: candidato.especiais ? candidato.especiais : "",
-        cotas: candidato.cotas ? candidato.cotas : "",
-        SUPRA: candidato.SUPRA ? candidato.SUPRA : "",
-        grad: candidato.notaGraduacao ? candidato.notaGraduacao : 0,
-        area: candidato.notaArea ? candidato.notaArea : 0,
-        enade: candidato.notaEnade ? candidato.notaEnade : 0,
-        a1a2a3a4: candidato.notaA1A2A3A4 ? candidato.notaA1A2A3A4 : 0,
-        b1b2b3b4: candidato.notaB1B2B3B4 ? candidato.notaB1B2B3B4 : 0,
-        ic_it: candidato.notaIcIt ? candidato.notaIcIt : 0,
-        poscomp: candidato.notaPoscomp ? candidato.notaPoscomp : 0,
-        DISCIPLINA_PÓS_CAPES_6: candidato.notaDisciplinaPósCapes6
-          ? candidato.notaDisciplinaPósCapes6
+        especiais: candidato.possuiNecessidadesEspeciais ? "sim" : "nao",
+        cotas: candidato.vagasNegrosPardos ? "sim" : "nao",
+        SUPRA: candidato.vagasSupranumerarias ? "sim" : "nao",
+        grad: candidato.notas?.grad ? Number(candidato.notas?.grad) : 0,
+        area: candidato.notas?.area ? Number(candidato.notas?.area) : 0,
+        enade: candidato.notas?.enade ? Number(candidato.notas?.enade) : 0,
+        a1a2a3a4: candidato.notas?.a1a2a3a4 ? Number(candidato.notas?.a1a2a3a4) : 0,
+        b1b2b3b4: candidato.notas?.b1b2b3b4 ? Number(candidato.notas?.b1b2b3b4) : 0,
+        icIt: candidato.notas?.icIt ? Number(candidato.notas?.icIt) : 0,
+        poscomp: candidato.notas?.poscomp ? Number(candidato.notas?.poscomp) : 0,
+        disciplinaPosCapes6Mais: candidato.notas?.disciplinaPosCapes6Mais
+          ? Number(candidato.notas?.disciplinaPosCapes6Mais)
           : 0,
-        DISCIPLINA_PÓS_CAPES_3_5: candidato.notaDisciplinaPósCapes3_5
-          ? candidato.notaDisciplinaPósCapes3_5
+        disciplinaPosCapes3a5: candidato.notas?.disciplinaPosCapes3a5
+          ? Number(candidato.notas?.disciplinaPosCapes3a5)
           : 0,
       })
     }
@@ -112,10 +115,10 @@ export default function AvaliacaoCandidatoMestradoPage() {
       "enade",
       "a1a2a3a4",
       "b1b2b3b4",
-      "ic_it",
+      "icIt",
       "poscomp",
-      "DISCIPLINA_PÓS_CAPES_6",
-      "DISCIPLINA_PÓS_CAPES_3_5",
+      "disciplinaPosCapes6Mais",
+      "disciplinaPosCapes3a5",
     ],
   })
 
@@ -147,12 +150,58 @@ export default function AvaliacaoCandidatoMestradoPage() {
     setNota(resultado.pontuacao)
   }, [camposNotaEtapa1])
 
-  function onSubmit(dados: CandidatoMestradoNotaEtapa1) {
-    const resultado = calcularMestradoNotaEtapa1(dados)
-    console.log("Pontuação:", resultado.pontuacao)
-    console.log("Aprovado:", resultado.aprovado)
-  }
+  const updateCandidatoMutation = useUpdateCandidatoMestrado()
+  const updateNotaMutation = useUpdateCandidatoMestradoNota()
 
+  async function onSubmit(dados: CandidatoMestradoNotaEtapa1) {
+    if (!id) return
+
+    console.log("Dados do formulário:", dados)
+
+    const [candidatoResult, notaResult] = await Promise.allSettled([
+      updateCandidatoMutation.mutateAsync({
+        id,
+        body: {
+          // Se for string vazia (""), envia undefined para o banco de dados ignorar a coluna no UPDATE
+          avaliador1: dados.avaliador1 || undefined,
+          avaliador2: dados.avaliador2 || undefined,
+          primeiraAreaPreferencia: dados.area1 || undefined,
+          segundaAreaPreferencia: dados.area2 || undefined,
+
+          cpf: dados.cpf,
+          nome: dados.nome,
+          email: dados.email,
+          municipio: dados.cidade,
+          solicitouIsencaoTaxaInscricao: dados.isencao === "sim",
+          isencaoAprovada: dados.isencaoAprovada === "sim",
+          GRU: dados.GRU || undefined,
+          homologa: dados.Homologa || undefined,
+          nomeUniversidadeGraduacao: dados.universidade || undefined,
+          nomeCursoGraduacao: dados.cursoGrad || undefined,
+          cidadeOndeRealizouGraduacao: dados.cidadeGrad || undefined,
+          possuiNecessidadesEspeciais: dados.especiais === "sim",
+          vagasNegrosPardos: dados.cotas === "sim",
+          vagasSupranumerarias: dados.SUPRA === "sim",
+        },
+      }),
+      updateNotaMutation.mutateAsync({
+        id,
+        body: {
+          grad: dados.grad,
+          area: dados.area,
+          enade: dados.enade,
+          a1a2a3a4: dados.a1a2a3a4,
+          b1b2b3b4: dados.b1b2b3b4,
+          icIt: dados.icIt,
+          poscomp: dados.poscomp,
+          disciplinaPosCapes6Mais: dados.disciplinaPosCapes6Mais,
+          disciplinaPosCapes3a5: dados.disciplinaPosCapes3a5,
+        },
+      }),
+    ])
+
+    if (candidatoResult.status === "rejected" || notaResult.status === "rejected") return
+  }
   if (isLoading) {
     return (
       <div className="container mx-auto p-4 md:p-8">
@@ -258,7 +307,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
         <FieldLegend className="font-bold text-muted-foreground">Dados do candidato</FieldLegend>
 
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          {/* ID */}
+          {/* ID 
           <Field className="flex flex-col gap-4">
             <FieldLabel htmlFor="id" className="font-bold text-muted-foreground">
               ID
@@ -268,8 +317,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="text"
               id="id"
-            />
+              />
           </Field>
+              */}
 
           {/* CPF */}
           <Field className="flex flex-col gap-4">

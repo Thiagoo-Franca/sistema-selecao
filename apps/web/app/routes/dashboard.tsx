@@ -35,6 +35,12 @@ import {
 } from "@/hooks"
 import type { Route } from "./+types/dashboard"
 import { useCandidatos } from "@/hooks/candidato.hooks"
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL" }]
 
@@ -522,15 +528,15 @@ export type NotaDoutorado = {
 export type NotaMestrado = {
   id: number
   idCandidato: number
-  grad: string | null
-  area: string | null
-  enade: string | null
-  a1a2a3a4: string | null
-  b1b2b3b4: string | null
-  icIt: string | null
-  poscomp: string | null
-  disciplinaPosCapes6Mais: string | null
-  disciplinaPosCapes3a5: string | null
+  grad: number | null
+  area: number | null
+  enade: number | null
+  a1a2a3a4: number | null
+  b1b2b3b4: number | null
+  icIt: number | null
+  poscomp: number | null
+  disciplinaPosCapes6Mais: number | null
+  disciplinaPosCapes3a5: number | null
 }
 
 export type Endereco = {
@@ -630,6 +636,13 @@ export interface CandidatoDoutorado extends Candidato {
 
 export interface CandidatoMestrado extends Candidato {
   tipoCurso: "Mestrado"
+
+  avaliador1: string | null
+  avaliador2: string | null
+  isencaoAprovada: boolean | null
+  GRU: string | null
+  homologa: string | null
+  notas: NotaMestrado | null
 
   // formulário de mestrado
   copiaDiplomaGraduacao: string // URL do PDF

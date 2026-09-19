@@ -4,7 +4,9 @@ import * as service from "./candidato.service";
 import { zValidator } from "@hono/zod-validator";
 import {
   updateCandidatoDoutoradoSchema,
+  updateCandidatoMestradoSchema,
   updateNotaDoutoradoSchema,
+  updateNotaMestradoSchema,
 } from "./candidato.schema";
 import { match } from "ts-pattern";
 import { AppError } from "../../error";
@@ -51,6 +53,64 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
+
+  .patch(
+    "/mestrado/:id",
+    zValidator("json", updateCandidatoMestradoSchema),
+    async (c) => {
+      const id = c.req.param("id");
+      const body = c.req.valid("json");
+      const result = await service.updateCandidatoMestrado(c, id, body);
+
+      if (!result.ok) {
+        console.error(
+          `Error updating mestrado candidato with ID ${id}:`,
+          result.error,
+        );
+        throw match(result.error)
+          .with(
+            { type: "database_error" },
+            () => new AppError(500, "Erro ao atualizar candidato"),
+          )
+          .exhaustive();
+      }
+
+      if (!result.data) {
+        throw new AppError(404, "Candidato não encontrado");
+      }
+
+      return c.json(result.data);
+    },
+  )
+
+  .patch(
+    "/mestrado/:id/nota",
+    zValidator("json", updateNotaMestradoSchema),
+    async (c) => {
+      const id = c.req.param("id");
+      const body = c.req.valid("json");
+      const result = await service.updateNotaMestrado(c, id, body);
+
+      if (!result.ok) {
+        console.error(
+          `Error updating mestrado candidato nota with ID ${id}:`,
+          result.error,
+        );
+        throw match(result.error)
+          .with(
+            { type: "database_error" },
+            () => new AppError(500, "Erro ao atualizar nota do candidato"),
+          )
+          .exhaustive();
+      }
+
+      if (!result.data) {
+        throw new AppError(404, "Nota do candidato não encontrada");
+      }
+
+      return c.json(result.data);
+    },
+  )
 
   .patch(
     "/doutorado/:id",

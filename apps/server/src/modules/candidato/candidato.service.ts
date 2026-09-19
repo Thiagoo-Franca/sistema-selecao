@@ -6,10 +6,21 @@ import {
   CandidatoMestrado,
   Endereco,
   NotaDoutorado,
+  NotaMestrado,
 } from "../../database";
 import { eq } from "drizzle-orm";
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown };
+
+type CandidatoMestradoComRelacoes = typeof CandidatoMestrado.$inferSelect & {
+  endereco: typeof Endereco.$inferSelect | null;
+  notas: typeof NotaMestrado.$inferSelect | null;
+};
+
+type CandidatoDoutoradoComRelacoes = typeof CandidatoDoutorado.$inferSelect & {
+  endereco: typeof Endereco.$inferSelect | null;
+  notas: typeof NotaDoutorado.$inferSelect | null;
+};
 
 export const getAllCandidatos = async (
   c: Context<{ Variables: AppVariables }>,
@@ -58,18 +69,11 @@ export const getAllCandidatosMestrado = async (
     return err({ type: "database_error", error });
   }
 };
-
 export const getCandidatoMestradoById = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
 ): Promise<
-  AppResult<
-    | (typeof CandidatoMestrado.$inferSelect & {
-        endereco: typeof Endereco.$inferSelect | null;
-      })
-    | null,
-    GetAllCandidatosError
-  >
+  AppResult<CandidatoMestradoComRelacoes | null, GetAllCandidatosError>
 > => {
   const dbInstance = c.get("db");
 
@@ -78,6 +82,10 @@ export const getCandidatoMestradoById = async (
       .select()
       .from(CandidatoMestrado)
       .leftJoin(Endereco, eq(CandidatoMestrado.idEndereco, Endereco.id))
+      .leftJoin(
+        NotaMestrado,
+        eq(NotaMestrado.idCandidato, CandidatoMestrado.id),
+      )
       .where(eq(CandidatoMestrado.id, Number(id)))
       .limit(1);
 
@@ -86,6 +94,7 @@ export const getCandidatoMestradoById = async (
     const candidato = {
       ...result[0].candidato_mestrado,
       endereco: result[0].endereco,
+      notas: result[0].nota_mestrado,
     };
 
     return ok(candidato);
@@ -146,6 +155,73 @@ export const getAllCandidatosDoutorado = async (
     return err({ type: "database_error", error });
   }
 };
+
+export const updateCandidatoMestrado = async (
+  c: Context<{ Variables: AppVariables }>,
+  id: string,
+  body: Partial<typeof CandidatoMestrado.$inferInsert>,
+): Promise<
+  AppResult<
+    | (typeof CandidatoMestrado.$inferSelect & {
+        endereco: typeof Endereco.$inferSelect | null;
+      })
+    | null,
+    GetAllCandidatosError
+  >
+> => {
+  const dbInstance = c.get("db");
+
+  try {
+    const [candidatoAtualizado] = await dbInstance
+      .update(CandidatoMestrado)
+      .set(body)
+      .where(eq(CandidatoMestrado.id, Number(id)))
+      .returning();
+    if (!candidatoAtualizado) return ok(null);
+
+    const [enderecoAtual] = await dbInstance
+      .select()
+      .from(Endereco)
+      .where(eq(Endereco.id, candidatoAtualizado.idEndereco));
+
+    return ok({ ...candidatoAtualizado, endereco: enderecoAtual ?? null });
+  } catch (error) {
+    console.error(`Error updating mestrado candidato with ID ${id}:`, error);
+    return err({ type: "database_error", error });
+  }
+};
+
+export const updateNotaMestrado = async (
+  c: Context<{ Variables: AppVariables }>,
+  idCandidato: string,
+  body: Partial<typeof NotaMestrado.$inferInsert>,
+): Promise<
+  AppResult<typeof NotaMestrado.$inferSelect | null, GetAllCandidatosError>
+> => {
+  const dbInstance = c.get("db");
+
+  try {
+    const [notaAtualizada] = await dbInstance
+      .insert(NotaMestrado)
+      .values({
+        idCandidato: Number(idCandidato),
+        ...body,
+      })
+      .onConflictDoUpdate({
+        target: NotaMestrado.idCandidato, // Assumindo que idCandidato é UNIQUE
+        set: body,
+      })
+      .returning();
+    return ok(notaAtualizada ?? null);
+  } catch (error) {
+    console.error(
+      `Error updating/inserting nota mestrado for candidato ID ${idCandidato}:`,
+      error,
+    );
+    return err({ type: "database_error", error });
+  }
+};
+
 export const updateCandidatoDoutorado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,

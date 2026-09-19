@@ -3,7 +3,7 @@ import apiClient from "@/services/apiClient"
 import { rpcReturn } from "@/lib/utils"
 import type { CandidatoDoutorado, CandidatoMestrado } from "@/routes/_index"
 import { toast } from "sonner"
-import type { NotaDoutorado } from "@/routes/dashboard"
+import type { NotaDoutorado, NotaMestrado } from "@/routes/dashboard"
 
 export const useCandidatos = () => {
   return useQuery({
@@ -84,6 +84,50 @@ export const useUpdateCandidatoDoutoradoNota = () => {
     },
     onError: (error) => {
       toast.error(`Erro ao atualizar nota do candidato de doutorado: ${error.message}`)
+    },
+  })
+}
+
+export const useUpdateCandidatoMestrado = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: { id: string | number; body: Partial<CandidatoMestrado> }) => {
+      const response = await apiClient.candidato.mestrado[":id"].$patch({
+        param: { id: String(data.id) },
+        json: data.body,
+      })
+      return rpcReturn(response) as unknown as CandidatoMestrado
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.invalidateQueries({ queryKey: ["candidatoMestrado", variables.id] })
+      toast.success("Candidato de mestrado atualizado com sucesso!")
+    },
+    onError: (error) => {
+      toast.error(`Erro ao atualizar candidato de mestrado: ${error.message}`)
+    },
+  })
+}
+
+export const useUpdateCandidatoMestradoNota = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: { id: string | number; body: Partial<NotaMestrado> }) => {
+      const response = await apiClient.candidato.mestrado[":id"].nota.$patch({
+        param: { id: String(data.id) },
+        json: data.body,
+      })
+      return rpcReturn(response) as unknown as NotaMestrado
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.invalidateQueries({ queryKey: ["candidatoMestrado", variables.id] })
+      toast.success("Nota do candidato de mestrado atualizada com sucesso!")
+    },
+    onError: (error) => {
+      toast.error(`Erro ao atualizar nota do candidato de mestrado: ${error.message}`)
     },
   })
 }

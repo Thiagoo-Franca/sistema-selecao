@@ -10,6 +10,13 @@ import { TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/tab
 import type { CandidatoMestrado } from "./_index"
 import { formatDate } from "./banca.$id"
 import { Button } from "@/components/ui/button"
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu"
 
 function formatBoolean(valor: boolean) {
   if (valor) {
@@ -113,19 +120,42 @@ export default function CandidatoDoutoradoPage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <div className="mb-6 flex flex-row items-center justify-between">
+      <div className="mb-6 flex w-full flex-row justify-between">
         <div className="flex flex-row items-center gap-4">
           <Button onClick={() => navigate(-1)} variant="outline" className="">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
           </Button>
           <h1 className="text-2xl font-bold">{candidato.nome}</h1>
         </div>
-        <Button
-          className="bg-blue-500 hover:bg-blue-600"
-          onClick={() => navigate(`/doutorado/${candidato.id}/avaliacao`)}
-        >
-          Avaliar
-        </Button>
+        <div className="flex flex-col items-center gap-4 self-stretch md:flex-row">
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Outras opções</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="flex flex-col gap-2 p-4">
+                    <li>
+                      <Button className="w-full bg-white text-black hover:bg-black/10">
+                        Editar candidato
+                      </Button>
+                    </li>
+                    <li>
+                      <Button className="w-full bg-red-500 hover:bg-red-600">
+                        Excluir candidato
+                      </Button>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+          <Button
+            className="bg-blue-500 hover:bg-blue-600"
+            onClick={() => navigate(`/doutorado/${candidato.id}/avaliacao`)}
+          >
+            Avaliar
+          </Button>
+        </div>
       </div>
       <section>
         <div className="grid grid-cols-3 gap-4">

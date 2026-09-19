@@ -76,9 +76,9 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
         email: candidato.email ? candidato.email : "",
         solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ? "sim" : "nao",
         isencaoAprovada: candidato.isencaoAprovada ? "sim" : "nao",
-        gru: candidato.gru ? candidato.gru : "", // ajustar GRU
+        gru: candidato.GRU ? candidato.GRU : "", // ajustar GRU
         homologa: candidato.homologa ? "sim" : "nao", // ajustar homologa
-        areaPgcomp: candidato.areaPgcomp ? candidato.areaPgcomp : "", // ajustar areaPGCOMP
+        areaPgcomp: candidato.areaPGCOMP ? candidato.areaPGCOMP : "", // ajustar areaPGCOMP
         OrientadorMestrado: candidato.orientadorMestrado ? candidato.orientadorMestrado : "", // ajustar orientadorMestrado
         PotencialOrientador1: candidato.primeiraOpcaoOrientador
           ? candidato.primeiraOpcaoOrientador
