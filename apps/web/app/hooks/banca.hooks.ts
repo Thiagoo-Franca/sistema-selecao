@@ -90,7 +90,8 @@ export const useUpdateBanca = (id: string) => {
     onError: (error: any) => {
       toast({
         title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao atualizar banca. Tente novamente.",
+        description:
+          error instanceof Error ? error.message : "Erro ao atualizar banca. Tente novamente.",
         variant: "destructive",
       })
     },
@@ -208,7 +209,8 @@ export const useMyDefesas = (
       })
       return rpcReturn(res)
     },
-    enabled: !!userQuery.data && (userQuery.data.role === "TEACHER" || userQuery.data.role === "ADMIN"),
+    enabled:
+      !!userQuery.data && (userQuery.data.role === "TEACHER" || userQuery.data.role === "ADMIN"),
   })
 }
 
@@ -226,7 +228,8 @@ export const useBancasQueParticipei = (searchQuery?: string) => {
       })
       return rpcReturn(res)
     },
-    enabled: !!userQuery.data && (userQuery.data.role === "TEACHER" || userQuery.data.role === "ADMIN"),
+    enabled:
+      !!userQuery.data && (userQuery.data.role === "TEACHER" || userQuery.data.role === "ADMIN"),
   })
 }
 
@@ -235,7 +238,15 @@ export const useAssignGradeMutation = () => {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async ({ bancaId, userId, nota }: { bancaId: string; userId: string; nota: string }) => {
+    mutationFn: async ({
+      bancaId,
+      userId,
+      nota,
+    }: {
+      bancaId: string
+      userId: string
+      nota: string
+    }) => {
       const response = await apiClient.banca[":bancaId"].usuarios[":userId"].nota.$post({
         param: { bancaId, userId },
         json: { nota },

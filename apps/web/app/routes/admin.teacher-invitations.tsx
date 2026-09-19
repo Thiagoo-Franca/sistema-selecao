@@ -1,9 +1,7 @@
 import { Header } from "@/components/layout/Header"
 import type { Route } from "./+types/admin.teacher-invitations"
 
-export const meta: Route.MetaFunction = () => [
-  { title: "SISDEF - Convites de Professores" },
-]
+export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Convites de Professores" }]
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,15 +12,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { useUser } from "@/services/useUser"
-import { 
-  useTeacherInvitations, 
-  useCreateTeacherInvitation, 
-  type CreateTeacherInvitationData 
+import {
+  useTeacherInvitations,
+  useCreateTeacherInvitation,
+  type CreateTeacherInvitationData,
 } from "@/hooks"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Mail, Plus, RefreshCw, Search } from "lucide-react"
@@ -33,7 +45,7 @@ import { z } from "zod"
 
 const createTeacherInvitationSchema = z.object({
   email: z.string().email("Email inválido"),
-  nome: z.string().min(1, "Nome é obrigatório")
+  nome: z.string().min(1, "Nome é obrigatório"),
 })
 
 export default function AdminTeacherInvitationsPage() {
@@ -48,7 +60,7 @@ export default function AdminTeacherInvitationsPage() {
     resolver: zodResolver(createTeacherInvitationSchema),
     defaultValues: {
       email: "",
-      nome: ""
+      nome: "",
     },
   })
 
@@ -63,16 +75,16 @@ export default function AdminTeacherInvitationsPage() {
   // Estado de carregamento
   if (userQuery.isLoading || invitationsQuery.isLoading) {
     return (
-      <div className="container mx-auto p-4 md:p-8 space-y-4">
+      <div className="container mx-auto space-y-4 p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+        <div className="mb-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
           <Skeleton className="h-10 w-full sm:w-1/2" />
           <Skeleton className="h-10 w-40" />
         </div>
-        <div className="border rounded-md p-4">
-          <Skeleton className="h-8 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
+        <div className="rounded-md border p-4">
+          <Skeleton className="mb-2 h-8 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
       </div>
@@ -83,8 +95,8 @@ export default function AdminTeacherInvitationsPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="bg-destructive/10 text-destructive p-4 rounded-md">
-          <h2 className="text-xl font-bold mb-2">Erro ao carregar dados</h2>
+        <div className="rounded-md bg-destructive/10 p-4 text-destructive">
+          <h2 className="mb-2 text-xl font-bold">Erro ao carregar dados</h2>
           <p>Ocorreu um erro ao carregar os convites. Por favor, tente novamente mais tarde.</p>
         </div>
       </div>
@@ -110,38 +122,50 @@ export default function AdminTeacherInvitationsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pendente</Badge>
+        return (
+          <Badge variant="outline" className="border-yellow-200 bg-yellow-50 text-yellow-700">
+            Pendente
+          </Badge>
+        )
       case "used":
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Aceito</Badge>
+        return (
+          <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
+            Aceito
+          </Badge>
+        )
       case "expired":
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Expirado</Badge>
+        return (
+          <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
+            Expirado
+          </Badge>
+        )
       default:
         return <Badge variant="outline">{status}</Badge>
     }
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     })
   }
 
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      
+
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Convites para Professores</h1>
+        <h1 className="mb-2 text-2xl font-bold">Convites para Professores</h1>
         <p className="text-muted-foreground">Gerencie convites enviados para novos professores.</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+      <div className="mb-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Buscar por nome ou email..."
             value={searchQuery}
@@ -149,7 +173,7 @@ export default function AdminTeacherInvitationsPage() {
             className="pl-10"
           />
         </div>
-        
+
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -157,14 +181,16 @@ export default function AdminTeacherInvitationsPage() {
             onClick={() => invitationsQuery.refetch()}
             disabled={invitationsQuery.isRefetching}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${invitationsQuery.isRefetching ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${invitationsQuery.isRefetching ? "animate-spin" : ""}`}
+            />
             Atualizar
           </Button>
-          
+
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Novo Convite
               </Button>
             </DialogTrigger>
@@ -175,7 +201,7 @@ export default function AdminTeacherInvitationsPage() {
                   Envie um convite para um novo professor se juntar ao sistema.
                 </DialogDescription>
               </DialogHeader>
-              
+
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
@@ -191,7 +217,7 @@ export default function AdminTeacherInvitationsPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="email"
@@ -205,27 +231,20 @@ export default function AdminTeacherInvitationsPage() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setDialogOpen(false)}
-                    >
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                       Cancelar
                     </Button>
-                    <Button
-                      type="submit"
-                      disabled={createInvitationMutation.isPending}
-                    >
+                    <Button type="submit" disabled={createInvitationMutation.isPending}>
                       {createInvitationMutation.isPending ? (
                         <>
-                          <Mail className="h-4 w-4 mr-2 animate-pulse" />
+                          <Mail className="mr-2 h-4 w-4 animate-pulse" />
                           Enviando...
                         </>
                       ) : (
                         <>
-                          <Mail className="h-4 w-4 mr-2" />
+                          <Mail className="mr-2 h-4 w-4" />
                           Enviar Convite
                         </>
                       )}
@@ -238,7 +257,7 @@ export default function AdminTeacherInvitationsPage() {
         </div>
       </div>
 
-      <div className="border rounded-md overflow-x-auto">
+      <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -263,7 +282,9 @@ export default function AdminTeacherInvitationsPage() {
             ) : (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
-                  {searchQuery ? "Nenhum convite encontrado para esta busca." : "Nenhum convite enviado ainda."}
+                  {searchQuery
+                    ? "Nenhum convite encontrado para esta busca."
+                    : "Nenhum convite enviado ainda."}
                 </TableCell>
               </TableRow>
             )}

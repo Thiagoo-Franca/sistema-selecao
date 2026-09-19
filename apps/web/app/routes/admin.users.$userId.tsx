@@ -32,13 +32,13 @@ export default function AdminUserDetailPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="mx-auto max-w-4xl space-y-6">
           <Button onClick={() => navigate("/admin/users")} variant="outline" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
           </Button>
           <Card>
             <CardHeader>
-              <Skeleton className="h-8 w-48 mb-2" />
+              <Skeleton className="mb-2 h-8 w-48" />
               <Skeleton className="h-4 w-32" />
             </CardHeader>
             <CardContent>
@@ -66,14 +66,14 @@ export default function AdminUserDetailPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           <Button onClick={() => navigate("/admin/users")} variant="outline" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
           </Button>
           <Card>
             <CardContent className="pt-6">
-              <div className="bg-destructive/10 text-destructive p-4 rounded-md">
-                <h2 className="text-xl font-bold mb-2">Usuário não encontrado</h2>
+              <div className="rounded-md bg-destructive/10 p-4 text-destructive">
+                <h2 className="mb-2 text-xl font-bold">Usuário não encontrado</h2>
                 <p>O usuário solicitado não existe ou você não tem permissão para visualizá-lo.</p>
               </div>
             </CardContent>
@@ -98,7 +98,7 @@ export default function AdminUserDetailPage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <Button onClick={() => navigate("/admin/users")} variant="outline" className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
@@ -107,7 +107,7 @@ export default function AdminUserDetailPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-2xl">
                   <User className="h-6 w-6" />
                   {user.nome}
                 </CardTitle>
@@ -119,30 +119,30 @@ export default function AdminUserDetailPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <Mail className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Email</p>
                   <p className="text-sm">{user.email}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Hash className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <Hash className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Matrícula</p>
                   <p className="text-sm">{user.matricula}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <School className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <School className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Escola/Instituição</p>
                   <p className="text-sm">{user.school}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <GraduationCap className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <GraduationCap className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Título Acadêmico</p>
                   <p className="text-sm">{user.academicTitle}</p>
@@ -165,13 +165,15 @@ export default function AdminUserDetailPage() {
             {associationsQuery.isLoading ? (
               <p className="text-sm text-muted-foreground">Carregando associações...</p>
             ) : !hasAssociations ? (
-              <p className="text-sm text-muted-foreground">Nenhuma banca ou participação encontrada.</p>
+              <p className="text-sm text-muted-foreground">
+                Nenhuma banca ou participação encontrada.
+              </p>
             ) : (
               <div className="space-y-4">
                 {associations.bancasAsOrientador.length > 0 && (
                   <div>
-                    <h4 className="font-medium mb-2">Orientador</h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
+                    <h4 className="mb-2 font-medium">Orientador</h4>
+                    <ul className="list-inside list-disc space-y-1 text-sm">
                       {associations.bancasAsOrientador.map((b) => (
                         <li key={b.id}>
                           {b.tituloTrabalho} ({b.autor})
@@ -182,8 +184,8 @@ export default function AdminUserDetailPage() {
                 )}
                 {associations.bancasAsAluno.length > 0 && (
                   <div>
-                    <h4 className="font-medium mb-2">Aluno</h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
+                    <h4 className="mb-2 font-medium">Aluno</h4>
+                    <ul className="list-inside list-disc space-y-1 text-sm">
                       {associations.bancasAsAluno.map((b) => (
                         <li key={b.id}>
                           {b.tituloTrabalho} ({b.autor})
@@ -194,8 +196,8 @@ export default function AdminUserDetailPage() {
                 )}
                 {associations.membrosEmBancas.length > 0 && (
                   <div>
-                    <h4 className="font-medium mb-2">Membro</h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
+                    <h4 className="mb-2 font-medium">Membro</h4>
+                    <ul className="list-inside list-disc space-y-1 text-sm">
                       {associations.membrosEmBancas.map((m) => (
                         <li key={`${m.bancaId}-${m.role}`}>
                           {m.tituloTrabalho} ({roleLabels[m.role] ?? m.role})

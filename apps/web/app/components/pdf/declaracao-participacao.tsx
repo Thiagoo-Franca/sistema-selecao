@@ -2,7 +2,13 @@ import type { DocumentInfo } from "@/hooks"
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
 import { SharedDocumentHeader } from "./shared-document"
 
-export const DeclaracaoParticipacaoPDF = ({ bancaInfo, membroId }: { bancaInfo: DocumentInfo; membroId: number }) => {
+export const DeclaracaoParticipacaoPDF = ({
+  bancaInfo,
+  membroId,
+}: {
+  bancaInfo: DocumentInfo
+  membroId: number
+}) => {
   const { curso, membros } = bancaInfo
 
   const membro = membros.find((m) => m.id === membroId)
@@ -54,11 +60,13 @@ export const DeclaracaoParticipacaoPDF = ({ bancaInfo, membroId }: { bancaInfo: 
 
         {/* Texto da Declaração */}
         <Text style={styles.declarationText}>
-          Declaro para os devidos fins, que <Text style={styles.boldText}>{membro.usuario.nome}</Text>, participou da
-          banca de defesa do Projeto Final II de <Text style={styles.boldText}>{bancaInfo.autor}</Text> aluno do Curso
-          de {curso.nome}
-          da UFBA, intitulado <Text style={styles.boldText}>"{bancaInfo.tituloTrabalho}"</Text>, que ocorreu em{" "}
-          <Text style={styles.boldText}>{defenseDate}</Text>, atuando como {getRoleText(membro.role)}.
+          Declaro para os devidos fins, que{" "}
+          <Text style={styles.boldText}>{membro.usuario.nome}</Text>, participou da banca de defesa
+          do Projeto Final II de <Text style={styles.boldText}>{bancaInfo.autor}</Text> aluno do
+          Curso de {curso.nome}
+          da UFBA, intitulado <Text style={styles.boldText}>"{bancaInfo.tituloTrabalho}"</Text>, que
+          ocorreu em <Text style={styles.boldText}>{defenseDate}</Text>, atuando como{" "}
+          {getRoleText(membro.role)}.
         </Text>
 
         {/* Local e Data */}

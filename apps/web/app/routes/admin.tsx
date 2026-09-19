@@ -3,9 +3,7 @@ import { Navigate, Outlet } from "react-router"
 import { useEffect, useState } from "react"
 import type { Route } from "./+types/admin"
 
-export const meta: Route.MetaFunction = () => [
-  { title: "SISDEF - Administração" },
-]
+export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Administração" }]
 
 export default function AdminLayout() {
   const [isClient, setIsClient] = useState(false)
@@ -16,7 +14,7 @@ export default function AdminLayout() {
   }, [])
 
   if (!isClient || isLoading) {
-    return <div className="p-8 flex justify-center">Carregando...</div>
+    return <div className="flex justify-center p-8">Carregando...</div>
   }
   if (isError || !user) {
     return <Navigate to="/" />

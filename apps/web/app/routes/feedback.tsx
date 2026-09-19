@@ -17,7 +17,7 @@ export default function FeedbackPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="flex items-center justify-center h-48">
+        <div className="flex h-48 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       </div>
@@ -32,7 +32,7 @@ export default function FeedbackPage() {
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
 
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         <Tabs defaultValue="form" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="form">Enviar Feedback</TabsTrigger>

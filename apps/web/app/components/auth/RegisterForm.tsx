@@ -53,7 +53,11 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
   }
 
   const errorMessage =
-    error instanceof Error ? (error.cause instanceof Error ? error.cause.message : error.message) : null
+    error instanceof Error
+      ? error.cause instanceof Error
+        ? error.cause.message
+        : error.message
+      : null
 
   return (
     <Form {...form}>
@@ -73,7 +77,7 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
             disabled={isPending}
             {...register("nome", { required: "Nome é obrigatório" })}
           />
-          {errors.nome && <p className="text-sm text-destructive mt-1">{errors.nome.message}</p>}
+          {errors.nome && <p className="mt-1 text-sm text-destructive">{errors.nome.message}</p>}
         </div>
 
         <div>
@@ -91,7 +95,7 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
               },
             })}
           />
-          {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
+          {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>}
         </div>
 
         <div>
@@ -102,7 +106,9 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
             disabled={isPending}
             {...register("school", { required: "Universidade é obrigatória" })}
           />
-          {errors.school && <p className="text-sm text-destructive mt-1">{errors.school.message}</p>}
+          {errors.school && (
+            <p className="mt-1 text-sm text-destructive">{errors.school.message}</p>
+          )}
         </div>
 
         <div>
@@ -113,7 +119,9 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
             disabled={isPending}
             {...register("matricula", { required: "Matrícula é obrigatória" })}
           />
-          {errors.matricula && <p className="text-sm text-destructive mt-1">{errors.matricula.message}</p>}
+          {errors.matricula && (
+            <p className="mt-1 text-sm text-destructive">{errors.matricula.message}</p>
+          )}
         </div>
 
         <div>
@@ -124,7 +132,9 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
             disabled={isPending}
             {...register("academicTitle", { required: "Título acadêmico é obrigatório" })}
           />
-          {errors.academicTitle && <p className="text-sm text-destructive mt-1">{errors.academicTitle.message}</p>}
+          {errors.academicTitle && (
+            <p className="mt-1 text-sm text-destructive">{errors.academicTitle.message}</p>
+          )}
         </div>
 
         <div>
@@ -142,7 +152,9 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
               },
             })}
           />
-          {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
+          )}
         </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>

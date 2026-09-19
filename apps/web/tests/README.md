@@ -41,45 +41,49 @@ npm run test:e2e
 ### Basic Test Structure
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test"
 
-test('test name', async ({ page }) => {
-  await page.goto('/');
-  
+test("test name", async ({ page }) => {
+  await page.goto("/")
+
   // Your test logic here
-  await expect(page.locator('selector')).toBeVisible();
-});
+  await expect(page.locator("selector")).toBeVisible()
+})
 ```
 
 ### Common Patterns
 
 #### Navigation
+
 ```typescript
-await page.goto('/');
-await page.getByRole('link', { name: 'Link Text' }).click();
+await page.goto("/")
+await page.getByRole("link", { name: "Link Text" }).click()
 ```
 
 #### Form Interactions
+
 ```typescript
-await page.getByLabel('Email').fill('test@example.com');
-await page.getByRole('button', { name: 'Submit' }).click();
+await page.getByLabel("Email").fill("test@example.com")
+await page.getByRole("button", { name: "Submit" }).click()
 ```
 
 #### Assertions
+
 ```typescript
-await expect(page).toHaveTitle(/Expected Title/);
-await expect(page.locator('.element')).toBeVisible();
-await expect(page).toHaveURL(/.*expected-path/);
+await expect(page).toHaveTitle(/Expected Title/)
+await expect(page.locator(".element")).toBeVisible()
+await expect(page).toHaveURL(/.*expected-path/)
 ```
 
 #### API Mocking
+
 ```typescript
-await page.route('**/api/**', route => {
-  route.fulfill({ 
-    status: 200, 
-    body: JSON.stringify({ data: 'mock' }) 
-  });
-});
+await page.route("**/api/**", (route) => {
+  route.fulfill({
+    status: 200,
+    body: JSON.stringify({ data: "mock" }),
+  })
+})
 ```
 
 ## Configuration
@@ -121,6 +125,7 @@ The tests use a special test environment:
 ## CI/CD Integration
 
 Tests are configured to run in CI environments with:
+
 - Reduced parallelism on CI
 - Retry logic for flaky tests
 - Proper exit codes for build failures

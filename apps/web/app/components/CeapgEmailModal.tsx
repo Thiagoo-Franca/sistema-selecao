@@ -34,9 +34,17 @@ export interface CeagEmailData {
   message: string
 }
 
-export function CeagEmailModal({ isOpen, onClose, onConfirm, isLoading = false, bancaInfo }: CeagEmailModalProps) {
+export function CeagEmailModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading = false,
+  bancaInfo,
+}: CeagEmailModalProps) {
   const { data: user } = useUser()
-  const [ceapgEmail, setCeagEmail] = useState(import.meta.env.PROD ? "ceag-ic@ufba.br" : "antoinel2210@gmail.com")
+  const [ceapgEmail, setCeagEmail] = useState(
+    import.meta.env.PROD ? "ceag-ic@ufba.br" : "antoinel2210@gmail.com"
+  )
   const [senderName, setSenderName] = useState(user?.nome || "")
   const [senderEmail, setSenderEmail] = useState(user?.email || "")
   const defaultMessage = `Prezados colegas do CEAG,
@@ -60,24 +68,30 @@ Universidade Federal da Bahia`
     })
   }
 
-  const attachments = ["Formulário de Avaliação.pdf", "Declaração de Participação.pdf", "Declaração de Orientação.pdf"]
+  const attachments = [
+    "Formulário de Avaliação.pdf",
+    "Declaração de Participação.pdf",
+    "Declaração de Orientação.pdf",
+  ]
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
             Confirmar Envio para CEAG
           </DialogTitle>
-          <DialogDescription>Revise os dados abaixo antes de enviar as declarações para o CEAG.</DialogDescription>
+          <DialogDescription>
+            Revise os dados abaixo antes de enviar as declarações para o CEAG.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Informações da Banca */}
           {bancaInfo && (
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <h4 className="font-semibold mb-2">Informações da Banca</h4>
+            <div className="rounded-lg bg-muted/50 p-4">
+              <h4 className="mb-2 font-semibold">Informações da Banca</h4>
               <div className="space-y-1 text-sm">
                 <p>
                   <span className="font-medium">Autor:</span> {bancaInfo.autor}
@@ -106,7 +120,7 @@ Universidade Federal da Bahia`
           </div>
 
           {/* Dados do Remetente */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="senderName">Seu Nome</Label>
               <Input
@@ -135,11 +149,11 @@ Universidade Federal da Bahia`
               <Paperclip className="h-4 w-4" />
               Arquivos Anexos
             </Label>
-            <div className="bg-muted/30 p-3 rounded-lg">
+            <div className="rounded-lg bg-muted/30 p-3">
               <ul className="space-y-1 text-sm">
                 {attachments.map((attachment, index) => (
                   <li key={index} className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <div className="h-2 w-2 rounded-full bg-green-500" />
                     {attachment}
                   </li>
                 ))}
@@ -150,7 +164,11 @@ Universidade Federal da Bahia`
           {/* Mensagem do Email */}
           <div className="space-y-2">
             <Label>Mensagem do Email</Label>
-            <Textarea value={message} onChange={(e) => setMessage(e.target.value)} className="min-h-[160px]" />
+            <Textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="min-h-[160px]"
+            />
           </div>
 
           <DialogFooter>
@@ -160,7 +178,7 @@ Universidade Federal da Bahia`
             <Button type="submit" disabled={isLoading} className="flex items-center gap-2">
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   Enviando...
                 </>
               ) : (

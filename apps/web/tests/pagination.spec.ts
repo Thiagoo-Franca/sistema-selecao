@@ -47,13 +47,17 @@ test.describe("Pagination Display", () => {
     }
   })
 
-  test("should display both upcoming and past defenses sections when available", async ({ page }) => {
+  test("should display both upcoming and past defenses sections when available", async ({
+    page,
+  }) => {
     // Wait for the defense table to load
     await page.waitForSelector('[data-testid="defense-table"]', { timeout: 10000 })
 
     // Check if there are sections for both upcoming and past defenses
     const upcomingSection = page.locator('h3:has-text("Próximas defesas")')
-    const pastSection = page.locator('h3:has-text("Defesas anteriores")').or(page.locator('h3:has-text("Defesas")'))
+    const pastSection = page
+      .locator('h3:has-text("Defesas anteriores")')
+      .or(page.locator('h3:has-text("Defesas")'))
 
     // At least one section should be visible
     const sections = await Promise.all([

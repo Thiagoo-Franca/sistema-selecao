@@ -54,8 +54,8 @@ export function UserBancaList({ bancas, userRole, isAdmin }: UserBancaListProps)
 
   if (bancas.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-lg font-medium mb-2">
+      <div className="py-8 text-center text-muted-foreground">
+        <p className="mb-2 text-lg font-medium">
           {userRole === "TEACHER"
             ? "Nenhuma participação em bancas"
             : userRole === "STUDENT"
@@ -109,7 +109,7 @@ export function UserBancaList({ bancas, userRole, isAdmin }: UserBancaListProps)
       <div className="space-y-6">
         {uniqueRoles.map((role) => (
           <div key={role}>
-            <h3 className="text-lg font-semibold mb-3">{roleGroupLabels[role]}</h3>
+            <h3 className="mb-3 text-lg font-semibold">{roleGroupLabels[role]}</h3>
             <div className="space-y-3">
               {groupedBancas[role].map((banca) => (
                 <BancaCard
@@ -130,7 +130,12 @@ export function UserBancaList({ bancas, userRole, isAdmin }: UserBancaListProps)
   return (
     <div className="space-y-3">
       {bancas.map((banca) => (
-        <BancaCard key={banca.id} banca={banca} isAdmin={isAdmin} onClick={() => handleBancaClick(banca.id)} />
+        <BancaCard
+          key={banca.id}
+          banca={banca}
+          isAdmin={isAdmin}
+          onClick={() => handleBancaClick(banca.id)}
+        />
       ))}
     </div>
   )
@@ -157,11 +162,11 @@ function BancaCard({
   return (
     <div
       onClick={onClick}
-      className="border rounded-lg p-4 hover:bg-muted/50 cursor-pointer transition-colors"
+      className="cursor-pointer rounded-lg border p-4 transition-colors hover:bg-muted/50"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-2">
-          <div className="flex items-start gap-2 flex-wrap">
+          <div className="flex flex-wrap items-start gap-2">
             <Badge variant="outline">{roleLabels[banca.userRole]}</Badge>
             {isAdmin && !banca.visible && (
               <Badge variant="secondary" className="flex items-center gap-1">
@@ -170,7 +175,7 @@ function BancaCard({
               </Badge>
             )}
           </div>
-          <h4 className="font-semibold text-base">{banca.tituloTrabalho}</h4>
+          <h4 className="text-base font-semibold">{banca.tituloTrabalho}</h4>
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
@@ -189,21 +194,24 @@ function BancaCard({
           </div>
           {otherMembers.length > 0 && (
             <div className="flex items-start gap-1 text-sm text-muted-foreground">
-              <Users className="h-4 w-4 mt-0.5" />
+              <Users className="mt-0.5 h-4 w-4" />
               <span>
                 Outros participantes: {otherMembers.map((m) => m.usuario.nome).join(", ")}
               </span>
             </div>
           )}
         </div>
-        <Button variant="ghost" size="sm" onClick={(e) => {
-          e.stopPropagation()
-          onClick()
-        }}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation()
+            onClick()
+          }}
+        >
           Ver detalhes
         </Button>
       </div>
     </div>
   )
 }
-

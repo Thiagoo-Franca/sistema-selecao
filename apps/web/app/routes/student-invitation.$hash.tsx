@@ -1,10 +1,21 @@
 import { Header } from "@/components/layout/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAcceptStudentInvitation, useVerifyStudentInvitation, type AcceptStudentInvitationData } from "@/hooks"
+import {
+  useAcceptStudentInvitation,
+  useVerifyStudentInvitation,
+  type AcceptStudentInvitationData,
+} from "@/hooks"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CheckCircle, Mail, XCircle } from "lucide-react"
 import { useEffect } from "react"
@@ -56,14 +67,19 @@ export default function StudentInvitationAcceptPage() {
   }, [acceptMutation.isSuccess, navigate])
 
   if (!hash) {
-    return <InvalidInviteCard message="O link do convite está incompleto ou é inválido." onBack={() => navigate("/")} />
+    return (
+      <InvalidInviteCard
+        message="O link do convite está incompleto ou é inválido."
+        onBack={() => navigate("/")}
+      />
+    )
   }
 
   if (verifyQuery.isLoading) {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <Card className="max-w-md mx-auto">
+        <Card className="mx-auto max-w-md">
           <CardHeader>
             <Skeleton className="h-6 w-32" />
           </CardHeader>
@@ -96,7 +112,7 @@ export default function StudentInvitationAcceptPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <Card className="max-w-md mx-auto">
+        <Card className="mx-auto max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -104,7 +120,7 @@ export default function StudentInvitationAcceptPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               Sua conta foi ativada. Você será redirecionado para a página de login em breve.
             </p>
             <Button onClick={() => navigate("/")} className="w-full">
@@ -136,15 +152,15 @@ export default function StudentInvitationAcceptPage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <Card className="max-w-lg mx-auto">
+      <Card className="mx-auto max-w-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-blue-600" />
             Convite para Aluno
           </CardTitle>
           <CardDescription>
-            Olá, {invitation?.nome}! Sua matrícula <strong>{invitation?.matricula}</strong> foi pré-cadastrada.
-            Defina sua senha para completar o acesso.
+            Olá, {invitation?.nome}! Sua matrícula <strong>{invitation?.matricula}</strong> foi
+            pré-cadastrada. Defina sua senha para completar o acesso.
           </CardDescription>
         </CardHeader>
 
@@ -220,7 +236,7 @@ function InvalidInviteCard({ message, onBack }: { message: string; onBack: () =>
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <Card className="max-w-md mx-auto">
+      <Card className="mx-auto max-w-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <XCircle className="h-5 w-5 text-destructive" />
@@ -228,7 +244,7 @@ function InvalidInviteCard({ message, onBack }: { message: string; onBack: () =>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-4">{message}</p>
+          <p className="mb-4 text-muted-foreground">{message}</p>
           <Button onClick={onBack} className="w-full">
             Voltar ao Início
           </Button>

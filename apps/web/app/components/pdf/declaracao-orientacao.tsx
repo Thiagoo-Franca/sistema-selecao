@@ -59,11 +59,12 @@ export const DeclaracaoOrientacaoPDF = ({
 
         {/* Texto da Declaração */}
         <Text style={styles.declarationText}>
-          Declaro para os devidos fins, que <Text style={styles.boldText}>{orientador.usuario.nome}</Text> atuou como{" "}
-          {getRoleText(orientador.role)} do Projeto Final II de <Text style={styles.boldText}>{bancaInfo.autor}</Text>,
-          aluno do Curso de {curso.nome}
-          da UFBA, intitulado <Text style={styles.boldText}>"{bancaInfo.tituloTrabalho}"</Text>, cuja defesa ocorreu em{" "}
-          <Text style={styles.boldText}>{defenseDate}</Text>.
+          Declaro para os devidos fins, que{" "}
+          <Text style={styles.boldText}>{orientador.usuario.nome}</Text> atuou como{" "}
+          {getRoleText(orientador.role)} do Projeto Final II de{" "}
+          <Text style={styles.boldText}>{bancaInfo.autor}</Text>, aluno do Curso de {curso.nome}
+          da UFBA, intitulado <Text style={styles.boldText}>"{bancaInfo.tituloTrabalho}"</Text>,
+          cuja defesa ocorreu em <Text style={styles.boldText}>{defenseDate}</Text>.
         </Text>
 
         {/* Local e Data */}

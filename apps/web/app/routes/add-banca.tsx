@@ -14,7 +14,13 @@ import { Form } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import useIsTeacher from "@/hooks/use-role"
 import { useToast } from "@/hooks/use-toast"
@@ -63,7 +69,12 @@ const DEV_SEED_DATA: Partial<BancaFormData> = {
   // avaliador3Id: 3, // Commented out to test partial banca scenario
 }
 
-import { useAddBancaMutation, useCreateStudentInvitation, useStudentsAvailableForBanca, useTeachers } from "@/hooks"
+import {
+  useAddBancaMutation,
+  useCreateStudentInvitation,
+  useStudentsAvailableForBanca,
+  useTeachers,
+} from "@/hooks"
 
 const FORM_STEPS = [
   { id: 0, name: "Informações Básicas" },
@@ -124,9 +135,11 @@ export default function AddBancaPage() {
 
     const { hora, avaliador1Id, avaliador2Id, avaliador3Id, ...dataWithoutExtraFields } = data
 
-    const membros = [{ id: Number(avaliador1Id) }, { id: Number(avaliador2Id) }, { id: Number(avaliador3Id) }].filter(
-      (membro) => !!membro.id,
-    )
+    const membros = [
+      { id: Number(avaliador1Id) },
+      { id: Number(avaliador2Id) },
+      { id: Number(avaliador3Id) },
+    ].filter((membro) => !!membro.id)
 
     const submissionData: SubmissionPayload = {
       ...dataWithoutExtraFields,
@@ -176,7 +189,7 @@ export default function AddBancaPage() {
             variant: "destructive",
           })
         },
-      },
+      }
     )
   }
 
@@ -231,11 +244,15 @@ export default function AddBancaPage() {
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
       <div className="mb-8 flex justify-center">
-        <StepIndicator currentStep={currentStep} steps={FORM_STEPS} setCurrentStep={setCurrentStep} />
+        <StepIndicator
+          currentStep={currentStep}
+          steps={FORM_STEPS}
+          setCurrentStep={setCurrentStep}
+        />
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-3xl mx-auto">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mx-auto max-w-3xl space-y-6">
           <div className="space-y-4">
             {
               // renderFormStep()
@@ -248,7 +265,7 @@ export default function AddBancaPage() {
                 .otherwise(() => null)
             }
           </div>
-          <div className="flex justify-between items-center pt-4">
+          <div className="flex items-center justify-between pt-4">
             {process.env.NODE_ENV === "development" && <DevFillButton />}
             <div className="flex gap-4">
               {currentStep > 0 && (
@@ -297,16 +314,16 @@ const StepIndicator = ({
   setCurrentStep: (step: number) => void
 }) => {
   return (
-    <div className="flex items-center ">
+    <div className="flex items-center">
       {steps.map((step, index) => (
         <div key={step.id} className="flex items-center">
           <button
             type="button"
             onClick={() => setCurrentStep(index)}
-            className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors hover:bg-primary/80 ${
+            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors hover:bg-primary/80 ${
               index <= currentStep
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background border-muted hover:border-primary/50"
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-muted bg-background hover:border-primary/50"
             }`}
           >
             {index + 1}
@@ -332,7 +349,7 @@ const BasicInfoSection = () => {
   } = useFormContext<BancaFormData>()
   return (
     <>
-      <h2 className="text-xl font-semibold mb-4">Informações Básicas</h2>
+      <h2 className="mb-4 text-xl font-semibold">Informações Básicas</h2>
       <div className="flex items-center gap-4">
         <div className="flex-grow">
           <Label htmlFor="tituloTrabalho">Título do Trabalho</Label>
@@ -342,7 +359,9 @@ const BasicInfoSection = () => {
             placeholder="Título completo do trabalho"
             aria-invalid={errors.tituloTrabalho ? "true" : "false"}
           />
-          {errors.tituloTrabalho && <p className="text-sm text-red-600 mt-1">{errors.tituloTrabalho.message}</p>}
+          {errors.tituloTrabalho && (
+            <p className="mt-1 text-sm text-red-600">{errors.tituloTrabalho.message}</p>
+          )}
         </div>
         {isUserTeacher && (
           <Controller
@@ -351,10 +370,15 @@ const BasicInfoSection = () => {
             defaultValue={true}
             render={({ field }) => (
               <div className="flex items-center space-x-2 pt-6">
-                <Checkbox id="visible" checked={field.value} onCheckedChange={field.onChange} ref={field.ref} />
+                <Checkbox
+                  id="visible"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  ref={field.ref}
+                />
                 <Label
                   htmlFor="visible"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap"
+                  className="whitespace-nowrap text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   {field.value ? "Pública" : "Privada"}
                 </Label>
@@ -373,7 +397,7 @@ const BasicInfoSection = () => {
           rows={8}
           aria-invalid={errors.resumo ? "true" : "false"}
         />
-        {errors.resumo && <p className="text-sm text-red-600 mt-1">{errors.resumo.message}</p>}
+        {errors.resumo && <p className="mt-1 text-sm text-red-600">{errors.resumo.message}</p>}
       </div>
 
       <div>
@@ -385,7 +409,7 @@ const BasicInfoSection = () => {
           rows={8}
           aria-invalid={errors.abstract ? "true" : "false"}
         />
-        {errors.abstract && <p className="text-sm text-red-600 mt-1">{errors.abstract.message}</p>}
+        {errors.abstract && <p className="mt-1 text-sm text-red-600">{errors.abstract.message}</p>}
       </div>
     </>
   )
@@ -422,7 +446,7 @@ const InviteStudentDialog = ({
           reset()
           onOpenChange(false)
         },
-      },
+      }
     )
   }
 
@@ -438,7 +462,8 @@ const InviteStudentDialog = ({
         <DialogHeader>
           <DialogTitle>Convidar novo aluno</DialogTitle>
           <DialogDescription>
-            O aluno receberá um email para definir senha e completar o cadastro. Você já pode usá-lo nesta banca.
+            O aluno receberá um email para definir senha e completar o cadastro. Você já pode usá-lo
+            nesta banca.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -530,19 +555,25 @@ const AuthorInfoSection = () => {
       (student) =>
         student.nome.toLowerCase().includes(term) ||
         student.email.toLowerCase().includes(term) ||
-        student.matricula?.toLowerCase().includes(term),
+        student.matricula?.toLowerCase().includes(term)
     )
   }, [studentsList, searchTerm])
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-4">Informações do Autor</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <h2 className="mb-4 text-xl font-semibold">Informações do Autor</h2>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div>
           <Label htmlFor="autor">Aluno</Label>
           {isUserStudent ? (
             <>
-              <Input id="autor" {...register("autor")} value={user?.nome || ""} disabled className="bg-muted" />
+              <Input
+                id="autor"
+                {...register("autor")}
+                value={user?.nome || ""}
+                disabled
+                className="bg-muted"
+              />
               <Controller
                 name="alunoId"
                 control={control}
@@ -569,7 +600,9 @@ const AuthorInfoSection = () => {
                   open={studentSelectOpen}
                   onOpenChange={setStudentSelectOpen}
                   onValueChange={(value) => {
-                    const student = studentsQuery.data?.find((student) => student.id.toString() === value)
+                    const student = studentsQuery.data?.find(
+                      (student) => student.id.toString() === value
+                    )
                     if (student) {
                       field.onChange(student.nome)
                       setValue("matricula", student.matricula)
@@ -583,7 +616,7 @@ const AuthorInfoSection = () => {
                     <SelectValue placeholder="Selecione o aluno..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="p-2 border-b sticky top-0 bg-background z-10">
+                    <div className="sticky top-0 z-10 border-b bg-background p-2">
                       <Input
                         placeholder="Buscar aluno..."
                         value={searchTerm}
@@ -618,7 +651,7 @@ const AuthorInfoSection = () => {
                               {student.nome} - ({student.email})
                             </span>
                             {student.invitationPending && (
-                              <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                              <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                                 Convite pendente
                               </span>
                             )}
@@ -627,7 +660,9 @@ const AuthorInfoSection = () => {
                       ))
                     ) : (
                       <SelectItem value="0" disabled>
-                        {searchTerm ? "Nenhum aluno encontrado para a busca" : "Nenhum aluno encontrado"}
+                        {searchTerm
+                          ? "Nenhum aluno encontrado para a busca"
+                          : "Nenhum aluno encontrado"}
                       </SelectItem>
                     )}
                   </SelectContent>
@@ -635,19 +670,23 @@ const AuthorInfoSection = () => {
               )}
             />
           )}
-          {errors.autor && <p className="text-sm text-red-600 mt-1">{errors.autor.message}</p>}
-          {errors.alunoId && <p className="text-sm text-red-600 mt-1">{errors.alunoId.message}</p>}
+          {errors.autor && <p className="mt-1 text-sm text-red-600">{errors.autor.message}</p>}
+          {errors.alunoId && <p className="mt-1 text-sm text-red-600">{errors.alunoId.message}</p>}
         </div>
         <div>
           <Label htmlFor="matricula">Matrícula</Label>
           <Input
             id="matricula"
-            {...register("matricula", { required: isUserTeacher ? "Matrícula é obrigatória" : false })}
+            {...register("matricula", {
+              required: isUserTeacher ? "Matrícula é obrigatória" : false,
+            })}
             placeholder="Matrícula"
             aria-invalid={errors.matricula ? "true" : "false"}
             disabled={true}
           />
-          {errors.matricula && <p className="text-sm text-red-600 mt-1">{errors.matricula.message}</p>}
+          {errors.matricula && (
+            <p className="mt-1 text-sm text-red-600">{errors.matricula.message}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="orientadorId">Orientador</Label>
@@ -684,7 +723,9 @@ const AuthorInfoSection = () => {
               </Select>
             )}
           />
-          {errors.orientadorId && <p className="text-sm text-red-600 mt-1">{errors.orientadorId.message}</p>}
+          {errors.orientadorId && (
+            <p className="mt-1 text-sm text-red-600">{errors.orientadorId.message}</p>
+          )}
         </div>
       </div>
       <InviteStudentDialog
@@ -712,7 +753,7 @@ const WorkAndDefenseSection = () => {
 
   const handleYearSemesterFormat = (
     e: React.ChangeEvent<HTMLInputElement>,
-    fieldName: "periodoAcademico" | "turma",
+    fieldName: "periodoAcademico" | "turma"
   ) => {
     setValue(fieldName, e.target.value)
   }
@@ -723,11 +764,11 @@ const WorkAndDefenseSection = () => {
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-4">Metadados e Agendamento</h2>
+      <h2 className="mb-4 text-xl font-semibold">Metadados e Agendamento</h2>
 
       {/* Seção de Metadados */}
       <div className="mb-6 border-b pb-4">
-        <h3 className="text-lg font-medium mb-3">Metadados do Trabalho</h3>
+        <h3 className="mb-3 text-lg font-medium">Metadados do Trabalho</h3>
         <div>
           <Label htmlFor="palavrasChave">Palavras Chave</Label>
           <Input
@@ -736,11 +777,13 @@ const WorkAndDefenseSection = () => {
             placeholder="Separadas por vírgula"
             aria-invalid={errors.palavrasChave ? "true" : "false"}
           />
-          {errors.palavrasChave && <p className="text-sm text-red-600 mt-1">{errors.palavrasChave.message}</p>}
+          {errors.palavrasChave && (
+            <p className="mt-1 text-sm text-red-600">{errors.palavrasChave.message}</p>
+          )}
           <p className="text-sm text-muted-foreground">Separe as palavras-chave por vírgula (,).</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
             <Label htmlFor="turma">Turma</Label>
             <Controller
@@ -762,7 +805,7 @@ const WorkAndDefenseSection = () => {
                 />
               )}
             />
-            {errors.turma && <p className="text-sm text-red-600 mt-1">{errors.turma.message}</p>}
+            {errors.turma && <p className="mt-1 text-sm text-red-600">{errors.turma.message}</p>}
           </div>
           <div>
             <Label htmlFor="curso">Curso</Label>
@@ -772,7 +815,11 @@ const WorkAndDefenseSection = () => {
               rules={{ required: "Curso é obrigatório" }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value?.toString() ?? ""}>
-                  <SelectTrigger id="curso" ref={field.ref} aria-invalid={errors.cursoId ? "true" : "false"}>
+                  <SelectTrigger
+                    id="curso"
+                    ref={field.ref}
+                    aria-invalid={errors.cursoId ? "true" : "false"}
+                  >
                     <SelectValue placeholder="Selecione o curso..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -782,7 +829,9 @@ const WorkAndDefenseSection = () => {
                 </Select>
               )}
             />
-            {errors.cursoId && <p className="text-sm text-red-600 mt-1">{errors.cursoId.message}</p>}
+            {errors.cursoId && (
+              <p className="mt-1 text-sm text-red-600">{errors.cursoId.message}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="periodoAcademico">Período Acadêmico</Label>
@@ -804,16 +853,18 @@ const WorkAndDefenseSection = () => {
                 />
               )}
             />
-            {errors.periodoAcademico && <p className="text-sm text-red-600 mt-1">{errors.periodoAcademico.message}</p>}
-            <p className="text-xs text-muted-foreground mt-1">Formato: Ano.Semestre (ex: 2024.2)</p>
+            {errors.periodoAcademico && (
+              <p className="mt-1 text-sm text-red-600">{errors.periodoAcademico.message}</p>
+            )}
+            <p className="mt-1 text-xs text-muted-foreground">Formato: Ano.Semestre (ex: 2024.2)</p>
           </div>
         </div>
       </div>
 
       {/* Seção de Agendamento */}
       <div>
-        <h3 className="text-lg font-medium mb-3">Agendamento da Defesa</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <h3 className="mb-3 text-lg font-medium">Agendamento da Defesa</h3>
+        <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-3">
           <div>
             <Label htmlFor="data_realizacao">Data da Defesa</Label>
             <Controller
@@ -832,7 +883,11 @@ const WorkAndDefenseSection = () => {
                 <Input
                   id="dataRealizacao"
                   type="date"
-                  value={field.value instanceof Date ? field.value.toISOString().split("T")[0] : field.value || ""}
+                  value={
+                    field.value instanceof Date
+                      ? field.value.toISOString().split("T")[0]
+                      : field.value || ""
+                  }
                   onChange={(e) => {
                     const value = e.target.value
                     if (!value) {
@@ -847,7 +902,9 @@ const WorkAndDefenseSection = () => {
                 />
               )}
             />
-            {errors.dataRealizacao && <p className="text-sm text-red-600 mt-1">{errors.dataRealizacao.message}</p>}
+            {errors.dataRealizacao && (
+              <p className="mt-1 text-sm text-red-600">{errors.dataRealizacao.message}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="hora">Hora da Defesa</Label>
@@ -857,11 +914,11 @@ const WorkAndDefenseSection = () => {
               {...register("hora", { required: "Hora é obrigatória" })}
               aria-invalid={errors.hora ? "true" : "false"}
             />
-            {errors.hora && <p className="text-sm text-red-600 mt-1">{errors.hora.message}</p>}
+            {errors.hora && <p className="mt-1 text-sm text-red-600">{errors.hora.message}</p>}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center mt-4">
+        <div className="mt-4 grid grid-cols-1 items-center gap-4 md:grid-cols-3">
           <div className="md:col-span-1">
             <Label>Tipo de Banca</Label>
             <Controller
@@ -888,14 +945,20 @@ const WorkAndDefenseSection = () => {
             />
           </div>
           <div className="md:col-span-2">
-            <Label htmlFor="local">{modalidadeValue === "remoto" ? "Link da Reunião" : "Local Físico"}</Label>
+            <Label htmlFor="local">
+              {modalidadeValue === "remoto" ? "Link da Reunião" : "Local Físico"}
+            </Label>
             <Input
               id="local"
               {...register("local", { required: "Local/Link é obrigatório" })}
               aria-invalid={errors.local ? "true" : "false"}
-              placeholder={modalidadeValue === "remoto" ? "https://meet.google.com/..." : "Sala, Auditório, etc."}
+              placeholder={
+                modalidadeValue === "remoto"
+                  ? "https://meet.google.com/..."
+                  : "Sala, Auditório, etc."
+              }
             />
-            {errors.local && <p className="text-sm text-red-600 mt-1">{errors.local.message}</p>}
+            {errors.local && <p className="mt-1 text-sm text-red-600">{errors.local.message}</p>}
           </div>
         </div>
       </div>
@@ -921,10 +984,10 @@ const EvaluatorsSection = () => {
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-4">Avaliadores da Banca</h2>
-      <p className="text-sm text-muted-foreground mb-6">
-        Selecione os avaliadores para compor a banca. Mínimo: orientador + 1 avaliador adicional. Para gerar
-        certificados e relatórios, é necessário ter 3 avaliadores com notas atribuídas.
+      <h2 className="mb-4 text-xl font-semibold">Avaliadores da Banca</h2>
+      <p className="mb-6 text-sm text-muted-foreground">
+        Selecione os avaliadores para compor a banca. Mínimo: orientador + 1 avaliador adicional.
+        Para gerar certificados e relatórios, é necessário ter 3 avaliadores com notas atribuídas.
       </p>
 
       <div className="space-y-4">
@@ -943,9 +1006,11 @@ const EvaluatorsSection = () => {
               const orientador = teachers?.find((t) => t.id === Number(orientadorId))
 
               return (
-                <div className="flex items-center p-3 border rounded bg-muted/50">
+                <div className="flex items-center rounded border bg-muted/50 p-3">
                   <div className="flex-1">
-                    <p className="font-medium">{orientador?.nome || "Orientador não selecionado"}</p>
+                    <p className="font-medium">
+                      {orientador?.nome || "Orientador não selecionado"}
+                    </p>
                     <p className="text-sm text-muted-foreground">{orientador?.academicTitle}</p>
                   </div>
                   <span className="text-sm text-muted-foreground">Orientador</span>
@@ -953,7 +1018,9 @@ const EvaluatorsSection = () => {
               )
             }}
           />
-          {errors.avaliador1Id && <p className="text-sm text-red-600 mt-1">{errors.avaliador1Id.message}</p>}
+          {errors.avaliador1Id && (
+            <p className="mt-1 text-sm text-red-600">{errors.avaliador1Id.message}</p>
+          )}
         </div>
 
         <div>
@@ -990,7 +1057,9 @@ const EvaluatorsSection = () => {
               </Select>
             )}
           />
-          {errors.avaliador2Id && <p className="text-sm text-red-600 mt-1">{errors.avaliador2Id.message}</p>}
+          {errors.avaliador2Id && (
+            <p className="mt-1 text-sm text-red-600">{errors.avaliador2Id.message}</p>
+          )}
         </div>
 
         <div>
@@ -1001,7 +1070,9 @@ const EvaluatorsSection = () => {
             rules={{ required: false }} // Made optional
             render={({ field }) => {
               const avaliador2Id = watch("avaliador2Id")
-              const filteredTeachers = availableTeachers.filter((teacher) => teacher.id !== Number(avaliador2Id))
+              const filteredTeachers = availableTeachers.filter(
+                (teacher) => teacher.id !== Number(avaliador2Id)
+              )
 
               return (
                 <Select onValueChange={field.onChange} value={field.value?.toString() ?? ""}>
@@ -1033,7 +1104,9 @@ const EvaluatorsSection = () => {
               )
             }}
           />
-          {errors.avaliador3Id && <p className="text-sm text-red-600 mt-1">{errors.avaliador3Id.message}</p>}
+          {errors.avaliador3Id && (
+            <p className="mt-1 text-sm text-red-600">{errors.avaliador3Id.message}</p>
+          )}
         </div>
       </div>
     </>
@@ -1057,11 +1130,11 @@ const ReviewField = ({
 )
 
 const SectionHeader = ({ title }: { title: string }) => (
-  <h3 className="text-lg font-medium border-b pb-2 mb-2">{title}</h3>
+  <h3 className="mb-2 border-b pb-2 text-lg font-medium">{title}</h3>
 )
 
 const EvaluatorCard = ({ teacher }: { teacher: any }) => (
-  <div className="flex items-center justify-between p-3 border rounded">
+  <div className="flex items-center justify-between rounded border p-3">
     <div>
       <p className="font-medium">{teacher?.nome || "Não selecionado"}</p>
       <p className="text-sm text-muted-foreground">{teacher?.academicTitle}</p>
@@ -1072,7 +1145,7 @@ const EvaluatorCard = ({ teacher }: { teacher: any }) => (
 const BasicInfoReviewSection = ({ values }: { values: BancaFormData }) => (
   <div>
     <SectionHeader title="Informações Básicas" />
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <ReviewField label="Título do Trabalho" value={values.tituloTrabalho} />
       <ReviewField label="Visibilidade" value={values.visible ? "Pública" : "Privada"} />
     </div>
@@ -1081,21 +1154,36 @@ const BasicInfoReviewSection = ({ values }: { values: BancaFormData }) => (
   </div>
 )
 
-const AuthorInfoReviewSection = ({ values, orientador }: { values: BancaFormData; orientador: any }) => (
+const AuthorInfoReviewSection = ({
+  values,
+  orientador,
+}: {
+  values: BancaFormData
+  orientador: any
+}) => (
   <div className="space-y-4">
     <SectionHeader title="Informações do Autor" />
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <ReviewField label="Autor" value={values.autor} />
       <ReviewField label="Matrícula" value={values.matricula} />
     </div>
     <div>
-      <ReviewField label="Orientador" value={orientador ? `${orientador.nome}` : "Não selecionado"} />
+      <ReviewField
+        label="Orientador"
+        value={orientador ? `${orientador.nome}` : "Não selecionado"}
+      />
       <p className="text-sm text-muted-foreground">{`(${orientador?.academicTitle || ""})`}</p>
     </div>
   </div>
 )
 
-const EvaluatorsReviewSection = ({ values, teachers }: { values: BancaFormData; teachers: any[] }) => {
+const EvaluatorsReviewSection = ({
+  values,
+  teachers,
+}: {
+  values: BancaFormData
+  teachers: any[]
+}) => {
   const orientador = teachers?.find((teacher) => Number(teacher.id) === Number(values.orientadorId))
   const avaliador2 = teachers?.find((teacher) => Number(teacher.id) === Number(values.avaliador2Id))
   const avaliador3 = teachers?.find((teacher) => Number(teacher.id) === Number(values.avaliador3Id))
@@ -1122,9 +1210,12 @@ const MetadataReviewSection = ({ values }: { values: BancaFormData }) => {
     <div>
       <SectionHeader title="Metadados do Trabalho" />
       <KeywordsList keywords={values.palavrasChave} className="mb-4" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+      <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-3">
         <ReviewField label="Turma" value={values.turma} />
-        <ReviewField label="Curso" value={cursoNomes[String(values.cursoId) as keyof typeof cursoNomes]} />
+        <ReviewField
+          label="Curso"
+          value={cursoNomes[String(values.cursoId) as keyof typeof cursoNomes]}
+        />
         <ReviewField label="Período Acadêmico" value={values.periodoAcademico} />
       </div>
     </div>
@@ -1134,7 +1225,7 @@ const MetadataReviewSection = ({ values }: { values: BancaFormData }) => {
 const DefenseScheduleReviewSection = ({ values }: { values: BancaFormData }) => (
   <div>
     <SectionHeader title="Agendamento da Defesa" />
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <ReviewField
         label="Data"
         value={
@@ -1145,8 +1236,11 @@ const DefenseScheduleReviewSection = ({ values }: { values: BancaFormData }) => 
       />
       <ReviewField label="Hora" value={values.hora} />
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-      <ReviewField label="Modalidade" value={values.modalidade === "local" ? "Presencial" : "Remoto"} />
+    <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <ReviewField
+        label="Modalidade"
+        value={values.modalidade === "local" ? "Presencial" : "Remoto"}
+      />
       <ReviewField label={values.modalidade === "local" ? "Local" : "Link"} value={values.local} />
     </div>
   </div>
@@ -1161,8 +1255,8 @@ const ReviewSection = () => {
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-4">Revisão e Confirmação</h2>
-      <div className="space-y-6 border rounded-lg p-4">
+      <h2 className="mb-4 text-xl font-semibold">Revisão e Confirmação</h2>
+      <div className="space-y-6 rounded-lg border p-4">
         <BasicInfoReviewSection values={values} />
         <AuthorInfoReviewSection values={values} orientador={orientador} />
         <EvaluatorsReviewSection values={values} teachers={teachers || []} />

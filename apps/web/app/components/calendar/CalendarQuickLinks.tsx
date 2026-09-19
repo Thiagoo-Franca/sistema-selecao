@@ -19,12 +19,12 @@ export function CalendarQuickLinks({ bancaId }: CalendarQuickLinksProps) {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3">
+    <div className="flex flex-col gap-3 sm:flex-row">
       <Button
         variant="outline"
         onClick={handleGoogleCalendar}
         disabled={googleCalendarMutation.isPending}
-        className="flex items-center justify-center gap-2 flex-1"
+        className="flex flex-1 items-center justify-center gap-2"
       >
         {googleCalendarMutation.isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -33,12 +33,12 @@ export function CalendarQuickLinks({ bancaId }: CalendarQuickLinksProps) {
         )}
         <span>Google Calendar</span>
       </Button>
-      
+
       <Button
         variant="outline"
         onClick={handleOutlookCalendar}
         disabled={outlookCalendarMutation.isPending}
-        className="flex items-center justify-center gap-2 flex-1"
+        className="flex flex-1 items-center justify-center gap-2"
       >
         {outlookCalendarMutation.isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />

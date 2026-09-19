@@ -27,11 +27,31 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUser } from "@/services/useUser"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -63,7 +83,7 @@ export default function AdminUsersIndexPage() {
       (user) =>
         user.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.matricula.toLowerCase().includes(searchQuery.toLowerCase()),
+        user.matricula.toLowerCase().includes(searchQuery.toLowerCase())
     )
   }, [allUsersQuery.data, searchQuery])
 
@@ -72,7 +92,7 @@ export default function AdminUsersIndexPage() {
       if (!role) return filteredUsers
       return filteredUsers.filter((user) => user.role === role)
     },
-    [filteredUsers],
+    [filteredUsers]
   )
 
   const isAdmin = userQuery.data?.role === "ADMIN"
@@ -83,15 +103,15 @@ export default function AdminUsersIndexPage() {
 
   if (userQuery.isLoading || allUsersQuery.isLoading) {
     return (
-      <div className="container mx-auto p-4 md:p-8 space-y-4">
+      <div className="container mx-auto space-y-4 p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+        <div className="mb-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
           <Skeleton className="h-10 w-full sm:w-1/2" />
         </div>
-        <div className="border rounded-md p-4">
-          <Skeleton className="h-8 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
-          <Skeleton className="h-12 w-full mb-2" />
+        <div className="rounded-md border p-4">
+          <Skeleton className="mb-2 h-8 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
+          <Skeleton className="mb-2 h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
       </div>
@@ -102,9 +122,11 @@ export default function AdminUsersIndexPage() {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
-        <div className="bg-destructive/10 text-destructive p-4 rounded-md">
-          <h2 className="text-xl font-bold mb-2">Erro ao carregar dados</h2>
-          <p>Ocorreu um erro ao carregar a lista de usuários. Por favor, tente novamente mais tarde.</p>
+        <div className="rounded-md bg-destructive/10 p-4 text-destructive">
+          <h2 className="mb-2 text-xl font-bold">Erro ao carregar dados</h2>
+          <p>
+            Ocorreu um erro ao carregar a lista de usuários. Por favor, tente novamente mais tarde.
+          </p>
         </div>
       </div>
     )
@@ -123,13 +145,13 @@ export default function AdminUsersIndexPage() {
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Gerenciamento de Usuários</h1>
+        <h1 className="mb-2 text-2xl font-bold">Gerenciamento de Usuários</h1>
         <p className="text-muted-foreground">Visualize e gerencie todos os usuários do sistema.</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+      <div className="mb-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Buscar por nome, email ou matrícula..."
             value={searchQuery}
@@ -138,7 +160,7 @@ export default function AdminUsersIndexPage() {
           />
         </div>
         <Button onClick={() => navigate("/admin/teacher-invitations")} variant="outline">
-          <UserPlus className="h-4 w-4 mr-2" />
+          <UserPlus className="mr-2 h-4 w-4" />
           Convites para Professores
         </Button>
       </div>
@@ -224,7 +246,7 @@ function UserTable({
   onDeleteUser: (user: UserType) => void
 }) {
   return (
-    <div className="border rounded-md overflow-x-auto">
+    <div className="overflow-x-auto rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -288,7 +310,9 @@ function UserTable({
           ) : (
             <TableRow>
               <TableCell colSpan={5} className="h-24 text-center">
-                {searchQuery ? "Nenhum usuário encontrado para esta busca." : "Nenhum usuário cadastrado."}
+                {searchQuery
+                  ? "Nenhum usuário encontrado para esta busca."
+                  : "Nenhum usuário cadastrado."}
               </TableCell>
             </TableRow>
           )}
@@ -352,7 +376,7 @@ function EditUserDialog({
         onSuccess: () => {
           onOpenChange(false)
         },
-      },
+      }
     )
   }
 
@@ -490,7 +514,7 @@ function DeleteUserDialog({
         onError: (error: Error & { status?: number }) => {
           if (error.status === 400) setShowAssociations(true)
         },
-      },
+      }
     )
   }
 
@@ -540,7 +564,9 @@ function DeleteUserDialog({
                     )}
                     {associations.bancasAsAluno.length > 0 && (
                       <li>
-                        <span className="font-medium">Aluno em {associations.bancasAsAluno.length} banca(s):</span>
+                        <span className="font-medium">
+                          Aluno em {associations.bancasAsAluno.length} banca(s):
+                        </span>
                         <ul className="ml-4 mt-1 list-disc">
                           {associations.bancasAsAluno.map((b) => (
                             <li key={b.id}>
@@ -552,7 +578,9 @@ function DeleteUserDialog({
                     )}
                     {associations.membrosEmBancas.length > 0 && (
                       <li>
-                        <span className="font-medium">Membro em {associations.membrosEmBancas.length} banca(s):</span>
+                        <span className="font-medium">
+                          Membro em {associations.membrosEmBancas.length} banca(s):
+                        </span>
                         <ul className="ml-4 mt-1 list-disc">
                           {associations.membrosEmBancas.map((m) => (
                             <li key={`${m.bancaId}-${m.role}`}>
@@ -574,11 +602,12 @@ function DeleteUserDialog({
                 <AlertTitle className="font-semibold">Atenção: exclusão em cascata</AlertTitle>
                 <AlertDescription>
                   <p className="font-medium">
-                    Ao clicar em &quot;Excluir mesmo assim&quot;, todas as bancas onde este usuário é orientador ou
-                    aluno serão removidas permanentemente.
+                    Ao clicar em &quot;Excluir mesmo assim&quot;, todas as bancas onde este usuário
+                    é orientador ou aluno serão removidas permanentemente.
                   </p>
                   <p className="mt-2">
-                    As participações como avaliador ou coorientador serão apenas desvinculadas (as bancas permanecem).
+                    As participações como avaliador ou coorientador serão apenas desvinculadas (as
+                    bancas permanecem).
                   </p>
                 </AlertDescription>
               </Alert>

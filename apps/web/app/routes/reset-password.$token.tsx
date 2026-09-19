@@ -1,9 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { Route } from "./+types/reset-password.$token"
 
-export const meta: Route.MetaFunction = () => [
-  { title: "SISSEL - Redefinir Senha" },
-]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Redefinir Senha" }]
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -65,7 +63,7 @@ export default function ResetPasswordPage() {
             title: "Senha redefinida com sucesso ✅",
             description: "Sua senha foi alterada. Você pode fazer login agora.",
           })
-          
+
           // Redirect to login after 3 seconds
           setTimeout(() => {
             navigate("/")
@@ -83,11 +81,11 @@ export default function ResetPasswordPage() {
 
   if (tokenValid === null) {
     return (
-      <div className="container mx-auto flex items-center justify-center min-h-screen p-4">
+      <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-6">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
               <p>Verificando token...</p>
             </div>
           </CardContent>
@@ -98,10 +96,10 @@ export default function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="container mx-auto flex items-center justify-center min-h-screen p-4">
+      <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <CheckCircle className="h-6 w-6 text-green-600" />
             </div>
             <CardTitle className="text-green-600">Senha Redefinida!</CardTitle>
@@ -110,10 +108,7 @@ export default function ResetPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={() => navigate("/")} 
-              className="w-full"
-            >
+            <Button onClick={() => navigate("/")} className="w-full">
               Ir para Login
             </Button>
           </CardContent>
@@ -123,13 +118,11 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-screen p-4">
+    <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle>Redefinir Senha</CardTitle>
-          <CardDescription>
-            Digite sua nova senha abaixo
-          </CardDescription>
+          <CardDescription>Digite sua nova senha abaixo</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -149,7 +142,7 @@ export default function ResetPasswordPage() {
                 })}
               />
               {errors.password && (
-                <p className="text-sm text-destructive mt-1">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
 
@@ -162,12 +155,11 @@ export default function ResetPasswordPage() {
                 disabled={resetPasswordMutation.isPending}
                 {...register("confirmPassword", {
                   required: "Confirmação de senha é obrigatória",
-                  validate: (value) =>
-                    value === password || "As senhas não coincidem",
+                  validate: (value) => value === password || "As senhas não coincidem",
                 })}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive mt-1">{errors.confirmPassword.message}</p>
+                <p className="mt-1 text-sm text-destructive">{errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -175,10 +167,10 @@ export default function ResetPasswordPage() {
               {resetPasswordMutation.isPending ? "Redefinindo..." : "Redefinir Senha"}
             </Button>
 
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="w-full" 
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
               onClick={() => navigate("/")}
               disabled={resetPasswordMutation.isPending}
             >

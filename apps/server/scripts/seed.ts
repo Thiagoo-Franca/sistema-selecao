@@ -11,6 +11,8 @@ import {
   type InsertCurso,
   type InsertUser,
   type InsertUsuarioBanca,
+  NotaDoutorado,
+  NotaMestrado,
   Users,
   usuariosBancas,
 
@@ -81,7 +83,7 @@ const [endereco4] = await db
   })
   .returning({ id: Endereco.id })
 
-await db.insert(CandidatoMestrado).values({
+const [candidatoMestrado1] = await db.insert(CandidatoMestrado).values({
   numeroInscricao: "TEST-001",
   status: "Inscricao Submetida",
   dataInscricao: new Date(),
@@ -123,10 +125,16 @@ await db.insert(CandidatoMestrado).values({
   valorDoEnadeDoCursoGraduacao: "3.5",
   primeiraAreaPreferencia: "ES - Engenharia de Software",
   cartaMotivacao: "link.pdf",
-}).onConflictDoNothing()
+}).onConflictDoNothing().returning({ id: CandidatoMestrado.id })
 console.log("Seeded 1 candidato mestrado.")
 
-await db.insert(CandidatoMestrado).values({
+if (candidatoMestrado1) {
+  await db.insert(NotaMestrado).values({
+    idCandidato: candidatoMestrado1.id,
+  }).onConflictDoNothing()
+}
+
+const [candidatoMestrado2] = await db.insert(CandidatoMestrado).values({
   numeroInscricao: "MEST-2024-001",
   status: "Inscricao Submetida",
   dataInscricao: new Date(),
@@ -164,10 +172,16 @@ await db.insert(CandidatoMestrado).values({
   valorDoEnadeDoCursoGraduacao: "4.5",
   primeiraAreaPreferencia: "ICOT - Inteligência Computacional e Otimização",
   cartaMotivacao: "carta.pdf"
-}).onConflictDoNothing()
+}).onConflictDoNothing().returning({ id: CandidatoMestrado.id })
+
+if (candidatoMestrado2) {
+  await db.insert(NotaMestrado).values({
+    idCandidato: candidatoMestrado2.id,
+  }).onConflictDoNothing()
+}
 console.log("Seeded 2 candidato mestrado.")
 
-await db.insert(CandidatoDoutorado).values({
+const [candidatoDoutorado1] = await db.insert(CandidatoDoutorado).values({
   numeroInscricao: "DOUT-2024-001",
   status: "Inscricao Submetida",
   dataInscricao: new Date(),
@@ -205,10 +219,17 @@ await db.insert(CandidatoDoutorado).values({
   primeiraOpcaoOrientador: "Prof. Dr. Fulano",
   segundaOpcaoOrientador: "Prof. Dr. Beltrano",
   terceiraOpcaoOrientador: "Prof. Dr. Sicrano"
-}).onConflictDoNothing()
+}).onConflictDoNothing().returning({ id: CandidatoDoutorado.id })
+
+if (candidatoDoutorado1) {
+  await db.insert(NotaDoutorado).values({
+    idCandidato: candidatoDoutorado1.id,
+  }).onConflictDoNothing()
+}
+
 console.log("Seeded 3 candidato doutorado.")
 
-await db.insert(CandidatoDoutorado).values({
+const [candidatoDoutorado2] = await db.insert(CandidatoDoutorado).values({
   numeroInscricao: "DOUT-2024-002",
   status: "Inscricao Submetida",
   dataInscricao: new Date(),
@@ -246,7 +267,14 @@ await db.insert(CandidatoDoutorado).values({
   primeiraOpcaoOrientador: "Prof. Dr. Orientador A",
   segundaOpcaoOrientador: "Prof. Dr. Orientador B",
   terceiraOpcaoOrientador: "Prof. Dr. Orientador C"
-}).onConflictDoNothing()
+}).onConflictDoNothing().returning({ id: CandidatoDoutorado.id })
+
+if (candidatoDoutorado2) {
+  await db.insert(NotaDoutorado).values({
+    idCandidato: candidatoDoutorado2.id,
+  }).onConflictDoNothing()
+}
+
 console.log("Seeded 4 candidato doutorado.")
 
 

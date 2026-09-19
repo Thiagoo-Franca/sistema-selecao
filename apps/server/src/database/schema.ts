@@ -1,14 +1,28 @@
-import { relations, sql } from "drizzle-orm"
-import { boolean, integer, numeric, pgEnum, pgTable, serial, text, timestamp, unique } from "drizzle-orm/pg-core"
+import { relations, sql } from "drizzle-orm";
+import {
+  boolean,
+  integer,
+  numeric,
+  pgEnum,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  unique,
+} from "drizzle-orm/pg-core";
 
-export const tipoCursoEnum = pgEnum("tipo_curso", ["Doutorado", "Mestrado"])
-export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number]
+export const tipoCursoEnum = pgEnum("tipo_curso", ["Doutorado", "Mestrado"]);
+export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number];
 
-export const sexoEnum = pgEnum("sexo", ["Masculino", "Feminino", "Outro"])
-export type Sexo = (typeof sexoEnum.enumValues)[number]
+export const sexoEnum = pgEnum("sexo", ["Masculino", "Feminino", "Outro"]);
+export type Sexo = (typeof sexoEnum.enumValues)[number];
 
-export const estadoCivilEnum = pgEnum("estado_civil", ["Solteiro", "Casado", "Divorciado"])
-export type EstadoCivil = (typeof estadoCivilEnum.enumValues)[number]
+export const estadoCivilEnum = pgEnum("estado_civil", [
+  "Solteiro",
+  "Casado",
+  "Divorciado",
+]);
+export type EstadoCivil = (typeof estadoCivilEnum.enumValues)[number];
 
 export const AreaPreferencia = pgEnum("area_preferencia", [
   "CVIS - Computação Visual",
@@ -20,8 +34,8 @@ export const AreaPreferencia = pgEnum("area_preferencia", [
   "RCSD - Redes de Computadores e Sistemas Distribuídos",
   "SCTR - Sistemas Ciberfísicos e de Tempo Real",
   "SSEG - Segurança de Sistemas e Redes",
-])
-export type AreaPreferencia = (typeof AreaPreferencia.enumValues)[number]
+]);
+export type AreaPreferencia = (typeof AreaPreferencia.enumValues)[number];
 
 export const Endereco = pgTable("endereco", {
   id: serial("id").primaryKey(),
@@ -32,7 +46,7 @@ export const Endereco = pgTable("endereco", {
   complemento: text("complemento"),
   estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
   municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
-})
+});
 
 export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
@@ -50,7 +64,7 @@ export const NotaMestrado = pgTable("nota_mestrado", {
   poscomp: numeric("poscomp"),
   disciplinaPosCapes6Mais: numeric("disciplina_pos_capes_6_mais"),
   disciplinaPosCapes3a5: numeric("disciplina_pos_capes_3_a_5"),
-})
+});
 
 export const NotaDoutorado = pgTable("nota_doutorado", {
   id: serial("id").primaryKey(),
@@ -65,7 +79,7 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
   a1a2a3a4: numeric("a1a2a3a4"),
   b1b2b3b4: numeric("b1b2b3b4"),
   notaAnteprojeto: numeric("nota_anteprojeto"),
-})
+});
 const candidatoBaseColumns = {
   // dados da inscricao
   id: serial("id").primaryKey(),
@@ -74,7 +88,7 @@ const candidatoBaseColumns = {
   numeroInscricao: text("numero_inscricao").notNull(),
   status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
   dataInscricao: timestamp("data_inscricao").notNull(),
-  
+
   // pontuacao e classificacao
   avaliado: boolean("avaliado").notNull().default(false),
 
@@ -109,7 +123,7 @@ const candidatoBaseColumns = {
   idEndereco: integer("id_endereco")
     .notNull()
     .references(() => Endereco.id),
-  
+
   telefoneFixo: text("telefone_fixo"),
   telefoneCelular: text("telefone_celular").notNull(),
 
@@ -121,67 +135,111 @@ const candidatoBaseColumns = {
   copiaCPF: text("copia_cpf").notNull(), // link para PDF da cópia do CPF
   copiaPassaporteOuRNE: text("copia_passaporte_ou_rne"), // link para PDF da cópia do passaporte ou RNE, apenas para estrangeiros
   copiaDocumentoIdentificacao: text("copia_documento_identificacao"), // link para PDF da cópia do RG ou CNH, apenas para brasileiros
-  solicitouIsencaoTaxaInscricao: boolean("solicitou_isencao_taxa_inscricao").notNull().default(false),
+  solicitouIsencaoTaxaInscricao: boolean("solicitou_isencao_taxa_inscricao")
+    .notNull()
+    .default(false),
   comprovacaoPesquisas: text("comprovacao_pesquisas").notNull(), // link para PDF de comprovação de participação em pesquisas, publicações, etc.
-  possuiNecessidadesEspeciais: boolean("possui_necessidades_especiais").notNull().default(false),
+  possuiNecessidadesEspeciais: boolean("possui_necessidades_especiais")
+    .notNull()
+    .default(false),
   vagasNegrosPardos: boolean("vagas_negros_pardos").notNull().default(false),
-  vagasSupranumerarias: boolean("vagas_supranumerarias").notNull().default(false),
-}
+  vagasSupranumerarias: boolean("vagas_supranumerarias")
+    .notNull()
+    .default(false),
+};
 
-export const CandidatoDoutorado = pgTable("candidato_doutorado", {
-  ...candidatoBaseColumns,
-  // dados inscricao
-  tipoCurso: tipoCursoEnum("tipo_curso").default("Doutorado").notNull(),
+export const CandidatoDoutorado = pgTable(
+  "candidato_doutorado",
+  {
+    ...candidatoBaseColumns,
+    // dados inscricao
+    tipoCurso: tipoCursoEnum("tipo_curso").default("Doutorado").notNull(),
 
-  // formulario de inscricao para doutorado em ciencia da computacao
-  historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
-  copiaDiplomaMestrado: text("copia_diploma_mestrado").notNull(), // link para PDF da cópia do diploma do mestrado ou declaracao de conclusão
-  historicoMestrado: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado ou declaração de conclusão
-  nomeUniversidadeMestrado: text("nome_universidade_mestrado").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
-  nomeCursoMestrado: text("nome_curso_mestrado").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
-  // falta comprovações de pesquisa
-  anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
-  conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
-  primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
-  segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
-  terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
-}, (table) => ({
-  numeroInscricaoUnique: unique("candidato_doutorado_numero_inscricao_unique").on(table.numeroInscricao),
-  cpfUnique: unique("candidato_doutorado_cpf_unique").on(table.cpf),
-  emailUnique: unique("candidato_doutorado_email_unique").on(table.email),
-  rgUnique: unique("candidato_doutorado_rg_unique").on(table.rg),
-  tituloEleitorUnique: unique("candidato_doutorado_titulo_eleitor_unique").on(table.tituloEleitor),
-  passaporteUnique: unique("candidato_doutorado_passaporte_unique").on(table.passaporte),
-}))
+    // formulario de inscricao para doutorado em ciencia da computacao
+    historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
+    copiaDiplomaMestrado: text("copia_diploma_mestrado").notNull(), // link para PDF da cópia do diploma do mestrado ou declaracao de conclusão
+    historicoMestrado: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado ou declaração de conclusão
+    nomeUniversidadeMestrado: text("nome_universidade_mestrado").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
+    nomeCursoMestrado: text("nome_curso_mestrado").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
+    // falta comprovações de pesquisa
+    anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
+    conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
+    primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
+    segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
+    terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
+    avaliador1: text("avaliador_1"),
+    avaliador2: text("avaliador_2"),
+    isencaoAprovada: boolean("isencao_aprovada"),
+    gru: text("gru"),
+    homologa: text("homologa"),
+    areaPgcomp: text("area_pgcomp"),
+    orientadorMestrado: text("orientador_mestrado"),
+  },
+  (table) => ({
+    numeroInscricaoUnique: unique(
+      "candidato_doutorado_numero_inscricao_unique",
+    ).on(table.numeroInscricao),
+    cpfUnique: unique("candidato_doutorado_cpf_unique").on(table.cpf),
+    emailUnique: unique("candidato_doutorado_email_unique").on(table.email),
+    rgUnique: unique("candidato_doutorado_rg_unique").on(table.rg),
+    tituloEleitorUnique: unique("candidato_doutorado_titulo_eleitor_unique").on(
+      table.tituloEleitor,
+    ),
+    passaporteUnique: unique("candidato_doutorado_passaporte_unique").on(
+      table.passaporte,
+    ),
+  }),
+);
 
-export const CandidatoMestrado = pgTable("candidato_mestrado", {
-  ...candidatoBaseColumns,
-  // dados da inscricao
-  tipoCurso: tipoCursoEnum("tipo_curso").default("Mestrado").notNull(),
+export const CandidatoMestrado = pgTable(
+  "candidato_mestrado",
+  {
+    ...candidatoBaseColumns,
+    // dados da inscricao
+    tipoCurso: tipoCursoEnum("tipo_curso").default("Mestrado").notNull(),
+    avaliador1: text("avaliador_1"),
+    avaliador2: text("avaliador_2"),
+    gru: text("gru"),
+    homologa: text("homologa"),
+    isencaoAprovada: boolean("isencao_aprovada"),
 
-  // formulario de inscricao para mestrado em ciencia da computacao
-  copiaDiplomaGraduacao: text("copia_diploma_graduacao").notNull(), // link para PDF da cópia do diploma da graduação
-  historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
-  nomeUniversidadeGraduacao: text("nome_universidade_graduacao").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
-  nomeCursoGraduacao: text("nome_curso_graduacao").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
-  cidadeOndeRealizouGraduacao: text("cidade_onde_realizou_graduacao").notNull(), // Ex: 'Salvador', 'São Paulo', etc.
-  enadeDoCursoGraduacao: text("enade_do_curso_graduacao").notNull(), // link  para enedade so curos de graduacao, portal EMEC
-  valorDoEnadeDoCursoGraduacao: text("valor_do_enade_do_curso_graduacao").notNull(), // Ex: '3.5', '4.0', etc.
-  notaPOSCOMP: text("nota_poscomp"),
-  primeiraAreaPreferencia: AreaPreferencia("primeira_area_preferencia").notNull(),
-  segundaAreaPreferencia: AreaPreferencia("segunda_area_preferencia"),
-  cartaMotivacao: text("carta_motivacao").notNull(), // Link para PDF 
-}, (table) => ({
-  numeroInscricaoUnique: unique("candidato_mestrado_numero_inscricao_unique").on(table.numeroInscricao),
-  cpfUnique: unique("candidato_mestrado_cpf_unique").on(table.cpf),
-  emailUnique: unique("candidato_mestrado_email_unique").on(table.email),
-  rgUnique: unique("candidato_mestrado_rg_unique").on(table.rg),
-  tituloEleitorUnique: unique("candidato_mestrado_titulo_eleitor_unique").on(table.tituloEleitor),
-  passaporteUnique: unique("candidato_mestrado_passaporte_unique").on(table.passaporte),
-}))
+    // formulario de inscricao para mestrado em ciencia da computacao
+    copiaDiplomaGraduacao: text("copia_diploma_graduacao").notNull(), // link para PDF da cópia do diploma da graduação
+    historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
+    nomeUniversidadeGraduacao: text("nome_universidade_graduacao").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
+    nomeCursoGraduacao: text("nome_curso_graduacao").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
+    cidadeOndeRealizouGraduacao: text(
+      "cidade_onde_realizou_graduacao",
+    ).notNull(), // Ex: 'Salvador', 'São Paulo', etc.
+    enadeDoCursoGraduacao: text("enade_do_curso_graduacao").notNull(), // link  para enedade so curos de graduacao, portal EMEC
+    valorDoEnadeDoCursoGraduacao: text(
+      "valor_do_enade_do_curso_graduacao",
+    ).notNull(), // Ex: '3.5', '4.0', etc.
+    notaPOSCOMP: text("nota_poscomp"),
+    primeiraAreaPreferencia: AreaPreferencia(
+      "primeira_area_preferencia",
+    ).notNull(),
+    segundaAreaPreferencia: AreaPreferencia("segunda_area_preferencia"),
+    cartaMotivacao: text("carta_motivacao").notNull(), // Link para PDF
+  },
+  (table) => ({
+    numeroInscricaoUnique: unique(
+      "candidato_mestrado_numero_inscricao_unique",
+    ).on(table.numeroInscricao),
+    cpfUnique: unique("candidato_mestrado_cpf_unique").on(table.cpf),
+    emailUnique: unique("candidato_mestrado_email_unique").on(table.email),
+    rgUnique: unique("candidato_mestrado_rg_unique").on(table.rg),
+    tituloEleitorUnique: unique("candidato_mestrado_titulo_eleitor_unique").on(
+      table.tituloEleitor,
+    ),
+    passaporteUnique: unique("candidato_mestrado_passaporte_unique").on(
+      table.passaporte,
+    ),
+  }),
+);
 
-export const userRole = pgEnum("user_role", ["STUDENT", "TEACHER", "ADMIN"])
-export type UserRole = (typeof userRole.enumValues)[number]
+export const userRole = pgEnum("user_role", ["STUDENT", "TEACHER", "ADMIN"]);
+export type UserRole = (typeof userRole.enumValues)[number];
 export const Users = pgTable("usuario", {
   id: serial("id").primaryKey(),
   passwordHash: text("password_has").notNull(), // Nome da coluna original era password_has
@@ -193,20 +251,20 @@ export const Users = pgTable("usuario", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
   role: userRole("role").notNull(),
-})
-export type InsertUser = typeof Users.$inferInsert
-export type SelectUser = typeof Users.$inferSelect
+});
+export type InsertUser = typeof Users.$inferInsert;
+export type SelectUser = typeof Users.$inferSelect;
 
 export const Cursos = pgTable("cursos", {
   id: serial("id").primaryKey(),
   nome: text("nome").notNull(),
   sigla: text("sigla").notNull().unique(), // Ex: 'BCC', 'ENGCOMP'
   // Adicionar outros campos como coordenacao, disciplina principal, etc., se necessário
-})
-export type InsertCurso = typeof Cursos.$inferInsert
-export type SelectCurso = typeof Cursos.$inferSelect
+});
+export type InsertCurso = typeof Cursos.$inferInsert;
+export type SelectCurso = typeof Cursos.$inferSelect;
 
-export const modalidadeEnum = pgEnum("modalidade", ["remoto", "local"])
+export const modalidadeEnum = pgEnum("modalidade", ["remoto", "local"]);
 export const Bancas = pgTable(
   "banca",
   {
@@ -239,12 +297,15 @@ export const Bancas = pgTable(
   },
   (table) => {
     return {
-      alunoCursoUnique: unique("aluno_curso_unique").on(table.alunoId, table.cursoId),
-    }
-  }
-)
-export type InsertBanca = typeof Bancas.$inferInsert
-export type SelectBanca = typeof Bancas.$inferSelect
+      alunoCursoUnique: unique("aluno_curso_unique").on(
+        table.alunoId,
+        table.cursoId,
+      ),
+    };
+  },
+);
+export type InsertBanca = typeof Bancas.$inferInsert;
+export type SelectBanca = typeof Bancas.$inferSelect;
 
 export const documentos = pgTable("documento", {
   id: serial("id").primaryKey(),
@@ -252,7 +313,7 @@ export const documentos = pgTable("documento", {
   descricao: text("descricao").notNull(), // Nome original do arquivo?
   status: text("status").notNull(), // Ex: 'pending', 'approved', 'rejected'
   dataSubmissao: timestamp("data_submissao").notNull(),
-})
+});
 
 export const invites = pgTable("invite", {
   id: serial("id").primaryKey(),
@@ -267,7 +328,7 @@ export const invites = pgTable("invite", {
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
-})
+});
 
 export const resetPasswords = pgTable("reset_password", {
   id: serial("id").primaryKey(),
@@ -279,7 +340,7 @@ export const resetPasswords = pgTable("reset_password", {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
   expiresAt: timestamp("expires_at").notNull(), // Adicionado para controle
-})
+});
 
 export const teacherInvitations = pgTable("teacher_invitation", {
   id: serial("id").primaryKey(),
@@ -295,9 +356,9 @@ export const teacherInvitations = pgTable("teacher_invitation", {
     .notNull()
     .references(() => Users.id), // Admin who sent the invitation
   userId: integer("user_id").references(() => Users.id), // Set when account is created
-})
-export type InsertTeacherInvitation = typeof teacherInvitations.$inferInsert
-export type SelectTeacherInvitation = typeof teacherInvitations.$inferSelect
+});
+export type InsertTeacherInvitation = typeof teacherInvitations.$inferInsert;
+export type SelectTeacherInvitation = typeof teacherInvitations.$inferSelect;
 
 export const studentInvitations = pgTable("student_invitation", {
   id: serial("id").primaryKey(),
@@ -315,9 +376,9 @@ export const studentInvitations = pgTable("student_invitation", {
   userId: integer("user_id")
     .notNull()
     .references(() => Users.id), // Stub Users row created with the invitation
-})
-export type InsertStudentInvitation = typeof studentInvitations.$inferInsert
-export type SelectStudentInvitation = typeof studentInvitations.$inferSelect
+});
+export type InsertStudentInvitation = typeof studentInvitations.$inferInsert;
+export type SelectStudentInvitation = typeof studentInvitations.$inferSelect;
 
 export const sessions = pgTable("session", {
   id: text("id").primaryKey(), // Aumentado tamanho
@@ -325,9 +386,14 @@ export const sessions = pgTable("session", {
   expire: timestamp("expire").notNull(),
   data: text("data"), // Usar text em vez de blob para JSON
   // token_access removido, geralmente gerenciado por JWT em header
-})
+});
 
-export const usuarioBancaRole = pgEnum("usuario_banca_role", ["orientador", "coorientador", "aluno", "avaliador"])
+export const usuarioBancaRole = pgEnum("usuario_banca_role", [
+  "orientador",
+  "coorientador",
+  "aluno",
+  "avaliador",
+]);
 export const usuariosBancas = pgTable("usuario_banca", {
   id: serial("id").primaryKey(),
   usuarioId: integer("id_usuario")
@@ -339,9 +405,9 @@ export const usuariosBancas = pgTable("usuario_banca", {
   role: usuarioBancaRole("role").notNull(),
   nota: text("nota"),
   // Adicionar unique constraint para (usuarioId, bancaId) ?
-})
-export type InsertUsuarioBanca = typeof usuariosBancas.$inferInsert
-export type SelectUsuarioBanca = typeof usuariosBancas.$inferSelect
+});
+export type InsertUsuarioBanca = typeof usuariosBancas.$inferInsert;
+export type SelectUsuarioBanca = typeof usuariosBancas.$inferSelect;
 
 export const bancasDocumentos = pgTable("banca_documento", {
   id: serial("id").primaryKey(),
@@ -352,32 +418,29 @@ export const bancasDocumentos = pgTable("banca_documento", {
   documentoId: integer("id_documento")
     .notNull()
     .references(() => documentos.id),
-})
+});
 
 // === FEEDBACK SYSTEM ===
 
-export const feedbackSubmissions = pgTable(
-  "feedback_submission",
-  {
-    id: serial("id").primaryKey(),
-    userId: integer("user_id")
-      .notNull()
-      .references(() => Users.id)
-      .unique(), // Only one feedback per user
-    taskComplexityRating: integer("task_complexity_rating").notNull(), // 1-5 scale
-    interfaceConsistencyRating: integer("interface_consistency_rating").notNull(), // 1-5 scale
-    responseTimeRating: integer("response_time_rating").notNull(), // 1-5 scale
-    satisfactionRating: integer("satisfaction_rating").notNull(), // 1-5 scale
-    usagePurposes: text("usage_purposes").notNull(), // JSON array of strings
-    usagePurposeOther: text("usage_purpose_other"), // Custom text when "Other" is selected
-    completedAllTasks: boolean("completed_all_tasks").notNull(),
-    createdAt: timestamp("created_at")
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
-  }
-)
-export type InsertFeedbackSubmission = typeof feedbackSubmissions.$inferInsert
-export type SelectFeedbackSubmission = typeof feedbackSubmissions.$inferSelect
+export const feedbackSubmissions = pgTable("feedback_submission", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => Users.id)
+    .unique(), // Only one feedback per user
+  taskComplexityRating: integer("task_complexity_rating").notNull(), // 1-5 scale
+  interfaceConsistencyRating: integer("interface_consistency_rating").notNull(), // 1-5 scale
+  responseTimeRating: integer("response_time_rating").notNull(), // 1-5 scale
+  satisfactionRating: integer("satisfaction_rating").notNull(), // 1-5 scale
+  usagePurposes: text("usage_purposes").notNull(), // JSON array of strings
+  usagePurposeOther: text("usage_purpose_other"), // Custom text when "Other" is selected
+  completedAllTasks: boolean("completed_all_tasks").notNull(),
+  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+export type InsertFeedbackSubmission = typeof feedbackSubmissions.$inferInsert;
+export type SelectFeedbackSubmission = typeof feedbackSubmissions.$inferSelect;
 
 export const featureRequests = pgTable("feature_request", {
   id: serial("id").primaryKey(),
@@ -390,9 +453,9 @@ export const featureRequests = pgTable("feature_request", {
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
-})
-export type InsertFeatureRequest = typeof featureRequests.$inferInsert
-export type SelectFeatureRequest = typeof featureRequests.$inferSelect
+});
+export type InsertFeatureRequest = typeof featureRequests.$inferInsert;
+export type SelectFeatureRequest = typeof featureRequests.$inferSelect;
 
 export const featureRequestVotes = pgTable(
   "feature_request_vote",
@@ -410,12 +473,15 @@ export const featureRequestVotes = pgTable(
   },
   (table) => {
     return {
-      userFeatureRequestUnique: unique("user_feature_request_unique").on(table.userId, table.featureRequestId),
-    }
-  }
-)
-export type InsertFeatureRequestVote = typeof featureRequestVotes.$inferInsert
-export type SelectFeatureRequestVote = typeof featureRequestVotes.$inferSelect
+      userFeatureRequestUnique: unique("user_feature_request_unique").on(
+        table.userId,
+        table.featureRequestId,
+      ),
+    };
+  },
+);
+export type InsertFeatureRequestVote = typeof featureRequestVotes.$inferInsert;
+export type SelectFeatureRequestVote = typeof featureRequestVotes.$inferSelect;
 
 // === DEFINIÇÃO DAS RELAÇÕES ===
 
@@ -430,11 +496,11 @@ export const usuariosRelations = relations(Users, ({ one, many }) => ({
   featureRequests: many(featureRequests),
   featureRequestVotes: many(featureRequestVotes),
   // bancasCriadas: many(bancas), // Descomentar se banca.userId for mantido
-}))
+}));
 
 export const cursosRelations = relations(Cursos, ({ many }) => ({
   bancas: many(Bancas),
-}))
+}));
 
 export const bancasRelations = relations(Bancas, ({ one, many }) => ({
   orientador: one(Users, {
@@ -452,11 +518,11 @@ export const bancasRelations = relations(Bancas, ({ one, many }) => ({
   membros: many(usuariosBancas), // Relação com usuários através da tabela de junção
   documentosAssociados: many(bancasDocumentos), // Relação com documentos através da tabela de junção
   convites: many(invites), // Convites relacionados a esta banca
-}))
+}));
 
 export const documentosRelations = relations(documentos, ({ many }) => ({
   bancasAssociadas: many(bancasDocumentos), // Relação através da tabela de junção
-}))
+}));
 
 export const invitesRelations = relations(invites, ({ one }) => ({
   usuarioConvidado: one(Users, {
@@ -467,32 +533,35 @@ export const invitesRelations = relations(invites, ({ one }) => ({
     fields: [invites.bancaId],
     references: [Bancas.id],
   }),
-}))
+}));
 
 export const resetPasswordsRelations = relations(resetPasswords, ({ one }) => ({
   usuario: one(Users, {
     fields: [resetPasswords.userId],
     references: [Users.id],
   }),
-}))
+}));
 
-export const teacherInvitationsRelations = relations(teacherInvitations, ({ one }) => ({
-  invitedBy: one(Users, {
-    fields: [teacherInvitations.invitedBy],
-    references: [Users.id],
+export const teacherInvitationsRelations = relations(
+  teacherInvitations,
+  ({ one }) => ({
+    invitedBy: one(Users, {
+      fields: [teacherInvitations.invitedBy],
+      references: [Users.id],
+    }),
+    user: one(Users, {
+      fields: [teacherInvitations.userId],
+      references: [Users.id],
+    }),
   }),
-  user: one(Users, {
-    fields: [teacherInvitations.userId],
-    references: [Users.id],
-  }),
-}))
+);
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   usuario: one(Users, {
     fields: [sessions.userId],
     references: [Users.id],
   }),
-}))
+}));
 
 // Relações para a tabela de junção usuario_banca
 export const usuariosBancasRelations = relations(usuariosBancas, ({ one }) => ({
@@ -504,45 +573,57 @@ export const usuariosBancasRelations = relations(usuariosBancas, ({ one }) => ({
     fields: [usuariosBancas.bancaId],
     references: [Bancas.id],
   }),
-}))
+}));
 
 // Relações para a tabela de junção banca_documento
-export const bancasDocumentosRelations = relations(bancasDocumentos, ({ one }) => ({
-  banca: one(Bancas, {
-    fields: [bancasDocumentos.bancaId],
-    references: [Bancas.id],
+export const bancasDocumentosRelations = relations(
+  bancasDocumentos,
+  ({ one }) => ({
+    banca: one(Bancas, {
+      fields: [bancasDocumentos.bancaId],
+      references: [Bancas.id],
+    }),
+    documento: one(documentos, {
+      fields: [bancasDocumentos.documentoId],
+      references: [documentos.id],
+    }),
   }),
-  documento: one(documentos, {
-    fields: [bancasDocumentos.documentoId],
-    references: [documentos.id],
-  }),
-}))
+);
 
 // Relações para feedback submissions
-export const feedbackSubmissionsRelations = relations(feedbackSubmissions, ({ one }) => ({
-  user: one(Users, {
-    fields: [feedbackSubmissions.userId],
-    references: [Users.id],
+export const feedbackSubmissionsRelations = relations(
+  feedbackSubmissions,
+  ({ one }) => ({
+    user: one(Users, {
+      fields: [feedbackSubmissions.userId],
+      references: [Users.id],
+    }),
   }),
-}))
+);
 
 // Relações para feature requests
-export const featureRequestsRelations = relations(featureRequests, ({ one, many }) => ({
-  user: one(Users, {
-    fields: [featureRequests.userId],
-    references: [Users.id],
+export const featureRequestsRelations = relations(
+  featureRequests,
+  ({ one, many }) => ({
+    user: one(Users, {
+      fields: [featureRequests.userId],
+      references: [Users.id],
+    }),
+    votes: many(featureRequestVotes),
   }),
-  votes: many(featureRequestVotes),
-}))
+);
 
 // Relações para feature request votes
-export const featureRequestVotesRelations = relations(featureRequestVotes, ({ one }) => ({
-  user: one(Users, {
-    fields: [featureRequestVotes.userId],
-    references: [Users.id],
+export const featureRequestVotesRelations = relations(
+  featureRequestVotes,
+  ({ one }) => ({
+    user: one(Users, {
+      fields: [featureRequestVotes.userId],
+      references: [Users.id],
+    }),
+    featureRequest: one(featureRequests, {
+      fields: [featureRequestVotes.featureRequestId],
+      references: [featureRequests.id],
+    }),
   }),
-  featureRequest: one(featureRequests, {
-    fields: [featureRequestVotes.featureRequestId],
-    references: [featureRequests.id],
-  }),
-}))
+);

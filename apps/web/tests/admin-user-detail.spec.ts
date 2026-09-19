@@ -6,7 +6,10 @@ const TEACHER_EMAIL = "teacher@test.com"
 
 async function loginAsAdmin(page: import("@playwright/test").Page) {
   await page.goto("/")
-  await page.getByRole("button", { name: /login|entrar/i }).first().click()
+  await page
+    .getByRole("button", { name: /login|entrar/i })
+    .first()
+    .click()
   await page.getByLabel(/email/i).fill(ADMIN_EMAIL)
   await page.locator("#login-password").fill(ADMIN_PASSWORD)
   await page.getByRole("button", { name: /entrar/i }).click()
@@ -16,7 +19,9 @@ async function loginAsAdmin(page: import("@playwright/test").Page) {
 async function goToAdminUsers(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: /olá|admin test/i }).click()
   await page.getByRole("link", { name: /gerenciar usuários/i }).click()
-  await expect(page.getByRole("heading", { name: /gerenciamento de usuários/i })).toBeVisible({ timeout: 5000 })
+  await expect(page.getByRole("heading", { name: /gerenciamento de usuários/i })).toBeVisible({
+    timeout: 5000,
+  })
 }
 
 test.describe("[USR-005, USR-006, USR-007, USR-008, USR-009] Admin View User Detail", () => {
@@ -73,7 +78,10 @@ test.describe("[USR-005, USR-006, USR-007, USR-008, USR-009] Admin View User Det
 
   test("[USR-009] Non-admin cannot access user detail", async ({ page }) => {
     await page.goto("/")
-    await page.getByRole("button", { name: /login|entrar/i }).first().click()
+    await page
+      .getByRole("button", { name: /login|entrar/i })
+      .first()
+      .click()
     await page.getByLabel(/email/i).fill(TEACHER_EMAIL)
     await page.locator("#login-password").fill(ADMIN_PASSWORD)
     await page.getByRole("button", { name: /entrar/i }).click()

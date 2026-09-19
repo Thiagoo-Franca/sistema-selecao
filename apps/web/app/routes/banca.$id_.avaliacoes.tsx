@@ -2,7 +2,13 @@ import { BancaNavigation } from "@/components/layout/BancaNavigation"
 import { Header } from "@/components/layout/Header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -62,8 +68,14 @@ export default function BancaAvaliacoesPage() {
     }
   }, [banca])
 
-  const handleAvaliacaoChange = (membroId: number, field: keyof AvaliacaoMembro, value: string | boolean) => {
-    setAvaliacoes((prev) => prev.map((av) => (av.membroId === membroId ? { ...av, [field]: value } : av)))
+  const handleAvaliacaoChange = (
+    membroId: number,
+    field: keyof AvaliacaoMembro,
+    value: string | boolean
+  ) => {
+    setAvaliacoes((prev) =>
+      prev.map((av) => (av.membroId === membroId ? { ...av, [field]: value } : av))
+    )
   }
 
   const handleSaveUserGrade = async (membroId: number, nota: string) => {
@@ -97,10 +109,10 @@ export default function BancaAvaliacoesPage() {
 
       <BancaNavigation id={id} user={user!} currentPage="avaliacoes" />
 
-      <div className="bg-card shadow-md rounded-lg overflow-hidden">
+      <div className="overflow-hidden rounded-lg bg-card shadow-md">
         <BancaHeader banca={banca} />
 
-        <div className="p-6 space-y-6">
+        <div className="space-y-6 p-6">
           <AvaliacoesMembros
             bancaId={id}
             avaliacoes={avaliacoes}
@@ -167,16 +179,16 @@ export default function BancaAvaliacoesPage() {
 // }
 
 const BancaHeader = ({ banca }: { banca: any }) => (
-  <div className="bg-muted p-6 border-b">
+  <div className="border-b bg-muted p-6">
     <div className="flex items-start justify-between">
       <div className="flex items-start gap-4">
-        <img src="/brasao_ufba.png" alt="Brasão da UFBA" className="w-16 h-16 object-contain" />
+        <img src="/brasao_ufba.png" alt="Brasão da UFBA" className="h-16 w-16 object-contain" />
         <div className="flex-1">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
             <BarChart3 className="h-6 w-6" />
             Avaliações da Banca
           </h1>
-          <p className="text-muted-foreground mt-2">{banca.tituloTrabalho}</p>
+          <p className="mt-2 text-muted-foreground">{banca.tituloTrabalho}</p>
           <p className="text-sm text-muted-foreground">
             Autor: {banca.autor} • Curso: {banca.curso?.nome}
           </p>
@@ -198,31 +210,32 @@ function NormasDialog() {
           Normas
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">NORMAS</DialogTitle>
+          <DialogTitle className="text-center text-xl font-bold">NORMAS</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 text-sm">
           {/* 1. Formato da Avaliação Oral */}
           <div>
-            <h3 className="text-lg font-bold mb-3">1. Sobre o Formato da Avaliação Oral</h3>
+            <h3 className="mb-3 text-lg font-bold">1. Sobre o Formato da Avaliação Oral</h3>
             <p className="text-justify leading-relaxed">
-              O tempo para exposição do trabalho pelo aluno é de 20 minutos. Após a apresentação, cada avaliador terá um
-              tempo médio de 15 minutos para <span className="underline">arguição</span>. Após a{" "}
-              <span className="underline">arguição</span>, os membros da banca devem-se reunir para preencher o
-              formulário de avaliação.
+              O tempo para exposição do trabalho pelo aluno é de 20 minutos. Após a apresentação,
+              cada avaliador terá um tempo médio de 15 minutos para{" "}
+              <span className="underline">arguição</span>. Após a{" "}
+              <span className="underline">arguição</span>, os membros da banca devem-se reunir para
+              preencher o formulário de avaliação.
             </p>
           </div>
 
           {/* 2. Critérios de Avaliação */}
           <div>
-            <h3 className="text-lg font-bold mb-3">2. Critérios de Avaliação</h3>
-            <p className="text-justify leading-relaxed mb-3">
-              Na avaliação do projeto apresentado pelo(a) estudante consistirá que devem ser observados os parâmetros
-              relacionados abaixo.
+            <h3 className="mb-3 text-lg font-bold">2. Critérios de Avaliação</h3>
+            <p className="mb-3 text-justify leading-relaxed">
+              Na avaliação do projeto apresentado pelo(a) estudante consistirá que devem ser
+              observados os parâmetros relacionados abaixo.
             </p>
-            <ul className="list-disc list-inside space-y-1 ml-4">
+            <ul className="ml-4 list-inside list-disc space-y-1">
               <li>Clareza.</li>
               <li>Objetividade.</li>
               <li>Correção e organização do texto.</li>
@@ -233,23 +246,25 @@ function NormasDialog() {
               <li>Preparação do material de apoio.</li>
               <li>Transmissão do assunto.</li>
             </ul>
-            <p className="text-justify leading-relaxed mt-3">
-              Cada avaliador deverá atribuir uma nota de 0 a 10. A nota obtida pelo(a) aluno(a) será o resultado da
-              média simples das notas dos avaliadores.
+            <p className="mt-3 text-justify leading-relaxed">
+              Cada avaliador deverá atribuir uma nota de 0 a 10. A nota obtida pelo(a) aluno(a) será
+              o resultado da média simples das notas dos avaliadores.
             </p>
           </div>
 
           {/* 3. Sobre Aprovação */}
           <div>
-            <h3 className="text-lg font-bold mb-3">3. Sobre Aprovação</h3>
+            <h3 className="mb-3 text-lg font-bold">3. Sobre Aprovação</h3>
             <p className="text-justify leading-relaxed">
-              O estudante será <strong>"Aprovado por Média"</strong> se obtiver nota igual ou superior a 7 (sete). O
-              estudante terá um prazo de 8 (oito) dias para entregar nova versão da monografia com as mudanças sugeridas
-              pela banca, se não entregar nova versão será <strong>"Reprovado por Média"</strong> (nota inferior a 1,7).
-              Se a nota for maior que 1,7 (um e sete décimos) e menor que 7 (sete), o estudante terá prazo de 8 (oito)
-              dias para apresentar nova versão da monografia. Findo este prazo, a banca de avaliação atribuirá uma
-              segunda nota e o estudante será considerado <strong>"Aprovado"</strong> (com Final) se obtiver nota igual
-              ou superior a 5 (cinco). Caso contrário, o aluno será <strong>"Reprovado por Conceito"</strong>.
+              O estudante será <strong>"Aprovado por Média"</strong> se obtiver nota igual ou
+              superior a 7 (sete). O estudante terá um prazo de 8 (oito) dias para entregar nova
+              versão da monografia com as mudanças sugeridas pela banca, se não entregar nova versão
+              será <strong>"Reprovado por Média"</strong> (nota inferior a 1,7). Se a nota for maior
+              que 1,7 (um e sete décimos) e menor que 7 (sete), o estudante terá prazo de 8 (oito)
+              dias para apresentar nova versão da monografia. Findo este prazo, a banca de avaliação
+              atribuirá uma segunda nota e o estudante será considerado <strong>"Aprovado"</strong>{" "}
+              (com Final) se obtiver nota igual ou superior a 5 (cinco). Caso contrário, o aluno
+              será <strong>"Reprovado por Conceito"</strong>.
             </p>
           </div>
         </div>
@@ -261,7 +276,11 @@ function NormasDialog() {
 const AvaliacoesMembros = (props: {
   bancaId: string
   avaliacoes: AvaliacaoMembro[]
-  handleAvaliacaoChange: (membroId: number, field: keyof AvaliacaoMembro, value: string | boolean) => void
+  handleAvaliacaoChange: (
+    membroId: number,
+    field: keyof AvaliacaoMembro,
+    value: string | boolean
+  ) => void
   handleSaveUserGrade: (membroId: number, nota: string) => void
   user: any
   isAdmin: boolean
@@ -270,7 +289,7 @@ const AvaliacoesMembros = (props: {
   const membrosAvaliadores = useDocumentAvaliadores(Number(props.bancaId)) || []
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Avaliações dos Membros da Banca</h2>
+      <h2 className="mb-4 text-xl font-semibold">Avaliações dos Membros da Banca</h2>
       <div className="grid gap-4">
         {membrosAvaliadores.map((membro) => {
           const avaliacao = props.avaliacoes.find((av) => av.membroId === membro.id)
@@ -291,7 +310,7 @@ const AvaliacoesMembros = (props: {
                       {membro.usuario.nome}
                     </CardTitle>
                     <CardDescription
-                      className="flex items-start gap-2 line-clamp-2 w-3/4"
+                      className="line-clamp-2 flex w-3/4 items-start gap-2"
                       title={membro.usuario.academicTitle}
                     >
                       Avaliador
@@ -310,7 +329,9 @@ const AvaliacoesMembros = (props: {
                           max="10"
                           step="0.1"
                           value={avaliacao.nota}
-                          onChange={(e) => props.handleAvaliacaoChange(membro.id, "nota", e.target.value)}
+                          onChange={(e) =>
+                            props.handleAvaliacaoChange(membro.id, "nota", e.target.value)
+                          }
                           placeholder="Ex: 8.5"
                           disabled={props.isAssigningGrade}
                           className="w-28"
@@ -345,11 +366,11 @@ function AccessDeniedMessage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4">
-        <h2 className="text-xl font-bold mb-2">Acesso negado</h2>
+      <div className="mb-4 rounded-md bg-destructive/10 p-4 text-destructive">
+        <h2 className="mb-2 text-xl font-bold">Acesso negado</h2>
         <p>
-          Você não tem permissão para acessar esta página. Apenas administradores, professores e membros da banca podem
-          acessar as avaliações.
+          Você não tem permissão para acessar esta página. Apenas administradores, professores e
+          membros da banca podem acessar as avaliações.
         </p>
       </div>
       <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
@@ -365,9 +386,11 @@ function ErrorMessage({ error }: { error: any }) {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
-      <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4">
-        <h2 className="text-xl font-bold mb-2">Erro ao carregar dados da banca</h2>
-        <p>{error instanceof Error ? error.message : "Erro desconhecido ao carregar dados da banca."}</p>
+      <div className="mb-4 rounded-md bg-destructive/10 p-4 text-destructive">
+        <h2 className="mb-2 text-xl font-bold">Erro ao carregar dados da banca</h2>
+        <p>
+          {error instanceof Error ? error.message : "Erro desconhecido ao carregar dados da banca."}
+        </p>
       </div>
       <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
         <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
@@ -381,17 +404,17 @@ function AvaliacoesPageSkeleton() {
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
       <div className="space-y-6">
-        <div className="flex items-center space-x-4 mb-6">
+        <div className="mb-6 flex items-center space-x-4">
           <Skeleton className="h-10 w-32" />
         </div>
-        <div className="bg-card shadow-md rounded-lg overflow-hidden">
-          <div className="bg-muted p-6 border-b">
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-96 mb-1" />
+        <div className="overflow-hidden rounded-lg bg-card shadow-md">
+          <div className="border-b bg-muted p-6">
+            <Skeleton className="mb-2 h-8 w-64" />
+            <Skeleton className="mb-1 h-4 w-96" />
             <Skeleton className="h-3 w-48" />
           </div>
-          <div className="p-6 space-y-6">
-            <Skeleton className="h-6 w-48 mb-4" />
+          <div className="space-y-6 p-6">
+            <Skeleton className="mb-4 h-6 w-48" />
             <div className="space-y-4">
               <Skeleton className="h-40 w-full" />
               <Skeleton className="h-40 w-full" />
