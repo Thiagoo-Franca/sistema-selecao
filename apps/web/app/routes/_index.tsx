@@ -103,7 +103,7 @@ export default function LandingPage() {
     <main className="min-h-screen bg-white lg:grid lg:grid-cols-2">
       <section
         aria-labelledby="brand-title"
-        className="flex flex-col items-center justify-center bg-white px-6 py-6 text-center lg:min-h-screen lg:bg-green-50 lg:px-12 lg:py-16"
+        className="text-centerlg:bg-green-50 flex flex-col items-center justify-center bg-white px-6 py-6 lg:min-h-screen lg:bg-green-50 lg:px-12 lg:py-16"
       >
         <div className="flex flex-col items-center">
           <img
@@ -113,15 +113,15 @@ export default function LandingPage() {
           />
           <h1
             id="brand-title"
-            className="mt-3 hidden text-4xl font-bold tracking-tight lg:block lg:text-5xl"
+            className="mt-6 hidden text-4xl font-bold tracking-tight lg:block lg:text-5xl"
           >
-            Sistema Seleção
+            Sistema <br /> <span className="text-7xl"> Seleção</span>
           </h1>
         </div>
       </section>
       <section
         aria-labelledby="login-title"
-        className="flex items-center justify-center bg-white px-6 py-6 lg:min-h-screen lg:px-16 lg:py-16"
+        className="flex items-center justify-center bg-white px-6 py-6 shadow-lg lg:min-h-screen lg:px-16 lg:py-16"
       >
         <div className="w-full max-w-md">
           <h1

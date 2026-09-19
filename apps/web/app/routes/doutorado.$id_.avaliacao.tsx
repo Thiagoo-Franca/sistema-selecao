@@ -3,7 +3,11 @@ import type { Route } from "./+types/banca.$id"
 import { useEffect, useState } from "react"
 import { useToast } from "@/hooks"
 import { useUser } from "@/services/useUser"
-import { useCandidatoDoutoradoById } from "@/hooks/candidato.hooks"
+import {
+  useCandidatoDoutoradoById,
+  useUpdateCandidatoDoutorado,
+  useUpdateCandidatoDoutoradoNota,
+} from "@/hooks/candidato.hooks"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   CandidatoDoutoradoNotaEtapa1Schema,
@@ -70,11 +74,11 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
         cpf: candidato.cpf ? candidato.cpf : "",
         nome: candidato.nome ? candidato.nome : "",
         email: candidato.email ? candidato.email : "",
-        solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ? "Sim" : "Não",
-        isencaoAprovada: candidato.isencaoAprovada ? "Sim" : "Não",
-        GRU: candidato.GRU ? candidato.GRU : "", // ajustar GRU
-        homologa: candidato.homologa ? "Sim" : "Não", // ajustar homologa
-        areaPGCOMP: candidato.areaPGCOMP ? candidato.areaPGCOMP : "", // ajustar areaPGCOMP
+        solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ? "sim" : "nao",
+        isencaoAprovada: candidato.isencaoAprovada ? "sim" : "nao",
+        gru: candidato.gru ? candidato.gru : "", // ajustar GRU
+        homologa: candidato.homologa ? "sim" : "nao", // ajustar homologa
+        areaPgcomp: candidato.areaPgcomp ? candidato.areaPgcomp : "", // ajustar areaPGCOMP
         OrientadorMestrado: candidato.orientadorMestrado ? candidato.orientadorMestrado : "", // ajustar orientadorMestrado
         PotencialOrientador1: candidato.primeiraOpcaoOrientador
           ? candidato.primeiraOpcaoOrientador
@@ -85,9 +89,9 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
         PotencialOrientador3: candidato.terceiraOpcaoOrientador
           ? candidato.terceiraOpcaoOrientador
           : "",
-        Especiais: candidato.possuiNecessidadesEspeciais ? "Sim" : "Não",
-        Cotas: candidato.vagasNegrosPardos ? "Sim" : "Não",
-        Supra: candidato.vagasSupranumerarias ? "Sim" : "Não",
+        Especiais: candidato.possuiNecessidadesEspeciais ? "sim" : "nao",
+        Cotas: candidato.vagasNegrosPardos ? "sim" : "nao",
+        Supra: candidato.vagasSupranumerarias ? "sim" : "nao",
         Universidade: candidato.nomeUniversidadeMestrado ? candidato.nomeUniversidadeMestrado : "",
         Curso: candidato.nomeCursoMestrado ? candidato.nomeCursoMestrado : "",
         Cidade: candidato.cidadeOndeRealizouMestrado ? candidato.cidadeOndeRealizouMestrado : "", // cidade da universidade
@@ -135,10 +139,56 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
     setNota(resultado.pontuacao)
   }, [camposNotaEtapa1])
 
-  function onSubmit(dados: CandidatoDoutoradoNotaEtapa1) {
-    const resultado = calcularNotaDoutoradoEtapa1(dados)
-    console.log("Pontuação:", resultado.pontuacao)
-    console.log("Aprovado:", resultado.aprovado)
+  const updateCandidatoMutation = useUpdateCandidatoDoutorado()
+  const updateNotaMutation = useUpdateCandidatoDoutoradoNota()
+
+  async function onSubmit(dados: CandidatoDoutoradoNotaEtapa1) {
+    if (!id) return
+
+    console.log("Dados do formulário:", dados)
+
+    const [candidatoResult, notaResult] = await Promise.allSettled([
+      updateCandidatoMutation.mutateAsync({
+        id,
+        body: {
+          avaliador1: dados.avaliador1,
+          avaliador2: dados.avaliador2,
+          cpf: dados.cpf,
+          nome: dados.nome,
+          email: dados.email,
+          solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao === "sim",
+          isencaoAprovada: dados.isencaoAprovada === "sim",
+          gru: dados.gru,
+          homologa: dados.homologa === "sim" ? "sim" : "nao",
+          areaPgcomp: dados.areaPgcomp,
+          orientadorMestrado: dados.OrientadorMestrado,
+          primeiraOpcaoOrientador: dados.PotencialOrientador1,
+          segundaOpcaoOrientador: dados.PotencialOrientador2,
+          terceiraOpcaoOrientador: dados.PotencialOrientador3,
+          possuiNecessidadesEspeciais: dados.Especiais === "sim",
+          vagasNegrosPardos: dados.Cotas === "sim",
+          vagasSupranumerarias: dados.Supra === "sim",
+          nomeUniversidadeMestrado: dados.Universidade,
+          nomeCursoMestrado: dados.Curso,
+          cidadeOndeRealizouMestrado: dados.Cidade,
+        },
+      }),
+      updateNotaMutation.mutateAsync({
+        id,
+        body: {
+          msc: dados.msc,
+          areaFormacaoGraduacao: dados.areaFormacaoGraduacao,
+          conceitoCapesMestrado: dados.conceitoCapesMestrado,
+          a1a2a3a4: dados.a1a2a3a4,
+          b1b2b3b4: dados.b1b2b3b4,
+          notaAnteprojeto: dados.notaAnteprojeto,
+        },
+      }),
+    ])
+
+    // toasts de sucesso/erro já disparam dentro dos hooks (onSuccess/onError);
+    // aqui só decide o que fazer se uma das duas falhar
+    if (candidatoResult.status === "rejected" || notaResult.status === "rejected") return
   }
 
   if (isLoading) {
@@ -177,7 +227,12 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
       </div>
-      <form className="flex flex-col gap-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="flex flex-col gap-y-4"
+        onSubmit={handleSubmit(onSubmit, (erros) => {
+          console.log("Erros de validação:", erros)
+        })}
+      >
         <FieldLegend className="font-bold text-muted-foreground">Avaliadores</FieldLegend>
 
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
@@ -305,7 +360,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
           {/* GRU */}
           <Controller
             control={control}
-            name="GRU"
+            name="gru"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
                 <FieldLabel htmlFor="GRU" className="font-bold text-muted-foreground">
@@ -355,7 +410,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
           {/* Area PGCOMP */}
           <Controller
             control={control}
-            name="areaPGCOMP"
+            name="areaPgcomp"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
                 <FieldLabel htmlFor="areaPGCOMP" className="font-bold text-muted-foreground">
