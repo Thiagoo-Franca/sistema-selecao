@@ -48,6 +48,9 @@ export const Endereco = pgTable("endereco", {
   municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
 });
 
+export type InsertEndereco = typeof Endereco.$inferInsert;
+export type SelectEndereco = typeof Endereco.$inferSelect;
+
 export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
   idCandidato: integer("id_candidato")
@@ -66,6 +69,9 @@ export const NotaMestrado = pgTable("nota_mestrado", {
   disciplinaPosCapes3a5: numeric("disciplina_pos_capes_3_a_5"),
 });
 
+export type InsertNotaMestrado = typeof NotaMestrado.$inferInsert;
+export type SelectNotaMestrado = typeof NotaMestrado.$inferSelect;
+
 export const NotaDoutorado = pgTable("nota_doutorado", {
   id: serial("id").primaryKey(),
   idCandidato: integer("id_candidato")
@@ -80,6 +86,10 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
   b1b2b3b4: numeric("b1b2b3b4"),
   notaAnteprojeto: numeric("nota_anteprojeto"),
 });
+
+export type InsertNotaDoutorado = typeof NotaDoutorado.$inferInsert;
+export type SelectNotaDoutorado = typeof NotaDoutorado.$inferSelect;
+
 const candidatoBaseColumns = {
   // dados da inscricao
   id: serial("id").primaryKey(),
@@ -191,6 +201,9 @@ export const CandidatoDoutorado = pgTable(
   }),
 );
 
+export type InsertCandidatoDoutorado = typeof CandidatoDoutorado.$inferInsert;
+export type SelectCandidatoDoutorado = typeof CandidatoDoutorado.$inferSelect;
+
 export const CandidatoMestrado = pgTable(
   "candidato_mestrado",
   {
@@ -237,6 +250,9 @@ export const CandidatoMestrado = pgTable(
     ),
   }),
 );
+
+export type InsertCandidatoMestrado = typeof CandidatoMestrado.$inferInsert;
+export type SelectCandidatoMestrado = typeof CandidatoMestrado.$inferSelect;
 
 export const userRole = pgEnum("user_role", ["STUDENT", "TEACHER", "ADMIN"]);
 export type UserRole = (typeof userRole.enumValues)[number];
