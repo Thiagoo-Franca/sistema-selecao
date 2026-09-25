@@ -1,5 +1,11 @@
-import type { AppType } from "../src/index"
+import type { AppType } from "../src/index";
 
-export type * from "../src/database/schema"
-export type * from "../src/modules/auth/auth.schema"
-export type { AppType }
+export type * from "../src/database/schema";
+export type * from "../src/modules/auth/auth.schema";
+
+export type {
+  CandidatoDoutoradoComRelacoes,
+  CandidatoMestradoComRelacoes,
+} from "../src/modules/candidato/candidato.service";
+
+export type { AppType };

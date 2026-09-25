@@ -12,15 +12,17 @@ import { eq } from "drizzle-orm";
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown };
 
-type CandidatoMestradoComRelacoes = typeof CandidatoMestrado.$inferSelect & {
-  endereco: typeof Endereco.$inferSelect | null;
-  notas: typeof NotaMestrado.$inferSelect | null;
-};
+export type CandidatoMestradoComRelacoes =
+  typeof CandidatoMestrado.$inferSelect & {
+    endereco: typeof Endereco.$inferSelect | null;
+    notas: typeof NotaMestrado.$inferSelect | null;
+  };
 
-type CandidatoDoutoradoComRelacoes = typeof CandidatoDoutorado.$inferSelect & {
-  endereco: typeof Endereco.$inferSelect | null;
-  notas: typeof NotaDoutorado.$inferSelect | null;
-};
+export type CandidatoDoutoradoComRelacoes =
+  typeof CandidatoDoutorado.$inferSelect & {
+    endereco: typeof Endereco.$inferSelect | null;
+    notas: typeof NotaDoutorado.$inferSelect | null;
+  };
 
 export const getAllCandidatos = async (
   c: Context<{ Variables: AppVariables }>,
