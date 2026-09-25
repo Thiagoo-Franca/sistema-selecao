@@ -60,3 +60,5 @@ yarn-error.log*
 *.fdb_latexmk
 *.fls
 *.synctex.gz
+
+apps/server/api/index.mjs
