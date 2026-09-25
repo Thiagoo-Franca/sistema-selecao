@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { AreaPreferencia } from "../../database";
 
 const updateCandidatoMestradoSchema = z.object({
   avaliador1: z.string().nullable().optional(),
   avaliador2: z.string().nullable().optional(),
-  primeiraAreaPreferencia: z.string().optional(),
-  segundaAreaPreferencia: z.string().optional(),
+  primeiraAreaPreferencia: z.enum(AreaPreferencia.enumValues).optional(),
+  segundaAreaPreferencia: z.enum(AreaPreferencia.enumValues).optional(),
   cpf: z
     .string()
     .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")
