@@ -58,15 +58,19 @@ export const NotaMestrado = pgTable("nota_mestrado", {
     .references(() => CandidatoMestrado.id)
     .unique(), // garante 1:1 com o candidato
 
-  grad: numeric("grad"),
-  area: numeric("area"),
-  enade: numeric("enade"),
-  a1a2a3a4: numeric("a1a2a3a4"),
-  b1b2b3b4: numeric("b1b2b3b4"),
-  icIt: numeric("ic_it"),
-  poscomp: numeric("poscomp"),
-  disciplinaPosCapes6Mais: numeric("disciplina_pos_capes_6_mais"),
-  disciplinaPosCapes3a5: numeric("disciplina_pos_capes_3_a_5"),
+  grad: numeric("grad", { mode: "number" }),
+  area: numeric("area", { mode: "number" }),
+  enade: numeric("enade", { mode: "number" }),
+  a1a2a3a4: numeric("a1a2a3a4", { mode: "number" }),
+  b1b2b3b4: numeric("b1b2b3b4", { mode: "number" }),
+  icIt: numeric("ic_it", { mode: "number" }),
+  poscomp: numeric("poscomp", { mode: "number" }),
+  disciplinaPosCapes6Mais: numeric("disciplina_pos_capes_6_mais", {
+    mode: "number",
+  }),
+  disciplinaPosCapes3a5: numeric("disciplina_pos_capes_3_a_5", {
+    mode: "number",
+  }),
 });
 
 export type InsertNotaMestrado = typeof NotaMestrado.$inferInsert;
@@ -79,12 +83,12 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
     .references(() => CandidatoDoutorado.id)
     .unique(), // garante 1:1 com o candidato
 
-  msc: numeric("msc"), // nota do mestrado
-  areaFormacaoGraduacao: numeric("area_formacao_graduacao"),
-  conceitoCapesMestrado: numeric("conceito_capes_mestrado"),
-  a1a2a3a4: numeric("a1a2a3a4"),
-  b1b2b3b4: numeric("b1b2b3b4"),
-  notaAnteprojeto: numeric("nota_anteprojeto"),
+  msc: numeric("msc", { mode: "number" }), // nota do mestrado
+  areaFormacaoGraduacao: numeric("area_formacao_graduacao", { mode: "number" }),
+  conceitoCapesMestrado: numeric("conceito_capes_mestrado", { mode: "number" }),
+  a1a2a3a4: numeric("a1a2a3a4", { mode: "number" }),
+  b1b2b3b4: numeric("b1b2b3b4", { mode: "number" }),
+  notaAnteprojeto: numeric("nota_anteprojeto", { mode: "number" }),
 });
 
 export type InsertNotaDoutorado = typeof NotaDoutorado.$inferInsert;
@@ -229,9 +233,7 @@ export const CandidatoMestrado = pgTable(
       "valor_do_enade_do_curso_graduacao",
     ).notNull(), // Ex: '3.5', '4.0', etc.
     notaPOSCOMP: text("nota_poscomp"),
-    primeiraAreaPreferencia: AreaPreferencia(
-      "primeira_area_preferencia",
-    ).notNull(),
+    primeiraAreaPreferencia: AreaPreferencia("primeira_area_preferencia"),
     segundaAreaPreferencia: AreaPreferencia("segunda_area_preferencia"),
     cartaMotivacao: text("carta_motivacao").notNull(), // Link para PDF
   },
