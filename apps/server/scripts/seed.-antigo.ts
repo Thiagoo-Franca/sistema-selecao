@@ -1,0 +1,1147 @@
+import "dotenv/config";
+
+import {
+  Bancas,
+  CandidatoDoutorado,
+  CandidatoMestrado,
+  Cursos,
+  db,
+  Endereco,
+  type InsertBanca,
+  type InsertCurso,
+  type InsertUser,
+  type InsertUsuarioBanca,
+  NotaDoutorado,
+  NotaMestrado,
+  Users,
+  usuariosBancas,
+} from "../src/database";
+
+async function seed() {
+  await db.transaction(async (db) => {
+    // --- Seed Cursos ---
+    console.log("Seeding cursos...");
+    await db
+      .insert(Cursos)
+      .values({
+        id: 1,
+        nome: "Ciência da Computação",
+        sigla: "BCC",
+      })
+      .onConflictDoNothing();
+    console.log(`Seeded ${cursosData.length} cursos.`);
+
+    console.log("Seeding candidatos...");
+
+    // Endereços primeiro
+    const [endereco1] = await db
+      .insert(Endereco)
+      .values({
+        cep: "40000-000",
+        logradouro: "Rua Teste",
+        numero: "10",
+        bairro: "Bairro Teste",
+        estado: "Bahia",
+        municipio: "Salvador",
+      })
+      .returning({ id: Endereco.id });
+
+    const [endereco2] = await db
+      .insert(Endereco)
+      .values({
+        cep: "40000-000",
+        logradouro: "Rua A",
+        numero: "50",
+        bairro: "Pituba",
+        estado: "Bahia",
+        municipio: "Salvador",
+      })
+      .returning({ id: Endereco.id });
+
+    const [endereco3] = await db
+      .insert(Endereco)
+      .values({
+        cep: "40000-001",
+        logradouro: "Rua B",
+        numero: "100",
+        bairro: "Ondina",
+        estado: "Bahia",
+        municipio: "Salvador",
+      })
+      .returning({ id: Endereco.id });
+
+    const [endereco4] = await db
+      .insert(Endereco)
+      .values({
+        cep: "13000-000",
+        logradouro: "Av. Brasil",
+        numero: "200",
+        bairro: "Jardim",
+        estado: "São Paulo",
+        municipio: "Campinas",
+      })
+      .returning({ id: Endereco.id });
+
+    const [candidatoMestrado1] = await db
+      .insert(CandidatoMestrado)
+      .values({
+        numeroInscricao: "TEST-001",
+        status: "Inscricao Submetida",
+        dataInscricao: new Date(),
+        cpf: "12345678901",
+        sexo: "Masculino",
+        nome: "João Silva",
+        estadoCivil: "Solteiro",
+        email: "joao@example.com",
+        dataNascimento: new Date("1995-01-15"),
+        raca: "Branco",
+        nomeMae: "Maria Silva",
+        tipoEscolaEnsinoMedio: "Publica",
+        pais: "Brasil",
+        estado: "Bahia",
+        municipio: "Salvador",
+        rg: "1234567",
+        orgaoExpedidor: "SSP",
+        estadoExpedicao: "Bahia",
+        dataExpedicao: new Date("2020-01-01"),
+        tituloEleitor: "123456789",
+        secaoEleitoral: "001",
+        idEndereco: endereco1.id,
+        telefoneCelular: "71999999999",
+        linhaPesquisa: "Inteligência Artificial",
+        comprovantePagTaxaInscricao: "link.pdf",
+        copiaCPF: "link.pdf",
+        copiaDocumentoIdentificacao: "link.pdf",
+        solicitouIsencaoTaxaInscricao: false,
+        comprovacaoPesquisas: "link.pdf",
+        possuiNecessidadesEspeciais: false,
+        vagasNegrosPardos: false,
+        vagasSupranumerarias: false,
+        copiaDiplomaGraduacao: "link.pdf",
+        historicoGraduacao: "link.pdf",
+        nomeUniversidadeGraduacao: "UFBA",
+        nomeCursoGraduacao: "Ciência da Computação",
+        cidadeOndeRealizouGraduacao: "Salvador",
+        enadeDoCursoGraduacao: "2019",
+        valorDoEnadeDoCursoGraduacao: "3.5",
+        primeiraAreaPreferencia: "ES - Engenharia de Software",
+        cartaMotivacao: "link.pdf",
+      })
+      .onConflictDoNothing()
+      .returning({ id: CandidatoMestrado.id });
+    console.log("Seeded 1 candidato mestrado.");
+
+    if (candidatoMestrado1) {
+      await db
+        .insert(NotaMestrado)
+        .values({
+          idCandidato: candidatoMestrado1.id,
+        })
+        .onConflictDoNothing();
+    }
+
+    const [candidatoMestrado2] = await db
+      .insert(CandidatoMestrado)
+      .values({
+        numeroInscricao: "MEST-2024-001",
+        status: "Inscricao Submetida",
+        dataInscricao: new Date(),
+        cpf: "11122233344",
+        sexo: "Masculino",
+        nome: "Carlos Eduardo Souza",
+        estadoCivil: "Solteiro",
+        email: "carlos.souza@email.com",
+        dataNascimento: new Date("1998-05-10"),
+        raca: "Branco",
+        nomeMae: "Maria Souza",
+        tipoEscolaEnsinoMedio: "Publica",
+        pais: "Brasil",
+        estado: "Bahia",
+        municipio: "Salvador",
+        rg: "12345678",
+        orgaoExpedidor: "SSP",
+        estadoExpedicao: "BA",
+        dataExpedicao: new Date("2015-06-20"),
+        tituloEleitor: "111122223333",
+        secaoEleitoral: "010",
+        idEndereco: endereco2.id,
+        telefoneCelular: "71999998888",
+        linhaPesquisa: "Inteligência Artificial",
+        comprovantePagTaxaInscricao: "pdf1.pdf",
+        copiaCPF: "pdf2.pdf",
+        copiaDocumentoIdentificacao: "pdf3.pdf",
+        comprovacaoPesquisas: "pdf4.pdf",
+        copiaDiplomaGraduacao: "pdf5.pdf",
+        historicoGraduacao: "pdf6.pdf",
+        nomeUniversidadeGraduacao: "UFBA",
+        nomeCursoGraduacao: "Ciência da Computação",
+        cidadeOndeRealizouGraduacao: "Salvador",
+        enadeDoCursoGraduacao: "2022",
+        valorDoEnadeDoCursoGraduacao: "4.5",
+        primeiraAreaPreferencia:
+          "ICOT - Inteligência Computacional e Otimização",
+        cartaMotivacao: "carta.pdf",
+      })
+      .onConflictDoNothing()
+      .returning({ id: CandidatoMestrado.id });
+
+    if (candidatoMestrado2) {
+      await db
+        .insert(NotaMestrado)
+        .values({
+          idCandidato: candidatoMestrado2.id,
+        })
+        .onConflictDoNothing();
+    }
+    console.log("Seeded 2 candidato mestrado.");
+
+    const [candidatoDoutorado1] = await db
+      .insert(CandidatoDoutorado)
+      .values({
+        numeroInscricao: "DOUT-2024-001",
+        status: "Inscricao Submetida",
+        dataInscricao: new Date(),
+        cpf: "99988877766",
+        sexo: "Masculino",
+        nome: "Ricardo Santos",
+        estadoCivil: "Casado",
+        email: "ricardo.santos@email.com",
+        dataNascimento: new Date("1990-03-15"),
+        raca: "Branco",
+        nomeMae: "Helena Santos",
+        tipoEscolaEnsinoMedio: "Publica",
+        pais: "Brasil",
+        estado: "Bahia",
+        municipio: "Salvador",
+        rg: "11223344",
+        orgaoExpedidor: "SSP",
+        estadoExpedicao: "BA",
+        dataExpedicao: new Date("2010-01-10"),
+        tituloEleitor: "999988887777",
+        secaoEleitoral: "005",
+        idEndereco: endereco3.id,
+        telefoneCelular: "71977776666",
+        linhaPesquisa: "Redes e Segurança",
+        comprovantePagTaxaInscricao: "pdf1.pdf",
+        copiaCPF: "pdf2.pdf",
+        copiaDocumentoIdentificacao: "pdf3.pdf",
+        comprovacaoPesquisas: "pdf4.pdf",
+        historicoGraduacao: "grad.pdf",
+        copiaDiplomaMestrado: "mestrado.pdf",
+        historicoMestrado: "hist_mest.pdf",
+        nomeUniversidadeMestrado: "UFPE",
+        nomeCursoMestrado: "Ciência da Computação",
+        anteprojetoTese: "tese.pdf",
+        primeiraOpcaoOrientador: "Prof. Dr. Fulano",
+        segundaOpcaoOrientador: "Prof. Dr. Beltrano",
+        terceiraOpcaoOrientador: "Prof. Dr. Sicrano",
+      })
+      .onConflictDoNothing()
+      .returning({ id: CandidatoDoutorado.id });
+
+    if (candidatoDoutorado1) {
+      await db
+        .insert(NotaDoutorado)
+        .values({
+          idCandidato: candidatoDoutorado1.id,
+        })
+        .onConflictDoNothing();
+    }
+
+    console.log("Seeded 3 candidato doutorado.");
+
+    const [candidatoDoutorado2] = await db
+      .insert(CandidatoDoutorado)
+      .values({
+        numeroInscricao: "DOUT-2024-002",
+        status: "Inscricao Submetida",
+        dataInscricao: new Date(),
+        cpf: "00011122233",
+        sexo: "Feminino",
+        nome: "Mariana Costa",
+        estadoCivil: "Solteiro",
+        email: "mariana.costa@email.com",
+        dataNascimento: new Date("1992-08-30"),
+        raca: "Amarelo",
+        nomeMae: "Lucia Costa",
+        tipoEscolaEnsinoMedio: "Publica",
+        pais: "Brasil",
+        estado: "São Paulo",
+        municipio: "Campinas",
+        rg: "55667788",
+        orgaoExpedidor: "SSP",
+        estadoExpedicao: "SP",
+        dataExpedicao: new Date("2012-05-20"),
+        tituloEleitor: "000011112222",
+        secaoEleitoral: "015",
+        idEndereco: endereco4.id,
+        telefoneCelular: "19999990000",
+        linhaPesquisa: "Ciência de Dados",
+        comprovantePagTaxaInscricao: "pdf1.pdf",
+        copiaCPF: "pdf2.pdf",
+        copiaDocumentoIdentificacao: "pdf3.pdf",
+        comprovacaoPesquisas: "pdf4.pdf",
+        historicoGraduacao: "grad.pdf",
+        copiaDiplomaMestrado: "mestrado.pdf",
+        historicoMestrado: "hist_mest.pdf",
+        nomeUniversidadeMestrado: "UNICAMP",
+        nomeCursoMestrado: "Engenharia Elétrica",
+        anteprojetoTese: "tese.pdf",
+        primeiraOpcaoOrientador: "Prof. Dr. Orientador A",
+        segundaOpcaoOrientador: "Prof. Dr. Orientador B",
+        terceiraOpcaoOrientador: "Prof. Dr. Orientador C",
+      })
+      .onConflictDoNothing()
+      .returning({ id: CandidatoDoutorado.id });
+
+    if (candidatoDoutorado2) {
+      await db
+        .insert(NotaDoutorado)
+        .values({
+          idCandidato: candidatoDoutorado2.id,
+        })
+        .onConflictDoNothing();
+    }
+
+    console.log("Seeded 4 candidato doutorado.");
+
+    console.log("Seeding usuarios...");
+    await db.insert(Users).values(UserData).onConflictDoNothing();
+    console.log(`Seeded ${UserData.length} usuarios.`);
+
+    // --- Seed Bancas ---
+    console.log("Seeding bancas...");
+
+    await db.insert(Bancas).values(bancasData).onConflictDoNothing();
+    console.log(`Seeded ${bancasData.length} bancas.`);
+
+    // --- Seed UsuarioBanca ---
+    console.log("Seeding usuarios_bancas...");
+    await db
+      .insert(usuariosBancas)
+      .values(usuariosBancasData)
+      .onConflictDoNothing();
+    console.log(`Seeded ${usuariosBancasData.length} usuario_banca relations.`);
+  });
+}
+
+seed().catch((error) => {
+  console.error("Error seeding database:", error);
+  process.exit(1);
+});
+
+const cursosData: InsertCurso[] = [
+  {
+    id: 1,
+    nome: "Ciência da Computação", // Note: Encoding issues from SQL dump not fixed here
+    sigla: "BCC",
+  },
+  {
+    id: 2,
+    nome: "Sistemas de Informação", // Note: Encoding issues from SQL dump not fixed here
+    sigla: "BSI",
+  },
+];
+
+const UserData: InsertUser[] = [
+  {
+    id: 9,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "root@root.com",
+    nome: "Root ACTIVE",
+    school: "Root",
+    academicTitle: "Bacharelado",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "ADMIN",
+  },
+  {
+    id: 17,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "fdurao@ufba.br",
+    nome: "Frederico Araújo Durão",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Bacharelado",
+    matricula: "123",
+    createdAt: new Date("2023-11-03 13:48:56"),
+    updatedAt: new Date("2023-11-03 13:48:56"),
+    role: "TEACHER",
+  },
+  {
+    id: 57,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "steffen.lewitzka@ufba.br",
+    nome: "Steffen Lewitzka",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós Doutorado, PUC-Rio, 2005 Doutor em Ciência da Computação, CIn-UFPE, 2003",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "ADMIN",
+  },
+  {
+    id: 58,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "rodrigorgs@ufba.br",
+    nome: "Rodrigo Rocha Gomes e Souza",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutor em Ciência da Computação, Engenharia de Software, UFBA, 2015",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 59,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "macedo@ufba.br",
+    nome: "Raimundo José de Araújo Macêdo",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "PhD, University of Newcastle upon Tyne, Inglaterra, 1994",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 60,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "gorender@ufba.br",
+    nome: "Sérgio Gorender",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutor em Ciência da Computação. Centro de Informática - UFPE, 2005",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 61,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "ritasuzana@dcc.ufba.br",
+    nome: "Rita Suzana Pitangueira Maciel",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado - University of Waterloo. U.Waterloo, Canadá, 2015 Doutora em Ciência da Computação, UFPE, 2005",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 62,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "roberto.parente@ufba.br",
+    nome: "Roberto Freitas Parente",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Doutor em Ciência da Computação, Combinatória - USP, 2016",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 63,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "ricardoar@ufba.br",
+    nome: "Ricardo Araújo Rios",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado em Ciências da Computação e Matemática Computacional, ICMC - USP, 2020 Doutor em Ciências da Computação e Matemática Computacional, ICMC - USP, 2013 Doutorado sanduíche, Université de Montréal (Montreal - CA) , 2012 Mestrado em Ciência da Computação, Universidade Federal de São Carlos. UFSCAR, 2008 Graduação em Ciência da Computação, Universidade Estadual do Sudoeste da Bahia, UESB, 2006",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 64,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "rubisley@ufba.br",
+    nome: "Rubisley de Paula Lemes",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Doutor em Informática, UFPR, 2014",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 65,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "robespierre.pita@ufba.br",
+    nome: "Robespierre Dantas da Rocha Pita",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutor em Ciência da Computação - Universidade Federal da Bahia (UFBA), 2019 Mestre em Ciência da Computação - Universidade Federal da Bahia (UFBA), 2015 Especialista em Redes de Computadores - Universidade Salvador (UNIFACS), 2010 Graduado em Sistemas de Informação - Universidade Salvador (UNIFACS), 2009",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 66,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "melo@dcc.ufba.br",
+    nome: "Rafael Augusto de Melo",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado Universidade Federal Fluminense, UFF, 2014. Doutorado em Ciências da Engenharia (Matemática Aplicada) Université Catholique de Louvain, UCL, Bélgica, 2011. Mestrado em Computação  Universidade Federal Fluminense, UFF, 2007. Graduação em Ciência da Computação Universidade Federal de Lavras, UFLA, 2005.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 67,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "manoel.mendonca@ufba.br",
+    nome: "Manoel Gomes de Mendonça Neto",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado Universidade de Maryland Em College Park, UMCP, Estados Unidos, 1998.  Doutorado em Ciência da Computação Universidade de Maryland Em College Park, UMCP, Estados Unidos, 1997.  Mestrado em Engenharia de Computação e Automação Industrial Universidade Estadual de Campinas, UNICAMP, 1990.  Graduação em Engenharia Elétrica, op. Eletrônica Universidade Federal da Bahia, UFBA, 1986.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 68,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "maycon.leone@ufba.br",
+    nome: "Maycon Leone Maciel Peixoto",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado  Universidade Estadual de Campinas, UNICAMP, 2020. Doutorado em Ciências da Computação e Matemática Computacional Universidade de São Paulo, USP, 2012. Mestrado em Ciências da Computação e Matemática Computacional  Universidade de São Paulo, USP, 2008. Graduação em Bacharel em Ciência da Computação  Instituto Ensinar Brasil, FIC, 2005.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 69,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "msouza1@ufba.br",
+    nome: "Marlo Vieira dos Santos e Souza",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutorado em Computação  Universidade Federal do Rio Grande do Sul, UFRGS com período sanduíche em Utrecht University, 2016. Mestrado em Ciência da ComputaçãoPontifícia Universidade Católica do Rio Grande do Sul, PUCRS, 2012. Graduação em Matemática  Universidade Federal da Bahia, UFBA, 2009. Graduação em Ciência da ComputaçãoUniversidade Salvador, UNIFACS, 2008.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 70,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "seixas.luma@ufba.br",
+    nome: "Luma da Rocha Seixas",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Doutora em Ciência da Computação, UFPE, 2021",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 71,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "vaninha@ufba.br",
+    nome: "Vaninha Vieira dos Santos",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado em Ciência da Computação, University of Southern California, USA, 2015 Doutora em Ciência da Computação, CIn/UFPE, 2008 Doutorado Sanduíche, Université Pierre et Marie Curie (LIP6), Paris-França, 2007 Mestre em Ciência da Computação, COPPE/UFRJ, 2003 Bacharel em Ciência da Computação, DCC/UFBA, 1999",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 72,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "pregnier@ufba.br",
+    nome: "Paul Denis Etienne Regnier",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Doutorado em Ciência da Computação, UFBA, 2012",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 73,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "lrebouca@ufba.br",
+    nome: "Luciano Rebouças de Oliveira",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Post-Doctorate  Federal University of Bahia, UFBA, 2012.  PhD in Electrical and Computer Engineering  University of Coimbra, UC, Portugal, 2010.  Master in Mechatronics  Federal University of Bahia, UFBA, 2005.  Graduation in Computer Science  Federal University of Bahia, UFBA, 1997.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 74,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "tatianenogueira@ufba.br",
+    nome: "Tatiane Nogueira Rios",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutora em Ciências da Computação e Matemática Computacional, ICMC - USP, 2020 Doutora em Ciências da Computação e Matemática Computacional, ICMC - USP, 2013 Doutorado sanduíche, McGill University (Montreal - Canadá), 2012  Mestrado em Ciência da Computação  Universidade Federal de São Carlos, UFSCAR, 2008.  Graduação em Ciência da Computação Universidade Estadual do Sudoeste da Bahia, UESB, 2006.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 75,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "leobino@ufba.br",
+    nome: "Leobino Nascimento Sampaio",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado University of California Los Angeles, UCLA, 2020.  Doutorado em Ciências da Computação Universidade Federal de Pernambuco, UFPE, 2011.  Mestrado profissional em Redes de Computadores  Universidade Salvador, UNIFACS, 2004.  Graduação em Administração de Empresas Universidade Católica do Salvador, UCSAL, 1999.  Graduação em Ciência da Computação com ênfase em Análise de Sistemas  Universidade Salvador, UNIFACS, 1996.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 76,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "gmlima@ufba.br",
+    nome: "George Marconi de Araújo Lima",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado  Universidade Federal de Pernambuco, UFPE, 2016. Doutorado em Ciência da Computação  University of York, Inglaterra, 2003. Mestrado em Ciência da Computação  Universidade Estadual de Campinas, UNICAMP, 1996. Bacharelado em Ciência da Computação  Universidade Federal da Bahia, UFBA, 1993.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 78,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "laisns@ufba.br",
+    nome: "Laís do Nascimento Salvador",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-DoutoradoUniversidade de São Paulo, USP, 2018. Doutorado em Engenharia Elétrica  Universidade de São Paulo, USP, 2001. Mestrado em Engenharia Elétrica Universidade de São Paulo, USP, 1995. Graduação em Bacharelado em Processamento de Dados Universidade Federal da Bahia, UFBA, 1990.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 79,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "gustavobf@ufba.br",
+    nome: "Gustavo Bittencourt Figueiredo",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Doutor em Ciência da Computação, IC-UNICAMP, 2009",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 80,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "kaguero@ufba.br",
+    nome: "Karl Apaza Aguero",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Doutor em Ciência da Computação, UFPR, 2014",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 81,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "ivanmachado@dcc.ufba.br",
+    nome: "Ivan do Carmo Machado",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutor em Engenharia de Software, UFBA, 2015 Doutor em Ciência da Computação, UFBA, 2014 Doutorado Sanduíche, Clemson University, EUA, 2012",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 82,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "fassis@ufba.br",
+    nome: "Flávio Morais de Assis Silva",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutor (Dr-Ing), Universidade Técnica de Berlim, Alemanha, 1999",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 83,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "esa@dcc.ufba.br",
+    nome: "Eduardo Santana de Almeida",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado University of California, Irvine, UCI, Estados Unidos, 2019. Pós-Doutorado Virginia Polytech Institute and State University, Virgina Tech, Estados Unidos, 2008. Doutorado em Ciências da Computação  Universidade Federal de Pernambuco, UFPE, 2007. Mestrado em Ciência da Computação  Universidade Federal de São Carlos, UFSCAR, 2003. Graduação em Ciência da Computação  Universidade Salvador, UNIFACS, 2000.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 84,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "coimbra.danilo@ufba.br",
+    nome: "Danilo Barbosa Coimbra",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutorado em Ciências da Computação e Matemática Computacional  Universidade de São Paulo, USP com período co-tutela em University of Groningen, 2016. Mestrado em Ciências da Computação  Universidade de São Paulo, USP, 2011. Graduação em Ciência da Computação  Instituto de Ensino Superior COC, 2008.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 85,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "islame.felipe@ufba.br",
+    nome: "Felipe Fernandes",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutorado em Ciência da Computação (PPgSC/UFRN, 2022) Mestrado em Sistemas e Computação (PPgSC/UFRN, 2018) Bacharelado em Ciência da Computação (UFRN, 2016)",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 86,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "abdalla@ufba.br",
+    nome: "Débora Abdalla Santos",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Doutora em Ciência da Computação, UFPE, 2000",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 87,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "dclaro@ufba.br",
+    nome: "Daniela Barreiro Claro",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutora em Ciência da Computação, Université d'Angers - França, 2006",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 88,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "fabiola@dcc.ufba.br",
+    nome: "Fabíola Gonçalves Pereira Greve",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Post-Doctorate - Université Pierre et Marie Curie - Laboratoire d'Informatique de Paris, UPMC - LIP6, France, 2010. PhD in Informatics - Institut National de Recherche en Informatique et en Automatique - Siège, INRIA, France, 2002. Master in Computer Science - State University of Campinas, UNICAMP, 1991. Graduation in Data Processing - Federal University of Bahia, UFBA, 1988.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 89,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "santanna@dcc.ufba.br",
+    nome: "Cláudio Nogueira Sant'Anna",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado  Universidade Federal da Bahia, UFBA, 2009. Doutorado em Informática  Pontifícia Universidade Católica do Rio de Janeiro, PUC-Rio, 2008, em colaboração com a Universidade de Lancaster, Reino Unido. Mestrado em Informática  Pontifícia Universidade Católica do Rio de Janeiro, PUC-Rio, 2004. Bacharelado em Ciência da Computação Universidade Federal da Bahia, UFBA, 1997.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 90,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "flach@ufba.br",
+    nome: "Christina von Flach Garcia Chavez",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós-Doutorado  Université de Namur, UNAMUR, Bélgica, 2019. Pós-Doutorado  Pontifícia Universidade Católica do Rio de Janeiro, PUC-Rio, 2012. Doutorado em Informática  Pontifícia Universidade Católica do Rio de Janeiro, PUC-Rio, 2004. Mestrado em Ciência da Computação  Universidade Estadual de Campinas, UNICAMP, 1992. Bacharel em Ciência da Computação  Universidade Federal da Bahia, UFBA, 1987.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 91,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "prazeres@ufba.br",
+    nome: "Cássio Vinicius Serafim Prazeres",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Pós Doutorado em Internet das Coisas, National University of Ireland, Galway, 2015 Doutorado em Ciência da Computação, USP/ICMC, 2009 Mestrado em Ciência da Computação - Universidade Salvador, UNIFACS, 2003 Bacharel em Ciência da Computação - Universidade Salvador, UNIFACS, 2000",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "STUDENT",
+  },
+  {
+    id: 92,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "antonio.apolinario@ufba.br",
+    nome: "Antonio Lopes Apolinario Junior",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutorado em Engenharia de Sistemas e Computação  Universidade Federal do Rio de Janeiro, UFRJ, 2004.Mestrado em Engenharia de Sistemas e Computação  Universidade Federal do Rio de Janeiro, UFRJ, 1995.Bacharelado em Matematica Mod Informatica  Universidade do Estado do Rio de Janeiro, UERJ, 1991.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 93,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "bruno.ps@ufba.br",
+    nome: "Bruno Pereira dos Santos",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutorado em Ciências da Computação  Universidade Federal de Minas Gerais, UFMG, 2019. Mestrado em Ciências da Computação  Universidade Federal de Minas Gerais, UFMG, 2015. Graduação em Ciência da Computação  Universidade Estadual de Santa Cruz, UESC, 2012.",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 94,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "frieda@ufba.br",
+    nome: "Anna Friedericka Schwarzelmuller",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Mestre em Ciência da Informação, UFBA, 2004  Especialista em Redes de Computadores,UFRJ, 1994  Especialista em linguagens de programação,UNICAMP, 1979",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 95,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "aliriosa@ufba.br",
+    nome: "Alírio Santos de Sá",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Doutor em Ciência da Computação, DMCC-UFBA, 2011",
+    matricula: "123",
+    createdAt: new Date("2023-08-09 11:16:17"),
+    updatedAt: new Date("2023-08-09 11:16:17"),
+    role: "TEACHER",
+  },
+  {
+    id: 102,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "isaque.copque@ufba.br",
+    nome: "Isaque Santana Copque",
+    school: "UFBA",
+    academicTitle: "Bacharelado",
+    matricula: "123",
+    createdAt: new Date("2024-02-27 13:40:54"),
+    updatedAt: new Date("2024-02-27 13:40:54"),
+    role: "STUDENT",
+  },
+  {
+    id: 103,
+    passwordHash:
+      "$2y$13$9fWEoo.5.I9fSI8vQyKzJe1hCWu0qukZMVersQgJJRxt63Z11kXGe",
+    email: "contato.joaocomp@gmail.com",
+    nome: "João Pedro Brito Silva",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Bacharelado",
+    matricula: "123",
+    createdAt: new Date("2024-03-09 20:52:48"),
+    updatedAt: new Date("2024-03-09 20:52:48"),
+    role: "STUDENT",
+  },
+  {
+    id: 105,
+    passwordHash:
+      "$2y$13$Dj0EjuymiSPLsKw8ViW5quwU.xrufWLAA6k66b9ULRtprTOuai9TS",
+    email: "alberto.oliveira@ufba.br",
+    nome: "Alberto Oliveira Santos",
+    school: "Universidade Federal da Bahia",
+    academicTitle: "Bacharel",
+    matricula: "123",
+    createdAt: new Date("2024-05-02 11:52:37"),
+    updatedAt: new Date("2024-05-02 11:52:37"),
+    role: "STUDENT",
+  },
+  {
+    id: 106,
+    passwordHash:
+      "$2y$13$rUH.LZl1xJBr/fwpzw8g2.YOP1eOl3qozfPlg01OkloJmDEOdkmI6",
+    email: "teste@teste.com.br",
+    nome: "Orientador Teste",
+    school: "UFBA",
+    academicTitle: "Doutor",
+    matricula: "123",
+    createdAt: new Date("2024-05-08 14:55:21"),
+    updatedAt: new Date("2024-05-08 14:55:21"),
+    role: "TEACHER",
+  },
+  {
+    id: 107,
+    passwordHash:
+      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
+    email: "murilo.guerreiro@ufba.br",
+    nome: "Murilo Guerreiro Arouca",
+    school: "UFBA",
+    academicTitle: "Mestre",
+    matricula: "123",
+    createdAt: new Date("2024-05-22 12:49:31"),
+    updatedAt: new Date("2024-05-22 12:49:31"),
+    role: "TEACHER",
+  },
+  {
+    id: 108,
+    passwordHash:
+      "$2y$13$Ajua3qcC2e/f6.tkRTc/qu0Aj/ZR7I6l70m8XarH40hZlj3nHhD1i",
+    email: "bruno.paolo@ufba.br",
+    nome: "Bruno Guardiani",
+    school: "Universidade Federal da Bahia (UFBA)",
+    academicTitle: "Bacharel",
+    matricula: "123",
+    createdAt: new Date("2024-05-22 13:02:24"),
+    updatedAt: new Date("2024-05-22 13:02:24"),
+    role: "STUDENT",
+  },
+  {
+    id: 109,
+    passwordHash:
+      "$2y$13$J.xbA/QOqQB7/dX2NvGr9.2/9kyZqzyjcR5nX76z6wc8e3DXOtTN6",
+    email: "gabibohana@gmail.com",
+    nome: "Gabriela Bohana Ferreira Lima",
+    school: "UFBA",
+    academicTitle: "Bacharel",
+    matricula: "123",
+    createdAt: new Date("2024-06-20 02:06:18"),
+    updatedAt: new Date("2024-06-20 02:06:18"),
+    role: "STUDENT",
+  },
+  {
+    id: 110,
+    passwordHash:
+      "$2y$13$hm6YDaq3Hl6hzgKfLTsff.hLfRh3unrBG5x46/cbGhIXBxIQcWmba",
+    email: "eduardoferreira@ufba.br",
+    nome: "Eduardo Ferreira da Silva",
+    school: "UFBA",
+    academicTitle: "Mestre",
+    matricula: "123",
+    createdAt: new Date("2024-06-20 16:32:45"),
+    updatedAt: new Date("2024-06-20 16:32:45"),
+    role: "TEACHER",
+  },
+  {
+    id: 111,
+    passwordHash:
+      "$2y$13$/RaSl3r/nGOwZTtyAoaeuOV7fjAY2vaouY7JRXLeyTwA0n228cx5C",
+    email: "contato.joaocomp2@gmail.com",
+    nome: "João Pedro Brito Silva 2",
+    school: "UFBA",
+    academicTitle: "Doutor",
+    matricula: "123",
+    createdAt: new Date("2024-07-07 18:23:27"),
+    updatedAt: new Date("2024-07-07 18:23:27"),
+    role: "TEACHER",
+  },
+  {
+    id: 112,
+    passwordHash:
+      "$2y$13$z0br7bhgwl0y8rDFqpB67OgnZYx/yayp1tPvlR8q3n3YuOVWV0Fza",
+    email: "teste2@teste.com.br",
+    nome: "João Pedro Brito Silva Registrado",
+    school: "UFBA",
+    academicTitle: "Titulo",
+    matricula: "123",
+    createdAt: new Date("2024-08-19 20:03:48"),
+    updatedAt: new Date("2024-08-19 20:03:48"),
+    role: "STUDENT",
+  },
+];
+
+const bancasData: InsertBanca[] = [
+  {
+    id: 1,
+    cursoId: 1,
+    alunoId: 102,
+    orientadorId: 93,
+    autor: "Isaque Santana Copque",
+    turma: "2019.1",
+    periodoAcademico: "2019.1",
+    matricula: "219120256",
+    modalidade: "local", // from tipo_banca
+    tituloTrabalho:
+      "EventIC: An Academic Event Recommender System for the Institute of Computing",
+    resumo:
+      "Event promotion platforms play a crucial role in fostering connections because they can extend the reach and visibility of events. In the academic environment, characterized by frequent lectures, seminars, and conferences organized by various research groups, these tools enable students, researchers, and interested individuals to access information easily, driving the dissemination of knowledge within the scientific community.  To further optimize this potential, a Recommendation System can be employed to help ACTIVEs discover relevant events. This work addressed integrating a recommendation mechanism, into a web application for promoting academic events, EventIC. Collaborative Filtering and Content-Based Filtering techniques were employed, and a comparison experiment of the results from these approaches was conducted. The metrics adopted in this study indicated that Collaborative Filtering produced more accurate recommendations.",
+    abstract:
+      "Event promotion platforms play a crucial role in fostering connections because they can extend the reach and visibility of events. In the academic environment, characterized by frequent lectures, seminars, and conferences organized by various research groups, these tools enable students, researchers, and interested individuals to access information easily, driving the dissemination of knowledge within the scientific community.  To further optimize this potential, a Recommendation System can be employed to help ACTIVEs discover relevant events. This work addressed integrating a recommendation mechanism, into a web application for promoting academic events, EventIC. Collaborative Filtering and Content-Based Filtering techniques were employed, and a comparison experiment of the results from these approaches was conducted. The metrics adopted in this study indicated that Collaborative Filtering produced more accurate recommendations.",
+    palavrasChave:
+      "Recommender System, Collaborative FIltering, Content-Based Filtering",
+    dataRealizacao: new Date("2024-03-11 08:30:22"),
+    notaFinal: null,
+    local: "Salvador",
+    visible: true, // from visible = 1
+  },
+  {
+    alunoId: 103,
+    orientadorId: 93,
+    id: 2,
+    cursoId: 1,
+    autor: "Alberto Oliveira Santos",
+    turma: "101000 T10",
+    periodoAcademico: "2019.1",
+    matricula: "218217201",
+    modalidade: "remoto", // from tipo_banca
+    tituloTrabalho:
+      "Desenvolvimento e Avaliação de um Sistema Web de Apoio à Gestão de Projetos", // Encoding issues present
+    resumo:
+      "Projetos permeiam a sociedade, prazos, tarefas, mudanças de escopo, custos, entre outros fatores, influenciam no andamento de um projeto. Nesse sentido, devido a importância dos projetos no âmbito profissional faz-se necessário aplicar a gestão de projetos no cotidiano das empresas. De forma informatizada os Sistemas Web de Apoio à Gestão de Projetos (SWAGP) se popularizaram entre as empresas e instituições oferecendo ferramentas que apoiam na tomada de decisão e demonstram em tempo real a situação do projeto. Como forma de obter lucro, plataformas que oferecem esse tipo de solução passaram a incluir limitações ao seu plano grátis, impossibilitando o uso por pequenas empresas e no uso educacional de desenvolvimento de projetos. Neste trabalho será proposto um sistema web gratuito capaz de facilitar o gerenciamento de múltiplos projetos, oferecendo ferramentas que são comumente encontradas em softwares pagos.", // Encoding issues present
+    abstract:
+      "Projects permeate society, deadlines, tasks, scope changes, costs, among other factors, influence the progress of a project. In this sense, due to the importance of projects in the professional sphere, it is necessary to apply project management in the daily lives of companies. In a computerized way, Web Project Management Support Systems (WPMSS) have become popular among companies and institutions, offering tools that support decision-making and demonstrate the project status in real time. As a way of making a profit, platforms that offer this type of solution have started to include limitations to their free plan, making it impossible to use by small businesses and in educational use for project development. In this work, a free web system will be proposed capable of facilitating the management of multiple projects, offering tools that are commonly found in paid software.",
+    palavrasChave: "Gestão, Projetos, Software", // Encoding issues present
+    dataRealizacao: new Date("2024-06-10 11:00:25"),
+    notaFinal: null,
+    local: "https://meet.google.com/mxk-uuof-tza",
+    visible: false, // from visible = 0
+  },
+  {
+    alunoId: 105,
+    orientadorId: 93,
+    id: 3,
+    cursoId: 1,
+    autor: "Bruno Guardiani",
+    turma: "101000",
+    periodoAcademico: "2019.1",
+    matricula: "217216759",
+    modalidade: "remoto", // from tipo_banca
+    tituloTrabalho:
+      "Um Sistema de Recomendação baseado em Conteúdo para Recomendação de Vagas de Emprego", // Encoding issues present
+    resumo: "Sistema de Recomendação para Empregos",
+    abstract:
+      "At present, every web system generates a large amount of data based on the information that ACTIVEs make available. For instance, social media platforms like LinkedIn, which help ACTIVEs find the best match for their skills and the available vacancies on the platform. However, extracting useful data from these platforms is not straightforward. Hence, recommendation algorithms (RAs) are implemented on these websites. A well-known RA is content-based filtering, which takes into account the vacancyÔÇÖs descriptive data (e.g. skills, soft skills) to recommend jobs that align with the ACTIVEÔÇÖs descriptive characteristics. In addition, thereÔÇÖs some ways to make this approach get more effective integrating similarity calculation methodologies such as: Cosine Similarity, Jaccard, and Pearson.", // Encoding issues present
+    palavrasChave: "recommendation system, content-based, vacancy, jobs",
+    dataRealizacao: new Date("2024-06-10 09:30:07"),
+    notaFinal: null,
+    local: "https://meet.google.com/mgx-mtri-gne?hs=224",
+    visible: false, // from visible = 0
+  },
+  {
+    alunoId: 106,
+    orientadorId: 93,
+    id: 4,
+    cursoId: 1,
+    autor: "Gabriela Bohana Ferreira Lima",
+    turma: "MATA67",
+    periodoAcademico: "2019.1",
+    matricula: "216220011",
+    modalidade: "remoto", // from tipo_banca
+    tituloTrabalho:
+      "Um Sistema de Recomendação de filmes baseado em regras semânticas", // Encoding issues present
+    resumo:
+      "Com o advento da Web, usuários passaram a ter mais liberdade na criação e compartilhamento de conteúdo, gerando um grande volume de dados e tornando cada vez mais difícil tomar decisões sobre o que é relevante ou não, o que por sua vez gera um problema conhecido como sobrecarga de informação. Diante disso, percebe-se que é necessário a adoção de mecanismos inteligentes para a realização dessa tarefa de filtragem de conteúdo personalizado. Logo, este trabalho propõe um Sistema de Recomendação baseado em conteúdo que utiliza Web Semântica para gerar recomendações de filmes utilizando regras semânticas. Para isso, foi criada uma ontologia e as regras foram utilizadas para gerar as inferências. Um experimento offline foi realizado e resultados mostram que o sistema foi capaz de gerar recomendações relevantes em pelo menos 36\\% dos casos analisados.", // Encoding issues present
+    abstract:
+      "With the advent of the Web, ACTIVEs acquired more freedom to create and share content, producing a large volume of data and thus making it harder to decide whether something is relevant, leading to the problem known as information overload. In this context, it becomes necessary to adopt intelligent mechanisms to filter personalized content. Therefore, this work proposes a content-based Recommendation System that uses Semantic Web to generate movie recommendations using semantic rules. For this purpose, an ontology was created, and the rules were used to generate inferences. An offline experiment was carried out, and results show that the system could generate relevant recommendations in at least 36% of the cases analyzed.",
+    palavrasChave:
+      "sistema de recomendação, semântica, web semântica, recomendação, regra semântica, swrl, owl, protege,", // Encoding issues present
+    dataRealizacao: new Date("2024-06-21 09:00:16"),
+    notaFinal: null,
+    local: "meet.google.com/nhq-jmmg-czu",
+    visible: false, // from visible = 0
+  },
+  {
+    alunoId: 107,
+    orientadorId: 93,
+    id: 6,
+    cursoId: 1,
+    autor: "João Pedro Brito Silvadadasd",
+    turma: "1",
+    periodoAcademico: "2019.1",
+    matricula: "214002414",
+    modalidade: "remoto", // from tipo_banca
+    tituloTrabalho: "Defesa para teste das agendas - Google Calendar",
+    resumo: "Defesa para teste das agendas - Google Calendar",
+    abstract: "Defesa para teste das agendas - Google Calendar",
+    palavrasChave: "Keywords",
+    dataRealizacao: new Date("2024-07-18 20:35:46"),
+    notaFinal: null,
+    local: "http://www.google.com.br/teste",
+    visible: false, // from visible = 0
+  },
+];
+const usuariosBancasData: InsertUsuarioBanca[] = [
+  { id: 1, usuarioId: 17, bancaId: 1, role: "orientador", nota: "10" }, // Original nota was double 10
+  { id: 2, usuarioId: 84, bancaId: 1, role: "avaliador", nota: null },
+  { id: 3, usuarioId: 17, bancaId: 2, role: "orientador", nota: null },
+  { id: 11, usuarioId: 81, bancaId: 2, role: "avaliador", nota: null },
+  { id: 12, usuarioId: 67, bancaId: 2, role: "avaliador", nota: null },
+  { id: 13, usuarioId: 107, bancaId: 1, role: "avaliador", nota: "10" }, // Original nota was double 10
+  { id: 14, usuarioId: 17, bancaId: 6, role: "orientador", nota: null },
+  { id: 15, usuarioId: 84, bancaId: 6, role: "avaliador", nota: "4" }, // Original nota was double 4
+];
