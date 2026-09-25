@@ -6,6 +6,7 @@ import * as schema from "./schema";
 
 const pool = new pg.Pool({
   connectionString: env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
 export const db = drizzle(pool, { schema });
