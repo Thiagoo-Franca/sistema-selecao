@@ -2,19 +2,19 @@ import type {
   BuildQueryResult,
   DBQueryConfig,
   ExtractTablesWithRelations,
-} from 'drizzle-orm';
-import * as schema from './schema';
+} from "drizzle-orm";
+import * as schema from "./schema";
 
 type Schema = typeof schema;
 type TSchema = ExtractTablesWithRelations<Schema>;
 
 // https://github.com/drizzle-team/drizzle-orm/issues/695#issuecomment-1881454650
 export type IncludeRelation<TableName extends keyof TSchema> = DBQueryConfig<
-  'one' | 'many',
+  "one" | "many",
   boolean,
   TSchema,
   TSchema[TableName]
->['with'];
+>["with"];
 
 export type InferResultType<
   TableName extends keyof TSchema,
@@ -28,28 +28,28 @@ export type InferResultType<
 >;
 
 type Value =
-  | 'byte'
-  | 'password'
-  | 'regex'
-  | 'uuid'
-  | 'email'
-  | 'hostname'
-  | 'idn-email'
-  | 'idn-hostname'
-  | 'iri'
-  | 'iri-reference'
-  | 'ipv4'
-  | 'ipv6'
-  | 'uri'
-  | 'uri-reference'
-  | 'uri-template'
-  | 'url'
-  | 'date-time'
-  | 'date'
-  | 'time'
-  | 'duration'
-  | 'json-pointer'
-  | 'relative-json-pointer';
+  | "byte"
+  | "password"
+  | "regex"
+  | "uuid"
+  | "email"
+  | "hostname"
+  | "idn-email"
+  | "idn-hostname"
+  | "iri"
+  | "iri-reference"
+  | "ipv4"
+  | "ipv6"
+  | "uri"
+  | "uri-reference"
+  | "uri-template"
+  | "url"
+  | "date-time"
+  | "date"
+  | "time"
+  | "duration"
+  | "json-pointer"
+  | "relative-json-pointer";
 export type Format<T extends Value> = string;
 type IsExactlyDate<T> = [T] extends [Date]
   ? [Date] extends [T]
@@ -61,8 +61,8 @@ type IsExactlyDate<T> = [T] extends [Date]
 export type TransformDates<T> = T extends unknown
   ? IsExactlyDate<NonNullable<T>> extends true
     ? [T] extends [null]
-      ? (string & Format<'date-time'>) | null
-      : string & Format<'date-time'>
+      ? (string & Format<"date-time">) | null
+      : string & Format<"date-time">
     : T extends (infer U)[]
       ? TransformDates<U>[]
       : T extends object
