@@ -61,4 +61,4 @@ yarn-error.log*
 *.fls
 *.synctex.gz
 
-apps/server/api/
+apps/server/api/index.mjs
