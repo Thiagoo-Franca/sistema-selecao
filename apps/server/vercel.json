@@ -1,4 +1,4 @@
 {
   "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index.js" }]
 }
