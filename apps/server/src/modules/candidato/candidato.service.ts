@@ -1,13 +1,13 @@
 import type { Context } from "hono";
-import type { AppVariables } from "../../types";
-import { err, ok, type AppResult } from "../../result";
+import type { AppVariables } from "../../types.js";
+import { err, ok, type AppResult } from "../../result.js";
 import {
   CandidatoDoutorado,
   CandidatoMestrado,
   Endereco,
   NotaDoutorado,
   NotaMestrado,
-} from "../../database";
+} from "../../database/schema.js";
 import { eq } from "drizzle-orm";
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown };

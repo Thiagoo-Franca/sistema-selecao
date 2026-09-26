@@ -1,9 +1,8 @@
-import * as bcrypt from "bcryptjs"
-import crypto from "crypto"
-import { and, asc, desc, eq, inArray, not, or } from "drizzle-orm"
-import { type Context } from "hono"
-import { z } from "zod"
-import type { InferResultType } from "../../database"
+import * as bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { and, asc, desc, eq, inArray, not, or } from "drizzle-orm";
+import { type Context } from "hono";
+import { z } from "zod";
 import {
   Bancas,
   bancasDocumentos,
@@ -18,83 +17,94 @@ import {
   teacherInvitations,
   Users,
   usuariosBancas,
-} from "../../database/schema"
-import { type AppResult, err, ok } from "../../result"
-import { createPasswordResetEmail, sendEmail } from "../../services/email.service"
-import { type AppVariables } from "../../types"
-import { createUserSchema, updateUserSchema } from "./usuario.schema"
+} from "../../database/schema.js";
+import { type AppResult, err, ok } from "../../result.js";
+import {
+  createPasswordResetEmail,
+  sendEmail,
+} from "../../services/email.service.js";
+import { type AppVariables } from "../../types.js";
+import { createUserSchema, updateUserSchema } from "./usuario.schema.js";
+import type { InferResultType } from "../../database/type-utils.js";
 
-type GetUserByIdError = { type: "user_not_found" } | { type: "database_error"; error: unknown }
+type GetUserByIdError =
+  { type: "user_not_found" } | { type: "database_error"; error: unknown };
 type UpdateUserError =
   | { type: "user_not_found" }
   | { type: "duplicate_username" }
-  | { type: "database_error"; error: unknown }
+  | { type: "database_error"; error: unknown };
 type DeleteUserError =
   | { type: "user_not_found" }
   | { type: "user_referenced_elsewhere" }
-  | { type: "database_error"; error: unknown }
-type UpdateUserRoleError = { type: "user_not_found" } | { type: "database_error"; error: unknown }
-type GetUserBancasError = { type: "user_not_found" } | { type: "database_error"; error: unknown }
+  | { type: "database_error"; error: unknown };
+type UpdateUserRoleError =
+  { type: "user_not_found" } | { type: "database_error"; error: unknown };
+type GetUserBancasError =
+  { type: "user_not_found" } | { type: "database_error"; error: unknown };
 
 export type UserAssociations = {
-  bancasAsOrientador: { id: number; tituloTrabalho: string; autor: string }[]
-  bancasAsAluno: { id: number; tituloTrabalho: string; autor: string }[]
-  membrosEmBancas: { bancaId: number; tituloTrabalho: string; role: string }[]
-}
+  bancasAsOrientador: { id: number; tituloTrabalho: string; autor: string }[];
+  bancasAsAluno: { id: number; tituloTrabalho: string; autor: string }[];
+  membrosEmBancas: { bancaId: number; tituloTrabalho: string; role: string }[];
+};
 
-type GetUserAssociationsError = { type: "user_not_found" } | { type: "database_error"; error: unknown }
+type GetUserAssociationsError =
+  { type: "user_not_found" } | { type: "database_error"; error: unknown };
 
-type GetAllUsersError = { type: "database_error"; error: unknown }
+type GetAllUsersError = { type: "database_error"; error: unknown };
 export const getAllUsers = async (
   c: Context<{ Variables: AppVariables }>,
 ): Promise<AppResult<SelectUser[], GetAllUsersError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
   try {
-    const allUsers = await dbInstance.select().from(Users).orderBy(asc(Users.nome))
+    const allUsers = await dbInstance
+      .select()
+      .from(Users)
+      .orderBy(asc(Users.nome));
 
-    return ok(allUsers)
+    return ok(allUsers);
   } catch (error) {
-    console.error("Error fetching all users:", error)
-    return err({ type: "database_error", error })
+    console.error("Error fetching all users:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
-type GetTeachersError = { type: "database_error"; error: unknown }
+type GetTeachersError = { type: "database_error"; error: unknown };
 export const getTeachers = async (
   c: Context<{ Variables: AppVariables }>,
 ): Promise<AppResult<SelectUser[], GetTeachersError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
   try {
     const teachers = await dbInstance
       .select()
       .from(Users)
       .where(and(or(eq(Users.role, "TEACHER"), eq(Users.role, "ADMIN"))))
-      .orderBy(Users.nome)
+      .orderBy(Users.nome);
 
-    return ok(teachers)
+    return ok(teachers);
   } catch (error) {
-    console.error("Error fetching teachers:", error)
-    return err({ type: "database_error", error })
+    console.error("Error fetching teachers:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
 type CreateUserError =
   | { type: "duplicate_email" }
   | { type: "duplicate_username" }
   | { type: "hashing_error"; error: unknown }
-  | { type: "database_error"; error: unknown }
+  | { type: "database_error"; error: unknown };
 export const createUser = async (
   c: Context<{ Variables: AppVariables }>,
   userData: z.infer<typeof createUserSchema>,
 ): Promise<AppResult<SelectUser, CreateUserError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
 
   try {
     const existingUser = await dbInstance
       .select({ id: Users.id })
       .from(Users)
       .where(eq(Users.email, userData.email))
-      .limit(1)
+      .limit(1);
 
     if (existingUser.length > 0) {
       // Resilience: if the email belongs to a stub created by a pending student
@@ -102,7 +112,10 @@ export const createUser = async (
       // mark the invitation as used. Avoids "duplicate_email" friction for users
       // who sign up directly instead of clicking the invite link.
       const [pendingInvite] = await dbInstance
-        .select({ id: studentInvitations.id, userId: studentInvitations.userId })
+        .select({
+          id: studentInvitations.id,
+          userId: studentInvitations.userId,
+        })
         .from(studentInvitations)
         .where(
           and(
@@ -111,16 +124,16 @@ export const createUser = async (
             eq(studentInvitations.userId, existingUser[0].id),
           ),
         )
-        .limit(1)
+        .limit(1);
 
       if (pendingInvite) {
-        let passwordHash: string
+        let passwordHash: string;
         try {
-          passwordHash = await bcrypt.hash(userData.password, 10)
+          passwordHash = await bcrypt.hash(userData.password, 10);
         } catch (hashError) {
-          return err({ type: "hashing_error", error: hashError })
+          return err({ type: "hashing_error", error: hashError });
         }
-        const now = new Date()
+        const now = new Date();
         const [claimed] = await dbInstance
           .update(Users)
           .set({
@@ -132,32 +145,35 @@ export const createUser = async (
             updatedAt: now,
           })
           .where(eq(Users.id, pendingInvite.userId))
-          .returning()
+          .returning();
 
         if (!claimed) {
-          return err({ type: "database_error", error: "Failed to claim invitation stub" })
+          return err({
+            type: "database_error",
+            error: "Failed to claim invitation stub",
+          });
         }
 
         await dbInstance
           .update(studentInvitations)
           .set({ status: "used" })
-          .where(eq(studentInvitations.id, pendingInvite.id))
+          .where(eq(studentInvitations.id, pendingInvite.id));
 
-        return ok(claimed)
+        return ok(claimed);
       }
 
-      return err({ type: "duplicate_email" })
+      return err({ type: "duplicate_email" });
     }
 
-    let passwordHash: string | undefined = undefined
+    let passwordHash: string | undefined = undefined;
     try {
-      passwordHash = await bcrypt.hash(userData.password, 10)
+      passwordHash = await bcrypt.hash(userData.password, 10);
     } catch (hashError) {
-      console.error("Password hashing failed during user creation:", hashError)
-      return err({ type: "hashing_error", error: hashError })
+      console.error("Password hashing failed during user creation:", hashError);
+      return err({ type: "hashing_error", error: hashError });
     }
 
-    const now = new Date()
+    const now = new Date();
     const [newUserResult] = await dbInstance
       .insert(Users)
       .values({
@@ -171,53 +187,66 @@ export const createUser = async (
         updatedAt: now,
         school: userData.school,
       })
-      .returning()
+      .returning();
 
     if (!newUserResult) {
-      console.error("Failed to insert user or retrieve data after insert.")
-      return err({ type: "database_error", error: "Insert operation did not return expected data." })
+      console.error("Failed to insert user or retrieve data after insert.");
+      return err({
+        type: "database_error",
+        error: "Insert operation did not return expected data.",
+      });
     }
 
-    return ok(newUserResult)
+    return ok(newUserResult);
   } catch (error) {
-    console.error("Database error during user creation:", error)
-    return err({ type: "database_error", error })
+    console.error("Database error during user creation:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
 export const getUserById = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
-): Promise<AppResult<Omit<SelectUser, "passwordHash" | "createdAt">, GetUserByIdError>> => {
-  const dbInstance = c.get("db")
+): Promise<
+  AppResult<Omit<SelectUser, "passwordHash" | "createdAt">, GetUserByIdError>
+> => {
+  const dbInstance = c.get("db");
   try {
-    const result = await dbInstance.select().from(Users).where(eq(Users.id, id)).limit(1)
-    const user = result[0]
+    const result = await dbInstance
+      .select()
+      .from(Users)
+      .where(eq(Users.id, id))
+      .limit(1);
+    const user = result[0];
 
     if (!user) {
-      return err({ type: "user_not_found" })
+      return err({ type: "user_not_found" });
     }
-    return ok(user)
+    return ok(user);
   } catch (error) {
-    console.error(`Error fetching user with ID ${id}:`, error)
-    return err({ type: "database_error", error })
+    console.error(`Error fetching user with ID ${id}:`, error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
-type UpdateUserInput = z.infer<typeof updateUserSchema.shape.body>
+type UpdateUserInput = z.infer<typeof updateUserSchema.shape.body>;
 
 export const updateUser = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
   updateData: UpdateUserInput,
 ): Promise<AppResult<SelectUser, UpdateUserError>> => {
-  const dbInstance = c.get("db")
-  const { nome, school, academicTitle, role } = updateData
+  const dbInstance = c.get("db");
+  const { nome, school, academicTitle, role } = updateData;
 
   try {
-    const userCheck = await dbInstance.select({ id: Users.id }).from(Users).where(eq(Users.id, id)).limit(1)
+    const userCheck = await dbInstance
+      .select({ id: Users.id })
+      .from(Users)
+      .where(eq(Users.id, id))
+      .limit(1);
     if (userCheck.length === 0) {
-      return err({ type: "user_not_found" })
+      return err({ type: "user_not_found" });
     }
 
     const [updatedUser] = await dbInstance
@@ -230,54 +259,72 @@ export const updateUser = async (
         updatedAt: new Date(),
       })
       .where(eq(Users.id, id))
-      .returning()
+      .returning();
 
     if (!updatedUser) {
-      console.error(`Update failed unexpectedly for user ID ${id} after existence check.`)
-      return err({ type: "user_not_found" })
+      console.error(
+        `Update failed unexpectedly for user ID ${id} after existence check.`,
+      );
+      return err({ type: "user_not_found" });
     }
 
-    return ok(updatedUser)
+    return ok(updatedUser);
   } catch (error) {
-    console.error(`Error updating user with ID ${id}:`, error)
+    console.error(`Error updating user with ID ${id}:`, error);
 
-    if (error instanceof Error && error.message.includes("UNIQUE constraint failed: usuarios.username")) {
-      return err({ type: "duplicate_username" })
+    if (
+      error instanceof Error &&
+      error.message.includes("UNIQUE constraint failed: usuarios.username")
+    ) {
+      return err({ type: "duplicate_username" });
     }
-    return err({ type: "database_error", error })
+    return err({ type: "database_error", error });
   }
-}
+};
 
 export const getUserAssociations = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
 ): Promise<AppResult<UserAssociations, GetUserAssociationsError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
   try {
-    const userCheck = await dbInstance.select({ id: Users.id }).from(Users).where(eq(Users.id, id)).limit(1)
+    const userCheck = await dbInstance
+      .select({ id: Users.id })
+      .from(Users)
+      .where(eq(Users.id, id))
+      .limit(1);
     if (userCheck.length === 0) {
-      return err({ type: "user_not_found" })
+      return err({ type: "user_not_found" });
     }
 
-    const [bancasAsOrientador, bancasAsAluno, membrosEmBancas] = await Promise.all([
-      dbInstance
-        .select({ id: Bancas.id, tituloTrabalho: Bancas.tituloTrabalho, autor: Bancas.autor })
-        .from(Bancas)
-        .where(eq(Bancas.orientadorId, id)),
-      dbInstance
-        .select({ id: Bancas.id, tituloTrabalho: Bancas.tituloTrabalho, autor: Bancas.autor })
-        .from(Bancas)
-        .where(eq(Bancas.alunoId, id)),
-      dbInstance
-        .select({
-          bancaId: usuariosBancas.bancaId,
-          tituloTrabalho: Bancas.tituloTrabalho,
-          role: usuariosBancas.role,
-        })
-        .from(usuariosBancas)
-        .innerJoin(Bancas, eq(usuariosBancas.bancaId, Bancas.id))
-        .where(eq(usuariosBancas.usuarioId, id)),
-    ])
+    const [bancasAsOrientador, bancasAsAluno, membrosEmBancas] =
+      await Promise.all([
+        dbInstance
+          .select({
+            id: Bancas.id,
+            tituloTrabalho: Bancas.tituloTrabalho,
+            autor: Bancas.autor,
+          })
+          .from(Bancas)
+          .where(eq(Bancas.orientadorId, id)),
+        dbInstance
+          .select({
+            id: Bancas.id,
+            tituloTrabalho: Bancas.tituloTrabalho,
+            autor: Bancas.autor,
+          })
+          .from(Bancas)
+          .where(eq(Bancas.alunoId, id)),
+        dbInstance
+          .select({
+            bancaId: usuariosBancas.bancaId,
+            tituloTrabalho: Bancas.tituloTrabalho,
+            role: usuariosBancas.role,
+          })
+          .from(usuariosBancas)
+          .innerJoin(Bancas, eq(usuariosBancas.bancaId, Bancas.id))
+          .where(eq(usuariosBancas.usuarioId, id)),
+      ]);
 
     return ok({
       bancasAsOrientador,
@@ -287,105 +334,134 @@ export const getUserAssociations = async (
         tituloTrabalho: m.tituloTrabalho,
         role: m.role,
       })),
-    })
+    });
   } catch (error) {
-    console.error(`Error fetching associations for user ID ${id}:`, error)
-    return err({ type: "database_error", error })
+    console.error(`Error fetching associations for user ID ${id}:`, error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
 export const deleteUser = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
   cascade = false,
 ): Promise<AppResult<void, DeleteUserError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
   try {
-    const userCheck = await dbInstance.select({ id: Users.id }).from(Users).where(eq(Users.id, id)).limit(1)
+    const userCheck = await dbInstance
+      .select({ id: Users.id })
+      .from(Users)
+      .where(eq(Users.id, id))
+      .limit(1);
     if (userCheck.length === 0) {
-      return err({ type: "user_not_found" })
+      return err({ type: "user_not_found" });
     }
 
     if (cascade) {
       const bancaIdsToDelete = await dbInstance
         .select({ id: Bancas.id })
         .from(Bancas)
-        .where(or(eq(Bancas.orientadorId, id), eq(Bancas.alunoId, id)))
+        .where(or(eq(Bancas.orientadorId, id), eq(Bancas.alunoId, id)));
 
-      const bancaIds = bancaIdsToDelete.map((b) => b.id)
+      const bancaIds = bancaIdsToDelete.map((b) => b.id);
 
       if (bancaIds.length > 0) {
-        await dbInstance.delete(bancasDocumentos).where(inArray(bancasDocumentos.bancaId, bancaIds))
-        await dbInstance.delete(invites).where(inArray(invites.bancaId, bancaIds))
-        await dbInstance.delete(usuariosBancas).where(inArray(usuariosBancas.bancaId, bancaIds))
-        await dbInstance.delete(Bancas).where(inArray(Bancas.id, bancaIds))
+        await dbInstance
+          .delete(bancasDocumentos)
+          .where(inArray(bancasDocumentos.bancaId, bancaIds));
+        await dbInstance
+          .delete(invites)
+          .where(inArray(invites.bancaId, bancaIds));
+        await dbInstance
+          .delete(usuariosBancas)
+          .where(inArray(usuariosBancas.bancaId, bancaIds));
+        await dbInstance.delete(Bancas).where(inArray(Bancas.id, bancaIds));
       }
 
-      await dbInstance.delete(usuariosBancas).where(eq(usuariosBancas.usuarioId, id))
-      await dbInstance.delete(invites).where(eq(invites.userId, id))
-      await dbInstance.delete(resetPasswords).where(eq(resetPasswords.userId, id))
-      await dbInstance.delete(sessions).where(eq(sessions.userId, id))
-      await dbInstance.delete(featureRequestVotes).where(eq(featureRequestVotes.userId, id))
-      await dbInstance.delete(featureRequests).where(eq(featureRequests.userId, id))
-      await dbInstance.delete(feedbackSubmissions).where(eq(feedbackSubmissions.userId, id))
+      await dbInstance
+        .delete(usuariosBancas)
+        .where(eq(usuariosBancas.usuarioId, id));
+      await dbInstance.delete(invites).where(eq(invites.userId, id));
+      await dbInstance
+        .delete(resetPasswords)
+        .where(eq(resetPasswords.userId, id));
+      await dbInstance.delete(sessions).where(eq(sessions.userId, id));
+      await dbInstance
+        .delete(featureRequestVotes)
+        .where(eq(featureRequestVotes.userId, id));
+      await dbInstance
+        .delete(featureRequests)
+        .where(eq(featureRequests.userId, id));
+      await dbInstance
+        .delete(feedbackSubmissions)
+        .where(eq(feedbackSubmissions.userId, id));
       await dbInstance
         .delete(teacherInvitations)
-        .where(or(eq(teacherInvitations.userId, id), eq(teacherInvitations.invitedBy, id)))
+        .where(
+          or(
+            eq(teacherInvitations.userId, id),
+            eq(teacherInvitations.invitedBy, id),
+          ),
+        );
     }
 
-    await dbInstance.delete(Users).where(eq(Users.id, id))
+    await dbInstance.delete(Users).where(eq(Users.id, id));
 
-    return ok(undefined)
+    return ok(undefined);
   } catch (error) {
-    console.error(`Error deleting user with ID ${id}:`, error)
+    console.error(`Error deleting user with ID ${id}:`, error);
 
     const isFkError =
       error instanceof Error &&
       (error.message.includes("FOREIGN KEY constraint failed") ||
-        error.message.includes("violates foreign key constraint"))
+        error.message.includes("violates foreign key constraint"));
     if (isFkError) {
-      return err({ type: "user_referenced_elsewhere" })
+      return err({ type: "user_referenced_elsewhere" });
     }
-    return err({ type: "database_error", error })
+    return err({ type: "database_error", error });
   }
-}
+};
 
 export const updateUserRole = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
   newRole: "STUDENT" | "TEACHER" | "ADMIN",
 ): Promise<AppResult<{ id: number; role: string }, UpdateUserRoleError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
   try {
-    const userCheck = await dbInstance.select({ id: Users.id }).from(Users).where(eq(Users.id, id)).limit(1)
+    const userCheck = await dbInstance
+      .select({ id: Users.id })
+      .from(Users)
+      .where(eq(Users.id, id))
+      .limit(1);
     if (userCheck.length === 0) {
-      return err({ type: "user_not_found" })
+      return err({ type: "user_not_found" });
     }
 
     const updatedUserResult = await dbInstance
       .update(Users)
       .set({ role: newRole, updatedAt: new Date() })
       .where(eq(Users.id, id))
-      .returning({ id: Users.id, role: Users.role })
+      .returning({ id: Users.id, role: Users.role });
 
-    const updatedUser = updatedUserResult[0]
+    const updatedUser = updatedUserResult[0];
     if (!updatedUser) {
-      console.error(`Update role failed unexpectedly for user ID ${id}.`)
-      return err({ type: "user_not_found" })
+      console.error(`Update role failed unexpectedly for user ID ${id}.`);
+      return err({ type: "user_not_found" });
     }
 
-    return ok(updatedUser)
+    return ok(updatedUser);
   } catch (error) {
-    console.error(`Error updating role for user ID ${id}:`, error)
-    return err({ type: "database_error", error })
+    console.error(`Error updating role for user ID ${id}:`, error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
 type ChangePasswordServiceError =
   | { type: "user_not_found" }
   | { type: "invalid_current_password" }
   | { type: "hashing_error" }
-  | { type: "database_error" }
+  | { type: "database_error" };
 
 export const changeUserPassword = async (
   c: Context<{ Variables: AppVariables }>,
@@ -393,7 +469,7 @@ export const changeUserPassword = async (
   currentPassword: string,
   newPassword: string,
 ): Promise<AppResult<void, ChangePasswordServiceError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
 
   try {
     const [user] = await dbInstance
@@ -403,23 +479,29 @@ export const changeUserPassword = async (
       })
       .from(Users)
       .where(eq(Users.id, userId))
-      .limit(1)
+      .limit(1);
 
     if (!user) {
-      return err({ type: "user_not_found" })
+      return err({ type: "user_not_found" });
     }
 
-    const passwordIsValid = await bcrypt.compare(currentPassword, user.passwordHash)
+    const passwordIsValid = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash,
+    );
     if (!passwordIsValid) {
-      return err({ type: "invalid_current_password" })
+      return err({ type: "invalid_current_password" });
     }
 
-    let newPasswordHash: string
+    let newPasswordHash: string;
     try {
-      newPasswordHash = await bcrypt.hash(newPassword, 10)
+      newPasswordHash = await bcrypt.hash(newPassword, 10);
     } catch (hashError) {
-      console.error("Password hashing failed during password change:", hashError)
-      return err({ type: "hashing_error" })
+      console.error(
+        "Password hashing failed during password change:",
+        hashError,
+      );
+      return err({ type: "hashing_error" });
     }
 
     await dbInstance
@@ -428,38 +510,45 @@ export const changeUserPassword = async (
         passwordHash: newPasswordHash,
         updatedAt: new Date(),
       })
-      .where(eq(Users.id, userId))
+      .where(eq(Users.id, userId));
 
-    return ok(undefined)
+    return ok(undefined);
   } catch (error) {
-    console.error("Error changing user password:", error)
-    return err({ type: "database_error" })
+    console.error("Error changing user password:", error);
+    return err({ type: "database_error" });
   }
-}
+};
 
-type UserBancaWithRole = InferResultType<"Bancas", { curso: true; membros: { with: { usuario: true } } }> & {
-  userRole: "orientador" | "coorientador" | "aluno" | "avaliador"
-}
+type UserBancaWithRole = InferResultType<
+  "Bancas",
+  { curso: true; membros: { with: { usuario: true } } }
+> & {
+  userRole: "orientador" | "coorientador" | "aluno" | "avaliador";
+};
 
 export const getUserBancas = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
 ): Promise<AppResult<UserBancaWithRole[], GetUserBancasError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
   try {
     // Check if user exists
-    const userCheck = await dbInstance.select({ id: Users.id }).from(Users).where(eq(Users.id, id)).limit(1)
+    const userCheck = await dbInstance
+      .select({ id: Users.id })
+      .from(Users)
+      .where(eq(Users.id, id))
+      .limit(1);
     if (userCheck.length === 0) {
-      return err({ type: "user_not_found" })
+      return err({ type: "user_not_found" });
     }
 
     // Get current viewer's role (admin or not)
-    let isAdmin = false
-    const payload = c.get("jwtPayload")
+    let isAdmin = false;
+    const payload = c.get("jwtPayload");
     if (payload) {
-      const viewerResult = await getUserById(c, Number(payload.sub))
+      const viewerResult = await getUserById(c, Number(payload.sub));
       if (viewerResult.ok) {
-        isAdmin = viewerResult.data.role === "ADMIN"
+        isAdmin = viewerResult.data.role === "ADMIN";
       }
     }
 
@@ -470,19 +559,21 @@ export const getUserBancas = async (
         userRole: usuariosBancas.role,
       })
       .from(usuariosBancas)
-      .where(eq(usuariosBancas.usuarioId, id))
+      .where(eq(usuariosBancas.usuarioId, id));
 
     if (userBancasRelations.length === 0) {
-      return ok([])
+      return ok([]);
     }
 
-    const bancaIds = userBancasRelations.map((r) => r.bancaId)
-    const roleMap = new Map(userBancasRelations.map((r) => [r.bancaId, r.userRole]))
+    const bancaIds = userBancasRelations.map((r) => r.bancaId);
+    const roleMap = new Map(
+      userBancasRelations.map((r) => [r.bancaId, r.userRole]),
+    );
 
     // Build visibility filter: admins see all, non-admins see only visible
     const whereConditions = isAdmin
       ? inArray(Bancas.id, bancaIds)
-      : and(inArray(Bancas.id, bancaIds), eq(Bancas.visible, true))
+      : and(inArray(Bancas.id, bancaIds), eq(Bancas.visible, true));
 
     // Fetch bancas with relationships
     const bancas = await dbInstance.query.Bancas.findMany({
@@ -496,28 +587,32 @@ export const getUserBancas = async (
         },
       },
       orderBy: desc(Bancas.dataRealizacao),
-    })
+    });
 
     // Add user's role to each banca
     const bancasWithRole: UserBancaWithRole[] = bancas.map((banca) => ({
       ...banca,
-      userRole: roleMap.get(banca.id) as "orientador" | "coorientador" | "aluno" | "avaliador",
-    }))
+      userRole: roleMap.get(banca.id) as
+        "orientador" | "coorientador" | "aluno" | "avaliador",
+    }));
 
-    return ok(bancasWithRole)
+    return ok(bancasWithRole);
   } catch (error) {
-    console.error(`Error fetching bancas for user ID ${id}:`, error)
-    return err({ type: "database_error", error })
+    console.error(`Error fetching bancas for user ID ${id}:`, error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
-type GetStudentsError = { type: "database_error"; error: unknown }
+type GetStudentsError = { type: "database_error"; error: unknown };
 export const getStudents = async (
   c: Context<{ Variables: AppVariables }>,
 ): Promise<
-  AppResult<Pick<SelectUser, "id" | "nome" | "matricula" | "academicTitle" | "email">[], GetStudentsError>
+  AppResult<
+    Pick<SelectUser, "id" | "nome" | "matricula" | "academicTitle" | "email">[],
+    GetStudentsError
+  >
 > => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
   try {
     const students = await dbInstance
       .select({
@@ -530,25 +625,25 @@ export const getStudents = async (
       })
       .from(Users)
       .where(eq(Users.role, "STUDENT"))
-      .orderBy(asc(Users.nome))
+      .orderBy(asc(Users.nome));
 
-    return ok(students)
+    return ok(students);
   } catch (error) {
-    console.error("Error fetching students:", error)
-    return err({ type: "database_error", error })
+    console.error("Error fetching students:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
 type RequestPasswordResetError =
   | { type: "user_not_found" }
   | { type: "database_error"; error: unknown }
-  | { type: "email_error" }
+  | { type: "email_error" };
 
 export const requestPasswordReset = async (
   c: Context<{ Variables: AppVariables }>,
   email: string,
 ): Promise<AppResult<void, RequestPasswordResetError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
 
   try {
     // Check if user exists
@@ -556,60 +651,60 @@ export const requestPasswordReset = async (
       .select({ id: Users.id, nome: Users.nome })
       .from(Users)
       .where(eq(Users.email, email))
-      .limit(1)
+      .limit(1);
 
     if (user.length === 0) {
-      return err({ type: "user_not_found" })
+      return err({ type: "user_not_found" });
     }
 
-    const userData = user[0]
+    const userData = user[0];
 
     // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex")
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     // Store reset token
     await dbInstance.insert(resetPasswords).values({
       userId: userData.id,
       resetPasswordHash: resetToken,
       expiresAt,
-    })
+    });
 
     // Send reset email
-    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password/${resetToken}`
-    const emailHtml = createPasswordResetEmail(userData.nome, resetUrl)
+    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password/${resetToken}`;
+    const emailHtml = createPasswordResetEmail(userData.nome, resetUrl);
 
     const emailResult = await sendEmail({
       to: email,
       subject: "Recuperação de Senha - Sistema Banca",
       html: emailHtml,
-    })
+    });
 
     if (!emailResult.ok) {
-      console.error("Failed to send password reset email:", emailResult.error)
-      return err({ type: "email_error" })
+      console.error("Failed to send password reset email:", emailResult.error);
+      return err({ type: "email_error" });
     }
 
-    return ok(undefined)
+    return ok(undefined);
   } catch (error) {
-    console.error("Error requesting password reset:", error)
-    return err({ type: "database_error", error })
+    console.error("Error requesting password reset:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
 type ResetPasswordError =
   | { type: "invalid_token" }
   | { type: "token_expired" }
   | { type: "user_not_found" }
   | { type: "hashing_error"; error: unknown }
-  | { type: "database_error"; error: unknown }
+  | { type: "database_error"; error: unknown };
 
 export const resetPassword = async (
   c: Context<{ Variables: AppVariables }>,
   token: string,
   newPassword: string,
 ): Promise<AppResult<void, ResetPasswordError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
 
   try {
     // Find reset token
@@ -621,29 +716,31 @@ export const resetPassword = async (
       })
       .from(resetPasswords)
       .where(eq(resetPasswords.resetPasswordHash, token))
-      .limit(1)
+      .limit(1);
 
     if (resetRecord.length === 0) {
-      return err({ type: "invalid_token" })
+      return err({ type: "invalid_token" });
     }
 
-    const reset = resetRecord[0]
+    const reset = resetRecord[0];
 
     // Check if token is expired
     if (reset.expiresAt < new Date()) {
       // Clean up expired token
-      await dbInstance.delete(resetPasswords).where(eq(resetPasswords.id, reset.id))
+      await dbInstance
+        .delete(resetPasswords)
+        .where(eq(resetPasswords.id, reset.id));
 
-      return err({ type: "token_expired" })
+      return err({ type: "token_expired" });
     }
 
     // Hash new password
-    let passwordHash: string
+    let passwordHash: string;
     try {
-      passwordHash = await bcrypt.hash(newPassword, 10)
+      passwordHash = await bcrypt.hash(newPassword, 10);
     } catch (hashError) {
-      console.error("Password hashing failed during reset:", hashError)
-      return err({ type: "hashing_error", error: hashError })
+      console.error("Password hashing failed during reset:", hashError);
+      return err({ type: "hashing_error", error: hashError });
     }
 
     // Update user password
@@ -653,33 +750,42 @@ export const resetPassword = async (
         passwordHash,
         updatedAt: new Date(),
       })
-      .where(eq(Users.id, reset.userId))
+      .where(eq(Users.id, reset.userId));
 
     // Clean up used token
-    await dbInstance.delete(resetPasswords).where(eq(resetPasswords.id, reset.id))
+    await dbInstance
+      .delete(resetPasswords)
+      .where(eq(resetPasswords.id, reset.id));
 
-    return ok(undefined)
+    return ok(undefined);
   } catch (error) {
-    console.error("Error resetting password:", error)
-    return err({ type: "database_error", error })
+    console.error("Error resetting password:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
-type GetStudentsAvailableForBancaError = { type: "database_error"; error: unknown }
-export type StudentAvailableForBanca = SelectUser & { invitationPending: boolean }
+type GetStudentsAvailableForBancaError = {
+  type: "database_error";
+  error: unknown;
+};
+export type StudentAvailableForBanca = SelectUser & {
+  invitationPending: boolean;
+};
 
 export const getStudentsAvailableForBanca = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<StudentAvailableForBanca[], GetStudentsAvailableForBancaError>> => {
-  const dbInstance = c.get("db")
+): Promise<
+  AppResult<StudentAvailableForBanca[], GetStudentsAvailableForBancaError>
+> => {
+  const dbInstance = c.get("db");
   try {
     const studentsWithBancas = await dbInstance
       .select({ id: Users.id })
       .from(Users)
       .innerJoin(usuariosBancas, eq(Users.id, usuariosBancas.usuarioId))
-      .where(and(eq(Users.role, "STUDENT"), eq(usuariosBancas.role, "aluno")))
+      .where(and(eq(Users.role, "STUDENT"), eq(usuariosBancas.role, "aluno")));
 
-    const studentIdsWithBancas = studentsWithBancas.map((s) => s.id)
+    const studentIdsWithBancas = studentsWithBancas.map((s) => s.id);
 
     const availableStudents = await dbInstance
       .select()
@@ -687,22 +793,27 @@ export const getStudentsAvailableForBanca = async (
       .where(
         and(
           eq(Users.role, "STUDENT"),
-          studentIdsWithBancas.length > 0 ? not(inArray(Users.id, studentIdsWithBancas)) : undefined,
+          studentIdsWithBancas.length > 0
+            ? not(inArray(Users.id, studentIdsWithBancas))
+            : undefined,
         ),
       )
-      .orderBy(asc(Users.nome))
+      .orderBy(asc(Users.nome));
 
     const pendingInvites = await dbInstance
       .select({ userId: studentInvitations.userId })
       .from(studentInvitations)
-      .where(eq(studentInvitations.status, "pending"))
-    const pendingIds = new Set(pendingInvites.map((p) => p.userId))
+      .where(eq(studentInvitations.status, "pending"));
+    const pendingIds = new Set(pendingInvites.map((p) => p.userId));
 
     return ok(
-      availableStudents.map((s) => ({ ...s, invitationPending: pendingIds.has(s.id) })),
-    )
+      availableStudents.map((s) => ({
+        ...s,
+        invitationPending: pendingIds.has(s.id),
+      })),
+    );
   } catch (error) {
-    console.error("Error fetching students available for banca:", error)
-    return err({ type: "database_error", error })
+    console.error("Error fetching students available for banca:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
