@@ -3,7 +3,7 @@ import type {
   DBQueryConfig,
   ExtractTablesWithRelations,
 } from "drizzle-orm";
-import * as schema from "./schema.js";
+import * as schema from "./schema";
 
 type Schema = typeof schema;
 type TSchema = ExtractTablesWithRelations<Schema>;
