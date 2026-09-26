@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
-import { db } from "../src/database";
-import { app } from "../src/index";
+import { db } from "../src/database/index.js";
+import { app } from "../src/index.js";
 import type { AppVariables } from "../src/types";
 
 const TrueDeps = createMiddleware<{ Variables: AppVariables }>(
