@@ -1,5 +1,20 @@
-export { createBaseEmailTemplate, type BaseEmailProps } from './base.template'
-export { createTeacherInvitationEmail, type TeacherInvitationEmailProps } from './teacher-invitation.template'
-export { createStudentInvitationEmail, type StudentInvitationEmailProps } from './student-invitation.template'
-export { createPasswordResetEmail, type PasswordResetEmailProps } from './password-reset.template'
-export { createCalendarInviteEmail, type CalendarInviteEmailProps } from './calendar-invite.template'
+export {
+  createBaseEmailTemplate,
+  type BaseEmailProps,
+} from "./base.template.js";
+export {
+  createTeacherInvitationEmail,
+  type TeacherInvitationEmailProps,
+} from "./teacher-invitation.template.js";
+export {
+  createStudentInvitationEmail,
+  type StudentInvitationEmailProps,
+} from "./student-invitation.template.js";
+export {
+  createPasswordResetEmail,
+  type PasswordResetEmailProps,
+} from "./password-reset.template.js";
+export {
+  createCalendarInviteEmail,
+  type CalendarInviteEmailProps,
+} from "./calendar-invite.template.js";

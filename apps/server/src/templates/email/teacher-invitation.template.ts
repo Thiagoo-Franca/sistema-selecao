@@ -1,12 +1,14 @@
-import { createBaseEmailTemplate } from './base.template'
+import { createBaseEmailTemplate } from "./base.template.js";
 
 export interface TeacherInvitationEmailProps {
-  nome: string
-  invitationUrl: string
+  nome: string;
+  invitationUrl: string;
 }
 
-export const createTeacherInvitationEmail = (props: TeacherInvitationEmailProps): string => {
-  const { nome, invitationUrl } = props
+export const createTeacherInvitationEmail = (
+  props: TeacherInvitationEmailProps,
+): string => {
+  const { nome, invitationUrl } = props;
 
   const content = `
     <h2>Olá, ${nome}!</h2>
@@ -14,13 +16,13 @@ export const createTeacherInvitationEmail = (props: TeacherInvitationEmailProps)
     <p>Para aceitar o convite e completar seu cadastro, clique no botão abaixo:</p>
     <p><strong>Este convite expira em 7 dias.</strong></p>
     <p>Se você não solicitou este convite, pode ignorar este email.</p>
-  `
+  `;
 
   return createBaseEmailTemplate({
-    title: 'Convite para Professor',
+    title: "Convite para Professor",
     content,
-    buttonText: 'Aceitar Convite',
+    buttonText: "Aceitar Convite",
     buttonUrl: invitationUrl,
-    variant: 'default'
-  })
-}
+    variant: "default",
+  });
+};
