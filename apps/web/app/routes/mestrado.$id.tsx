@@ -8,7 +8,7 @@ import { Header } from "@/components/layout/Header"
 import { ArrowLeft, Loader2, Table } from "lucide-react"
 import { TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { CandidatoMestrado } from "./_index"
-import { formatDate } from "./banca.$id"
+// import { formatDate } from "./banca.$id"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -17,6 +17,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
+import type { Endereco, NotaMestrado } from "@tcc/server"
 
 type CandidatoMestradoComRelacoes = typeof CandidatoMestrado.$inferSelect & {
   endereco: typeof Endereco.$inferSelect | null
@@ -28,6 +29,18 @@ function formatBoolean(valor: boolean) {
     return "Sim"
   }
   return "Não"
+}
+
+export function formatDate(dateString: string | null | undefined | Date): string {
+  if (!dateString) {
+    return "Não informado"
+  }
+  const date = new Date(dateString)
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
 }
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Candidato de mestrado" }]

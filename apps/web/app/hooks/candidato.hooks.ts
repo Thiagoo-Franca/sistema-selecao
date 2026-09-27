@@ -3,7 +3,6 @@ import apiClient from "@/services/apiClient"
 import { rpcReturn } from "@/lib/utils"
 import type { CandidatoDoutorado, CandidatoMestrado } from "@/routes/_index"
 import { toast } from "sonner"
-import type { NotaDoutorado, NotaMestrado } from "@/routes/dashboard"
 
 export const useCandidatos = () => {
   return useQuery({
@@ -70,12 +69,12 @@ export const useUpdateCandidatoDoutoradoNota = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: { id: string | number; body: Partial<NotaDoutorado> }) => {
+    mutationFn: async (data: { id: string | number; body: Partial<NotaDoutorado | any> }) => {
       const response = await apiClient.candidato.doutorado[":id"].nota.$patch({
         param: { id: String(data.id) },
         json: data.body,
       })
-      return rpcReturn(response) as unknown as NotaDoutorado
+      return rpcReturn(response) as unknown as NotaDoutorado | any
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["candidatos"] })
@@ -114,12 +113,12 @@ export const useUpdateCandidatoMestradoNota = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: { id: string | number; body: Partial<NotaMestrado> }) => {
+    mutationFn: async (data: { id: string | number; body: Partial<NotaMestrado | any> }) => {
       const response = await apiClient.candidato.mestrado[":id"].nota.$patch({
         param: { id: String(data.id) },
         json: data.body,
       })
-      return rpcReturn(response) as unknown as NotaMestrado
+      return rpcReturn(response) as unknown as NotaMestrado | any
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["candidatos"] })

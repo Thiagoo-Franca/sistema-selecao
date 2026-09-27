@@ -8,7 +8,6 @@ import { Header } from "@/components/layout/Header"
 import { ArrowLeft, Loader2, Table } from "lucide-react"
 import { TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { CandidatoMestrado } from "./_index"
-import { formatDate } from "./banca.$id"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -17,6 +16,8 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
+import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
+import { formatDate } from "./mestrado.$id"
 
 function formatBoolean(valor: boolean) {
   if (valor) {
@@ -74,7 +75,7 @@ export default function CandidatoDoutoradoPage() {
     })
   }
 
-  const candidato: CandidatoDoutorado | null | undefined = candidatoQuery.data
+  const candidato: CandidatoDoutoradoComRelacoes | null | undefined = candidatoQuery.data
   console.log("Candidato: ", candidato)
 
   //const orientador = banca?.membros?.find((m) => m.role === "orientador")?.usuario
