@@ -8,10 +8,10 @@ import {
   type InsertCurso,
   type InsertUser,
   type InsertUsuarioBanca,
-} from "../database"
+} from "../database/index.js";
 
 export const seedTestData = async (db: Database) => {
-  console.log("🌱 Seeding test data...")
+  console.log("🌱 Seeding test data...");
 
   try {
     // Seed Cursos
@@ -26,13 +26,14 @@ export const seedTestData = async (db: Database) => {
         nome: "Sistemas de Informação",
         sigla: "BSI",
       },
-    ]
+    ];
 
-    await db.insert(Cursos).values(cursosData).onConflictDoNothing()
-    console.log("✅ Cursos seeded")
+    await db.insert(Cursos).values(cursosData).onConflictDoNothing();
+    console.log("✅ Cursos seeded");
 
     // Seed Users
-    const adminPasswordHash = "$2b$10$Tc0O8gfKK5QQNCEOaZzQ2uFaekULT0N3mWxaZ/aVp0q29zNBYN79S"
+    const adminPasswordHash =
+      "$2b$10$Tc0O8gfKK5QQNCEOaZzQ2uFaekULT0N3mWxaZ/aVp0q29zNBYN79S";
     const usersData: InsertUser[] = [
       {
         id: 1,
@@ -82,18 +83,18 @@ export const seedTestData = async (db: Database) => {
         updatedAt: new Date(),
         role: "TEACHER",
       },
-    ]
+    ];
 
-    await db.insert(Users).values(usersData).onConflictDoNothing()
-    console.log("✅ Users seeded")
+    await db.insert(Users).values(usersData).onConflictDoNothing();
+    console.log("✅ Users seeded");
 
     // Seed Bancas - Some upcoming and some past
-    const now = new Date()
-    const futureDate1 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-    const futureDate2 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000) // 14 days from now
-    const futureDate3 = new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000) // 21 days from now
-    const pastDate1 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) // 7 days ago
-    const pastDate2 = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000) // 14 days ago
+    const now = new Date();
+    const futureDate1 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+    const futureDate2 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 days from now
+    const futureDate3 = new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000); // 21 days from now
+    const pastDate1 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
+    const pastDate2 = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000); // 14 days ago
 
     const bancasData: InsertBanca[] = [
       // Upcoming bancas
@@ -108,8 +109,10 @@ export const seedTestData = async (db: Database) => {
         matricula: "STU123",
         modalidade: "remoto",
         tituloTrabalho: "Sistema de Recomendação para Testes E2E",
-        resumo: "Este trabalho apresenta um sistema de recomendação para testes automatizados end-to-end.",
-        abstract: "This work presents a recommendation system for automated end-to-end tests.",
+        resumo:
+          "Este trabalho apresenta um sistema de recomendação para testes automatizados end-to-end.",
+        abstract:
+          "This work presents a recommendation system for automated end-to-end tests.",
         palavrasChave: "testes, e2e, sistemas de recomendação",
         dataRealizacao: futureDate1,
         notaFinal: null,
@@ -146,8 +149,10 @@ export const seedTestData = async (db: Database) => {
         matricula: "STU789",
         modalidade: "remoto",
         tituloTrabalho: "Desenvolvimento de API RESTful com Node.js",
-        resumo: "Desenvolvimento de uma API RESTful moderna usando Node.js e TypeScript.",
-        abstract: "Development of a modern RESTful API using Node.js and TypeScript.",
+        resumo:
+          "Desenvolvimento de uma API RESTful moderna usando Node.js e TypeScript.",
+        abstract:
+          "Development of a modern RESTful API using Node.js and TypeScript.",
         palavrasChave: "api, nodejs, typescript",
         dataRealizacao: futureDate3,
         notaFinal: null,
@@ -193,40 +198,57 @@ export const seedTestData = async (db: Database) => {
         local: "https://meet.google.com/test-789",
         visible: true,
       },
-    ]
+    ];
 
-    const insertedBancas = await db.insert(Bancas).values(bancasData).onConflictDoNothing().returning()
+    const insertedBancas = await db
+      .insert(Bancas)
+      .values(bancasData)
+      .onConflictDoNothing()
+      .returning();
     console.log(
       "✅ Bancas seeded:",
-      insertedBancas.map((b) => b.id)
-    )
+      insertedBancas.map((b) => b.id),
+    );
 
     // Use the actual IDs returned from the database
-    const bancaIds = insertedBancas.map((b) => b.id)
+    const bancaIds = insertedBancas.map((b) => b.id);
 
     // Seed UsuarioBanca relations - only for successfully inserted bancas
-    const usuariosBancasData: InsertUsuarioBanca[] = []
- 
+    const usuariosBancasData: InsertUsuarioBanca[] = [];
+
     // Add relations for each successfully inserted banca
     bancaIds.forEach((bancaId, index) => {
       if (bancaId) {
         usuariosBancasData.push(
-          { usuarioId: 2, bancaId: bancaId, role: "orientador", nota: index >= 3 ? "9.5" : null },
-          { usuarioId: 4, bancaId: bancaId, role: "avaliador", nota: index >= 3 ? "9.0" : null }
-        )
+          {
+            usuarioId: 2,
+            bancaId: bancaId,
+            role: "orientador",
+            nota: index >= 3 ? "9.5" : null,
+          },
+          {
+            usuarioId: 4,
+            bancaId: bancaId,
+            role: "avaliador",
+            nota: index >= 3 ? "9.0" : null,
+          },
+        );
       }
-    })
+    });
 
-    await db.insert(usuariosBancas).values(usuariosBancasData).onConflictDoNothing()
-    console.log("✅ UsuarioBanca relations seeded")
+    await db
+      .insert(usuariosBancas)
+      .values(usuariosBancasData)
+      .onConflictDoNothing();
+    console.log("✅ UsuarioBanca relations seeded");
 
-    console.log("✅ Test data seeded successfully!")
-    console.log(`   - ${cursosData.length} cursos`)
-    console.log(`   - ${usersData.length} users`)
-    console.log(`   - ${bancasData.length} bancas`)
-    console.log(`   - ${usuariosBancasData.length} usuario-banca relations`)
+    console.log("✅ Test data seeded successfully!");
+    console.log(`   - ${cursosData.length} cursos`);
+    console.log(`   - ${usersData.length} users`);
+    console.log(`   - ${bancasData.length} bancas`);
+    console.log(`   - ${usuariosBancasData.length} usuario-banca relations`);
   } catch (error) {
-    console.error("❌ Error seeding test data:", error)
-    throw error
+    console.error("❌ Error seeding test data:", error);
+    throw error;
   }
-}
+};

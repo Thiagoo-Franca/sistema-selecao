@@ -1,27 +1,27 @@
-import { serve } from "@hono/node-server"
-import { getFakeDb, fakeDeps } from "./tests/utils"
-import { app } from "./index"
-import { seedTestData } from "./tests/seed-test-data"
+import { serve } from "@hono/node-server";
+import { getFakeDb, fakeDeps } from "./tests/utils.js";
+import { app } from "./index.js";
+import { seedTestData } from "./tests/seed-test-data.js";
 
 const startTestServer = async () => {
   // Get fake database for testing
-  const fakeDb = await getFakeDb()
-  
+  const fakeDb = await getFakeDb();
+
   // Seed test data
-  await seedTestData(fakeDb)
-  
+  await seedTestData(fakeDb);
+
   // Create test dependencies middleware
-  const testDeps = fakeDeps(fakeDb)
+  const testDeps = fakeDeps(fakeDb);
 
-  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 9000
-  
-  serve({ 
-    fetch: app(testDeps).fetch, 
-    port: PORT 
-  })
-  
-  console.log(` ✅ Test server starting on port ${PORT}...`)
-  console.log(` 📊 Using fake database for testing`)
-}
+  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 9000;
 
-startTestServer().catch(console.error)
+  serve({
+    fetch: app(testDeps).fetch,
+    port: PORT,
+  });
+
+  console.log(` ✅ Test server starting on port ${PORT}...`);
+  console.log(` 📊 Using fake database for testing`);
+};
+
+startTestServer().catch(console.error);

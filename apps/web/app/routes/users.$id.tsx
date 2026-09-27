@@ -9,7 +9,6 @@ import { useUser } from "@/services/useUser"
 import { ArrowLeft, Mail, School, User, GraduationCap, Hash } from "lucide-react"
 import { useNavigate, useParams } from "react-router"
 import { match } from "ts-pattern"
-import { UserBancaList } from "@/components/users/UserBancaList"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Perfil do Usuário" }]
 
@@ -171,9 +170,11 @@ export default function UserProfilePage() {
                   : "Bancas onde este usuário participou"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          {/*
+           <CardContent>
             <UserBancaList bancas={bancas} userRole={user.role} isAdmin={isAdmin} />
           </CardContent>
+  */}
         </Card>
       </div>
     </div>

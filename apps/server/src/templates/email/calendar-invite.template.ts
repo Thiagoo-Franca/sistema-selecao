@@ -1,18 +1,20 @@
-import { createBaseEmailTemplate } from "./base.template"
+import { createBaseEmailTemplate } from "./base.template.js";
 
 export interface CalendarInviteEmailProps {
-  recipientName?: string
-  tituloTrabalho: string
-  autor: string
-  orientador?: string
-  curso?: string
-  dataRealizacao: string
-  local: string
-  periodoAcademico: string
-  turma?: string
+  recipientName?: string;
+  tituloTrabalho: string;
+  autor: string;
+  orientador?: string;
+  curso?: string;
+  dataRealizacao: string;
+  local: string;
+  periodoAcademico: string;
+  turma?: string;
 }
 
-export const createCalendarInviteEmail = (props: CalendarInviteEmailProps): string => {
+export const createCalendarInviteEmail = (
+  props: CalendarInviteEmailProps,
+): string => {
   const {
     recipientName,
     tituloTrabalho,
@@ -22,10 +24,10 @@ export const createCalendarInviteEmail = (props: CalendarInviteEmailProps): stri
     dataRealizacao,
     local,
     periodoAcademico,
-    turma
-  } = props
+    turma,
+  } = props;
 
-  const greeting = recipientName ? `Olá, ${recipientName}!` : 'Olá!'
+  const greeting = recipientName ? `Olá, ${recipientName}!` : "Olá!";
 
   const content = `
     <h2>Convite para Defesa de TCC</h2>
@@ -41,9 +43,9 @@ export const createCalendarInviteEmail = (props: CalendarInviteEmailProps): stri
       
       <p style="margin: 8px 0;"><strong>Autor:</strong> ${autor}</p>
       
-      ${orientador ? `<p style="margin: 8px 0;"><strong>Orientador:</strong> ${orientador}</p>` : ''}
+      ${orientador ? `<p style="margin: 8px 0;"><strong>Orientador:</strong> ${orientador}</p>` : ""}
       
-      ${curso ? `<p style="margin: 8px 0;"><strong>Curso:</strong> ${curso}</p>` : ''}
+      ${curso ? `<p style="margin: 8px 0;"><strong>Curso:</strong> ${curso}</p>` : ""}
       
       <p style="margin: 8px 0;"><strong>Data e Hora:</strong> ${dataRealizacao}</p>
       
@@ -51,7 +53,7 @@ export const createCalendarInviteEmail = (props: CalendarInviteEmailProps): stri
       
       <p style="margin: 8px 0;"><strong>Período Acadêmico:</strong> ${periodoAcademico}</p>
       
-      ${turma ? `<p style="margin: 8px 0;"><strong>Turma:</strong> ${turma}</p>` : ''}
+      ${turma ? `<p style="margin: 8px 0;"><strong>Turma:</strong> ${turma}</p>` : ""}
     </div>
     
     <h3>Como adicionar ao seu calendário</h3>
@@ -85,10 +87,10 @@ export const createCalendarInviteEmail = (props: CalendarInviteEmailProps): stri
       Atenciosamente,<br/>
       <strong>Sistema de Defesas de TCC do Instituto de Computação - UFBA</strong>
     </p>
-  `
+  `;
 
   return createBaseEmailTemplate({
-    title: 'Convite para Defesa de TCC',
-    content: content
-  })
-}
+    title: "Convite para Defesa de TCC",
+    content: content,
+  });
+};

@@ -1,4 +1,4 @@
-import { StyleSheet } from "@react-pdf/renderer"
+import { StyleSheet } from "@react-pdf/renderer/index.js";
 
 export const sharedStyles = StyleSheet.create({
   page: {
@@ -101,4 +101,4 @@ export const sharedStyles = StyleSheet.create({
     paddingBottom: 2,
     paddingLeft: 5,
   },
-})
+});

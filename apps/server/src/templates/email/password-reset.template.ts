@@ -1,12 +1,14 @@
-import { createBaseEmailTemplate } from './base.template'
+import { createBaseEmailTemplate } from "./base.template.js";
 
 export interface PasswordResetEmailProps {
-  nome: string
-  resetUrl: string
+  nome: string;
+  resetUrl: string;
 }
 
-export const createPasswordResetEmail = (props: PasswordResetEmailProps): string => {
-  const { nome, resetUrl } = props
+export const createPasswordResetEmail = (
+  props: PasswordResetEmailProps,
+): string => {
+  const { nome, resetUrl } = props;
 
   const content = `
     <h2>Olá, ${nome}!</h2>
@@ -26,13 +28,13 @@ export const createPasswordResetEmail = (props: PasswordResetEmailProps): string
     <div class="link-fallback">
       ${resetUrl}
     </div>
-  `
+  `;
 
   return createBaseEmailTemplate({
-    title: 'Recuperação de Senha',
+    title: "Recuperação de Senha",
     content,
-    buttonText: 'Redefinir Senha',
+    buttonText: "Redefinir Senha",
     buttonUrl: resetUrl,
-    variant: 'default'
-  })
-}
+    variant: "default",
+  });
+};

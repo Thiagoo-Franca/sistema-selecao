@@ -1,47 +1,56 @@
-import * as bcrypt from "bcryptjs"
-import crypto from "crypto"
-import { and, eq } from "drizzle-orm"
-import { type Context } from "hono"
-import { env } from "../../config/env"
+import * as bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { and, eq } from "drizzle-orm";
+import { type Context } from "hono";
+import { env } from "../../config/env.js";
 import {
   studentInvitations,
   Users,
   type SelectStudentInvitation,
-} from "../../database/schema"
-import { err, ok, type AppResult } from "../../result"
-import { createStudentInvitationEmail, sendEmail } from "../../services/email.service"
-import { type AppVariables } from "../../types"
+} from "../../database/schema.js";
+import { err, ok, type AppResult } from "../../result.js";
+import {
+  createStudentInvitationEmail,
+  sendEmail,
+} from "../../services/email.service.js";
+import { type AppVariables } from "../../types.js";
 
 interface CreateStudentInvitationInput {
-  email: string
-  nome: string
-  matricula: string
+  email: string;
+  nome: string;
+  matricula: string;
 }
 
 interface CreateStudentInvitationResponse {
-  invitationId: number
-  invitationHash: string
-  userId: number
+  invitationId: number;
+  invitationHash: string;
+  userId: number;
 }
 
 type CreateStudentInvitationServiceError =
   | { type: "duplicate_email" }
   | { type: "existing_invitation" }
   | { type: "database_error" }
-  | { type: "email_error" }
+  | { type: "email_error" };
 
 // Unguessable random hash that fails bcrypt.compare for any input — stub user can't log in.
-const buildUnusablePasswordHash = () => `!unusable!${crypto.randomBytes(32).toString("hex")}`
+const buildUnusablePasswordHash = () =>
+  `!unusable!${crypto.randomBytes(32).toString("hex")}`;
 
 export const createStudentInvitationService = async (
   c: Context<{ Variables: AppVariables }>,
   input: CreateStudentInvitationInput,
-): Promise<AppResult<CreateStudentInvitationResponse, CreateStudentInvitationServiceError>> => {
-  const dbInstance = c.get("db")
-  const inviter = c.get("jwtPayload")
+): Promise<
+  AppResult<
+    CreateStudentInvitationResponse,
+    CreateStudentInvitationServiceError
+  >
+> => {
+  const dbInstance = c.get("db");
+  const inviter = c.get("jwtPayload");
 
   if (!inviter) {
-    return err({ type: "database_error" })
+    return err({ type: "database_error" });
   }
 
   try {
@@ -49,24 +58,29 @@ export const createStudentInvitationService = async (
       .select({ id: Users.id })
       .from(Users)
       .where(eq(Users.email, input.email))
-      .limit(1)
+      .limit(1);
 
     if (existingUser.length > 0) {
-      return err({ type: "duplicate_email" })
+      return err({ type: "duplicate_email" });
     }
 
     const existingInvitation = await dbInstance
       .select({ id: studentInvitations.id })
       .from(studentInvitations)
-      .where(and(eq(studentInvitations.email, input.email), eq(studentInvitations.status, "pending")))
-      .limit(1)
+      .where(
+        and(
+          eq(studentInvitations.email, input.email),
+          eq(studentInvitations.status, "pending"),
+        ),
+      )
+      .limit(1);
 
     if (existingInvitation.length > 0) {
-      return err({ type: "existing_invitation" })
+      return err({ type: "existing_invitation" });
     }
 
-    const invitationHash = crypto.randomBytes(32).toString("hex")
-    const now = new Date()
+    const invitationHash = crypto.randomBytes(32).toString("hex");
+    const now = new Date();
 
     const [stubUser] = await dbInstance
       .insert(Users)
@@ -81,10 +95,10 @@ export const createStudentInvitationService = async (
         createdAt: now,
         updatedAt: now,
       })
-      .returning({ id: Users.id })
+      .returning({ id: Users.id });
 
     if (!stubUser) {
-      return err({ type: "database_error" })
+      return err({ type: "database_error" });
     }
 
     const [newInvitation] = await dbInstance
@@ -98,53 +112,61 @@ export const createStudentInvitationService = async (
         userId: stubUser.id,
         status: "pending",
       })
-      .returning({ id: studentInvitations.id })
+      .returning({ id: studentInvitations.id });
 
     if (!newInvitation) {
-      return err({ type: "database_error" })
+      return err({ type: "database_error" });
     }
 
-    const invitationUrl = `${env.FRONTEND_URL || "http://localhost:5173"}/student-invitation/${invitationHash}`
-    const emailHtml = createStudentInvitationEmail(input.nome, invitationUrl)
+    const invitationUrl = `${env.FRONTEND_URL || "http://localhost:5173"}/student-invitation/${invitationHash}`;
+    const emailHtml = createStudentInvitationEmail(input.nome, invitationUrl);
 
     const emailResult = await sendEmail({
       to: input.email,
       subject: "Convite para Aluno - Sistema Banca",
       html: emailHtml,
-    })
+    });
 
     if (!emailResult.ok) {
-      console.error("Failed to send student invitation email:", emailResult.error)
+      console.error(
+        "Failed to send student invitation email:",
+        emailResult.error,
+      );
     }
 
     return ok({
       invitationId: newInvitation.id,
       invitationHash,
       userId: stubUser.id,
-    })
+    });
   } catch (dbError) {
-    console.error("Database error during student invitation creation:", dbError)
-    return err({ type: "database_error" })
+    console.error(
+      "Database error during student invitation creation:",
+      dbError,
+    );
+    return err({ type: "database_error" });
   }
-}
+};
 
 interface StudentInvitationDetails {
-  email: string
-  nome: string
-  matricula: string
-  status: string
+  email: string;
+  nome: string;
+  matricula: string;
+  status: string;
 }
 
 type VerifyStudentInvitationServiceError =
   | { type: "invitation_not_found" }
   | { type: "invitation_already_used" }
-  | { type: "database_error" }
+  | { type: "database_error" };
 
 export const verifyStudentInvitationService = async (
   c: Context<{ Variables: AppVariables }>,
   hash: string,
-): Promise<AppResult<StudentInvitationDetails, VerifyStudentInvitationServiceError>> => {
-  const dbInstance = c.get("db")
+): Promise<
+  AppResult<StudentInvitationDetails, VerifyStudentInvitationServiceError>
+> => {
+  const dbInstance = c.get("db");
 
   try {
     const [invitation] = await dbInstance
@@ -156,70 +178,78 @@ export const verifyStudentInvitationService = async (
       })
       .from(studentInvitations)
       .where(eq(studentInvitations.invitationHash, hash))
-      .limit(1)
+      .limit(1);
 
     if (!invitation) {
-      return err({ type: "invitation_not_found" })
+      return err({ type: "invitation_not_found" });
     }
 
     if (invitation.status === "used") {
-      return err({ type: "invitation_already_used" })
+      return err({ type: "invitation_already_used" });
     }
 
-    return ok(invitation)
+    return ok(invitation);
   } catch (dbError) {
-    console.error("Database error during student invitation verification:", dbError)
-    return err({ type: "database_error" })
+    console.error(
+      "Database error during student invitation verification:",
+      dbError,
+    );
+    return err({ type: "database_error" });
   }
-}
+};
 
 interface AcceptStudentInvitationInput {
-  invitationHash: string
-  password: string
-  school: string
-  academicTitle?: string
+  invitationHash: string;
+  password: string;
+  school: string;
+  academicTitle?: string;
 }
 
 interface AcceptStudentInvitationResponse {
-  userId: number
+  userId: number;
 }
 
 type AcceptStudentInvitationServiceError =
   | { type: "invitation_not_found" }
   | { type: "invitation_already_used" }
   | { type: "hashing_error" }
-  | { type: "database_error" }
+  | { type: "database_error" };
 
 export const acceptStudentInvitationService = async (
   c: Context<{ Variables: AppVariables }>,
   input: AcceptStudentInvitationInput,
-): Promise<AppResult<AcceptStudentInvitationResponse, AcceptStudentInvitationServiceError>> => {
-  const dbInstance = c.get("db")
+): Promise<
+  AppResult<
+    AcceptStudentInvitationResponse,
+    AcceptStudentInvitationServiceError
+  >
+> => {
+  const dbInstance = c.get("db");
 
   try {
     const [invitation] = await dbInstance
       .select()
       .from(studentInvitations)
       .where(eq(studentInvitations.invitationHash, input.invitationHash))
-      .limit(1)
+      .limit(1);
 
     if (!invitation) {
-      return err({ type: "invitation_not_found" })
+      return err({ type: "invitation_not_found" });
     }
 
     if (invitation.status === "used") {
-      return err({ type: "invitation_already_used" })
+      return err({ type: "invitation_already_used" });
     }
 
-    let passwordHash: string
+    let passwordHash: string;
     try {
-      passwordHash = await bcrypt.hash(input.password, 10)
+      passwordHash = await bcrypt.hash(input.password, 10);
     } catch (hashError) {
-      console.error("Password hashing failed:", hashError)
-      return err({ type: "hashing_error" })
+      console.error("Password hashing failed:", hashError);
+      return err({ type: "hashing_error" });
     }
 
-    const now = new Date()
+    const now = new Date();
     await dbInstance
       .update(Users)
       .set({
@@ -228,33 +258,41 @@ export const acceptStudentInvitationService = async (
         academicTitle: input.academicTitle ?? "",
         updatedAt: now,
       })
-      .where(eq(Users.id, invitation.userId))
+      .where(eq(Users.id, invitation.userId));
 
     await dbInstance
       .update(studentInvitations)
       .set({ status: "used" })
-      .where(eq(studentInvitations.id, invitation.id))
+      .where(eq(studentInvitations.id, invitation.id));
 
-    return ok({ userId: invitation.userId })
+    return ok({ userId: invitation.userId });
   } catch (dbError) {
-    console.error("Database error during student invitation acceptance:", dbError)
-    return err({ type: "database_error" })
+    console.error(
+      "Database error during student invitation acceptance:",
+      dbError,
+    );
+    return err({ type: "database_error" });
   }
-}
+};
 
 export const listStudentInvitationsService = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<SelectStudentInvitation[], { type: "database_error" }>> => {
-  const dbInstance = c.get("db")
+): Promise<
+  AppResult<SelectStudentInvitation[], { type: "database_error" }>
+> => {
+  const dbInstance = c.get("db");
 
   try {
     const invitations = await dbInstance
       .select()
       .from(studentInvitations)
-      .orderBy(studentInvitations.createdAt)
-    return ok(invitations)
+      .orderBy(studentInvitations.createdAt);
+    return ok(invitations);
   } catch (dbError) {
-    console.error("Database error during student invitations listing:", dbError)
-    return err({ type: "database_error" })
+    console.error(
+      "Database error during student invitations listing:",
+      dbError,
+    );
+    return err({ type: "database_error" });
   }
-}
+};

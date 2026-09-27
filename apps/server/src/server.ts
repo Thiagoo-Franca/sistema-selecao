@@ -3,9 +3,9 @@ import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { createMiddleware } from "hono/factory";
 import path from "path";
-import { db, runDatabaseMigrations } from "./database";
-import { app } from "./index";
-import { type AppVariables } from "./types";
+import { db, runDatabaseMigrations } from "./database/index.js";
+import { app } from "./index.js";
+import { type AppVariables } from "./types.js";
 
 const TrueDeps = createMiddleware<{ Variables: AppVariables }>(
   async (c, next) => {

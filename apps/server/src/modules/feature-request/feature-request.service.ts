@@ -1,18 +1,22 @@
-import { desc, eq, sql } from "drizzle-orm"
-import { type Context } from "hono"
-import { featureRequests, featureRequestVotes, Users } from "../../database/schema"
-import { type AppResult, err, ok } from "../../result"
-import { type AppVariables } from "../../types"
-import { type CreateFeatureRequestInput } from "./feature-request.schema"
+import { desc, eq, sql } from "drizzle-orm";
+import { type Context } from "hono";
+import {
+  featureRequests,
+  featureRequestVotes,
+  Users,
+} from "../../database/schema.js";
+import { type AppResult, err, ok } from "../../result.js";
+import { type AppVariables } from "../../types.js";
+import { type CreateFeatureRequestInput } from "./feature-request.schema.js";
 
-type CreateFeatureRequestError = { type: "database_error"; error: unknown }
+type CreateFeatureRequestError = { type: "database_error"; error: unknown };
 
 export const createFeatureRequest = async (
   c: Context<{ Variables: AppVariables }>,
-  data: CreateFeatureRequestInput
+  data: CreateFeatureRequestInput,
 ): Promise<AppResult<{ id: number }, CreateFeatureRequestError>> => {
-  const dbInstance = c.get("db")
-  const userId = c.get("jwtPayload").sub
+  const dbInstance = c.get("db");
+  const userId = c.get("jwtPayload").sub;
 
   try {
     const [newFeatureRequest] = await dbInstance
@@ -23,36 +27,41 @@ export const createFeatureRequest = async (
         description: data.description,
         voteCount: 0,
       })
-      .returning({ id: featureRequests.id })
+      .returning({ id: featureRequests.id });
 
     if (!newFeatureRequest) {
-      console.error("Failed to insert feature request")
-      return err({ type: "database_error", error: "Insert operation did not return expected data." })
+      console.error("Failed to insert feature request");
+      return err({
+        type: "database_error",
+        error: "Insert operation did not return expected data.",
+      });
     }
 
-    return ok({ id: newFeatureRequest.id })
+    return ok({ id: newFeatureRequest.id });
   } catch (error) {
-    console.error("Error creating feature request:", error)
-    return err({ type: "database_error", error })
+    console.error("Error creating feature request:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
-type GetAllFeatureRequestsError = { type: "database_error"; error: unknown }
+type GetAllFeatureRequestsError = { type: "database_error"; error: unknown };
 
 export interface FeatureRequestWithAuthor {
-  id: number
-  title: string
-  description: string
-  voteCount: number
-  createdAt: Date
-  authorName: string
-  authorId: number
+  id: number;
+  title: string;
+  description: string;
+  voteCount: number;
+  createdAt: Date;
+  authorName: string;
+  authorId: number;
 }
 
 export const getAllFeatureRequests = async (
-  c: Context<{ Variables: AppVariables }>
-): Promise<AppResult<FeatureRequestWithAuthor[], GetAllFeatureRequestsError>> => {
-  const dbInstance = c.get("db")
+  c: Context<{ Variables: AppVariables }>,
+): Promise<
+  AppResult<FeatureRequestWithAuthor[], GetAllFeatureRequestsError>
+> => {
+  const dbInstance = c.get("db");
 
   try {
     const requests = await dbInstance
@@ -67,26 +76,29 @@ export const getAllFeatureRequests = async (
       })
       .from(featureRequests)
       .innerJoin(Users, eq(featureRequests.userId, Users.id))
-      .orderBy(desc(featureRequests.voteCount), desc(featureRequests.createdAt))
+      .orderBy(
+        desc(featureRequests.voteCount),
+        desc(featureRequests.createdAt),
+      );
 
-    return ok(requests)
+    return ok(requests);
   } catch (error) {
-    console.error("Error fetching feature requests:", error)
-    return err({ type: "database_error", error })
+    console.error("Error fetching feature requests:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
 type VoteFeatureRequestError =
   | { type: "not_found" }
   | { type: "duplicate_vote" }
-  | { type: "database_error"; error: unknown }
+  | { type: "database_error"; error: unknown };
 
 export const voteFeatureRequest = async (
   c: Context<{ Variables: AppVariables }>,
   userId: number,
-  featureRequestId: number
+  featureRequestId: number,
 ): Promise<AppResult<{ voteCount: number }, VoteFeatureRequestError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
 
   try {
     // Check if feature request exists
@@ -94,10 +106,10 @@ export const voteFeatureRequest = async (
       .select({ id: featureRequests.id })
       .from(featureRequests)
       .where(eq(featureRequests.id, featureRequestId))
-      .limit(1)
+      .limit(1);
 
     if (!featureRequest) {
-      return err({ type: "not_found" })
+      return err({ type: "not_found" });
     }
 
     // Check if user has already voted
@@ -105,12 +117,12 @@ export const voteFeatureRequest = async (
       .select({ id: featureRequestVotes.id })
       .from(featureRequestVotes)
       .where(
-        sql`${featureRequestVotes.userId} = ${userId} AND ${featureRequestVotes.featureRequestId} = ${featureRequestId}`
+        sql`${featureRequestVotes.userId} = ${userId} AND ${featureRequestVotes.featureRequestId} = ${featureRequestId}`,
       )
-      .limit(1)
+      .limit(1);
 
     if (existingVote.length > 0) {
-      return err({ type: "duplicate_vote" })
+      return err({ type: "duplicate_vote" });
     }
 
     // Add vote in a transaction
@@ -119,7 +131,7 @@ export const voteFeatureRequest = async (
       await tx.insert(featureRequestVotes).values({
         userId,
         featureRequestId,
-      })
+      });
 
       // Increment vote count
       await tx
@@ -127,44 +139,44 @@ export const voteFeatureRequest = async (
         .set({
           voteCount: sql`${featureRequests.voteCount} + 1`,
         })
-        .where(eq(featureRequests.id, featureRequestId))
-    })
+        .where(eq(featureRequests.id, featureRequestId));
+    });
 
     // Get updated vote count
     const [updatedRequest] = await dbInstance
       .select({ voteCount: featureRequests.voteCount })
       .from(featureRequests)
       .where(eq(featureRequests.id, featureRequestId))
-      .limit(1)
+      .limit(1);
 
-    return ok({ voteCount: updatedRequest?.voteCount ?? 0 })
+    return ok({ voteCount: updatedRequest?.voteCount ?? 0 });
   } catch (error) {
-    console.error("Error voting on feature request:", error)
-    return err({ type: "database_error", error })
+    console.error("Error voting on feature request:", error);
+    return err({ type: "database_error", error });
   }
-}
+};
 
-type CheckIfUserVotedError = { type: "database_error"; error: unknown }
+type CheckIfUserVotedError = { type: "database_error"; error: unknown };
 
 export const checkIfUserVoted = async (
   c: Context<{ Variables: AppVariables }>,
   userId: number,
-  featureRequestId: number
+  featureRequestId: number,
 ): Promise<AppResult<boolean, CheckIfUserVotedError>> => {
-  const dbInstance = c.get("db")
+  const dbInstance = c.get("db");
 
   try {
     const existingVote = await dbInstance
       .select({ id: featureRequestVotes.id })
       .from(featureRequestVotes)
       .where(
-        sql`${featureRequestVotes.userId} = ${userId} AND ${featureRequestVotes.featureRequestId} = ${featureRequestId}`
+        sql`${featureRequestVotes.userId} = ${userId} AND ${featureRequestVotes.featureRequestId} = ${featureRequestId}`,
       )
-      .limit(1)
+      .limit(1);
 
-    return ok(existingVote.length > 0)
+    return ok(existingVote.length > 0);
   } catch (error) {
-    console.error("Error checking if user voted:", error)
-    return err({ type: "database_error", error })
+    console.error("Error checking if user voted:", error);
+    return err({ type: "database_error", error });
   }
-}
+};

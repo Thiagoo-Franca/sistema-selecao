@@ -1,11 +1,9 @@
 // Export all centralized hooks
-export * from "./banca.hooks"
 export * from "./user.hooks"
 export * from "./cursos.hooks"
 export * from "./teacher-invitation.hooks"
 export * from "./student-invitation.hooks"
-export * from "./documento.hooks"
-export * from "./calendar.hooks"
+export * from "./candidato.hooks"
 
 // Re-export existing hooks
 export { useToast } from "./use-toast"
