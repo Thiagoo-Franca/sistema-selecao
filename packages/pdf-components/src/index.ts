@@ -1,6 +1,6 @@
-export { DeclaracaoParticipacaoPDF } from "./declaracao-participacao"
-export { DeclaracaoOrientacaoPDF } from "./declaracao-orientacao"
-export { FormularioAvaliacaoPDF } from "./formulario-avaliacao"
-export { SharedDocumentHeader } from "./shared-header"
-export { sharedStyles } from "./shared-styles"
-export type { DocumentInfo } from "./types"
+export { DeclaracaoParticipacaoPDF } from "./declaracao-participacao.js";
+export { DeclaracaoOrientacaoPDF } from "./declaracao-orientacao.js";
+export { FormularioAvaliacaoPDF } from "./formulario-avaliacao.js";
+export { SharedDocumentHeader } from "./shared-header.js";
+export { sharedStyles } from "./shared-styles.js";
+export type { DocumentInfo } from "./types.js";

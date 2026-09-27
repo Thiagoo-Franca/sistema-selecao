@@ -1,30 +1,49 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
-import React from "react"
+import {
+  Document,
+  Page,
+  StyleSheet,
+  Text,
+  View,
+} from "@react-pdf/renderer/index.js";
+import React from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { DocumentInfo } from "./types"
-let a = React as any
+import type { DocumentInfo } from "./types.js";
+let a = React as any;
 
 interface FormularioAvaliacaoPDFProps {
-  bancaInfo: DocumentInfo
+  bancaInfo: DocumentInfo;
 }
 
-export const fileAvaliadores = (membros: DocumentInfo["membros"] | undefined) => {
-  return membros?.filter((m) => m.role !== "aluno" && m.role !== "orientador")
-}
+export const fileAvaliadores = (
+  membros: DocumentInfo["membros"] | undefined,
+) => {
+  return membros?.filter((m) => m.role !== "aluno" && m.role !== "orientador");
+};
 
-export function FormularioAvaliacaoPDF({ bancaInfo }: FormularioAvaliacaoPDFProps) {
-  const defenseDate = new Date(bancaInfo.dataRealizacao).toLocaleDateString("pt-BR")
-  const orientador = bancaInfo.membros.find((m) => m.role === "orientador")
-  const coorientador = bancaInfo.membros.find((m) => m.role === "coorientador")
-  const avaliadores = fileAvaliadores(bancaInfo.membros) || []
+export function FormularioAvaliacaoPDF({
+  bancaInfo,
+}: FormularioAvaliacaoPDFProps) {
+  const defenseDate = new Date(bancaInfo.dataRealizacao).toLocaleDateString(
+    "pt-BR",
+  );
+  const orientador = bancaInfo.membros.find((m) => m.role === "orientador");
+  const coorientador = bancaInfo.membros.find((m) => m.role === "coorientador");
+  const avaliadores = fileAvaliadores(bancaInfo.membros) || [];
 
-  const notasValidas = avaliadores.filter((a) => a.nota).map((a) => Number(a.nota))
+  const notasValidas = avaliadores
+    .filter((a) => a.nota)
+    .map((a) => Number(a.nota));
   const media =
-    notasValidas.length > 0 ? (notasValidas.reduce((sum, nota) => sum + nota, 0) / notasValidas.length).toFixed(1) : ""
+    notasValidas.length > 0
+      ? (
+          notasValidas.reduce((sum, nota) => sum + nota, 0) /
+          notasValidas.length
+        ).toFixed(1)
+      : "";
 
-  const curso = bancaInfo.curso?.nome || ""
+  const curso = bancaInfo.curso?.nome || "";
 
   return (
     <Document>
@@ -32,13 +51,16 @@ export function FormularioAvaliacaoPDF({ bancaInfo }: FormularioAvaliacaoPDFProp
         {/* Cabeçalho */}
         <View style={styles.header}>
           <Text style={styles.headerLine}>Universidade Federal da Bahia</Text>
-          <Text style={styles.headerLine}>Departamento de Ciência da Computação</Text>
+          <Text style={styles.headerLine}>
+            Departamento de Ciência da Computação
+          </Text>
           <Text style={styles.headerLine}>Bacharelado em {curso}</Text>
           <Text style={styles.headerLine}>
             {bancaInfo.turma ?? ""} - TCC BACHARELADO {curso.toUpperCase()}
           </Text>
           <Text style={styles.headerLine}>
-            TURMA: {bancaInfo.turma ?? ""} DATA: {defenseDate} - SEMESTRE: {bancaInfo.periodoAcademico}
+            TURMA: {bancaInfo.turma ?? ""} DATA: {defenseDate} - SEMESTRE:{" "}
+            {bancaInfo.periodoAcademico}
           </Text>
         </View>
 
@@ -62,12 +84,16 @@ export function FormularioAvaliacaoPDF({ bancaInfo }: FormularioAvaliacaoPDFProp
 
           <View style={styles.row}>
             <Text style={styles.label}>Orientador(a):</Text>
-            <Text style={styles.underline}>{orientador?.usuario.nome || ""}</Text>
+            <Text style={styles.underline}>
+              {orientador?.usuario.nome || ""}
+            </Text>
           </View>
 
           <View style={styles.row}>
             <Text style={styles.label}>Co-orientador(a):</Text>
-            <Text style={styles.underline}>{coorientador?.usuario.nome || ""}</Text>
+            <Text style={styles.underline}>
+              {coorientador?.usuario.nome || ""}
+            </Text>
           </View>
         </View>
 
@@ -120,7 +146,8 @@ export function FormularioAvaliacaoPDF({ bancaInfo }: FormularioAvaliacaoPDFProp
         {/* Recebimento da Declaração */}
         <View style={styles.declarationSection}>
           <Text style={styles.declarationTitle}>
-            Recebimento da Declaração como Orientador e membro da Banca Examinadora
+            Recebimento da Declaração como Orientador e membro da Banca
+            Examinadora
           </Text>
 
           <View style={styles.declarationTable}>
@@ -142,7 +169,7 @@ export function FormularioAvaliacaoPDF({ bancaInfo }: FormularioAvaliacaoPDFProp
         </View>
       </Page>
     </Document>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -352,4 +379,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderRight: "1 solid #000",
   },
-})
+});
