@@ -1,6 +1,6 @@
-import { createInsertSchema } from "drizzle-zod"
-import { z } from "zod"
-import { Users } from "../../database"
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+import { Users } from "../../database/index.js";
 
 export const insertUserSchema = createInsertSchema(Users)
   .omit({
@@ -13,5 +13,5 @@ export const insertUserSchema = createInsertSchema(Users)
   .extend({
     password: z.string(),
   })
-  .strip()
-export type RegisterUserInput = z.infer<typeof insertUserSchema>
+  .strip();
+export type RegisterUserInput = z.infer<typeof insertUserSchema>;

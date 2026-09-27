@@ -1,32 +1,34 @@
-import nodemailer from "nodemailer"
-import { env } from "../config/env"
-import { err, ok, type AppResult } from "../result"
+import nodemailer from "nodemailer";
+import { env } from "../config/env.js";
+import { err, ok, type AppResult } from "../result.js";
 import {
   createCalendarInviteEmail,
   createPasswordResetEmail as createPasswordResetEmailTemplate,
   createStudentInvitationEmail as createStudentInvitationEmailTemplate,
   createTeacherInvitationEmail as createTeacherInvitationEmailTemplate,
   type CalendarInviteEmailProps,
-} from "../templates/email"
+} from "../templates/email/index.js";
 
 export type EmailAttachment = {
-  filename: string
-  content: string | Buffer
-  contentType: string
-}
+  filename: string;
+  content: string | Buffer;
+  contentType: string;
+};
 
 interface SendEmailInput {
-  to: string
-  subject: string
-  html: string
-  cc?: string[]
-  from?: string
-  attachments?: EmailAttachment[]
+  to: string;
+  subject: string;
+  html: string;
+  cc?: string[];
+  from?: string;
+  attachments?: EmailAttachment[];
 }
 
-type SendEmailError = { type: "email_error" } | { type: "config_error" }
+type SendEmailError = { type: "email_error" } | { type: "config_error" };
 
-export const sendEmail = async (input: SendEmailInput): Promise<AppResult<void, SendEmailError>> => {
+export const sendEmail = async (
+  input: SendEmailInput,
+): Promise<AppResult<void, SendEmailError>> => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -34,19 +36,19 @@ export const sendEmail = async (input: SendEmailInput): Promise<AppResult<void, 
         user: env.SMTP_USER,
         pass: env.SMTP_PASSWORD,
       },
-    })
+    });
 
     if (env.NODE_ENV === "development") {
       // Try Ethereal test account, but fall back to a no-network JSON transport
       // if the api.nodemailer.com lookup is unreachable (offline dev / firewall).
       try {
-        const testAccount = await nodemailer.createTestAccount()
+        const testAccount = await nodemailer.createTestAccount();
         const devTransporter = nodemailer.createTransport({
           host: "smtp.ethereal.email",
           port: 587,
           secure: false,
           auth: { user: testAccount.user, pass: testAccount.pass },
-        })
+        });
         const info = await devTransporter.sendMail({
           from: input.from || '"Sistema Banca" <noreply@sistema-banca.com>',
           to: input.to,
@@ -54,13 +56,18 @@ export const sendEmail = async (input: SendEmailInput): Promise<AppResult<void, 
           subject: input.subject,
           html: input.html,
           attachments: input.attachments,
-        })
-        console.log("Message sent: %s", info.messageId)
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info))
-        return ok(undefined)
+        });
+        console.log("Message sent: %s", info.messageId);
+        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        return ok(undefined);
       } catch (etherealErr) {
-        console.warn("Ethereal unavailable, logging email to console instead:", (etherealErr as Error).message)
-        const jsonTransporter = nodemailer.createTransport({ jsonTransport: true })
+        console.warn(
+          "Ethereal unavailable, logging email to console instead:",
+          (etherealErr as Error).message,
+        );
+        const jsonTransporter = nodemailer.createTransport({
+          jsonTransport: true,
+        });
         const info = await jsonTransporter.sendMail({
           from: input.from || '"Sistema Banca" <noreply@sistema-banca.com>',
           to: input.to,
@@ -68,10 +75,10 @@ export const sendEmail = async (input: SendEmailInput): Promise<AppResult<void, 
           subject: input.subject,
           html: input.html,
           attachments: input.attachments,
-        })
-        console.log("\n📧 [DEV EMAIL]", input.subject, "→", input.to)
-        console.log(info.message)
-        return ok(undefined)
+        });
+        console.log("\n📧 [DEV EMAIL]", input.subject, "→", input.to);
+        console.log(info.message);
+        return ok(undefined);
       }
     }
 
@@ -83,27 +90,36 @@ export const sendEmail = async (input: SendEmailInput): Promise<AppResult<void, 
       subject: input.subject,
       html: input.html,
       attachments: input.attachments,
-    })
+    });
 
-    console.log("Email sent: %s", info.messageId)
-    return ok(undefined)
+    console.log("Email sent: %s", info.messageId);
+    return ok(undefined);
   } catch (error) {
-    console.error("Email sending failed:", error)
-    return err({ type: "email_error" })
+    console.error("Email sending failed:", error);
+    return err({ type: "email_error" });
   }
-}
+};
 
-export const createTeacherInvitationEmail = (nome: string, invitationUrl: string): string => {
-  return createTeacherInvitationEmailTemplate({ nome, invitationUrl })
-}
+export const createTeacherInvitationEmail = (
+  nome: string,
+  invitationUrl: string,
+): string => {
+  return createTeacherInvitationEmailTemplate({ nome, invitationUrl });
+};
 
-export const createStudentInvitationEmail = (nome: string, invitationUrl: string): string => {
-  return createStudentInvitationEmailTemplate({ nome, invitationUrl })
-}
+export const createStudentInvitationEmail = (
+  nome: string,
+  invitationUrl: string,
+): string => {
+  return createStudentInvitationEmailTemplate({ nome, invitationUrl });
+};
 
-export const createPasswordResetEmail = (nome: string, resetUrl: string): string => {
-  return createPasswordResetEmailTemplate({ nome, resetUrl })
-}
+export const createPasswordResetEmail = (
+  nome: string,
+  resetUrl: string,
+): string => {
+  return createPasswordResetEmailTemplate({ nome, resetUrl });
+};
 
 // Basic HTML escaping to avoid injection in email body
 const escapeHtml = (str: string) =>
@@ -112,20 +128,24 @@ const escapeHtml = (str: string) =>
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/\"/g, "&quot;")
-    .replace(/'/g, "&#39;")
+    .replace(/'/g, "&#39;");
 
 // Convert plain text with newlines into HTML paragraphs
 const textToParagraphsHtml = (text: string) => {
-  const escaped = escapeHtml(text)
+  const escaped = escapeHtml(text);
   const paragraphs = escaped
     .split(/\n\s*\n/) // blank line separates paragraphs
-    .map((p) => `<p style="margin-bottom: 20px;">${p.replace(/\n/g, "<br>")}</p>`) // keep line breaks
-    .join("\n")
-  return paragraphs
-}
+    .map(
+      (p) => `<p style="margin-bottom: 20px;">${p.replace(/\n/g, "<br>")}</p>`,
+    ) // keep line breaks
+    .join("\n");
+  return paragraphs;
+};
 
-export const createCeagDeclarationsEmail = (plainTextMessage: string): string => {
-  const bodyHtml = textToParagraphsHtml(plainTextMessage)
+export const createCeagDeclarationsEmail = (
+  plainTextMessage: string,
+): string => {
+  const bodyHtml = textToParagraphsHtml(plainTextMessage);
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
       <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -139,16 +159,16 @@ export const createCeagDeclarationsEmail = (plainTextMessage: string): string =>
         </div>
       </div>
     </div>
-  `
-}
+  `;
+};
 export const sendCalendarInviteEmail = async (
   to: string,
   emailProps: CalendarInviteEmailProps,
   icsContent: string,
-  bancaId: number
+  bancaId: number,
 ): Promise<AppResult<void, SendEmailError>> => {
-  const subject = `Convite: Defesa de TCC - ${emailProps.tituloTrabalho}`
-  const html = createCalendarInviteEmail(emailProps)
+  const subject = `Convite: Defesa de TCC - ${emailProps.tituloTrabalho}`;
+  const html = createCalendarInviteEmail(emailProps);
 
   const attachments = [
     {
@@ -156,12 +176,12 @@ export const sendCalendarInviteEmail = async (
       content: icsContent,
       contentType: "text/calendar; charset=utf-8",
     },
-  ]
+  ];
 
   return sendEmail({
     to,
     subject,
     html,
     attachments,
-  })
-}
+  });
+};

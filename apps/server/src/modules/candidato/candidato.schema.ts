@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AreaPreferencia } from "../../database";
+import { AreaPreferencia } from "../../database/index.js";
 
 const updateCandidatoMestradoSchema = z.object({
   avaliador1: z.string().nullable().optional(),

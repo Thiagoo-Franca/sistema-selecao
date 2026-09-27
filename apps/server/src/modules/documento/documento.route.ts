@@ -1,18 +1,21 @@
-import { zValidator } from "@hono/zod-validator"
-import { Hono } from "hono"
-import { match } from "ts-pattern"
-import { z } from "zod"
-import { AppError } from "../../error"
-import type { AppVariables } from "../../types"
-import { checkRole } from "../auth/auth.middleware"
-import { getBancaDocumentInfo, sendCeagDeclarations } from "./documento.service"
+import { zValidator } from "@hono/zod-validator";
+import { Hono } from "hono";
+import { match } from "ts-pattern";
+import { z } from "zod";
+import { AppError } from "../../error.js";
+import type { AppVariables } from "../../types.js";
+import { checkRole } from "../auth/auth.middleware.js";
+import {
+  getBancaDocumentInfo,
+  sendCeagDeclarations,
+} from "./documento.service.js";
 
 const sendCeagDeclarationsSchema = z.object({
   ceapgEmail: z.string().email("Email do CEAG inválido"),
   senderName: z.string().min(1, "Nome do remetente é obrigatório"),
   senderEmail: z.string().email("Email do remetente inválido"),
   message: z.string().min(1, "Mensagem do email é obrigatória"),
-})
+});
 
 export const documentoRoutes = new Hono<{ Variables: AppVariables }>()
   .get(
@@ -20,16 +23,16 @@ export const documentoRoutes = new Hono<{ Variables: AppVariables }>()
     checkRole(["TEACHER", "ADMIN"]),
     zValidator("param", z.object({ bancaId: z.string() })),
     async (c) => {
-      const { bancaId } = c.req.valid("param")
-      const bancaIdNumber = parseInt(bancaId)
+      const { bancaId } = c.req.valid("param");
+      const bancaIdNumber = parseInt(bancaId);
 
       if (isNaN(bancaIdNumber)) {
-        throw new AppError(400, "ID da banca inválido")
+        throw new AppError(400, "ID da banca inválido");
       }
 
-      const result = await getBancaDocumentInfo(c, bancaIdNumber)
-      return c.json(result)
-    }
+      const result = await getBancaDocumentInfo(c, bancaIdNumber);
+      return c.json(result);
+    },
   )
   .post(
     "/send-ceag-declarations/:bancaId",
@@ -37,12 +40,13 @@ export const documentoRoutes = new Hono<{ Variables: AppVariables }>()
     zValidator("param", z.object({ bancaId: z.string() })),
     zValidator("json", sendCeagDeclarationsSchema),
     async (c) => {
-      const { bancaId } = c.req.valid("param")
-      const { ceapgEmail, senderName, senderEmail, message } = c.req.valid("json")
-      const bancaIdNumber = parseInt(bancaId)
+      const { bancaId } = c.req.valid("param");
+      const { ceapgEmail, senderName, senderEmail, message } =
+        c.req.valid("json");
+      const bancaIdNumber = parseInt(bancaId);
 
       if (isNaN(bancaIdNumber)) {
-        throw new AppError(400, "ID da banca inválido")
+        throw new AppError(400, "ID da banca inválido");
       }
 
       const result = await sendCeagDeclarations(c, bancaIdNumber, {
@@ -50,18 +54,29 @@ export const documentoRoutes = new Hono<{ Variables: AppVariables }>()
         senderName,
         senderEmail,
         message,
-      })
+      });
 
       if (!result.ok) {
         throw match(result.error)
-          .with({ type: "banca_not_found" }, () => new AppError(404, "Banca não encontrada"))
-          .with({ type: "email_error" }, () => new AppError(500, "Erro ao enviar email"))
-          .with({ type: "pdf_generation_error" }, () => new AppError(500, "Erro ao gerar documentos PDF"))
-          .exhaustive()
+          .with(
+            { type: "banca_not_found" },
+            () => new AppError(404, "Banca não encontrada"),
+          )
+          .with(
+            { type: "email_error" },
+            () => new AppError(500, "Erro ao enviar email"),
+          )
+          .with(
+            { type: "pdf_generation_error" },
+            () => new AppError(500, "Erro ao gerar documentos PDF"),
+          )
+          .exhaustive();
       }
 
-      return c.json({ message: "Declarações enviadas com sucesso para o CEAG" })
-    }
-  )
+      return c.json({
+        message: "Declarações enviadas com sucesso para o CEAG",
+      });
+    },
+  );
 // PDF generation endpoints removed - moved to frontend
 // Frontend will use /info/:bancaId to get data and generate PDFs client-side

@@ -1,15 +1,15 @@
 import { Hono } from "hono";
-import type { AppVariables } from "../../types";
-import * as service from "./candidato.service";
+import type { AppVariables } from "../../types.js";
+import * as service from "./candidato.service.js";
 import { zValidator } from "@hono/zod-validator";
 import {
   updateCandidatoDoutoradoSchema,
   updateCandidatoMestradoSchema,
   updateNotaDoutoradoSchema,
   updateNotaMestradoSchema,
-} from "./candidato.schema";
+} from "./candidato.schema.js";
 import { match } from "ts-pattern";
-import { AppError } from "../../error";
+import { AppError } from "../../error.js";
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   .get("/", async (c) => {
