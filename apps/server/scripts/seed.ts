@@ -3,21 +3,22 @@ import "dotenv/config";
 import {
   CandidatoDoutorado,
   CandidatoMestrado,
-  Cursos,
+  // Cursos,
   db,
   Endereco,
-  type InsertCurso,
+  // type InsertCurso,
   type InsertUser,
   NotaDoutorado,
   NotaMestrado,
   Users,
 } from "../src/database";
 
+/*
 const cursosData: InsertCurso[] = [
   { id: 1, nome: "Ciência da Computação", sigla: "BCC" },
   { id: 2, nome: "Sistemas de Informação", sigla: "BSI" },
 ];
-
+*/
 const UserData: InsertUser[] = [
   {
     id: 1,
@@ -36,10 +37,11 @@ const UserData: InsertUser[] = [
 
 async function seed() {
   await db.transaction(async (db) => {
+    /*
     console.log("Seeding cursos...");
     await db.insert(Cursos).values(cursosData).onConflictDoNothing();
     console.log(`Seeded ${cursosData.length} cursos.`);
-
+*/
     console.log("Seeding usuarios...");
     await db.insert(Users).values(UserData).onConflictDoNothing();
     console.log(`Seeded ${UserData.length} usuarios.`);

@@ -64,6 +64,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
+  /*
   .get("/students/available-for-banca", async (c) => {
     const result = await service.getStudentsAvailableForBanca(c);
     if (!result.ok) {
@@ -76,6 +77,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
+    */
   .post(
     "/",
     checkRole(["ADMIN", "TEACHER"]),
@@ -249,6 +251,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
       return c.body(null, 204);
     },
   )
+  /*
   .get(
     "/:id/bancas",
     zValidator("param", schema.idParamSchema.shape.param),
@@ -270,6 +273,8 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
       return c.json(result.data);
     },
   )
+    */
+   /*
   .get(
     "/:id/associations",
     checkRole(["ADMIN"]),
@@ -292,6 +297,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
       return c.json(result.data);
     },
   )
+    */
   .post(
     "/request-password-reset",
     zValidator("json", schema.requestPasswordResetSchema),

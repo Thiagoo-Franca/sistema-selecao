@@ -1,3 +1,5 @@
+/*
+
 import { zValidator } from "@hono/zod-validator";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
@@ -544,3 +546,4 @@ export const bancaRoutes = new Hono<{ Variables: AppVariables }>()
       return c.json(result.data);
     },
   );
+*/

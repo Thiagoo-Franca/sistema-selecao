@@ -4,7 +4,7 @@ import { and, eq, gte } from "drizzle-orm";
 import { type Context } from "hono";
 import { sign } from "hono/jwt";
 import {
-  invites,
+  //invites,
   resetPasswords,
   Users,
   type SelectUser,
@@ -330,6 +330,7 @@ type VerifyInviteHashServiceError =
   | { type: "invite_not_pending"; status: string }
   | { type: "database_error" };
 
+/* 
 export const verifyInviteHashService = async (
   c: Context<{ Variables: AppVariables }>,
   hash: string,
@@ -381,6 +382,8 @@ export const verifyInviteHashService = async (
     return err({ type: "database_error" });
   }
 };
+
+*/
 
 interface RegisterUserResponse {
   userId: number;

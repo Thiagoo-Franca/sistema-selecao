@@ -4,19 +4,12 @@ import { and, asc, desc, eq, inArray, not, or } from "drizzle-orm";
 import { type Context } from "hono";
 import { z } from "zod";
 import {
-  Bancas,
-  bancasDocumentos,
-  featureRequests,
-  featureRequestVotes,
   feedbackSubmissions,
-  invites,
   resetPasswords,
   type SelectUser,
-  sessions,
   studentInvitations,
   teacherInvitations,
   Users,
-  usuariosBancas,
 } from "../../database/schema.js";
 import { type AppResult, err, ok } from "../../result.js";
 import {
@@ -282,6 +275,7 @@ export const updateUser = async (
   }
 };
 
+/*
 export const getUserAssociations = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
@@ -340,7 +334,7 @@ export const getUserAssociations = async (
     return err({ type: "database_error", error });
   }
 };
-
+*/
 export const deleteUser = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
@@ -356,7 +350,7 @@ export const deleteUser = async (
     if (userCheck.length === 0) {
       return err({ type: "user_not_found" });
     }
-
+    /*
     if (cascade) {
       const bancaIdsToDelete = await dbInstance
         .select({ id: Bancas.id })
@@ -377,33 +371,35 @@ export const deleteUser = async (
           .where(inArray(usuariosBancas.bancaId, bancaIds));
         await dbInstance.delete(Bancas).where(inArray(Bancas.id, bancaIds));
       }
+        */
 
-      await dbInstance
-        .delete(usuariosBancas)
-        .where(eq(usuariosBancas.usuarioId, id));
-      await dbInstance.delete(invites).where(eq(invites.userId, id));
-      await dbInstance
-        .delete(resetPasswords)
-        .where(eq(resetPasswords.userId, id));
-      await dbInstance.delete(sessions).where(eq(sessions.userId, id));
-      await dbInstance
-        .delete(featureRequestVotes)
-        .where(eq(featureRequestVotes.userId, id));
-      await dbInstance
-        .delete(featureRequests)
-        .where(eq(featureRequests.userId, id));
-      await dbInstance
-        .delete(feedbackSubmissions)
-        .where(eq(feedbackSubmissions.userId, id));
-      await dbInstance
-        .delete(teacherInvitations)
-        .where(
-          or(
-            eq(teacherInvitations.userId, id),
-            eq(teacherInvitations.invitedBy, id),
-          ),
-        );
-    }
+    //await dbInstance
+    //  .delete(usuariosBancas)
+    //  .where(eq(usuariosBancas.usuarioId, id));
+
+    //  await dbInstance.delete(invites).where(eq(invites.userId, id));
+    await dbInstance
+      .delete(resetPasswords)
+      .where(eq(resetPasswords.userId, id));
+    // await dbInstance.delete(sessions).where(eq(sessions.userId, id));
+    // await dbInstance
+    //  .delete(featureRequestVotes)
+    //  .where(eq(featureRequestVotes.userId, id));
+    // await dbInstance
+    //  .delete(featureRequests)
+    //  .where(eq(featureRequests.userId, id));
+    await dbInstance
+      .delete(feedbackSubmissions)
+      .where(eq(feedbackSubmissions.userId, id));
+    await dbInstance
+      .delete(teacherInvitations)
+      .where(
+        or(
+          eq(teacherInvitations.userId, id),
+          eq(teacherInvitations.invitedBy, id),
+        ),
+      );
+    // }
 
     await dbInstance.delete(Users).where(eq(Users.id, id));
 
@@ -519,13 +515,15 @@ export const changeUserPassword = async (
   }
 };
 
+/*
 type UserBancaWithRole = InferResultType<
   "Bancas",
   { curso: true; membros: { with: { usuario: true } } }
 > & {
   userRole: "orientador" | "coorientador" | "aluno" | "avaliador";
 };
-
+*/
+/*
 export const getUserBancas = async (
   c: Context<{ Variables: AppVariables }>,
   id: number,
@@ -602,7 +600,7 @@ export const getUserBancas = async (
     return err({ type: "database_error", error });
   }
 };
-
+*/
 type GetStudentsError = { type: "database_error"; error: unknown };
 export const getStudents = async (
   c: Context<{ Variables: AppVariables }>,
@@ -771,7 +769,7 @@ type GetStudentsAvailableForBancaError = {
 export type StudentAvailableForBanca = SelectUser & {
   invitationPending: boolean;
 };
-
+/*
 export const getStudentsAvailableForBanca = async (
   c: Context<{ Variables: AppVariables }>,
 ): Promise<
@@ -817,3 +815,4 @@ export const getStudentsAvailableForBanca = async (
     return err({ type: "database_error", error });
   }
 };
+*/

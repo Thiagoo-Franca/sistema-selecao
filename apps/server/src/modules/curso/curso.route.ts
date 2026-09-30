@@ -1,8 +1,10 @@
+/*
+
 import { Hono } from "hono";
 import { match } from "ts-pattern";
 import { AppError } from "../../error.js";
 import { type AppVariables } from "../../types.js";
-import * as service from "./curso.service.js";
+// import * as service from "./curso.service.js";
 
 export const cursoRoutes = new Hono<{ Variables: AppVariables }>().get(
   "/",
@@ -19,3 +21,4 @@ export const cursoRoutes = new Hono<{ Variables: AppVariables }>().get(
     return c.json(result.data);
   },
 );
+*/

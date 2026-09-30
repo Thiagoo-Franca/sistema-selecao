@@ -1,5 +1,4 @@
 import { useNavigate, useParams } from "react-router"
-import type { Route } from "./+types/banca.$id"
 import { useToast } from "@/hooks"
 import { useEffect, useState } from "react"
 import {
@@ -10,7 +9,6 @@ import {
 import { useUser } from "@/services/useUser"
 import { Header } from "@/components/layout/Header"
 import { ArrowLeft, Loader2 } from "lucide-react"
-import type { CandidatoMestrado } from "./_index"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel, FieldLegend } from "@/components/ui/field"
 import {
@@ -29,6 +27,8 @@ import {
   type CandidatoMestradoNotaEtapa1,
 } from "@/schema/schema"
 import { calcularMestradoNotaEtapa1, paraNumeroSeguro } from "@/lib/calculoNotas"
+import type { CandidatoMestradoComRelacoes } from "@tcc/server"
+import type { Route } from "../+types/root"
 
 export const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato Mestrado` }]
 
@@ -55,7 +55,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
   } = form
 
   const user = userQuery.data
-  const candidato: CandidatoMestrado | null | undefined = candidatoQuery.data
+  const candidato: CandidatoMestradoComRelacoes | null | undefined = candidatoQuery.data
   const isLoading = candidatoQuery.isLoading || userQuery.isLoading
   const isAdmin = user?.role === "ADMIN"
 
@@ -68,6 +68,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
   useEffect(() => {
     if (candidato) {
       reset({
+        avaliado: candidato.avaliado ? candidato.avaliado : false,
         avaliador1: candidato.avaliador1 ? candidato.avaliador1 : "",
         avaliador2: candidato.avaliador2 ? candidato.avaliador2 : "",
         area1: candidato.primeiraAreaPreferencia ? candidato.primeiraAreaPreferencia : "",
@@ -163,6 +164,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
         id,
         body: {
           // Se for string vazia (""), envia undefined para o banco de dados ignorar a coluna no UPDATE
+          avaliado: true,
           avaliador1: dados.avaliador1 || undefined,
           avaliador2: dados.avaliador2 || undefined,
           primeiraAreaPreferencia: dados.area1 || undefined,

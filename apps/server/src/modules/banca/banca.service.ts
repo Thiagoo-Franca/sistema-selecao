@@ -1,3 +1,4 @@
+/*
 import { and, asc, desc, eq, gte, ilike, inArray, lt, or } from "drizzle-orm";
 import { type Context } from "hono";
 import type { InferResultType } from "../../database/index.js";
@@ -1186,3 +1187,4 @@ export const getBancasByMember = async (
     return err({ type: "database_error", error });
   }
 };
+*/

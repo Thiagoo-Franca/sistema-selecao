@@ -1,6 +1,8 @@
+/*
+
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { Bancas } from "../../database/index.js";
+// import { Bancas } from "../../database/index.js";
 
 export const paramIdSchema = z.object({
   id: z.string().refine((val) => !Number.isNaN(parseInt(val, 10)), {
@@ -8,8 +10,9 @@ export const paramIdSchema = z.object({
   }),
 });
 
-const baseBancaSchema = createInsertSchema(Bancas);
+// const baseBancaSchema = createInsertSchema(Bancas);
 
+/*
 export const createBancaSchema = baseBancaSchema.extend({
   autor: z.string().min(1, "Autor é obrigatório"),
   matricula: z.string().min(1, "Matrícula é obrigatória"),
@@ -63,3 +66,4 @@ export type UpdateBancaInput = z.infer<typeof updateBancaSchema>;
 export type ParamIdInput = z.infer<typeof paramIdSchema>;
 export type CreateBanca = z.infer<typeof createBancaSchema>;
 export type UpdateBanca = z.infer<typeof updateBancaSchema>;
+*/

@@ -1,3 +1,4 @@
+/*
 import {
   and,
   asc,
@@ -59,7 +60,7 @@ export class BancaDAO {
 
   /**
    * Build search conditions for queries with joins (can reference related tables)
-   */
+   *
   private buildSearchConditionWithJoins(searchQuery?: string): SQL | undefined {
     if (!searchQuery) return undefined;
 
@@ -73,7 +74,7 @@ export class BancaDAO {
 
   /**
    * Build search conditions for queries without joins (main table only)
-   */
+   *
   private buildSearchConditionMainTable(searchQuery?: string): SQL | undefined {
     if (!searchQuery) return undefined;
 
@@ -85,7 +86,7 @@ export class BancaDAO {
 
   /**
    * Build where conditions for queries with joins
-   */
+   *
   private buildWhereConditionWithJoins(filters: BancaSearchFilters): SQL {
     const conditions: SQL[] = [];
 
@@ -109,8 +110,7 @@ export class BancaDAO {
 
   /**
    * Build where conditions for queries without joins
-   */
-  private buildWhereConditionMainTable(filters: BancaSearchFilters): SQL {
+     private buildWhereConditionMainTable(filters: BancaSearchFilters): SQL {
     const conditions: SQL[] = [];
 
     if (filters.visible !== undefined) {
@@ -133,7 +133,7 @@ export class BancaDAO {
 
   /**
    * Get order clause for sorting
-   */
+   
   private getOrderClause(
     sortOptions: BancaSortOptions,
     defaultOrder: "asc" | "desc" = "desc",
@@ -161,14 +161,14 @@ export class BancaDAO {
 
   /**
    * Check if sorting requires joins
-   */
+   *
   private needsJoins(orderBy?: string): boolean {
     return orderBy ? JOIN_FIELDS.includes(orderBy) : false;
   }
 
   /**
    * Get total count of bancas matching filters
-   */
+   *
   async getTotalCount(filters: BancaSearchFilters): Promise<number> {
     const dbInstance = this.db("db");
     const whereCondition = this.buildWhereConditionWithJoins(filters);
@@ -185,7 +185,7 @@ export class BancaDAO {
 
   /**
    * Get bancas with full relations using efficient method
-   */
+   
   async getBancasWithRelations(
     options: BancaQueryOptions,
     dateFilter?: { past?: boolean; upcoming?: boolean },
@@ -295,7 +295,7 @@ export class BancaDAO {
   /**
    * Get upcoming bancas (future defenses)
    * If userId and userRole provided, includes invisible bancas where user is a member
-   */
+   
   async getUpcomingBancas(
     options: BancaQueryOptions & {
       userId?: number;
@@ -354,7 +354,7 @@ export class BancaDAO {
   /**
    * Get past bancas (completed defenses)
    * If userId and userRole provided, includes invisible bancas where user is a member
-   */
+   
   async getPastBancas(
     options: BancaQueryOptions & {
       userId?: number;
@@ -412,7 +412,7 @@ export class BancaDAO {
 
   /**
    * Get bancas by orientador (for "my defenses" functionality)
-   */
+  
   async getBancasByOrientador(
     options: BancaQueryOptions & { orientadorId: number },
   ): Promise<{
@@ -444,7 +444,7 @@ export class BancaDAO {
   /**
    * Get bancas where user is a member (avaliador) but not orientador
    * Simplified: query usuariosBancas, join with Bancas + relations, then split past/upcoming
-   */
+   
   async getBancasByMember(
     options: BancaQueryOptions & { userId: number },
   ): Promise<{
@@ -504,3 +504,4 @@ export class BancaDAO {
     };
   }
 }
+*/

@@ -11,7 +11,7 @@ import {
   registerUserService,
   requestPasswordResetService,
   resetPasswordService,
-  verifyInviteHashService,
+  // verifyInviteHashService,
   verifyResetHashService,
 } from "./auth.service.js";
 
@@ -49,6 +49,7 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data, 200);
   })
+  /*
   .get("/invites/:hash", async (c) => {
     const hash = c.req.param("hash");
     if (!hash) {
@@ -71,6 +72,7 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data, 200);
   })
+  */
   .post(
     "/reset-password",
     zValidator("json", requestResetSchema),

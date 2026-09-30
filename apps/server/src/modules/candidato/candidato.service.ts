@@ -88,7 +88,7 @@ export const getCandidatoMestradoById = async (
         NotaMestrado,
         eq(NotaMestrado.idCandidato, CandidatoMestrado.id),
       )
-      .where(eq(CandidatoMestrado.id, Number(id)))
+      .where(eq(CandidatoMestrado.id, id))
       .limit(1);
 
     if (!result[0]) return ok(null);
@@ -122,7 +122,7 @@ export const getCandidatoDoutoradoById = async (
         NotaDoutorado,
         eq(NotaDoutorado.idCandidato, CandidatoDoutorado.id),
       )
-      .where(eq(CandidatoDoutorado.id, Number(id)))
+      .where(eq(CandidatoDoutorado.id, id))
       .limit(1);
 
     if (!result[0]) return ok(null);
@@ -177,7 +177,7 @@ export const updateCandidatoMestrado = async (
     const [candidatoAtualizado] = await dbInstance
       .update(CandidatoMestrado)
       .set(body)
-      .where(eq(CandidatoMestrado.id, Number(id)))
+      .where(eq(CandidatoMestrado.id, id))
       .returning();
     if (!candidatoAtualizado) return ok(null);
 
@@ -206,7 +206,7 @@ export const updateNotaMestrado = async (
     const [notaAtualizada] = await dbInstance
       .insert(NotaMestrado)
       .values({
-        idCandidato: Number(idCandidato),
+        idCandidato: idCandidato,
         ...body,
       })
       .onConflictDoUpdate({
@@ -243,7 +243,7 @@ export const updateCandidatoDoutorado = async (
     const [candidatoAtualizado] = await dbInstance
       .update(CandidatoDoutorado)
       .set(body)
-      .where(eq(CandidatoDoutorado.id, Number(id)))
+      .where(eq(CandidatoDoutorado.id, id))
       .returning();
 
     if (!candidatoAtualizado) return ok(null);
@@ -272,7 +272,7 @@ export const updateNotaDoutorado = async (
     const [notaAtualizada] = await dbInstance
       .insert(NotaDoutorado)
       .values({
-        idCandidato: Number(idCandidato),
+        idCandidato: idCandidato,
         ...body,
       })
       .onConflictDoUpdate({
