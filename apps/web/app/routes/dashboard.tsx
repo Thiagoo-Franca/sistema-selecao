@@ -20,7 +20,7 @@ import type { Route } from "./+types/dashboard"
 import { CandidatosTab } from "@/components/candidatos-tab"
 import CandidatoTab from "@/components/candidatos-tab/candidato-tab"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISSEL" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Dashboard" }]
 
 export default function Home() {
   const navigate = useNavigate()

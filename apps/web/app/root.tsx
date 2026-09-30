@@ -1,7 +1,15 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { useState } from "react"
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
+import {
+  isRouteErrorResponse,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useNavigate,
+} from "react-router"
 import type { Route } from "./+types/root"
 import "./app.css"
 import { Toaster } from "./components/ui/toaster"
@@ -54,11 +62,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return <Outlet />
 }
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Sistema de Seleção" }]
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!"
   let details = "An unexpected error occurred."
   let stack: string | undefined
+
+  const navigate = useNavigate()
 
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? "404" : "Error"
@@ -78,6 +89,12 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
           <code>{stack}</code>
         </pre>
       )}
+      <button
+        className="rounded bg-gradient-to-r from-blue-500 to-blue-700 px-4 py-2 font-bold text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-800"
+        onClick={() => navigate(-1)}
+      >
+        Voltar para a página anterior
+      </button>
     </main>
   )
 }

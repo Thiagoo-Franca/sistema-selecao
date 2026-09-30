@@ -3,7 +3,7 @@ import { LoginForm } from "@/components/auth/LoginForm"
 
 export const meta: Route.MetaFunction = () => [
   {
-    title: "SISSEL | Login",
+    title: "SISSEL - Login",
     "script:ld+json": {
       "@context": "https://schema.org",
       "@type": "WebSite",
