@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useUser } from "@/services/useUser"
 import { useNavigate } from "react-router"
 import type { Route } from "./+types/dashboard"
@@ -67,7 +66,7 @@ export default function Home() {
         {!!userQuery.data && isTeacherOrAdmin && (
           <Button
             className="w-full bg-blue-500 hover:bg-blue-600 md:max-w-xs"
-            onClick={() => navigate("/")}
+            //  onClick={() => navigate("/")}
           >
             Adicionar Candidato
           </Button>
