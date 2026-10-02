@@ -1,33 +1,39 @@
 import z from "zod"
 
 const CandidatoMestradoNotaEtapa1Schema = z.object({
-  grad: z.coerce.number(),
-  area: z.coerce.number(),
-  enade: z.number(),
-  a1a2a3a4: z.coerce.number(),
-  b1b2b3b4: z.coerce.number(),
-  icIt: z.coerce.number(),
-  poscomp: z.coerce.number(),
-  disciplinaPosCapes6Mais: z.coerce.number(),
-  disciplinaPosCapes3a5: z.coerce.number(),
-  avaliador1: z.string().optional(),
-  avaliador2: z.string().optional(),
-  area1: z.string(),
-  area2: z.string().optional(),
-  cpf: z.string().regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos"),
-  nome: z.string().min(1, "O nome é obrigatório"),
-  email: z.string().email("Email inválido"),
-  cidade: z.string().min(1, "A cidade é obrigatória"),
-  isencao: z.string(),
-  isencaoAprovada: z.string(),
-  GRU: z.string(),
-  Homologa: z.string(),
-  universidade: z.string(),
-  cursoGrad: z.string(),
-  cidadeGrad: z.string(),
-  especiais: z.string(),
-  cotas: z.string(),
-  SUPRA: z.string(),
+  avaliador1: z
+    .string()
+    .regex(/^[A-Za-zÀ-ÿ\s]+$/, "O nome do avaliador deve conter apenas letras e espaços")
+    .max(30, "O nome do avaliador 1 não pode ter mais de 30 caracteres")
+    .optional(),
+  avaliador2: z
+    .string()
+    .regex(/^[A-Za-zÀ-ÿ\s]+$/, "O nome do avaliador deve conter apenas letras e espaços")
+    .max(30, "O nome do avaliador 2 não pode ter mais de 30 caracteres")
+    .optional(),
+  solicitouIsencaoTaxaInscricao: z.boolean().optional(),
+  isencaoAprovada: z.boolean().optional(),
+  gru: z.string().optional(),
+  Homologa: z.string().optional(),
+  especiais: z.boolean().optional(),
+  cotas: z.boolean().optional(),
+  SUPRA: z.boolean().optional(),
+
+  avaliado: z.boolean().optional(),
+
+  grad: z.coerce.number().max(10, "A nota da graduação não pode ser maior que 10").optional(),
+  area: z.coerce.number().optional(),
+  enade: z
+    .number()
+    .min(1, "A nota do ENADE deve ser maior ou igual a 1")
+    .max(5, "A nota do ENADE não pode ser maior que 5")
+    .optional(),
+  a1a2a3a4: z.coerce.number().optional(),
+  b1b2b3b4: z.coerce.number().optional(),
+  icIt: z.coerce.number().optional(),
+  poscomp: z.coerce.number().optional(),
+  disciplinaPosCapes6Mais: z.coerce.number().optional(),
+  disciplinaPosCapes3a5: z.coerce.number().optional(),
 })
 
 export type CandidatoMestradoNotaEtapa1 = z.infer<typeof CandidatoMestradoNotaEtapa1Schema>

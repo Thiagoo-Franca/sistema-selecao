@@ -13,10 +13,10 @@ export type CandidatoMestradoNotaEtapa1 = {
   enade: number
   a1a2a3a4: number
   b1b2b3b4: number
-  ic_it: number
+  icIt: number
   poscomp: number
-  DISCIPLINA_PÓS_CAPES_6: number
-  DISCIPLINA_PÓS_CAPES_3_5: number
+  disciplinaPosCapes6Mais: number
+  disciplinaPosCapes3a5: number
 }
 
 // para evitar NaN
@@ -30,10 +30,10 @@ export function calcularMestradoNotaEtapa1({
   enade,
   a1a2a3a4,
   b1b2b3b4,
-  ic_it,
+  icIt,
   poscomp,
-  DISCIPLINA_PÓS_CAPES_6,
-  DISCIPLINA_PÓS_CAPES_3_5,
+  disciplinaPosCapes6Mais,
+  disciplinaPosCapes3a5,
 }: CandidatoMestradoNotaEtapa1): { pontuacao: number; aprovado: boolean } {
   const RGRAD = (grad * area * 7 + enade * 2 * 3) / 10
 
@@ -41,10 +41,10 @@ export function calcularMestradoNotaEtapa1({
     10,
     Math.min(10, a1a2a3a4 * 2) +
       Math.min(5, b1b2b3b4) +
-      Math.min(6, ic_it * 2) +
+      Math.min(6, icIt * 2) +
       poscomp / 7 +
-      Math.min(6, DISCIPLINA_PÓS_CAPES_6 * 2) +
-      Math.min(4, DISCIPLINA_PÓS_CAPES_3_5)
+      Math.min(6, disciplinaPosCapes6Mais * 2) +
+      Math.min(4, disciplinaPosCapes3a5)
   )
 
   const pontuacao = (RGRAD * 8 + RPQ_GRAD * 2) / 10

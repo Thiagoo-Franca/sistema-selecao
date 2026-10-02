@@ -10,7 +10,7 @@ import { useUser } from "@/services/useUser"
 import { Header } from "@/components/layout/Header"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Field, FieldLabel, FieldLegend } from "@/components/ui/field"
+import { Field, FieldError, FieldLabel, FieldLegend } from "@/components/ui/field"
 import {
   Select,
   SelectContent,
@@ -30,7 +30,18 @@ import { calcularMestradoNotaEtapa1, paraNumeroSeguro } from "@/lib/calculoNotas
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
 import type { Route } from "../+types/root"
 
-export const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato Mestrado` }]
+export const meta: Route.MetaFunction = () => [
+  { title: `SISSEL - Avaliação candidato Mestrado` },
+  { description: "Página de avaliação do candidato de mestrado" },
+]
+
+const GRU_OPTIONS = [
+  { value: "isento", label: "ISENTO" },
+  { value: "pago", label: "PAGO" },
+  { value: "aberto", label: "ABERTO" },
+  { value: "nao-isento", label: "NÃO ISENTO" },
+  { value: "nao-pagou", label: "NÃO PAGOU" },
+] as const
 
 export default function AvaliacaoCandidatoMestradoPage() {
   const navigate = useNavigate()
@@ -68,32 +79,18 @@ export default function AvaliacaoCandidatoMestradoPage() {
   useEffect(() => {
     if (candidato) {
       reset({
-        avaliado: candidato.avaliado ? candidato.avaliado : false,
         avaliador1: candidato.avaliador1 ? candidato.avaliador1 : "",
         avaliador2: candidato.avaliador2 ? candidato.avaliador2 : "",
-        area1: candidato.primeiraAreaPreferencia ? candidato.primeiraAreaPreferencia : "",
-        area2: candidato.segundaAreaPreferencia ? candidato.segundaAreaPreferencia : "",
-        cpf: candidato.cpf ? candidato.cpf : "",
-        nome: candidato.nome ? candidato.nome : "",
-        email: candidato.email ? candidato.email : "",
-        cidade: candidato.municipio ? candidato.municipio : "",
-        isencao: candidato.solicitouIsencaoTaxaInscricao === true ? "sim" : "nao",
-        isencaoAprovada: candidato.isencaoAprovada ? "sim" : "nao",
-        GRU: candidato.GRU ? candidato.GRU : "",
-        Homologa: candidato.homologa ? "sim" : "nao",
-        universidade: candidato.nomeUniversidadeGraduacao
-          ? candidato.nomeUniversidadeGraduacao
-          : "",
-        cursoGrad: candidato.nomeCursoGraduacao ? candidato.nomeCursoGraduacao : "",
-        cidadeGrad: candidato.cidadeOndeRealizouGraduacao
-          ? candidato.cidadeOndeRealizouGraduacao
-          : "",
-        especiais: candidato.possuiNecessidadesEspeciais ? "sim" : "nao",
-        cotas: candidato.vagasNegrosPardos ? "sim" : "nao",
-        SUPRA: candidato.vagasSupranumerarias ? "sim" : "nao",
+        solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ?? null,
+        isencaoAprovada: candidato.isencaoAprovada ?? null,
+        gru: candidato.gru ? candidato.gru : "",
+        Homologa: candidato.homologa ? candidato.homologa : "",
+        especiais: candidato.possuiNecessidadesEspeciais ?? null,
+        cotas: candidato.vagasNegrosPardos ?? null,
+        SUPRA: candidato.vagasSupranumerarias ?? null,
         grad: candidato.notas?.grad ? Number(candidato.notas?.grad) : 0,
         area: candidato.notas?.area ? Number(candidato.notas?.area) : 0,
-        enade: candidato.notas?.enade ? Number(candidato.notas?.enade) : 0,
+        enade: Number(candidato.notas?.enade ?? 0),
         a1a2a3a4: candidato.notas?.a1a2a3a4 ? Number(candidato.notas?.a1a2a3a4) : 0,
         b1b2b3b4: candidato.notas?.b1b2b3b4 ? Number(candidato.notas?.b1b2b3b4) : 0,
         icIt: candidato.notas?.icIt ? Number(candidato.notas?.icIt) : 0,
@@ -130,10 +127,10 @@ export default function AvaliacaoCandidatoMestradoPage() {
       enade,
       a1a2a3a4,
       b1b2b3b4,
-      ic_it,
+      icIt,
       poscomp,
-      DISCIPLINA_PÓS_CAPES_6,
-      DISCIPLINA_PÓS_CAPES_3_5,
+      disciplinaPosCapes6Mais,
+      disciplinaPosCapes3a5,
     ] = camposNotaEtapa1
 
     const resultado = calcularMestradoNotaEtapa1({
@@ -142,10 +139,10 @@ export default function AvaliacaoCandidatoMestradoPage() {
       enade: paraNumeroSeguro(enade),
       a1a2a3a4: paraNumeroSeguro(a1a2a3a4),
       b1b2b3b4: paraNumeroSeguro(b1b2b3b4),
-      ic_it: paraNumeroSeguro(ic_it),
+      icIt: paraNumeroSeguro(icIt),
       poscomp: paraNumeroSeguro(poscomp),
-      DISCIPLINA_PÓS_CAPES_6: paraNumeroSeguro(DISCIPLINA_PÓS_CAPES_6),
-      DISCIPLINA_PÓS_CAPES_3_5: paraNumeroSeguro(DISCIPLINA_PÓS_CAPES_3_5),
+      disciplinaPosCapes6Mais: paraNumeroSeguro(disciplinaPosCapes6Mais),
+      disciplinaPosCapes3a5: paraNumeroSeguro(disciplinaPosCapes3a5),
     })
 
     setNota(resultado.pontuacao)
@@ -157,52 +154,50 @@ export default function AvaliacaoCandidatoMestradoPage() {
   async function onSubmit(dados: CandidatoMestradoNotaEtapa1) {
     if (!id) return
 
-    console.log("Dados do formulário:", dados)
-
-    const [candidatoResult, notaResult] = await Promise.allSettled([
-      updateCandidatoMutation.mutateAsync({
-        id,
-        body: {
-          // Se for string vazia (""), envia undefined para o banco de dados ignorar a coluna no UPDATE
-          avaliado: true,
-          avaliador1: dados.avaliador1 || undefined,
-          avaliador2: dados.avaliador2 || undefined,
-          primeiraAreaPreferencia: dados.area1 || undefined,
-          segundaAreaPreferencia: dados.area2 || undefined,
-
-          cpf: dados.cpf,
-          nome: dados.nome,
-          email: dados.email,
-          municipio: dados.cidade,
-          solicitouIsencaoTaxaInscricao: dados.isencao === "sim",
-          isencaoAprovada: dados.isencaoAprovada === "sim",
-          GRU: dados.GRU || undefined,
-          homologa: dados.Homologa || undefined,
-          nomeUniversidadeGraduacao: dados.universidade || undefined,
-          nomeCursoGraduacao: dados.cursoGrad || undefined,
-          cidadeOndeRealizouGraduacao: dados.cidadeGrad || undefined,
-          possuiNecessidadesEspeciais: dados.especiais === "sim",
-          vagasNegrosPardos: dados.cotas === "sim",
-          vagasSupranumerarias: dados.SUPRA === "sim",
-        },
-      }),
-      updateNotaMutation.mutateAsync({
-        id,
-        body: {
-          grad: dados.grad,
-          area: dados.area,
-          enade: dados.enade,
-          a1a2a3a4: dados.a1a2a3a4,
-          b1b2b3b4: dados.b1b2b3b4,
-          icIt: dados.icIt,
-          poscomp: dados.poscomp,
-          disciplinaPosCapes6Mais: dados.disciplinaPosCapes6Mais,
-          disciplinaPosCapes3a5: dados.disciplinaPosCapes3a5,
-        },
-      }),
-    ])
-
-    if (candidatoResult.status === "rejected" || notaResult.status === "rejected") return
+    try {
+      const [candidatoResult, notaResult] = await Promise.allSettled([
+        updateCandidatoMutation.mutateAsync({
+          id,
+          body: {
+            avaliado: true,
+            avaliador1: dados.avaliador1 || undefined,
+            avaliador2: dados.avaliador2 || undefined,
+            solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
+            isencaoAprovada: dados.isencaoAprovada ?? undefined,
+            gru: dados.gru || undefined,
+            homologa: dados.Homologa || undefined,
+            possuiNecessidadesEspeciais: dados.especiais ?? undefined,
+            vagasNegrosPardos: dados.cotas ?? undefined,
+            vagasSupranumerarias: dados.SUPRA ?? undefined,
+          },
+        }),
+        updateNotaMutation.mutateAsync({
+          id,
+          body: {
+            grad: dados.grad,
+            area: dados.area,
+            enade: dados.enade,
+            a1a2a3a4: dados.a1a2a3a4,
+            b1b2b3b4: dados.b1b2b3b4,
+            icIt: dados.icIt,
+            poscomp: dados.poscomp,
+            disciplinaPosCapes6Mais: dados.disciplinaPosCapes6Mais,
+            disciplinaPosCapes3a5: dados.disciplinaPosCapes3a5,
+          },
+        }),
+      ])
+      toast({
+        title: "Avaliação salva com sucesso",
+        description: "A avaliação do candidato de mestrado foi salva com sucesso.",
+      })
+    } catch (error) {
+      toast({
+        title: "Erro ao salvar avaliação",
+        description:
+          "Ocorreu um erro ao salvar a avaliação do candidato de mestrado." +
+          (error instanceof Error ? ` Detalhes: ${error.message}` : ""),
+      })
+    }
   }
   if (isLoading) {
     return (
@@ -232,6 +227,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
     )
   }
 
+  console.log("Candidato:", candidato)
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
@@ -240,15 +236,27 @@ export default function AvaliacaoCandidatoMestradoPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
       </div>
+      <div className="my-4 flex flex-col gap-2 md:my-6">
+        <h1 className="text-2xl font-semibold">{candidato.nome}</h1>
+        <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+          <p>
+            Avalie o candidato: {candidato.nome} - {candidato.email}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Áreas de interesse do candidato:{" "}
+            <span className="font-medium">{candidato.primeiraAreaPreferencia}</span>{" "}
+            {candidato.segundaAreaPreferencia ? ` , ${candidato.segundaAreaPreferencia}` : null}
+          </p>
+          <p>
+            Dados da graduação: {candidato.nomeUniversidadeGraduacao} -{" "}
+            {candidato.nomeCursoGraduacao} - {candidato.cidadeOndeRealizouGraduacao}
+          </p>
+        </div>
+      </div>
 
-      {
-        // AGRUPAR CAMPOS PARA FICAR MAIS CLARO CADA SEÇÂO, por exemplo dados do candidato
-        // REALIZAR CALCULO NO FRONTEND MESMO, PARA APARECER INSTANTANEAMENTE A PONTUAÇÃO E SE FOI APROVADO OU NÃO, SEM PRECISAR FICAR ESPERANDO O BACKEND RESPONDER, PARA DEPOIS MOSTRAR ESSAS INFORMAÇÕES PARA O USUÁRIO
-      }
-
-      <form className="flex flex-col gap-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <form className="flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
         <FieldLegend className="font-bold text-muted-foreground">Avaliadores</FieldLegend>
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">
           {/* Avaliador 1 */}
 
           <Field className="flex flex-col gap-4">
@@ -261,6 +269,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
               type="text"
               id="avaliador1"
             />
+            <FieldError>{errors.avaliador1?.message}</FieldError>
           </Field>
 
           {/* Avaliador 2 */}
@@ -274,119 +283,30 @@ export default function AvaliacaoCandidatoMestradoPage() {
               type="text"
               id="avaliador2"
             />
+            <FieldError>{errors.avaliador2?.message}</FieldError>
           </Field>
         </div>
-        <FieldLegend className="font-bold text-muted-foreground">Áreas de Interesse</FieldLegend>
-
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          {/* Área 1 */}
-
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="area1" className="font-bold text-muted-foreground">
-              ÁREA 1 OPÇÃO
-            </FieldLabel>
-            <Input
-              {...register("area1")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="area1"
-            />
-          </Field>
-
-          {/* Área 2 */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="area2" className="font-bold text-muted-foreground">
-              ÁREA 2 OPÇÃO
-            </FieldLabel>
-            <Input
-              {...register("area2")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="area2"
-            />
-          </Field>
-        </div>
-        <FieldLegend className="font-bold text-muted-foreground">Dados do candidato</FieldLegend>
-
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          {/* ID 
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="id" className="font-bold text-muted-foreground">
-              ID
-            </FieldLabel>
-            <Input
-              {...register("id")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="id"
-              />
-          </Field>
-              */}
-
-          {/* CPF */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="cpf" className="font-bold text-muted-foreground">
-              CPF
-            </FieldLabel>
-            <Input
-              {...register("cpf")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="cpf"
-            />
-          </Field>
-
-          {/* Nome */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="nome" className="font-bold text-muted-foreground">
-              NOME
-            </FieldLabel>
-            <Input
-              {...register("nome")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="nome"
-            />
-          </Field>
-
-          {/* Email */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="email" className="font-bold text-muted-foreground">
-              EMAIL DO CANDIDATO
-            </FieldLabel>
-            <Input
-              {...register("email")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="email"
-              id="email"
-            />
-          </Field>
-
-          {/* Cidade */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="cidade" className="font-bold text-muted-foreground">
-              CIDADE DE RESIDÊNCIA
-            </FieldLabel>
-            <Input
-              {...register("cidade")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="cidade"
-            />
-          </Field>
-        </div>
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mt-4 grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">
           {/* Pediu Isenção */}
           <Controller
             control={control}
-            name="isencao"
+            name="solicitouIsencaoTaxaInscricao"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
-                <FieldLabel htmlFor="isencao" className="font-bold text-muted-foreground">
+                <FieldLabel
+                  htmlFor="solicitouIsencaoTaxaInscricao"
+                  className="font-bold text-muted-foreground"
+                >
                   PEDIU ISENÇÃO?
                 </FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className="w-full max-w-[400px]">
+                <Select
+                  onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
+                  value={field.value === true ? "sim" : "nao"}
+                >
+                  <SelectTrigger
+                    className="w-full max-w-[400px]"
+                    id="solicitouIsencaoTaxaInscricao"
+                  >
                     <SelectValue placeholder="Pediu ISENÇÃO?" />
                   </SelectTrigger>
                   <SelectContent>
@@ -396,6 +316,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FieldError>{errors.solicitouIsencaoTaxaInscricao?.message}</FieldError>
               </Field>
             )}
           />
@@ -409,18 +330,22 @@ export default function AvaliacaoCandidatoMestradoPage() {
                 <FieldLabel htmlFor="isencaoAprovada" className="font-bold text-muted-foreground">
                   ISENÇÃO APROVADA?
                 </FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className="w-full max-w-[400px]">
+                <Select
+                  onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
+                  value={field.value === true ? "sim" : "nao"}
+                >
+                  {" "}
+                  <SelectTrigger className="w-full max-w-[400px]" id="isencaoAprovada">
                     <SelectValue placeholder="Isenção aprovada?" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="sim">Sim</SelectItem>
                       <SelectItem value="nao">Não</SelectItem>
-                      <SelectItem value="nao-solicitou">Não solicitou</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FieldError>{errors.isencaoAprovada?.message}</FieldError>
               </Field>
             )}
           />
@@ -428,97 +353,58 @@ export default function AvaliacaoCandidatoMestradoPage() {
           {/* GRU */}
           <Controller
             control={control}
-            name="GRU"
+            name="gru"
             render={({ field }) => (
               <Field className="flex flex-col gap-4">
-                <FieldLabel htmlFor="GRU" className="font-bold text-muted-foreground">
+                <FieldLabel htmlFor="gru" className="font-bold text-muted-foreground">
                   GRU
                 </FieldLabel>
                 <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className="w-full max-w-[400px]">
+                  <SelectTrigger className="w-full max-w-[400px]" id="gru">
                     <SelectValue placeholder="GRU" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="isento">ISENTO</SelectItem>
-                      <SelectItem value="pago">PAGO</SelectItem>
-                      <SelectItem value="aberto">ABERTO</SelectItem>
-                      <SelectItem value="nao-isento">NAO ISENTO</SelectItem>
-                      <SelectItem value="nao-pagou">NAO PAGOU</SelectItem>
+                      {GRU_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FieldError>{errors.gru?.message}</FieldError>
               </Field>
             )}
           />
-        </div>
 
-        {/* Homologa */}
-        <Controller
-          control={control}
-          name="Homologa"
-          render={({ field }) => (
-            <Field className="flex flex-col gap-4">
-              <FieldLabel htmlFor="Homologa" className="font-bold text-muted-foreground">
-                Homologa?
-              </FieldLabel>
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                <SelectTrigger className="w-full max-w-[400px]">
-                  <SelectValue placeholder="Homologa?" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="sim">SIM</SelectItem>
-                    <SelectItem value="nao">NÃO</SelectItem>
-                    <SelectItem value="nao-solicitou">NÃO SOLICITOU</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
-        />
-        <FieldLegend className="font-bold text-muted-foreground">Dados sobre graduação</FieldLegend>
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-          {/* Universidade */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="universidade" className="font-bold text-muted-foreground">
-              UNIVERSIDADE
-            </FieldLabel>
-            <Input
-              {...register("universidade")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="universidade"
-            />
-          </Field>
-
-          {/* Curso de Graduação */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="cursoGrad" className="font-bold text-muted-foreground">
-              CURSO DE GRADUAÇÃO
-            </FieldLabel>
-            <Input
-              {...register("cursoGrad")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="cursoGrad"
-            />
-          </Field>
-
-          {/* Cidade de Graduação */}
-          <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="cidadeGrad" className="font-bold text-muted-foreground">
-              Cidade de graduação
-            </FieldLabel>
-            <Input
-              {...register("cidadeGrad")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="cidadeGrad"
-            />
-          </Field>
-        </div>
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
+          {/* Homologa */}
+          <Controller
+            control={control}
+            name="Homologa"
+            render={({ field }) => (
+              <Field className="flex flex-col gap-4">
+                <FieldLabel htmlFor="Homologa" className="font-bold text-muted-foreground">
+                  Homologa?
+                </FieldLabel>
+                <Select
+                  onValueChange={(v) => field.onChange(v === "sim" ? "sim" : "nao")}
+                  value={field.value === "sim" ? "sim" : "nao"}
+                >
+                  <SelectTrigger className="w-full max-w-[400px]" id="Homologa">
+                    <SelectValue placeholder="Homologa?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="sim">SIM</SelectItem>
+                      <SelectItem value="nao">NÃO</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FieldError>{errors.Homologa?.message}</FieldError>
+              </Field>
+            )}
+          />
           {/* Especiais */}
           <Controller
             control={control}
@@ -528,18 +414,21 @@ export default function AvaliacaoCandidatoMestradoPage() {
                 <FieldLabel htmlFor="especiais" className="font-bold text-muted-foreground">
                   Especiais
                 </FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className="w-full max-w-[400px]">
+                <Select
+                  onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
+                  value={field.value === true ? "sim" : "nao"}
+                >
+                  <SelectTrigger className="w-full max-w-[400px]" id="especiais">
                     <SelectValue placeholder="Especiais?" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="sim">SIM</SelectItem>
                       <SelectItem value="nao">NÃO</SelectItem>
-                      <SelectItem value="nao-solicitou">NÃO SOLICITOU</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FieldError>{errors.especiais?.message}</FieldError>
               </Field>
             )}
           />
@@ -553,18 +442,21 @@ export default function AvaliacaoCandidatoMestradoPage() {
                 <FieldLabel htmlFor="cotas" className="font-bold text-muted-foreground">
                   Cotas (Negros)
                 </FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className="w-full max-w-[400px]">
+                <Select
+                  onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
+                  value={field.value === true ? "sim" : "nao"}
+                >
+                  <SelectTrigger className="w-full max-w-[400px]" id="cotas">
                     <SelectValue placeholder="Cotas (Negros)?" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="sim">SIM</SelectItem>
                       <SelectItem value="nao">NÃO</SelectItem>
-                      <SelectItem value="nao-solicitou">NÃO SOLICITOU</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FieldError>{errors.cotas?.message}</FieldError>
               </Field>
             )}
           />
@@ -578,24 +470,27 @@ export default function AvaliacaoCandidatoMestradoPage() {
                 <FieldLabel htmlFor="SUPRA" className="font-bold text-muted-foreground">
                   SUPRA
                 </FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className="w-full max-w-[400px]">
+                <Select
+                  onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
+                  value={field.value === true ? "sim" : "nao"}
+                >
+                  <SelectTrigger className="w-full max-w-[400px]" id="SUPRA">
                     <SelectValue placeholder="SUPRA?" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="sim">SIM</SelectItem>
                       <SelectItem value="nao">NÃO</SelectItem>
-                      <SelectItem value="nao-solicitou">NÃO SOLICITOU</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FieldError>{errors.SUPRA?.message}</FieldError>
               </Field>
             )}
           />
         </div>
         <FieldLegend className="font-bold text-muted-foreground">Notas da Etapa I</FieldLegend>
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">
           {/* GRAD */}
           <Field className="flex flex-col gap-4">
             <FieldLabel htmlFor="grad" className="font-bold text-muted-foreground">
@@ -608,6 +503,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
               step="0.01"
               id="grad"
             />
+            <FieldError>{errors.grad?.message}</FieldError>
           </Field>
 
           {/* AREA */}
@@ -622,38 +518,44 @@ export default function AvaliacaoCandidatoMestradoPage() {
               step="0.01"
               id="area"
             />
+            <FieldError>{errors.area?.message}</FieldError>
           </Field>
 
           {/* ENADE */}
           <Controller
             control={control}
             name="enade"
-            render={({ field }) => (
-              <Field className="flex flex-col gap-4">
-                <FieldLabel htmlFor="enade" className="font-bold text-muted-foreground">
-                  ENADE
-                </FieldLabel>
-                <Select
-                  onValueChange={(v) => field.onChange(Number(v))}
-                  value={field.value ? String(field.value) : ""}
-                >
-                  <SelectTrigger className="w-full max-w-[400px]">
-                    <SelectValue placeholder="Enade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          />
+            render={({ field }) => {
+              console.log("enade field:", field.value, typeof field.value)
+              return (
+                <Field className="flex flex-col gap-4">
+                  <FieldLabel htmlFor="enade" className="font-bold text-muted-foreground">
+                    ENADE
+                  </FieldLabel>
 
+                  <Select
+                    value={field.value?.toString() ?? ""}
+                    onValueChange={(value) => field.onChange(Number(value))}
+                  >
+                    <SelectTrigger className="w-full max-w-[400px]" id="enade">
+                      <SelectValue placeholder="ENADE" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldError>{errors.enade?.message}</FieldError>
+                </Field>
+              )
+            }}
+          />
           {/* A1A2A3A4 */}
           <Field className="flex flex-col gap-4">
             <FieldLabel htmlFor="a1a2a3a4" className="font-bold text-muted-foreground">
@@ -665,6 +567,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
               type="number"
               id="a1a2a3a4"
             />
+            <FieldError>{errors.a1a2a3a4?.message}</FieldError>
           </Field>
 
           {/* B1B2B3B4 */}
@@ -678,6 +581,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
               type="number"
               id="b1b2b3b4"
             />
+            <FieldError>{errors.b1b2b3b4?.message}</FieldError>
           </Field>
 
           {/* IC/IT */}
@@ -686,11 +590,12 @@ export default function AvaliacaoCandidatoMestradoPage() {
               IC/IT
             </FieldLabel>
             <Input
-              {...register("ic_it", { valueAsNumber: true })}
+              {...register("icIt", { valueAsNumber: true })}
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="number"
               id="icit"
             />
+            <FieldError>{errors.icIt?.message}</FieldError>
           </Field>
 
           {/* POSCOMP */}
@@ -704,6 +609,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
               type="number"
               id="poscomp"
             />
+            <FieldError>{errors.poscomp?.message}</FieldError>
           </Field>
 
           {/* DISCIPLINA PÓS CAPES 6+ */}
@@ -712,11 +618,12 @@ export default function AvaliacaoCandidatoMestradoPage() {
               DISCIPLINA PÓS CAPES 6+
             </FieldLabel>
             <Input
-              {...register("DISCIPLINA_PÓS_CAPES_6", { valueAsNumber: true })}
+              {...register("disciplinaPosCapes6Mais", { valueAsNumber: true })}
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="number"
               id="posCapes"
             />
+            <FieldError>{errors.disciplinaPosCapes6Mais?.message}</FieldError>
           </Field>
 
           {/* DISCIPLINA PÓS CAPES 3 a 5 */}
@@ -725,11 +632,12 @@ export default function AvaliacaoCandidatoMestradoPage() {
               DISCIPLINA PÓS CAPES 3 a 5
             </FieldLabel>
             <Input
-              {...register("DISCIPLINA_PÓS_CAPES_3_5", { valueAsNumber: true })}
+              {...register("disciplinaPosCapes3a5", { valueAsNumber: true })}
               className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
               type="number"
               id="posCapes3a5"
             />
+            <FieldError>{errors.disciplinaPosCapes3a5?.message}</FieldError>
           </Field>
         </div>
 

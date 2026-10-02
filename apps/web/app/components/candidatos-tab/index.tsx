@@ -46,10 +46,6 @@ export function HomeTableCandidatos({
 }: HomeTableCandidatosProps) {
   const navigate = useNavigate()
 
-  const goToViewCandidato = (tipo: "mestrado" | "doutorado", candidatoId: string | number) => {
-    navigate(href(`/${tipo}/:id`, { id: String(candidatoId) }))
-  }
-
   const [candidatos, setCandidatos] = useState(data)
 
   const removerAcentos = (str: string) => {
@@ -127,10 +123,7 @@ export function HomeTableCandidatos({
                 className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr] items-center gap-4 rounded-lg border border-transparent bg-white px-0 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:grid-cols-4 md:px-4"
                 key={candidato.id}
                 onClick={() =>
-                  goToViewCandidato(
-                    candidato.tipoCurso.toLowerCase() as "mestrado" | "doutorado",
-                    candidato.id
-                  )
+                  navigate(`/${candidato.tipoCurso.toLocaleLowerCase()}/${candidato.id}`)
                 }
               >
                 <div className="col-span-1 font-medium text-neutral-900">{candidato.nome}</div>

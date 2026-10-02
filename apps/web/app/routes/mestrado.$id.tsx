@@ -61,7 +61,7 @@ export default function CandidatoMestradoPage() {
 
   if (candidatoQuery.isLoading || userQuery.isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
         <div className="flex h-48 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" />
@@ -78,7 +78,7 @@ export default function CandidatoMestradoPage() {
 
   if (!candidato) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
         <div className="py-20 text-center">
           <h2 className="mb-4 text-2xl font-semibold">Candidato não encontrado</h2>
@@ -99,7 +99,7 @@ export default function CandidatoMestradoPage() {
 
   const SECTION_CONTENT: {
     title: string
-    content: { label: string; value: string | boolean | Date | null }[]
+    content: { label: string; value: string | boolean | Date | null | undefined; link?: boolean }[]
   }[] = [
     {
       title: "INFORMAÇÕES DA CANDIDATURA",
@@ -190,6 +190,91 @@ export default function CandidatoMestradoPage() {
         { label: "Município", value: candidato.endereco?.municipio },
       ],
     },
+    {
+      title: "INFORMAÇÕES DE CANDIDATURA",
+      content: [
+        {
+          label: "Comprovação de inscrição",
+          value: candidato.comprovantePagTaxaInscricao,
+          link: true,
+        },
+        { label: "Cópia do CPF", value: candidato.copiaCPF, link: true },
+        {
+          label: "Cópia do Passaporte ou RNE (Apenas para estrangeiros)",
+          value: candidato.copiaPassaporteOuRNE || "Não informado",
+          link: !!candidato.copiaPassaporteOuRNE,
+        },
+        {
+          label: "Solicitou isenção do pagamento da taxa de inscrição",
+          value: formatBoolean(candidato.solicitouIsencaoTaxaInscricao),
+        },
+        {
+          label: "Cópia do diploma ou declaração de concluinte",
+          value: candidato.copiaDiplomaGraduacao,
+          link: true,
+        },
+        {
+          label: "Histórico da graduação",
+          value: candidato.historicoGraduacao,
+          link: true,
+        },
+        {
+          label: "Nome da faculdade/universidade onde realizou graduação",
+          value: candidato.nomeUniversidadeGraduacao,
+        },
+        {
+          label: "Nome do curso de graduação",
+          value: candidato.nomeCursoGraduacao,
+        },
+        {
+          label: "Cidade onde realizou a graduação",
+          value: candidato.cidadeOndeRealizouGraduacao,
+        },
+        {
+          label: "Link para ENADE do curso de graduação",
+          value: candidato.enadeDoCursoGraduacao,
+          link: true,
+        },
+        {
+          label: "Valor do ENADE",
+          value: candidato.valorDoEnadeDoCursoGraduacao,
+        },
+        {
+          label: "Comprovações de pesquisa",
+          value: candidato.comprovacaoPesquisas,
+          link: true,
+        },
+        {
+          label: "Nota do POSCOMP (opcional)",
+          value: candidato.notaPOSCOMP || "Não informado",
+        },
+        {
+          label: "Possui necessidades especiais",
+          value: formatBoolean(candidato.possuiNecessidadesEspeciais),
+        },
+        {
+          label: "Concorre às vagas reservadas para negros(as) - preto(as) e pardos(as)",
+          value: formatBoolean(candidato.vagasNegrosPardos),
+        },
+        {
+          label: "Concorre às vagas supranumerárias",
+          value: formatBoolean(candidato.vagasSupranumerarias),
+        },
+        {
+          label: "Primeira área de preferencia: ",
+          value: candidato.primeiraAreaPreferencia || "Não informado",
+        },
+        {
+          label: "Segunda área de preferencia: ",
+          value: candidato.segundaAreaPreferencia || "Não informado",
+        },
+        {
+          label: "Carta de motivação",
+          value: candidato.cartaMotivacao || "Não informado",
+          link: true,
+        },
+      ],
+    },
   ]
 
   return (
@@ -202,27 +287,29 @@ export default function CandidatoMestradoPage() {
           </Button>
         </div>
         <div className="flex flex-col items-center gap-4 self-stretch md:flex-row">
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Outras opções</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="flex flex-col gap-2 p-4">
-                    <li>
-                      <Button className="w-full bg-white text-black hover:bg-black/10">
-                        Editar candidato
-                      </Button>
-                    </li>
-                    <li>
-                      <Button className="w-full bg-red-500 hover:bg-red-600">
-                        Excluir candidato
-                      </Button>
-                    </li>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+          {user?.role === "ADMIN" && (
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Outras opções</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="flex flex-col gap-2 p-4">
+                      <li>
+                        <Button className="w-full bg-white text-black hover:bg-black/10">
+                          Editar candidato
+                        </Button>
+                      </li>
+                      <li>
+                        <Button className="w-full bg-red-500 hover:bg-red-600">
+                          Excluir candidato
+                        </Button>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          )}
           <Button
             className="bg-blue-500 hover:bg-blue-600"
             onClick={() => navigate(`/mestrado/${candidato.id}/avaliacao`)}
@@ -231,172 +318,15 @@ export default function CandidatoMestradoPage() {
           </Button>
         </div>
       </div>
-      <div className="my-2 flex flex-col gap-2 md:my-6">
+      <div className="my-4 flex flex-col gap-2 md:my-6">
         <h1 className="text-2xl font-semibold">{candidato.nome}</h1>
         <div className="flex flex-row gap-1 text-sm text-muted-foreground">
-          <p>Candidato de mestrado</p>
-          {"-"}
-          <p>Linha de pesquisa: {candidato.linhaPesquisa}</p>
+          <p>Candidato de mestrado - Linha de pesquisa: {candidato.linhaPesquisa}</p>
         </div>
       </div>
       {SECTION_CONTENT.map((section, index) => (
         <SectionContent key={index} title={section.title} content={section.content} />
       ))}
-
-      <section>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="text-muted-foreground">Comprovante de inscrição</h3>
-            <a
-              href={candidato.comprovantePagTaxaInscricao}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold hover:underline"
-            >
-              {candidato.comprovantePagTaxaInscricao}
-            </a>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Cópia CPF</h3>
-            <a
-              href={candidato.copiaCPF}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold hover:underline"
-            >
-              {candidato.copiaCPF}
-            </a>
-          </div>
-          {candidato.copiaPassaporteOuRNE && (
-            <div>
-              <h3 className="text-muted-foreground">
-                Cópia Passaporte ou RNE (Apenas para estrageiros)
-              </h3>
-
-              <a
-                href={candidato.copiaPassaporteOuRNE}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold hover:underline"
-              >
-                {candidato.copiaPassaporteOuRNE}
-              </a>
-            </div>
-          )}
-          <div>
-            <h3 className="text-muted-foreground">Isenção pagamento taxa de inscrição </h3>
-            <p className="font-semibold">
-              {formatBoolean(candidato.solicitouIsencaoTaxaInscricao)}
-            </p>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Cópia diploma ou declaração de concluinte</h3>
-            <a
-              href={candidato.copiaDiplomaGraduacao}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold hover:underline"
-            >
-              {candidato.copiaDiplomaGraduacao}
-            </a>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Histórico Graduação</h3>
-            <a
-              href={candidato.historicoGraduacao}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold hover:underline"
-            >
-              {candidato.historicoGraduacao}
-            </a>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">
-              Nome da universidade/faculdade onde realizou graduação
-            </h3>
-            <p className="font-semibold">{candidato.nomeUniversidadeGraduacao}</p>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Nome do curso de graduação</h3>
-            <p className="font-semibold">{candidato.nomeCursoGraduacao}</p>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Cidade onde realizou graduação</h3>
-            <p className="font-semibold">{candidato.cidadeOndeRealizouGraduacao}</p>
-          </div>
-
-          <div>
-            <h3 className="text-muted-foreground">Link para ENADE do curso de graduação</h3>
-            <a
-              href={candidato.enadeDoCursoGraduacao}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold hover:underline"
-            >
-              {candidato.enadeDoCursoGraduacao}
-            </a>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Valor do ENADE</h3>
-            <p className="font-semibold">{candidato.valorDoEnadeDoCursoGraduacao}</p>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Comprovações de pesquisa</h3>
-            <a
-              href={candidato.comprovacaoPesquisas}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold hover:underline"
-            >
-              {candidato.comprovacaoPesquisas}
-            </a>
-          </div>
-          {candidato.notaPOSCOMP && (
-            <div>
-              <h3 className="text-muted-foreground">Nota do POSCOMP (opcional)</h3>
-              <p className="font-semibold">{candidato.notaPOSCOMP}</p>
-            </div>
-          )}
-          <div>
-            <h3 className="text-muted-foreground">Possui necessidades especiais</h3>
-            <p className="font-semibold">{formatBoolean(candidato.possuiNecessidadesEspeciais)}</p>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">
-              Concorre às vagas reservadas para negros(as) - preto(as) e pardos(as)
-            </h3>
-            <p className="font-semibold">{formatBoolean(candidato.vagasNegrosPardos)}</p>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Concorre às vagas supranumerárias</h3>
-            <p className="font-semibold">{formatBoolean(candidato.vagasSupranumerarias)}</p>
-          </div>
-
-          <div>
-            <h3 className="text-muted-foreground">Primeira área de preferência</h3>
-            <p className="font-semibold">{candidato.primeiraAreaPreferencia}</p>
-          </div>
-          <div>
-            <h3 className="text-muted-foreground">Segunda área de preferência</h3>
-            <p className="font-semibold">{candidato.segundaAreaPreferencia}</p>
-          </div>
-
-          <div>
-            <h3 className="text-muted-foreground">Carta de motivação</h3>
-            <a
-              href={candidato.cartaMotivacao}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold hover:underline"
-            >
-              {candidato.cartaMotivacao}
-            </a>
-          </div>
-        </div>
-
-        <hr className="my-4" />
-      </section>
     </div>
   )
 }
