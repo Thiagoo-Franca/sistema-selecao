@@ -7,9 +7,20 @@ import { HomeTableCandidatos } from "."
 interface CandidatosTabProps {
   type: "mestrado" | "doutorado"
   searchQuery: string
+  orderBy?: string
+  order?: "asc" | "desc"
+  setOrderBy?: (value: string) => void
+  setOrder?: (value: "asc" | "desc") => void
 }
 
-export default function CandidatoTab({ type, searchQuery }: CandidatosTabProps) {
+export default function CandidatoTab({
+  type,
+  searchQuery,
+  orderBy,
+  order,
+  setOrderBy,
+  setOrder,
+}: CandidatosTabProps) {
   const candidatosQuery = useCandidatos()
   const candidatosData =
     type === "mestrado" ? candidatosQuery.data?.mestrado : candidatosQuery.data?.doutorado
@@ -34,7 +45,14 @@ export default function CandidatoTab({ type, searchQuery }: CandidatosTabProps) 
 
   return (
     <TabsContent value={`candidatos-${type}`}>
-      <HomeTableCandidatos data={candidatosData} searchQuery={searchQuery} />
+      <HomeTableCandidatos
+        data={candidatosData}
+        searchQuery={searchQuery}
+        orderBy={orderBy}
+        order={order}
+        setOrderBy={setOrderBy}
+        setOrder={setOrder}
+      />
     </TabsContent>
   )
 }

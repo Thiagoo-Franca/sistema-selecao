@@ -43,6 +43,8 @@ const TABS: { value: string; label: string }[] = [
 export default function Home() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useQueryParamsState("searchQuery", "")
+  const [orderBy, setOrderBy] = useQueryParamsState("orderBy", "nome")
+  const [order, setOrder] = useQueryParamsState<"asc" | "desc">("order", "asc")
   const [activeTab, setActiveTab] = useQueryParamsState("activeTab", "candidatos")
 
   const userQuery = useUser()
@@ -59,11 +61,14 @@ export default function Home() {
             placeholder="Buscar por nome…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full self-stretch sm:w-[400px]"
+            className="w-full self-stretch md:max-w-lg"
           />
         </div>
         {!!userQuery.data && isTeacherOrAdmin && (
-          <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => navigate("/")}>
+          <Button
+            className="w-full bg-blue-500 hover:bg-blue-600 md:max-w-xs"
+            onClick={() => navigate("/")}
+          >
             Adicionar Candidato
           </Button>
         )}
@@ -71,13 +76,13 @@ export default function Home() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full hover:cursor-pointer">
         <div className="flexitems-center mb-4 justify-between">
-          <TabsList className="flex w-full max-w-[400px] flex-row items-center justify-between gap-2 rounded-lg border-none bg-white p-1 shadow-none">
+          <TabsList className="flex w-full flex-row items-center justify-between gap-2 rounded-lg border-none bg-white p-1 shadow-none md:max-w-lg">
             {isTeacherOrAdmin &&
               TABS.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="w-full rounded-lg bg-white px-4 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 data-[state=active]:shadow-md"
+                  className="w-full rounded-lg bg-white px-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 data-[state=active]:shadow-md md:px-4"
                 >
                   {tab.label}
                 </TabsTrigger>
@@ -86,9 +91,29 @@ export default function Home() {
         </div>
         {isTeacherOrAdmin && (
           <>
-            <CandidatosTab searchQuery={searchQuery} />
-            <CandidatoTab type="mestrado" searchQuery={searchQuery} />
-            <CandidatoTab type="doutorado" searchQuery={searchQuery} />
+            <CandidatosTab
+              searchQuery={searchQuery}
+              orderBy={orderBy}
+              order={order}
+              setOrderBy={setOrderBy}
+              setOrder={setOrder}
+            />
+            <CandidatoTab
+              type="mestrado"
+              searchQuery={searchQuery}
+              orderBy={orderBy}
+              order={order}
+              setOrderBy={setOrderBy}
+              setOrder={setOrder}
+            />
+            <CandidatoTab
+              type="doutorado"
+              searchQuery={searchQuery}
+              orderBy={orderBy}
+              order={order}
+              setOrderBy={setOrderBy}
+              setOrder={setOrder}
+            />
           </>
         )}
       </Tabs>
