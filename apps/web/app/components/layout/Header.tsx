@@ -194,7 +194,7 @@ function RightSideButtons(props: RightSideButtonsProps) {
             <DropdownMenuItem asChild>
               <Link
                 to="/profile"
-                className="flex w-full items-center focus:bg-accent focus:text-accent-foreground"
+                className="flex w-full items-center hover:cursor-pointer focus:bg-accent focus:text-accent-foreground"
                 onClick={() => (document.activeElement as HTMLElement)?.blur?.()}
               >
                 <User className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -208,7 +208,7 @@ function RightSideButtons(props: RightSideButtonsProps) {
                 <DropdownMenuItem asChild>
                   <Link
                     to="/admin/users"
-                    className="flex w-full items-center focus:bg-accent focus:text-accent-foreground"
+                    className="flex w-full items-center hover:cursor-pointer focus:bg-accent focus:text-accent-foreground"
                     onClick={() => (document.activeElement as HTMLElement)?.blur?.()}
                   >
                     <Users className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -221,7 +221,7 @@ function RightSideButtons(props: RightSideButtonsProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleLogout}
-              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              className="text-destructive hover:cursor-pointer focus:bg-destructive/10 focus:text-destructive"
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   handleLogout()

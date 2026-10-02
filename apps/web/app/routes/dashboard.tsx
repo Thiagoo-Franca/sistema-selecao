@@ -1,48 +1,52 @@
 "use client"
 
+import { useState } from "react"
+import { useUser } from "@/services/useUser"
+import { useNavigate } from "react-router"
+import type { Route } from "./+types/dashboard"
+
 import { Header } from "@/components/layout/Header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useQueryParamsState } from "@/hooks/use-query-param-state"
-import { useUser } from "@/services/useUser"
-import { useState } from "react"
-import { useNavigate } from "react-router"
-
-import type { Route } from "./+types/dashboard"
 import { CandidatosTab } from "@/components/candidatos-tab"
 import CandidatoTab from "@/components/candidatos-tab/candidato-tab"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Dashboard" }]
+export const meta: Route.MetaFunction = () => [
+  {
+    title: "SISSEL - Dashboard",
+    "script:ld+json": JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Dashboard",
+      description: "Página de dashboard do sistema de seleção de candidatos.",
+    }),
+  },
+]
+
+const TABS: { value: string; label: string }[] = [
+  {
+    value: "candidatos",
+    label: "Todos os Candidatos",
+  },
+  {
+    value: "candidatos-mestrado",
+    label: "Mestrado",
+  },
+  {
+    value: "candidatos-doutorado",
+    label: "Doutorado",
+  },
+]
 
 export default function Home() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useQueryParamsState("searchQuery", "")
   const [activeTab, setActiveTab] = useQueryParamsState("activeTab", "candidatos")
-  const [sortField, setSortField] = useState<string>("")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
   const userQuery = useUser()
   const isTeacherOrAdmin = userQuery.data?.role === "TEACHER" || userQuery.data?.role === "ADMIN"
-
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      // Toggle order if same field
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-    } else {
-      // New field, default to ascending
-      setSortField(field)
-      setSortOrder("asc")
-    }
-  }
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -52,83 +56,39 @@ export default function Home() {
           <Input
             id="candidato-search"
             type="search"
-            placeholder="Buscar candidatos..."
+            placeholder="Buscar por nome…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full self-stretch sm:w-[400px]"
           />
         </div>
         {!!userQuery.data && isTeacherOrAdmin && (
-          <Button onClick={() => navigate("/")}>Adicionar Candidato</Button>
+          <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => navigate("/")}>
+            Adicionar Candidato
+          </Button>
         )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full hover:cursor-pointer">
-        <div className="mb-4 flex items-center justify-between">
-          <TabsList>
-            {isTeacherOrAdmin && (
-              <>
+        <div className="flexitems-center mb-4 justify-between">
+          <TabsList className="flex w-full max-w-[400px] flex-row items-center justify-between gap-2 rounded-lg border-none bg-white p-1 shadow-none">
+            {isTeacherOrAdmin &&
+              TABS.map((tab) => (
                 <TabsTrigger
-                  value="candidatos"
-                  data-testid="all-candidatos-tab"
-                  className="hover:cursor-pointer"
+                  key={tab.value}
+                  value={tab.value}
+                  className="w-full rounded-lg bg-white px-4 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 data-[state=active]:shadow-md"
                 >
-                  Candidatos
+                  {tab.label}
                 </TabsTrigger>
-                <TabsTrigger value="candidatos-mestrado" data-testid="candidatos-mestrado-tab">
-                  Candidatos Mestrado
-                </TabsTrigger>
-                <TabsTrigger value="candidatos-doutorado" data-testid="candidatos-doutorado-tab">
-                  Candidatos Doutorado
-                </TabsTrigger>
-              </>
-            )}
+              ))}
           </TabsList>
-          <div className="flex items-center gap-2 whitespace-nowrap">
-            <span className="text-sm text-muted-foreground">Exibir:</span>
-            <Select
-              value={rowsPerPage.toString()}
-              onValueChange={(value) => {
-                setRowsPerPage(Number(value))
-              }}
-            >
-              <SelectTrigger className="w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="30">30</SelectItem>
-              </SelectContent>
-            </Select>
-            <span className="text-sm text-muted-foreground">linhas</span>
-          </div>
         </div>
         {isTeacherOrAdmin && (
           <>
-            <CandidatosTab
-              searchQuery={searchQuery}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              onSort={handleSort}
-              rowsPerPage={rowsPerPage}
-            />
-            <CandidatoTab
-              type="mestrado"
-              searchQuery={searchQuery}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              onSort={handleSort}
-              rowsPerPage={rowsPerPage}
-            />
-            <CandidatoTab
-              type="doutorado"
-              searchQuery={searchQuery}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              onSort={handleSort}
-              rowsPerPage={rowsPerPage}
-            />
+            <CandidatosTab searchQuery={searchQuery} />
+            <CandidatoTab type="mestrado" searchQuery={searchQuery} />
+            <CandidatoTab type="doutorado" searchQuery={searchQuery} />
           </>
         )}
       </Tabs>

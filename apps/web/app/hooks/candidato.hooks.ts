@@ -1,17 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import apiClient from "@/services/apiClient"
 import { rpcReturn } from "@/lib/utils"
-import type { CandidatoDoutorado, CandidatoMestrado } from "@/routes/_index"
 import { toast } from "sonner"
+import type { CandidatoDoutoradoComRelacoes, CandidatoMestradoComRelacoes } from "@tcc/server"
 
 export const useCandidatos = () => {
   return useQuery({
-    queryKey: ["candidatos"],
+    queryKey: ["candidatos", "mestrado", "doutorado"],
     queryFn: async () => {
       const response = await apiClient.candidato.$get()
       return rpcReturn(response) as unknown as {
-        mestrado: CandidatoMestrado[]
-        doutorado: CandidatoDoutorado[]
+        mestrado: CandidatoMestradoComRelacoes[]
+        doutorado: CandidatoDoutoradoComRelacoes[]
       }
     },
   })
@@ -55,7 +55,7 @@ export const useUpdateCandidatoDoutorado = () => {
       return rpcReturn(response) as unknown as CandidatoDoutorado
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.invalidateQueries({ queryKey: ["candidatos", "doutorado"] })
       queryClient.invalidateQueries({ queryKey: ["candidatoDoutorado", variables.id] })
       toast.success("Candidato de doutorado atualizado com sucesso!")
     },
@@ -77,7 +77,7 @@ export const useUpdateCandidatoDoutoradoNota = () => {
       return rpcReturn(response) as unknown as NotaDoutorado | any
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.invalidateQueries({ queryKey: ["candidatos", "doutorado"] })
       queryClient.invalidateQueries({ queryKey: ["candidatoDoutorado", variables.id] })
       toast.success("Nota do candidato de doutorado atualizada com sucesso!")
     },

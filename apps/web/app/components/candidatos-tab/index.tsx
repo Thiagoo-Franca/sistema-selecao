@@ -6,15 +6,31 @@ import type { CandidatoDoutoradoComRelacoes, CandidatoMestradoComRelacoes } from
 import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react"
 import CandidatosTabLoading from "./candidatos-tab-loading"
 import CandidatosTabError from "./candidatos-tab-error"
+import { useEffect, useState } from "react"
+
+const LABELS = [
+  {
+    key: "nome",
+    label: "Nome",
+  },
+  {
+    key: "tipoCurso",
+    label: "Nível",
+  },
+  {
+    key: "linhaPesquisa",
+    label: "Linha de Pesquisa",
+  },
+  {
+    key: "avaliado",
+    label: "Avaliado",
+  },
+]
 
 export function HomeTableCandidatos(props: {
   data: (CandidatoMestradoComRelacoes | CandidatoDoutoradoComRelacoes)[]
   type?: "mestrado" | "doutorado"
   searchQuery: string
-  sortField: string
-  sortOrder: "asc" | "desc"
-  onSort: (field: string) => void
-  rowsPerPage?: number
 }) {
   const navigate = useNavigate()
 
@@ -22,6 +38,12 @@ export function HomeTableCandidatos(props: {
     navigate(href(`/${tipo}/:id`, { id: String(candidatoId) }))
   }
 
+  const [candidatos, setCandidatos] = useState(props.data)
+
+  const removerAcentos = (str: string) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  }
+  /*
   const getSortIcon = (columnKey: string) => {
     if (props.sortField !== columnKey) {
       return <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
@@ -31,25 +53,43 @@ export function HomeTableCandidatos(props: {
     ) : (
       <ChevronDown className="h-4 w-4" />
     )
-  }
+  }*/
 
   const truncateText = (text: string, maxLength: number) => {
     if (text.length <= maxLength) return text
     return text.substring(0, maxLength) + "..."
   }
-  const paginatedData = props.data
+
+  useEffect(() => {
+    if (!props.searchQuery) {
+      setCandidatos(props.data)
+    } else {
+      const buscaSemAcentos = removerAcentos(props.searchQuery.toLowerCase())
+
+      const filteredData = props.data.filter((candidato) => {
+        const nomeSemAcentos = removerAcentos(candidato.nome.toLowerCase())
+
+        const linhaPesquisaSemAcentos = removerAcentos(candidato.linhaPesquisa.toLowerCase())
+
+        return (
+          nomeSemAcentos.includes(buscaSemAcentos) ||
+          linhaPesquisaSemAcentos.includes(buscaSemAcentos)
+        )
+      })
+      setCandidatos(filteredData)
+    }
+  }, [props.searchQuery, props.data])
 
   return (
     <div className="flex w-full flex-col gap-2">
       <div className="grid w-full grid-cols-4 gap-4 px-8 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        <div>Nome</div>
-        <div>Nível</div>
-        <div>Status</div>
-        <div>Avaliado</div>
+        {LABELS.map((label) => (
+          <div key={label.key}>{label.label}</div>
+        ))}
       </div>
       <div className="flex w-full flex-col gap-2">
-        {paginatedData?.length > 0 ? (
-          paginatedData.map((candidato) => (
+        {candidatos?.length > 0 ? (
+          candidatos.map((candidato) => (
             <div
               className="grid w-full cursor-pointer grid-cols-4 items-center gap-4 rounded-lg border border-transparent bg-white px-4 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md"
               key={candidato.id}
@@ -64,9 +104,11 @@ export function HomeTableCandidatos(props: {
               <span className="inline-flex w-fit items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700">
                 {candidato.tipoCurso}
               </span>
-              <div className="col-span-1 text-sm text-neutral-500">{candidato.status}</div>
-              <div className="col-span-1 text-sm text-neutral-500">
-                {candidato.avaliado ? "Sim" : "Não"}
+              <div className="col-span-1 text-sm text-neutral-500">{candidato.linhaPesquisa}</div>
+              <div
+                className={`col-span-1 text-sm ${candidato.avaliado ? "text-green-600" : "text-gray-500"}`}
+              >
+                {candidato.avaliado ? "Sim" : "Pendente"}
               </div>
             </div>
           ))
@@ -82,10 +124,6 @@ export function HomeTableCandidatos(props: {
 
 interface CandidatosTabProps {
   searchQuery: string
-  sortField: string
-  sortOrder: "asc" | "desc"
-  onSort: (field: string) => void
-  rowsPerPage: number
 }
 
 export function CandidatosTab(props: CandidatosTabProps) {
@@ -114,14 +152,7 @@ export function CandidatosTab(props: CandidatosTabProps) {
 
   return (
     <TabsContent value="candidatos">
-      <HomeTableCandidatos
-        data={candidatos}
-        searchQuery={props.searchQuery}
-        sortField={props.sortField}
-        sortOrder={props.sortOrder}
-        rowsPerPage={props.rowsPerPage}
-        onSort={props.onSort}
-      />
+      <HomeTableCandidatos data={candidatos} searchQuery={props.searchQuery} />
     </TabsContent>
   )
 }

@@ -15,7 +15,7 @@ export const meta: Route.MetaFunction = () => [
 
 export default function LandingPage() {
   return (
-    <main className="flex h-screen items-center justify-center bg-white from-[#a8edbb] to-[#22d3ee] md:bg-gradient-to-r">
+    <main className="flex h-screen animate-gradient-move items-center justify-center bg-white bg-[size:500%_500%] md:bg-[linear-gradient(to_right,_#F0523E,_#F8D65A,_#7BCB61,_#70C8EA)]">
       <div className="flex w-full flex-col gap-6 rounded-lg bg-white p-6 md:h-auto md:w-1/2 md:gap-4 md:shadow-lg lg:w-1/3">
         <section className="flex flex-col items-center justify-center gap-4">
           <img
