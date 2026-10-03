@@ -1,3 +1,5 @@
+/*
+
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { match } from "ts-pattern";
@@ -5,7 +7,7 @@ import { AppError } from "../../error.js";
 import { generateCalendarInvites } from "../../services/calendar.service.js";
 import { sendCalendarInviteEmail } from "../../services/email.service.js";
 import type { AppVariables } from "../../types.js";
-import { getBancaById } from "../banca/banca.service.js";
+// import { getBancaById } from "../banca/banca.service.js";
 import { sendCalendarInviteSchema } from "./calendar.schema.js";
 
 export const calendarRoutes = new Hono<{ Variables: AppVariables }>()
@@ -135,3 +137,4 @@ export const calendarRoutes = new Hono<{ Variables: AppVariables }>()
       return c.json({ message: "Convite enviado com sucesso" });
     },
   );
+*/

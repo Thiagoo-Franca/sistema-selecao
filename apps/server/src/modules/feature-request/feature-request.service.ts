@@ -1,8 +1,10 @@
+/*
+
 import { desc, eq, sql } from "drizzle-orm";
 import { type Context } from "hono";
 import {
-  featureRequests,
-  featureRequestVotes,
+  //  featureRequests,
+  //  featureRequestVotes,
   Users,
 } from "../../database/schema.js";
 import { type AppResult, err, ok } from "../../result.js";
@@ -180,3 +182,4 @@ export const checkIfUserVoted = async (
     return err({ type: "database_error", error });
   }
 };
+*/

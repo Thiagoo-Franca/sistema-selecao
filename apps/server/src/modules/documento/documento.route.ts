@@ -1,3 +1,5 @@
+/*
+
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -24,3 +26,5 @@ export const documentoRoutes = new Hono<{ Variables: AppVariables }>().get(
 );
 // PDF generation endpoints removed - moved to frontend
 // Frontend will use /info/:bancaId to get data and generate PDFs client-side
+
+*/

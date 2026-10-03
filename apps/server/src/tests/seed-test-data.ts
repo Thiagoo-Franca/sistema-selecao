@@ -1,18 +1,19 @@
 import {
-  Bancas,
-  Cursos,
+  //  Bancas,
+  //  Cursos,
   Users,
-  usuariosBancas,
+  //  usuariosBancas,
   type Database,
-  type InsertBanca,
-  type InsertCurso,
+  //  type InsertBanca,
+  //  type InsertCurso,
   type InsertUser,
-  type InsertUsuarioBanca,
+  //  type InsertUsuarioBanca,
 } from "../database/index.js";
 
 export const seedTestData = async (db: Database) => {
   console.log("🌱 Seeding test data...");
 
+  /*
   try {
     // Seed Cursos
     const cursosData: InsertCurso[] = [
@@ -30,64 +31,65 @@ export const seedTestData = async (db: Database) => {
 
     await db.insert(Cursos).values(cursosData).onConflictDoNothing();
     console.log("✅ Cursos seeded");
+*/
 
-    // Seed Users
-    const adminPasswordHash =
-      "$2b$10$Tc0O8gfKK5QQNCEOaZzQ2uFaekULT0N3mWxaZ/aVp0q29zNBYN79S";
-    const usersData: InsertUser[] = [
-      {
-        id: 1,
-        passwordHash: adminPasswordHash,
-        email: "admin@test.com",
-        nome: "Admin Test",
-        school: "UFBA",
-        academicTitle: "Doutor",
-        matricula: "ADM123",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        role: "ADMIN",
-      },
-      {
-        id: 2,
-        passwordHash: adminPasswordHash,
-        email: "teacher@test.com",
-        nome: "Professor Test",
-        school: "UFBA",
-        academicTitle: "Doutor",
-        matricula: "PROF123",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        role: "TEACHER",
-      },
-      {
-        id: 3,
-        passwordHash: adminPasswordHash,
-        email: "student@test.com",
-        nome: "Aluno Test",
-        school: "UFBA",
-        academicTitle: "Bacharel",
-        matricula: "STU123",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        role: "STUDENT",
-      },
-      {
-        id: 4,
-        passwordHash: adminPasswordHash,
-        email: "teacher2@test.com",
-        nome: "Professor Test 2",
-        school: "UFBA",
-        academicTitle: "Doutor",
-        matricula: "PROF456",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        role: "TEACHER",
-      },
-    ];
+  // Seed Users
+  const adminPasswordHash =
+    "$2b$10$Tc0O8gfKK5QQNCEOaZzQ2uFaekULT0N3mWxaZ/aVp0q29zNBYN79S";
+  const usersData: InsertUser[] = [
+    {
+      id: 1,
+      passwordHash: adminPasswordHash,
+      email: "admin@test.com",
+      nome: "Admin Test",
+      school: "UFBA",
+      academicTitle: "Doutor",
+      matricula: "ADM123",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      role: "ADMIN",
+    },
+    {
+      id: 2,
+      passwordHash: adminPasswordHash,
+      email: "teacher@test.com",
+      nome: "Professor Test",
+      school: "UFBA",
+      academicTitle: "Doutor",
+      matricula: "PROF123",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      role: "TEACHER",
+    },
+    {
+      id: 3,
+      passwordHash: adminPasswordHash,
+      email: "student@test.com",
+      nome: "Aluno Test",
+      school: "UFBA",
+      academicTitle: "Bacharel",
+      matricula: "STU123",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      role: "STUDENT",
+    },
+    {
+      id: 4,
+      passwordHash: adminPasswordHash,
+      email: "teacher2@test.com",
+      nome: "Professor Test 2",
+      school: "UFBA",
+      academicTitle: "Doutor",
+      matricula: "PROF456",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      role: "TEACHER",
+    },
+  ];
 
-    await db.insert(Users).values(usersData).onConflictDoNothing();
-    console.log("✅ Users seeded");
-
+  await db.insert(Users).values(usersData).onConflictDoNothing();
+  console.log("✅ Users seeded");
+  /*
     // Seed Bancas - Some upcoming and some past
     const now = new Date();
     const futureDate1 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
@@ -235,9 +237,8 @@ export const seedTestData = async (db: Database) => {
         );
       }
     });
-
     await db
-      .insert(usuariosBancas)
+    .insert(usuariosBancas)
       .values(usuariosBancasData)
       .onConflictDoNothing();
     console.log("✅ UsuarioBanca relations seeded");
@@ -251,4 +252,5 @@ export const seedTestData = async (db: Database) => {
     console.error("❌ Error seeding test data:", error);
     throw error;
   }
+  */
 };

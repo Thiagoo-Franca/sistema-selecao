@@ -1,3 +1,5 @@
+/*
+
 import "dotenv/config";
 
 import {
@@ -1145,3 +1147,4 @@ const usuariosBancasData: InsertUsuarioBanca[] = [
   { id: 14, usuarioId: 17, bancaId: 6, role: "orientador", nota: null },
   { id: 15, usuarioId: 84, bancaId: 6, role: "avaliador", nota: "4" }, // Original nota was double 4
 ];
+*/

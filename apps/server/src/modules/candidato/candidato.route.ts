@@ -10,6 +10,7 @@ import {
 } from "./candidato.schema.js";
 import { match } from "ts-pattern";
 import { AppError } from "../../error.js";
+import { checkRole } from "../auth/auth.middleware.js";
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   .get("/", async (c) => {
@@ -168,4 +169,25 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
 
       return c.json(result.data);
     },
-  );
+  )
+  .delete("/mestrado/:id", checkRole(["ADMIN"]), async (c) => {
+    const id = c.req.param("id");
+    const result = await service.deleteCandidatoMestrado(c, id);
+
+    if (!result.ok) {
+      console.error(
+        `Error deleting mestrado candidato with ID ${id}:`,
+        result.error,
+      );
+      throw match(result.error)
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao deletar candidato"),
+        )
+        .exhaustive();
+    }
+    if (!result.data) {
+      throw new AppError(404, "Candidato não encontrado");
+    }
+    return c.json({ message: "Candidato de mestrado deletado com sucesso" });
+  });

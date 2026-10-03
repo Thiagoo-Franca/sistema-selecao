@@ -2,6 +2,7 @@ import { z } from "zod";
 import { AreaPreferencia } from "../../database/index.js";
 
 const updateCandidatoMestradoSchema = z.object({
+  avaliado: z.boolean().optional(),
   avaliador1: z.string().nullable().optional(),
   avaliador2: z.string().nullable().optional(),
   primeiraAreaPreferencia: z.enum(AreaPreferencia.enumValues).optional(),
@@ -22,6 +23,7 @@ const updateCandidatoMestradoSchema = z.object({
   cidadeGrad: z.string().optional(),
   possuiNecessidadesEspeciais: z.boolean().optional(),
   vagasNegrosPardos: z.boolean().optional(),
+
   vagasSupranumerarias: z.boolean().optional(),
 });
 
@@ -36,10 +38,12 @@ const updateNotaMestradoSchema = z.object({
   poscomp: z.number().optional(),
   disciplinaPosCapes6Mais: z.number().optional(),
   disciplinaPosCapes3a5: z.number().optional(),
+  notaEtapaII: z.number().optional(),
 });
 export { updateNotaMestradoSchema };
 
 const updateCandidatoDoutoradoSchema = z.object({
+  avaliado: z.boolean().optional(),
   avaliador1: z.string().nullable().optional(),
   avaliador2: z.string().nullable().optional(),
   cpf: z
@@ -55,7 +59,7 @@ const updateCandidatoDoutoradoSchema = z.object({
   areaPgcomp: z.string().optional(),
   orientadorMestrado: z.string().optional(),
   primeiraOpcaoOrientador: z.string().optional(),
-  segundaOpcaoOrientador: z.string().optional(),
+  segundaOpcaoOrientador: z.string().nullable().optional(),
   terceiraOpcaoOrientador: z.string().optional(),
   possuiNecessidadesEspeciais: z.boolean().optional(),
   vagasNegrosPardos: z.boolean().optional(),

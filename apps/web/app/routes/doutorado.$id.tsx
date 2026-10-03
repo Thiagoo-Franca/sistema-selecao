@@ -1,13 +1,10 @@
 import { useNavigate, useParams } from "react-router"
-import type { Route } from "./+types/banca.$id"
 import { useToast } from "@/hooks"
 import { useState } from "react"
-import { useCandidatoDoutoradoById, useCandidatoMestradoById } from "@/hooks/candidato.hooks"
+import { useCandidatoDoutoradoById } from "@/hooks/candidato.hooks"
 import { useUser } from "@/services/useUser"
 import { Header } from "@/components/layout/Header"
-import { ArrowLeft, Loader2, Table } from "lucide-react"
-import { TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { CandidatoMestrado } from "./_index"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -17,24 +14,20 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
 import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
-import { formatDate } from "./mestrado.$id"
+import type { Route } from "./+types/dashboard"
+import { formatBoolean, formatDate } from "@/lib/format"
 
-function formatBoolean(valor: boolean) {
-  if (valor) {
-    return "Sim"
-  }
-  return "Não"
-}
-
-export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Candidato de doutorado" }]
+export const meta: Route.MetaFunction = () => [
+  { title: "SISSEL - Candidato de doutorado", description: "Página do candidato de doutorado" },
+]
 
 export default function CandidatoDoutoradoPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string | undefined }>()
   const { toast } = useToast()
-  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const userQuery = useUser()
+
   const userLoading = userQuery.isLoading
   if (id === undefined) {
     navigate("/")
@@ -54,54 +47,33 @@ export default function CandidatoDoutoradoPage() {
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
         <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
         </div>
       </div>
     )
   }
 
-  // const bancaQuery = useBanca(id)
-  // const deleteBancaMutation = useDeleteBanca()
-  // const toggleVisibilityMutation = useToggleBancaVisibility(id)
-
-  function handleCopy(text: string, id: string) {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedId(id)
-      toast({
-        title: "Copiado!",
-        description: "Texto copiado para a área de transferência.",
-      })
-      setTimeout(() => setCopiedId(null), 2000)
-    })
-  }
-
-  const candidato: CandidatoDoutoradoComRelacoes | null | undefined = candidatoQuery.data
-  console.log("Candidato: ", candidato)
-
-  //const orientador = banca?.membros?.find((m) => m.role === "orientador")?.usuario
-  // const aluno = banca?.membros?.find((m) => m.role === "aluno")?.usuario
-
-  const isAdmin = user?.role === "ADMIN"
-  // const isOrientador = !!user?.id && user?.id === orientador?.id
-  const canEdit = isAdmin // || isOrientador
-
   const isLoading = candidatoQuery.isLoading || userLoading
   const error = candidatoQuery.error || userQuery.error
-
-  // const membrosBanca = banca?.membros
 
   if (isLoading) {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
         <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
         </div>
       </div>
     )
   }
 
-  if (!candidato) {
+  if (error) {
+    toast.error("Erro ao carregar candidato de doutorado")
+    navigate("/")
+    return null
+  }
+
+  if (!candidatoQuery.data) {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
@@ -117,6 +89,8 @@ export default function CandidatoDoutoradoPage() {
       </div>
     )
   }
+
+  const candidato = candidatoQuery.data as CandidatoDoutoradoComRelacoes
 
   return (
     <div className="container mx-auto p-4 md:p-8">

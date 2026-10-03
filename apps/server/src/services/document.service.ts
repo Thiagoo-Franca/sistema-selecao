@@ -1,3 +1,4 @@
+/*
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import type { InferResultType } from "../database/index.js";
@@ -112,3 +113,5 @@ export const checkUserAccessToBanca = async (
 
 // PDF generation moved to frontend
 // Backend now only provides data via getBancaInfoForDocument function
+
+*/

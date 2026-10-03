@@ -1,17 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import apiClient from "@/services/apiClient"
 import { rpcReturn } from "@/lib/utils"
-import type { CandidatoDoutorado, CandidatoMestrado } from "@/routes/_index"
 import { toast } from "sonner"
+import type {
+  CandidatoDoutoradoComRelacoes,
+  CandidatoMestradoComRelacoes,
+  InsertNotaMestrado,
+} from "@tcc/server"
 
 export const useCandidatos = () => {
   return useQuery({
-    queryKey: ["candidatos"],
+    queryKey: ["candidatos", "mestrado", "doutorado"],
     queryFn: async () => {
       const response = await apiClient.candidato.$get()
       return rpcReturn(response) as unknown as {
-        mestrado: CandidatoMestrado[]
-        doutorado: CandidatoDoutorado[]
+        mestrado: CandidatoMestradoComRelacoes[]
+        doutorado: CandidatoDoutoradoComRelacoes[]
       }
     },
   })
@@ -55,7 +59,7 @@ export const useUpdateCandidatoDoutorado = () => {
       return rpcReturn(response) as unknown as CandidatoDoutorado
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.invalidateQueries({ queryKey: ["candidatos", "doutorado"] })
       queryClient.invalidateQueries({ queryKey: ["candidatoDoutorado", variables.id] })
       toast.success("Candidato de doutorado atualizado com sucesso!")
     },
@@ -77,7 +81,7 @@ export const useUpdateCandidatoDoutoradoNota = () => {
       return rpcReturn(response) as unknown as NotaDoutorado | any
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.invalidateQueries({ queryKey: ["candidatos", "doutorado"] })
       queryClient.invalidateQueries({ queryKey: ["candidatoDoutorado", variables.id] })
       toast.success("Nota do candidato de doutorado atualizada com sucesso!")
     },
@@ -113,12 +117,12 @@ export const useUpdateCandidatoMestradoNota = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: { id: string | number; body: Partial<NotaMestrado | any> }) => {
+    mutationFn: async (data: { id: string | number; body: Partial<InsertNotaMestrado | any> }) => {
       const response = await apiClient.candidato.mestrado[":id"].nota.$patch({
         param: { id: String(data.id) },
         json: data.body,
       })
-      return rpcReturn(response) as unknown as NotaMestrado | any
+      return rpcReturn(response) as unknown as InsertNotaMestrado | any
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["candidatos"] })
@@ -127,6 +131,27 @@ export const useUpdateCandidatoMestradoNota = () => {
     },
     onError: (error) => {
       toast.error(`Erro ao atualizar nota do candidato de mestrado: ${error.message}`)
+    },
+  })
+}
+
+export const useDeleteCandidatoMestrado = (id: string | number) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.candidato.mestrado[":id"].$delete({
+        param: { id: String(id) },
+      })
+      return rpcReturn(response) as unknown as { message: string }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.removeQueries({ queryKey: ["candidatoMestrado", id] })
+      toast.success("Candidato de mestrado deletado com sucesso!")
+    },
+    onError: (error) => {
+      toast.error(`Erro ao deletar candidato de mestrado: ${error.message}`)
     },
   })
 }

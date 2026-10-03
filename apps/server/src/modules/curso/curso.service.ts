@@ -1,3 +1,5 @@
+/*
+
 import { type Context } from "hono";
 import { Cursos } from "../../database/schema.js";
 import { type AppResult, err, ok } from "../../result.js";
@@ -17,3 +19,5 @@ export const getAllCursos = async (
     return err({ type: "database_error", error });
   }
 };
+
+*/

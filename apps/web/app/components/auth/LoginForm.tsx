@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { AlertCircle } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { useNavigate } from "react-router"
 
 interface LoginFormValues {
   email: string
@@ -23,6 +24,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
   const [showPasswordReset, setShowPasswordReset] = useState(false)
   const loginMutation = useLoginMutation()
   const requestPasswordResetMutation = useRequestPasswordResetMutation()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -50,19 +52,19 @@ export function LoginForm(p: { onSuccess?: () => void }) {
 
   const onSubmit = (data: LoginFormValues) => {
     loginMutation.mutate(
-      { json: { email: data.email, password: data.password } },
+      { json: data },
       {
         onSuccess: (res) => {
           toast({
-            title: "Login realizado com sucesso ✅",
-            description: "Você foi redirecionado para a página inicial",
+            title: "Login realizado com sucesso",
+            description: "Você foi redirecionado para o dashboard",
           })
           useUser.setData(queryClient, res.user)
-          p.onSuccess?.()
+          navigate("/dashboard")
         },
-        onError: (error) => {
+        onError: () => {
           toast({
-            title: "Erro ao fazer login ❌",
+            title: "Erro ao fazer login",
             description: "Ocorreu um erro ao fazer login",
           })
         },
@@ -72,11 +74,11 @@ export function LoginForm(p: { onSuccess?: () => void }) {
 
   const onPasswordResetSubmit = (data: PasswordResetFormValues) => {
     requestPasswordResetMutation.mutate(
-      { json: { email: data.email } },
+      { json: data },
       {
         onSuccess: () => {
           toast({
-            title: "Email enviado com sucesso ✅",
+            title: "Email enviado com sucesso",
             description: "Verifique sua caixa de entrada para redefinir sua senha",
           })
           resetForm()
@@ -84,7 +86,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
         },
         onError: (error) => {
           toast({
-            title: "Erro ao enviar email ❌",
+            title: "Erro ao enviar email",
             description: error.message || "Ocorreu um erro ao enviar o email",
           })
         },
@@ -94,14 +96,17 @@ export function LoginForm(p: { onSuccess?: () => void }) {
 
   if (showPasswordReset) {
     return (
-      <form onSubmit={handleResetSubmit(onPasswordResetSubmit)} className="grid gap-4">
-        <div className="mb-4 text-center">
+      <form
+        onSubmit={handleResetSubmit(onPasswordResetSubmit)}
+        className="flex flex-col gap-6 md:gap-4"
+      >
+        <div className="text-center">
           <h3 className="text-lg font-semibold">Recuperar Senha</h3>
           <p className="text-sm text-muted-foreground">
             Digite seu email para receber instruções de recuperação
           </p>
         </div>
-        <div className="grid gap-2">
+        <div className="flex flex-col gap-2">
           <Label htmlFor="reset-email">Email</Label>
           <Input
             id="reset-email"
@@ -120,7 +125,11 @@ export function LoginForm(p: { onSuccess?: () => void }) {
             <p className="mt-1 text-sm text-destructive">{resetErrors.email.message}</p>
           )}
         </div>
-        <Button type="submit" className="w-full" disabled={requestPasswordResetMutation.isPending}>
+        <Button
+          type="submit"
+          className="hover:to-blue-00 w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50"
+          disabled={requestPasswordResetMutation.isPending}
+        >
           {requestPasswordResetMutation.isPending ? "Enviando..." : "Enviar Email de Recuperação"}
         </Button>
         <Button
@@ -137,7 +146,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 md:gap-4">
       {loginMutation.error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -149,7 +158,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
           </AlertDescription>
         </Alert>
       )}
-      <div className="grid gap-2">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="login-email">Email</Label>
         <Input
           id="login-email"
@@ -166,11 +175,13 @@ export function LoginForm(p: { onSuccess?: () => void }) {
         />
         {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>}
       </div>
-      <div className="grid gap-2">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="login-password">Senha</Label>
         <Input
           id="login-password"
           type="password"
+          className=""
+          placeholder="********"
           disabled={loginMutation.isPending}
           {...register("password", {
             required: "Senha é obrigatória",
@@ -180,7 +191,11 @@ export function LoginForm(p: { onSuccess?: () => void }) {
           <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
         )}
       </div>
-      <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+      <Button
+        type="submit"
+        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50"
+        disabled={loginMutation.isPending}
+      >
         {loginMutation.isPending ? "Entrando..." : "Entrar"}
       </Button>
       <Button

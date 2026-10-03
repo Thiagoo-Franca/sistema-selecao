@@ -9,6 +9,7 @@ import {
   text,
   timestamp,
   unique,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 export const tipoCursoEnum = pgEnum("tipo_curso", ["Doutorado", "Mestrado"]);
@@ -53,7 +54,7 @@ export type SelectEndereco = typeof Endereco.$inferSelect;
 
 export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
-  idCandidato: integer("id_candidato")
+  idCandidato: uuid("id_candidato")
     .notNull()
     .references(() => CandidatoMestrado.id)
     .unique(), // garante 1:1 com o candidato
@@ -71,6 +72,7 @@ export const NotaMestrado = pgTable("nota_mestrado", {
   disciplinaPosCapes3a5: numeric("disciplina_pos_capes_3_a_5", {
     mode: "number",
   }),
+  notaEtapaII: numeric("nota_etapa_ii", { mode: "number" }),
 });
 
 export type InsertNotaMestrado = typeof NotaMestrado.$inferInsert;
@@ -78,7 +80,7 @@ export type SelectNotaMestrado = typeof NotaMestrado.$inferSelect;
 
 export const NotaDoutorado = pgTable("nota_doutorado", {
   id: serial("id").primaryKey(),
-  idCandidato: integer("id_candidato")
+  idCandidato: uuid("id_candidato")
     .notNull()
     .references(() => CandidatoDoutorado.id)
     .unique(), // garante 1:1 com o candidato
@@ -96,7 +98,7 @@ export type SelectNotaDoutorado = typeof NotaDoutorado.$inferSelect;
 
 const candidatoBaseColumns = {
   // dados da inscricao
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   // The candidate tables share these columns, so their unique constraints
   // must be explicitly table-scoped (constraint names are schema-global).
   numeroInscricao: text("numero_inscricao").notNull(),
@@ -273,6 +275,7 @@ export const Users = pgTable("usuario", {
 export type InsertUser = typeof Users.$inferInsert;
 export type SelectUser = typeof Users.$inferSelect;
 
+/*
 export const Cursos = pgTable("cursos", {
   id: serial("id").primaryKey(),
   nome: text("nome").notNull(),
@@ -281,7 +284,9 @@ export const Cursos = pgTable("cursos", {
 });
 export type InsertCurso = typeof Cursos.$inferInsert;
 export type SelectCurso = typeof Cursos.$inferSelect;
+*/
 
+/*
 export const modalidadeEnum = pgEnum("modalidade", ["remoto", "local"]);
 export const Bancas = pgTable(
   "banca",
@@ -324,7 +329,9 @@ export const Bancas = pgTable(
 );
 export type InsertBanca = typeof Bancas.$inferInsert;
 export type SelectBanca = typeof Bancas.$inferSelect;
+*/
 
+/*
 export const documentos = pgTable("documento", {
   id: serial("id").primaryKey(),
   path: text("path"), // Caminho no storage
@@ -332,7 +339,9 @@ export const documentos = pgTable("documento", {
   status: text("status").notNull(), // Ex: 'pending', 'approved', 'rejected'
   dataSubmissao: timestamp("data_submissao").notNull(),
 });
+*/
 
+/*
 export const invites = pgTable("invite", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => Users.id), // Quem foi convidado (opcional até aceitar?)
@@ -347,6 +356,8 @@ export const invites = pgTable("invite", {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 });
+
+*/
 
 export const resetPasswords = pgTable("reset_password", {
   id: serial("id").primaryKey(),
@@ -398,6 +409,7 @@ export const studentInvitations = pgTable("student_invitation", {
 export type InsertStudentInvitation = typeof studentInvitations.$inferInsert;
 export type SelectStudentInvitation = typeof studentInvitations.$inferSelect;
 
+/*
 export const sessions = pgTable("session", {
   id: text("id").primaryKey(), // Aumentado tamanho
   userId: integer("user_id").references(() => Users.id), // Associar sessão a usuário
@@ -405,13 +417,17 @@ export const sessions = pgTable("session", {
   data: text("data"), // Usar text em vez de blob para JSON
   // token_access removido, geralmente gerenciado por JWT em header
 });
-
+*/
+/*
 export const usuarioBancaRole = pgEnum("usuario_banca_role", [
   "orientador",
   "coorientador",
   "aluno",
   "avaliador",
 ]);
+*/
+
+/*
 export const usuariosBancas = pgTable("usuario_banca", {
   id: serial("id").primaryKey(),
   usuarioId: integer("id_usuario")
@@ -426,7 +442,9 @@ export const usuariosBancas = pgTable("usuario_banca", {
 });
 export type InsertUsuarioBanca = typeof usuariosBancas.$inferInsert;
 export type SelectUsuarioBanca = typeof usuariosBancas.$inferSelect;
+*/
 
+/*
 export const bancasDocumentos = pgTable("banca_documento", {
   id: serial("id").primaryKey(),
   bancaId: integer("id_banca")
@@ -437,6 +455,7 @@ export const bancasDocumentos = pgTable("banca_documento", {
     .notNull()
     .references(() => documentos.id),
 });
+*/
 
 // === FEEDBACK SYSTEM ===
 
@@ -460,6 +479,7 @@ export const feedbackSubmissions = pgTable("feedback_submission", {
 export type InsertFeedbackSubmission = typeof feedbackSubmissions.$inferInsert;
 export type SelectFeedbackSubmission = typeof feedbackSubmissions.$inferSelect;
 
+/*
 export const featureRequests = pgTable("feature_request", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
@@ -474,7 +494,8 @@ export const featureRequests = pgTable("feature_request", {
 });
 export type InsertFeatureRequest = typeof featureRequests.$inferInsert;
 export type SelectFeatureRequest = typeof featureRequests.$inferSelect;
-
+*/
+/*
 export const featureRequestVotes = pgTable(
   "feature_request_vote",
   {
@@ -500,9 +521,10 @@ export const featureRequestVotes = pgTable(
 );
 export type InsertFeatureRequestVote = typeof featureRequestVotes.$inferInsert;
 export type SelectFeatureRequestVote = typeof featureRequestVotes.$inferSelect;
-
+*/
 // === DEFINIÇÃO DAS RELAÇÕES ===
 
+/*
 export const usuariosRelations = relations(Users, ({ one, many }) => ({
   sessoes: many(sessions),
   convitesEnviados: many(invites), // Se um admin pode convidar
@@ -515,11 +537,15 @@ export const usuariosRelations = relations(Users, ({ one, many }) => ({
   featureRequestVotes: many(featureRequestVotes),
   // bancasCriadas: many(bancas), // Descomentar se banca.userId for mantido
 }));
+*/
 
+/*
 export const cursosRelations = relations(Cursos, ({ many }) => ({
   bancas: many(Bancas),
 }));
+*/
 
+/*
 export const bancasRelations = relations(Bancas, ({ one, many }) => ({
   orientador: one(Users, {
     fields: [Bancas.orientadorId],
@@ -537,11 +563,13 @@ export const bancasRelations = relations(Bancas, ({ one, many }) => ({
   documentosAssociados: many(bancasDocumentos), // Relação com documentos através da tabela de junção
   convites: many(invites), // Convites relacionados a esta banca
 }));
-
+*/
+/*
 export const documentosRelations = relations(documentos, ({ many }) => ({
   bancasAssociadas: many(bancasDocumentos), // Relação através da tabela de junção
 }));
-
+*/
+/*
 export const invitesRelations = relations(invites, ({ one }) => ({
   usuarioConvidado: one(Users, {
     fields: [invites.userId],
@@ -552,14 +580,14 @@ export const invitesRelations = relations(invites, ({ one }) => ({
     references: [Bancas.id],
   }),
 }));
-
+*/
 export const resetPasswordsRelations = relations(resetPasswords, ({ one }) => ({
   usuario: one(Users, {
     fields: [resetPasswords.userId],
     references: [Users.id],
   }),
 }));
-
+/*
 export const teacherInvitationsRelations = relations(
   teacherInvitations,
   ({ one }) => ({
@@ -573,14 +601,17 @@ export const teacherInvitationsRelations = relations(
     }),
   }),
 );
+*/
 
+/*
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   usuario: one(Users, {
     fields: [sessions.userId],
     references: [Users.id],
   }),
 }));
-
+*/
+/*
 // Relações para a tabela de junção usuario_banca
 export const usuariosBancasRelations = relations(usuariosBancas, ({ one }) => ({
   usuario: one(Users, {
@@ -592,7 +623,8 @@ export const usuariosBancasRelations = relations(usuariosBancas, ({ one }) => ({
     references: [Bancas.id],
   }),
 }));
-
+*/
+/*
 // Relações para a tabela de junção banca_documento
 export const bancasDocumentosRelations = relations(
   bancasDocumentos,
@@ -607,7 +639,7 @@ export const bancasDocumentosRelations = relations(
     }),
   }),
 );
-
+*/
 // Relações para feedback submissions
 export const feedbackSubmissionsRelations = relations(
   feedbackSubmissions,
@@ -618,7 +650,7 @@ export const feedbackSubmissionsRelations = relations(
     }),
   }),
 );
-
+/*
 // Relações para feature requests
 export const featureRequestsRelations = relations(
   featureRequests,
@@ -630,7 +662,8 @@ export const featureRequestsRelations = relations(
     votes: many(featureRequestVotes),
   }),
 );
-
+*/
+/*
 // Relações para feature request votes
 export const featureRequestVotesRelations = relations(
   featureRequestVotes,
@@ -645,3 +678,4 @@ export const featureRequestVotesRelations = relations(
     }),
   }),
 );
+*/

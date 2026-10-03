@@ -1,3 +1,5 @@
+/*
+
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { match } from "ts-pattern";
@@ -91,3 +93,5 @@ export const featureRequestRoutes = new Hono<{ Variables: AppVariables }>()
 
     return c.json(result.data);
   });
+
+  */

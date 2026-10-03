@@ -1,3 +1,5 @@
+/*
+
 import type { Context } from "hono";
 import { match } from "ts-pattern";
 import { AppError } from "../../error.js";
@@ -25,3 +27,5 @@ export const getBancaDocumentInfo = async (
 
   return result.data;
 };
+
+*/

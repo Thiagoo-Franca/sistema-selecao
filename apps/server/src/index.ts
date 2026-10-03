@@ -7,12 +7,12 @@ import { AppError } from "./error.js";
 import { appJwt } from "./modules/auth/auth.middleware.js";
 import { authRoutes } from "./modules/auth/auth.route.js";
 import { JWT_SECRET } from "./modules/auth/jwt.js";
-import { bancaRoutes } from "./modules/banca/banca.route.js";
-import { calendarRoutes } from "./modules/calendar/calendar.route.js";
-import { cursoRoutes } from "./modules/curso/curso.route.js";
-import { documentoRoutes } from "./modules/documento/documento.route.js";
+// import { bancaRoutes } from "./modules/banca/banca.route.js";
+// import { calendarRoutes } from "./modules/calendar/calendar.route.js";
+// import { cursoRoutes } from "./modules/curso/curso.route.js";
+// import { documentoRoutes } from "./modules/documento/documento.route.js";
 import { feedbackRoutes } from "./modules/feedback/feedback.route.js";
-import { featureRequestRoutes } from "./modules/feature-request/feature-request.route.js";
+// import { featureRequestRoutes } from "./modules/feature-request/feature-request.route.js";
 import { usuarioRoutes } from "./modules/usuario/usuario.route.js";
 import studentInvitationRoutes from "./modules/student-invitation/student-invitation.route.js";
 import teacherInvitationRoutes from "./modules/teacher-invitation/teacher-invitation.route.js";
@@ -31,12 +31,12 @@ export const app = (
     .use("*", appJwt({ secret: JWT_SECRET }))
     .route("/auth", authRoutes)
     .route("/candidato", candidatoRoutes)
-    .route("/banca", bancaRoutes)
-    .route("/calendar", calendarRoutes)
-    .route("/cursos", cursoRoutes)
-    .route("/documentos", documentoRoutes)
+    // .route("/banca", bancaRoutes)
+    //.route("/calendar", calendarRoutes)
+    //.route("/cursos", cursoRoutes)
+    //.route("/documentos", documentoRoutes)
     .route("/feedback", feedbackRoutes)
-    .route("/feature-request", featureRequestRoutes)
+    //.route("/feature-request", featureRequestRoutes)
     .route("/usuario", usuarioRoutes)
     .route("/teacher-invitation", teacherInvitationRoutes)
     .route("/student-invitation", studentInvitationRoutes)

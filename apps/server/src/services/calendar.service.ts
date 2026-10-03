@@ -1,15 +1,23 @@
-import { type SelectBanca, type SelectUser } from "../database/schema.js";
+/*
 
+import {
+  //type SelectBanca,
+  type SelectUser,
+} from "../database/schema.js";
+
+/*
 interface BancaCalendarData {
   banca: SelectBanca & {
     orientador?: SelectUser;
     curso?: { nome: string };
   };
 }
-
+*/
 /**
  * Generate ICS (iCalendar) file content for a banca defense
- */
+ *
+
+/*
 export const generateICSContent = (data: BancaCalendarData): string => {
   const { banca } = data;
 
@@ -74,7 +82,7 @@ export const generateICSContent = (data: BancaCalendarData): string => {
 
 /**
  * Generate Google Calendar URL for a banca defense
- */
+ *
 export const generateGoogleCalendarUrl = (data: BancaCalendarData): string => {
   const { banca } = data;
 
@@ -121,7 +129,7 @@ export const generateGoogleCalendarUrl = (data: BancaCalendarData): string => {
 
 /**
  * Generate Outlook Calendar URL for a banca defense
- */
+ *
 export const generateOutlookUrl = (data: BancaCalendarData): string => {
   const { banca } = data;
 
@@ -161,7 +169,7 @@ export const generateOutlookUrl = (data: BancaCalendarData): string => {
 
 /**
  * Generate calendar invite data for different providers
- */
+ *
 export const generateCalendarInvites = (data: BancaCalendarData) => {
   return {
     ics: generateICSContent(data),
@@ -169,3 +177,5 @@ export const generateCalendarInvites = (data: BancaCalendarData) => {
     outlookUrl: generateOutlookUrl(data),
   };
 };
+
+*/

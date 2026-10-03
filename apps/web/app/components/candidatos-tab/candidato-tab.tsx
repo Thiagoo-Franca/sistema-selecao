@@ -7,19 +7,19 @@ import { HomeTableCandidatos } from "."
 interface CandidatosTabProps {
   type: "mestrado" | "doutorado"
   searchQuery: string
-  sortField: string
-  sortOrder: "asc" | "desc"
-  onSort: (field: string) => void
-  rowsPerPage: number
+  orderBy?: string
+  order?: "asc" | "desc"
+  setOrderBy?: (value: string) => void
+  setOrder?: (value: "asc" | "desc") => void
 }
 
 export default function CandidatoTab({
   type,
   searchQuery,
-  sortField,
-  sortOrder,
-  onSort,
-  rowsPerPage,
+  orderBy,
+  order,
+  setOrderBy,
+  setOrder,
 }: CandidatosTabProps) {
   const candidatosQuery = useCandidatos()
   const candidatosData =
@@ -33,15 +33,25 @@ export default function CandidatoTab({
     return <CandidatosTabError error={candidatosQuery.error} />
   }
 
+  if (!candidatosData || candidatosData.length === 0) {
+    return (
+      <TabsContent value={`candidatos-${type}`}>
+        <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
+          Nenhum candidato encontrado.
+        </div>
+      </TabsContent>
+    )
+  }
+
   return (
     <TabsContent value={`candidatos-${type}`}>
       <HomeTableCandidatos
         data={candidatosData}
         searchQuery={searchQuery}
-        sortField={sortField}
-        sortOrder={sortOrder}
-        rowsPerPage={rowsPerPage}
-        onSort={onSort}
+        orderBy={orderBy}
+        order={order}
+        setOrderBy={setOrderBy}
+        setOrder={setOrder}
       />
     </TabsContent>
   )

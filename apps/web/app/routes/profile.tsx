@@ -153,7 +153,7 @@ export default function ProfilePage() {
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
         <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
         </div>
       </div>
     )
@@ -246,7 +246,7 @@ export default function ProfilePage() {
                     >
                       {updateProfileMutation.isPending ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
                           Atualizando...
                         </>
                       ) : (
@@ -340,7 +340,7 @@ export default function ProfilePage() {
                     >
                       {changePasswordMutation.isPending ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
                           Alterando senha...
                         </>
                       ) : (

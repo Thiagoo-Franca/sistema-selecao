@@ -3,22 +3,27 @@ import "dotenv/config";
 import {
   CandidatoDoutorado,
   CandidatoMestrado,
-  Cursos,
+  // Cursos,
   db,
   Endereco,
-  type InsertCurso,
+  // type InsertCurso,
   type InsertUser,
   NotaDoutorado,
   NotaMestrado,
   Users,
 } from "../src/database";
+import bcrypt from "bcryptjs";
 
+/*
 const cursosData: InsertCurso[] = [
   { id: 1, nome: "Ciência da Computação", sigla: "BCC" },
   { id: 2, nome: "Sistemas de Informação", sigla: "BSI" },
 ];
+*/
+const passwordHash = await bcrypt.hash("admin@admin.com", 10);
 
 const UserData: InsertUser[] = [
+  /*
   {
     id: 1,
     passwordHash:
@@ -31,19 +36,31 @@ const UserData: InsertUser[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
     role: "TEACHER",
+  },*/
+  {
+    email: "admin@admin.com",
+    nome: "Root ACTIVE",
+    passwordHash,
+    school: "Root",
+    academicTitle: "Bacharelado",
+    matricula: "123",
+    role: "ADMIN",
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ];
 
 async function seed() {
   await db.transaction(async (db) => {
+    /*
     console.log("Seeding cursos...");
     await db.insert(Cursos).values(cursosData).onConflictDoNothing();
     console.log(`Seeded ${cursosData.length} cursos.`);
-
+    */
     console.log("Seeding usuarios...");
     await db.insert(Users).values(UserData).onConflictDoNothing();
     console.log(`Seeded ${UserData.length} usuarios.`);
-
+    /*
     console.log("Seeding candidatos...");
 
     const [endereco1] = await db
@@ -306,6 +323,7 @@ async function seed() {
         .values({ idCandidato: candidatoDoutorado2.id })
         .onConflictDoNothing();
     }
+    */
   });
 }
 

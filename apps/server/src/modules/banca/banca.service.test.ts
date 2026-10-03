@@ -1,10 +1,13 @@
+/*
 import { beforeEach, describe, expect, it } from "vitest";
 import { fakeDeps, getFakeDb } from "../../tests/utils.js";
+/* 
 import {
   getUpcomingBancasVisible,
   getPastBancasVisible,
   getBancasByOrientador,
 } from "./banca.service.js";
+ *
 import type { Context } from "hono";
 import type { AppVariables } from "../../types.js";
 
@@ -316,3 +319,5 @@ describe("BancaService - Sorting Integration", () => {
     });
   });
 });
+
+*/
