@@ -1,6 +1,10 @@
 interface SectionContentProps {
   title: string
-  content: { label: string; value: string | number | boolean }[]
+  content: {
+    label: string
+    value: string | number | boolean | Date | null | undefined
+    link?: boolean
+  }[]
   link?: boolean
 }
 
@@ -19,10 +23,10 @@ export default function SectionContent({ title, content, link }: SectionContentP
                 rel="noopener noreferrer"
                 className="font-semibold text-blue-600 hover:underline"
               >
-                {item.value}
+                {item.value ? String(item.value) : "Não informado"}
               </a>
             ) : (
-              <h3 className="font-semibold">{item.value}</h3>
+              <h3 className="font-semibold">{item.value ? String(item.value) : "Não informado"}</h3>
             )}
           </div>
         ))}

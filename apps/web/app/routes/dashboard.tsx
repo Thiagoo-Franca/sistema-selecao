@@ -1,16 +1,15 @@
 "use client"
 
 import { useUser } from "@/services/useUser"
-import { useNavigate } from "react-router"
-import type { Route } from "./+types/dashboard"
 
+import type { Route } from "./+types/dashboard"
 import { Header } from "@/components/layout/Header"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useQueryParamsState } from "@/hooks/use-query-param-state"
 import { CandidatosTab } from "@/components/candidatos-tab"
 import CandidatoTab from "@/components/candidatos-tab/candidato-tab"
+import SearchBar from "@/components/ui/search-bar"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -40,7 +39,6 @@ const TABS: { value: string; label: string }[] = [
 ]
 
 export default function Home() {
-  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useQueryParamsState("searchQuery", "")
   const [orderBy, setOrderBy] = useQueryParamsState("orderBy", "nome")
   const [order, setOrder] = useQueryParamsState<"asc" | "desc">("order", "asc")
@@ -54,14 +52,7 @@ export default function Home() {
       <Header className="mb-6" />
       <div className="mb-6 flex flex-col items-center justify-between gap-4 lg:flex-row">
         <div className="flex w-full flex-col items-center gap-4 self-stretch sm:flex-row">
-          <Input
-            id="candidato-search"
-            type="search"
-            placeholder="Buscar por nome…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full self-stretch md:max-w-lg"
-          />
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
         {!!userQuery.data && userQuery.data.role === "ADMIN" && (
           <Button

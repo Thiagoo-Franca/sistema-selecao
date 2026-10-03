@@ -603,7 +603,7 @@ de Recolhimento da União) */}
                     onValueChange={(value) => field.onChange(Number(value))}
                   >
                     <SelectTrigger className="w-full max-w-[400px]" id="enade">
-                      <SelectValue placeholder="ENADE" />
+                      <SelectValue placeholder="0" />
                     </SelectTrigger>
 
                     <SelectContent>

@@ -17,6 +17,10 @@ import {
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
 import { formatBoolean, formatCPF, formatDate, formatPhoneNumber } from "@/lib/format"
 import SectionContent from "@/components/candidatos/section-content"
+import CandidateActions from "@/components/candidatos/candidate-actions"
+import CandidateHeader from "@/components/candidatos/candidate-header"
+import CandidateDetails from "@/components/candidatos/candidate-details"
+import CandidateNotFound from "@/components/candidatos/candidate-not-found"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -76,24 +80,7 @@ export default function CandidatoMestradoPage() {
   }
 
   if (!candidato) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <Header className="mb-6" />
-        <div className="py-20 text-center">
-          <h2 className="mb-4 text-2xl font-semibold">Candidato não encontrado</h2>
-          <p className="text-muted-foreground">
-            O candidato que você está procurando não existe ou foi removido.
-          </p>
-          <Button
-            onClick={() => navigate(-1)}
-            variant="outline"
-            className="mt-4 hover:cursor-pointer"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-          </Button>
-        </div>
-      </div>
-    )
+    return <CandidateNotFound />
   }
 
   const SECTION_CONTENT: {
@@ -190,7 +177,7 @@ export default function CandidatoMestradoPage() {
       ],
     },
     {
-      title: "INFORMAÇÕES DE CANDIDATURA",
+      title: "INFORMAÇÕES ADICIONAIS",
       content: [
         {
           label: "Comprovação de inscrição",
@@ -286,61 +273,12 @@ export default function CandidatoMestradoPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <Header className="mb-6" />
-      <div className="mb-6 flex w-full flex-row justify-between">
-        <div className="flex flex-row items-center gap-4">
-          <Button onClick={() => navigate(-1)} variant="outline" className="">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-          </Button>
-        </div>
-        <div className="flex flex-col items-center gap-4 self-stretch md:flex-row">
-          {user?.role === "ADMIN" && (
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Outras opções</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="flex flex-col gap-2 p-4">
-                      <li>
-                        <Button className="w-full bg-white text-black hover:bg-black/10">
-                          Editar candidato
-                        </Button>
-                      </li>
-                      <li>
-                        <Button
-                          className="w-full bg-red-500 hover:bg-red-600"
-                          onClick={() => {
-                            handleDelete()
-                          }}
-                          disabled={deleteCandidatoMutation.isPending}
-                        >
-                          Excluir candidato
-                        </Button>
-                      </li>
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-          )}
-          <Button
-            className="bg-blue-500 hover:bg-blue-600"
-            onClick={() => navigate(`/mestrado/${candidato.id}/avaliacao`)}
-          >
-            Avaliar
-          </Button>
-        </div>
-      </div>
-      <div className="my-4 flex flex-col gap-2 md:my-6">
-        <h1 className="text-2xl font-semibold">{candidato.nome}</h1>
-        <div className="flex flex-row gap-1 text-sm text-muted-foreground">
-          <p>Candidato de mestrado - Linha de pesquisa: {candidato.linhaPesquisa}</p>
-        </div>
-      </div>
-      {SECTION_CONTENT.map((section, index) => (
-        <SectionContent key={index} title={section.title} content={section.content} />
-      ))}
-    </div>
+    <CandidateDetails
+      user={user}
+      candidato={candidato}
+      handleDelete={handleDelete}
+      deleteCandidatoMutation={deleteCandidatoMutation}
+      SECTION_CONTENT={SECTION_CONTENT}
+    />
   )
 }

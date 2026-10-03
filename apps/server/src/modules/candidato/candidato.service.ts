@@ -334,3 +334,48 @@ export const deleteCandidatoMestrado = async (
     return err({ type: "database_error", error });
   }
 };
+
+export const deleteCandidatoDoutorado = async (
+  c: Context<{ Variables: AppVariables }>,
+  id: string,
+): Promise<AppResult<{ id: string } | null, GetAllCandidatosError>> => {
+  const dbInstance = c.get("db");
+
+  try {
+    const candidatoExcluido = await dbInstance.transaction(async (tx) => {
+      await tx.delete(NotaDoutorado).where(eq(NotaDoutorado.idCandidato, id));
+
+      const [candidato] = await tx
+        .delete(CandidatoDoutorado)
+        .where(eq(CandidatoDoutorado.id, id))
+        .returning({
+          id: CandidatoDoutorado.id,
+          idEndereco: CandidatoDoutorado.idEndereco,
+        });
+
+      if (!candidato) return null;
+
+      const [outroCandidatoDoutorado] = await tx
+        .select({ id: CandidatoDoutorado.id })
+        .from(CandidatoDoutorado)
+        .where(eq(CandidatoDoutorado.idEndereco, candidato.idEndereco))
+        .limit(1);
+      const [outroCandidatoMestrado] = await tx
+        .select({ id: CandidatoMestrado.id })
+        .from(CandidatoMestrado)
+        .where(eq(CandidatoMestrado.idEndereco, candidato.idEndereco))
+        .limit(1);
+
+      if (!outroCandidatoMestrado && !outroCandidatoDoutorado) {
+        await tx.delete(Endereco).where(eq(Endereco.id, candidato.idEndereco));
+      }
+
+      return { id: candidato.id };
+    });
+
+    return ok(candidatoExcluido);
+  } catch (error) {
+    console.error(`Error deleting doutorado candidato with ID ${id}:`, error);
+    return err({ type: "database_error", error });
+  }
+};

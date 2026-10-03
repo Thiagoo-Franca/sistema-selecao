@@ -190,4 +190,26 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
       throw new AppError(404, "Candidato não encontrado");
     }
     return c.json({ message: "Candidato de mestrado deletado com sucesso" });
+  })
+  .delete("/doutorado/:id", checkRole(["ADMIN"]), async (c) => {
+    const id = c.req.param("id");
+    const result = await service.deleteCandidatoDoutorado(c, id);
+
+    if (!result.ok) {
+      console.error(
+        `Error deleting doutorado candidato with ID ${id}:`,
+        result.error,
+      );
+      throw match(result.error)
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao deletar candidato"),
+        )
+        .exhaustive();
+    }
+    if (!result.data) {
+      throw new AppError(404, "Candidato não encontrado");
+    }
+
+    return c.json({ message: "Candidato de doutorado deletado com sucesso" });
   });

@@ -155,3 +155,24 @@ export const useDeleteCandidatoMestrado = (id: string | number) => {
     },
   })
 }
+
+export const useDeleteCandidatoDoutorado = (id: string | number) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.candidato.doutorado[":id"].$delete({
+        param: { id: String(id) },
+      })
+      return rpcReturn(response) as unknown as { message: string }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.removeQueries({ queryKey: ["candidatoDoutorado", id] })
+      toast.success("Candidato de doutorado deletado com sucesso!")
+    },
+    onError: (error) => {
+      toast.error(`Erro ao deletar candidato de doutorado: ${error.message}`)
+    },
+  })
+}
