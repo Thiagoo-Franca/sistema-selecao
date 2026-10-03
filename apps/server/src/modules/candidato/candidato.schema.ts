@@ -38,6 +38,7 @@ const updateNotaMestradoSchema = z.object({
   poscomp: z.number().optional(),
   disciplinaPosCapes6Mais: z.number().optional(),
   disciplinaPosCapes3a5: z.number().optional(),
+  notaEtapaII: z.number().optional(),
 });
 export { updateNotaMestradoSchema };
 

@@ -1,6 +1,6 @@
 import z from "zod"
 
-const CandidatoMestradoNotaEtapa1Schema = z.object({
+const CandidatoMestradoNotaSchema = z.object({
   avaliador1: z
     .string()
     .regex(/^[A-Za-zÀ-ÿ\s]+$/, "O nome do avaliador deve conter apenas letras e espaços")
@@ -34,11 +34,15 @@ const CandidatoMestradoNotaEtapa1Schema = z.object({
   poscomp: z.coerce.number().optional(),
   disciplinaPosCapes6Mais: z.coerce.number().optional(),
   disciplinaPosCapes3a5: z.coerce.number().optional(),
+  notaEtapaII: z.preprocess(
+    (value) => (typeof value === "number" && Number.isNaN(value) ? undefined : value),
+    z.coerce.number().max(10, "A nota da etapa II não pode ser maior que 10").optional()
+  ),
 })
 
-export type CandidatoMestradoNotaEtapa1 = z.infer<typeof CandidatoMestradoNotaEtapa1Schema>
+export type CandidatoMestradoNota = z.infer<typeof CandidatoMestradoNotaSchema>
 
-export { CandidatoMestradoNotaEtapa1Schema }
+export { CandidatoMestradoNotaSchema }
 
 const CandidatoDoutoradoNotaEtapa1Schema = z.object({
   avaliador1: z.string(),

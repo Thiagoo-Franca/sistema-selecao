@@ -2,7 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import apiClient from "@/services/apiClient"
 import { rpcReturn } from "@/lib/utils"
 import { toast } from "sonner"
-import type { CandidatoDoutoradoComRelacoes, CandidatoMestradoComRelacoes } from "@tcc/server"
+import type {
+  CandidatoDoutoradoComRelacoes,
+  CandidatoMestradoComRelacoes,
+  InsertNotaMestrado,
+} from "@tcc/server"
 
 export const useCandidatos = () => {
   return useQuery({
@@ -113,12 +117,12 @@ export const useUpdateCandidatoMestradoNota = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: { id: string | number; body: Partial<NotaMestrado | any> }) => {
+    mutationFn: async (data: { id: string | number; body: Partial<InsertNotaMestrado | any> }) => {
       const response = await apiClient.candidato.mestrado[":id"].nota.$patch({
         param: { id: String(data.id) },
         json: data.body,
       })
-      return rpcReturn(response) as unknown as NotaMestrado | any
+      return rpcReturn(response) as unknown as InsertNotaMestrado | any
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["candidatos"] })
@@ -127,6 +131,27 @@ export const useUpdateCandidatoMestradoNota = () => {
     },
     onError: (error) => {
       toast.error(`Erro ao atualizar nota do candidato de mestrado: ${error.message}`)
+    },
+  })
+}
+
+export const useDeleteCandidatoMestrado = (id: string | number) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.candidato.mestrado[":id"].$delete({
+        param: { id: String(id) },
+      })
+      return rpcReturn(response) as unknown as { message: string }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["candidatos"] })
+      queryClient.removeQueries({ queryKey: ["candidatoMestrado", id] })
+      toast.success("Candidato de mestrado deletado com sucesso!")
+    },
+    onError: (error) => {
+      toast.error(`Erro ao deletar candidato de mestrado: ${error.message}`)
     },
   })
 }

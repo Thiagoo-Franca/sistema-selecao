@@ -2,7 +2,7 @@ import type { Route } from "./+types/dashboard"
 import { useNavigate, useParams } from "react-router"
 import { useToast } from "@/hooks"
 import { useEffect, useState } from "react"
-import { useCandidatoMestradoById } from "@/hooks/candidato.hooks"
+import { useCandidatoMestradoById, useDeleteCandidatoMestrado } from "@/hooks/candidato.hooks"
 import { useUser } from "@/services/useUser"
 import { Header } from "@/components/layout/Header"
 import { ArrowLeft, Loader2, Table } from "lucide-react"
@@ -36,25 +36,24 @@ export default function CandidatoMestradoPage() {
 
   const { toast } = useToast()
   const navigate = useNavigate()
-
-  if (id === undefined) {
-    navigate("/dashboard")
-    return null
-  }
-  const candidatoQuery = useCandidatoMestradoById(id)
-
+  const candidatoQuery = useCandidatoMestradoById(id ?? "")
+  const deleteCandidatoMutation = useDeleteCandidatoMestrado(id ?? "")
   const user = userQuery.data
-
-  if (!id || !user) {
-    navigate("/")
-    return
-  }
-
   const candidato: CandidatoMestradoComRelacoes = candidatoQuery.data
 
   useEffect(() => {
     document.title = `SISSEL - ${candidato?.nome ?? "Candidato de mestrado"}`
   }, [candidato?.nome])
+
+  if (id === undefined) {
+    navigate("/dashboard")
+    return null
+  }
+
+  if (!id || !user) {
+    navigate("/")
+    return
+  }
 
   // Ainda sem funcinalidade
   const isAdmin = user?.role === "ADMIN"
@@ -64,7 +63,7 @@ export default function CandidatoMestradoPage() {
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
         <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
         </div>
       </div>
     )
@@ -277,6 +276,15 @@ export default function CandidatoMestradoPage() {
     },
   ]
 
+  function handleDelete() {
+    if (!confirm("Tem certeza que deseja excluir este candidato?")) return
+
+    deleteCandidatoMutation
+      .mutateAsync()
+      .then(() => navigate("/dashboard"))
+      .catch(() => undefined)
+  }
+
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
@@ -300,7 +308,13 @@ export default function CandidatoMestradoPage() {
                         </Button>
                       </li>
                       <li>
-                        <Button className="w-full bg-red-500 hover:bg-red-600">
+                        <Button
+                          className="w-full bg-red-500 hover:bg-red-600"
+                          onClick={() => {
+                            handleDelete()
+                          }}
+                          disabled={deleteCandidatoMutation.isPending}
+                        >
                           Excluir candidato
                         </Button>
                       </li>

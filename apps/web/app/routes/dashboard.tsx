@@ -63,7 +63,7 @@ export default function Home() {
             className="w-full self-stretch md:max-w-lg"
           />
         </div>
-        {!!userQuery.data && isTeacherOrAdmin && (
+        {!!userQuery.data && userQuery.data.role === "ADMIN" && (
           <Button
             className="w-full bg-blue-500 hover:bg-blue-600 md:max-w-xs"
             //  onClick={() => navigate("/")}

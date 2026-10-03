@@ -22,11 +22,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  CandidatoMestradoNotaEtapa1Schema,
-  type CandidatoMestradoNotaEtapa1,
-} from "@/schema/schema"
-import { calcularMestradoNotaEtapa1, paraNumeroSeguro } from "@/lib/calculoNotas"
+import { CandidatoMestradoNotaSchema, type CandidatoMestradoNota } from "@/schema/schema"
+import { calcularMestradoNota, paraNumeroSeguro } from "@/lib/calculoNotas"
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
 import type { Route } from "../+types/root"
 
@@ -43,18 +40,52 @@ const GRU_OPTIONS = [
   { value: "nao-pagou", label: "NÃO PAGOU" },
 ] as const
 
+function normalizeGru(value: string | null | undefined) {
+  const normalizedValue = value?.trim().toLowerCase()
+  return GRU_OPTIONS.find((option) => option.value === normalizedValue)?.value ?? ""
+}
+
+function paraBooleano(value: unknown): boolean | undefined {
+  if (value === true || value === 1) return true
+  if (value === false || value === 0) return false
+
+  if (typeof value === "string") {
+    const normalizedValue = value.trim().toLowerCase()
+    if (["true", "t", "sim", "1"].includes(normalizedValue)) return true
+    if (["false", "f", "nao", "não", "0"].includes(normalizedValue)) return false
+  }
+
+  return undefined
+}
+
+function valorBooleanoSelect(value: boolean | undefined) {
+  return value === undefined ? "" : value ? "sim" : "nao"
+}
+
+function valorSimNaoSelect(value: unknown) {
+  if (value === true || value === 1) return "sim"
+  if (value === false || value === 0) return "nao"
+
+  if (typeof value === "string") {
+    const normalizedValue = value.trim().toLowerCase()
+    if (["sim", "true", "t", "1"].includes(normalizedValue)) return "sim"
+    if (["nao", "não", "false", "f", "0"].includes(normalizedValue)) return "nao"
+  }
+
+  return ""
+}
+
 export default function AvaliacaoCandidatoMestradoPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string | undefined }>()
   const [nota, setNota] = useState(0)
   const { toast } = useToast()
-  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const userQuery = useUser()
   const candidatoQuery = useCandidatoMestradoById(id ?? "")
 
-  const form = useForm<CandidatoMestradoNotaEtapa1>({
-    resolver: zodResolver(CandidatoMestradoNotaEtapa1Schema),
+  const form = useForm<CandidatoMestradoNota>({
+    resolver: zodResolver(CandidatoMestradoNotaSchema),
   })
 
   const {
@@ -71,23 +102,23 @@ export default function AvaliacaoCandidatoMestradoPage() {
   const isAdmin = user?.role === "ADMIN"
 
   useEffect(() => {
-    if (!id || (!userQuery.isLoading && !user)) {
+    if (!user && !userQuery.isLoading) {
       navigate("/")
     }
-  }, [id, user, userQuery.isLoading, navigate])
+  }, [user, userQuery.isLoading, navigate])
 
   useEffect(() => {
     if (candidato) {
       reset({
         avaliador1: candidato.avaliador1 ? candidato.avaliador1 : "",
         avaliador2: candidato.avaliador2 ? candidato.avaliador2 : "",
-        solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ?? null,
-        isencaoAprovada: candidato.isencaoAprovada ?? null,
-        gru: candidato.gru ? candidato.gru : "",
-        Homologa: candidato.homologa ? candidato.homologa : "",
-        especiais: candidato.possuiNecessidadesEspeciais ?? null,
-        cotas: candidato.vagasNegrosPardos ?? null,
-        SUPRA: candidato.vagasSupranumerarias ?? null,
+        solicitouIsencaoTaxaInscricao: paraBooleano(candidato.solicitouIsencaoTaxaInscricao),
+        isencaoAprovada: paraBooleano(candidato.isencaoAprovada),
+        gru: normalizeGru(candidato.gru),
+        Homologa: valorSimNaoSelect(candidato.homologa),
+        especiais: paraBooleano(candidato.possuiNecessidadesEspeciais),
+        cotas: paraBooleano(candidato.vagasNegrosPardos),
+        SUPRA: paraBooleano(candidato.vagasSupranumerarias),
         grad: candidato.notas?.grad ? Number(candidato.notas?.grad) : 0,
         area: candidato.notas?.area ? Number(candidato.notas?.area) : 0,
         enade: Number(candidato.notas?.enade ?? 0),
@@ -101,11 +132,14 @@ export default function AvaliacaoCandidatoMestradoPage() {
         disciplinaPosCapes3a5: candidato.notas?.disciplinaPosCapes3a5
           ? Number(candidato.notas?.disciplinaPosCapes3a5)
           : 0,
+        notaEtapaII: candidato.notas?.notaEtapaII
+          ? Number(candidato.notas?.notaEtapaII)
+          : undefined,
       })
     }
   }, [candidato, reset])
 
-  const camposNotaEtapa1 = useWatch({
+  const camposNota = useWatch({
     control,
     name: [
       "grad",
@@ -117,6 +151,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
       "poscomp",
       "disciplinaPosCapes6Mais",
       "disciplinaPosCapes3a5",
+      "notaEtapaII",
     ],
   })
 
@@ -131,9 +166,10 @@ export default function AvaliacaoCandidatoMestradoPage() {
       poscomp,
       disciplinaPosCapes6Mais,
       disciplinaPosCapes3a5,
-    ] = camposNotaEtapa1
+      notaEtapaII,
+    ] = camposNota
 
-    const resultado = calcularMestradoNotaEtapa1({
+    const resultado = calcularMestradoNota({
       grad: paraNumeroSeguro(grad),
       area: paraNumeroSeguro(area),
       enade: paraNumeroSeguro(enade),
@@ -143,19 +179,20 @@ export default function AvaliacaoCandidatoMestradoPage() {
       poscomp: paraNumeroSeguro(poscomp),
       disciplinaPosCapes6Mais: paraNumeroSeguro(disciplinaPosCapes6Mais),
       disciplinaPosCapes3a5: paraNumeroSeguro(disciplinaPosCapes3a5),
+      notaEtapaII: paraNumeroSeguro(notaEtapaII),
     })
 
     setNota(resultado.pontuacao)
-  }, [camposNotaEtapa1])
+  }, [camposNota])
 
   const updateCandidatoMutation = useUpdateCandidatoMestrado()
   const updateNotaMutation = useUpdateCandidatoMestradoNota()
 
-  async function onSubmit(dados: CandidatoMestradoNotaEtapa1) {
+  async function onSubmit(dados: CandidatoMestradoNota) {
     if (!id) return
 
     try {
-      const [candidatoResult, notaResult] = await Promise.allSettled([
+      const resultados = await Promise.allSettled([
         updateCandidatoMutation.mutateAsync({
           id,
           body: {
@@ -183,9 +220,17 @@ export default function AvaliacaoCandidatoMestradoPage() {
             poscomp: dados.poscomp,
             disciplinaPosCapes6Mais: dados.disciplinaPosCapes6Mais,
             disciplinaPosCapes3a5: dados.disciplinaPosCapes3a5,
+            notaEtapaII: Number.isNaN(dados.notaEtapaII) ? undefined : dados.notaEtapaII,
           },
         }),
       ])
+
+      for (const resultado of resultados) {
+        if (resultado.status === "rejected") {
+          throw resultado.reason
+        }
+      }
+
       toast({
         title: "Avaliação salva com sucesso",
         description: "A avaliação do candidato de mestrado foi salva com sucesso.",
@@ -204,7 +249,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
         <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
         </div>
       </div>
     )
@@ -300,8 +345,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   PEDIU ISENÇÃO?
                 </FieldLabel>
                 <Select
+                  key={valorBooleanoSelect(field.value)}
                   onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
-                  value={field.value === true ? "sim" : "nao"}
+                  value={valorBooleanoSelect(field.value)}
                 >
                   <SelectTrigger
                     className="w-full max-w-[400px]"
@@ -331,8 +377,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   ISENÇÃO APROVADA?
                 </FieldLabel>
                 <Select
+                  key={valorBooleanoSelect(field.value)}
                   onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
-                  value={field.value === true ? "sim" : "nao"}
+                  value={valorBooleanoSelect(field.value)}
                 >
                   {" "}
                   <SelectTrigger className="w-full max-w-[400px]" id="isencaoAprovada">
@@ -350,7 +397,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
             )}
           />
 
-          {/* GRU */}
+          {/* GRU (Guia 
+de Recolhimento da União) */}
           <Controller
             control={control}
             name="gru"
@@ -359,7 +407,12 @@ export default function AvaliacaoCandidatoMestradoPage() {
                 <FieldLabel htmlFor="gru" className="font-bold text-muted-foreground">
                   GRU
                 </FieldLabel>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                <Select
+                  key={field.value ?? "empty"}
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                >
+                  {" "}
                   <SelectTrigger className="w-full max-w-[400px]" id="gru">
                     <SelectValue placeholder="GRU" />
                   </SelectTrigger>
@@ -388,8 +441,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   Homologa?
                 </FieldLabel>
                 <Select
+                  key={valorSimNaoSelect(field.value)}
                   onValueChange={(v) => field.onChange(v === "sim" ? "sim" : "nao")}
-                  value={field.value === "sim" ? "sim" : "nao"}
+                  value={valorSimNaoSelect(field.value)}
                 >
                   <SelectTrigger className="w-full max-w-[400px]" id="Homologa">
                     <SelectValue placeholder="Homologa?" />
@@ -415,8 +469,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   Especiais
                 </FieldLabel>
                 <Select
+                  key={valorBooleanoSelect(field.value)}
                   onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
-                  value={field.value === true ? "sim" : "nao"}
+                  value={valorBooleanoSelect(field.value)}
                 >
                   <SelectTrigger className="w-full max-w-[400px]" id="especiais">
                     <SelectValue placeholder="Especiais?" />
@@ -443,8 +498,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   Cotas (Negros)
                 </FieldLabel>
                 <Select
+                  key={valorBooleanoSelect(field.value)}
                   onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
-                  value={field.value === true ? "sim" : "nao"}
+                  value={valorBooleanoSelect(field.value)}
                 >
                   <SelectTrigger className="w-full max-w-[400px]" id="cotas">
                     <SelectValue placeholder="Cotas (Negros)?" />
@@ -471,8 +527,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   SUPRA
                 </FieldLabel>
                 <Select
+                  key={valorBooleanoSelect(field.value)}
                   onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
-                  value={field.value === true ? "sim" : "nao"}
+                  value={valorBooleanoSelect(field.value)}
                 >
                   <SelectTrigger className="w-full max-w-[400px]" id="SUPRA">
                     <SelectValue placeholder="SUPRA?" />
@@ -489,7 +546,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
             )}
           />
         </div>
-        <FieldLegend className="font-bold text-muted-foreground">Notas da Etapa I</FieldLegend>
+        <FieldLegend className="font-bold">Notas da Etapa I</FieldLegend>
         <div className="grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">
           {/* GRAD */}
           <Field className="flex flex-col gap-4">
@@ -526,7 +583,14 @@ export default function AvaliacaoCandidatoMestradoPage() {
             control={control}
             name="enade"
             render={({ field }) => {
-              console.log("enade field:", field.value, typeof field.value)
+              const enadeValue =
+                typeof field.value === "number" &&
+                Number.isInteger(field.value) &&
+                field.value >= 1 &&
+                field.value <= 5
+                  ? String(field.value)
+                  : ""
+
               return (
                 <Field className="flex flex-col gap-4">
                   <FieldLabel htmlFor="enade" className="font-bold text-muted-foreground">
@@ -534,7 +598,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   </FieldLabel>
 
                   <Select
-                    value={field.value?.toString() ?? ""}
+                    key={enadeValue || "empty"}
+                    value={enadeValue}
                     onValueChange={(value) => field.onChange(Number(value))}
                   >
                     <SelectTrigger className="w-full max-w-[400px]" id="enade">
@@ -641,12 +706,26 @@ export default function AvaliacaoCandidatoMestradoPage() {
           </Field>
         </div>
 
+        <FieldLegend className="font-bold">Notas da Etapa II</FieldLegend>
+        {/* Nota etapa II */}
+        <Field className="flex flex-col gap-4">
+          <FieldLabel htmlFor="notaEtapaII" className="font-bold text-muted-foreground">
+            Nota etapa II
+          </FieldLabel>
+          <Input
+            {...register("notaEtapaII", { valueAsNumber: true })}
+            className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
+            type="number"
+            id="notaEtapaII"
+          />
+          <FieldError>{errors.notaEtapaII?.message}</FieldError>
+        </Field>
         {/* Prévia Nota */}
         <Field className="flex flex-col gap-4">
           <FieldLabel
             htmlFor="posCapes3a5"
             className="text-lg font-bold text-muted-foreground"
-          >{`Nota (Prévia): ${nota.toFixed(2)}`}</FieldLabel>
+          >{`NOTA FINAL (PRÉVIA): ${nota.toFixed(2)}`}</FieldLabel>
         </Field>
 
         <Button

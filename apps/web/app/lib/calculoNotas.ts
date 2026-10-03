@@ -7,7 +7,7 @@ export type CandidatoDoutoradoNotaEtapa1 = {
   notaAnteprojeto: number
 }
 
-export type CandidatoMestradoNotaEtapa1 = {
+export type CandidatoMestradoNota = {
   grad: number
   area: number
   enade: number
@@ -17,6 +17,7 @@ export type CandidatoMestradoNotaEtapa1 = {
   poscomp: number
   disciplinaPosCapes6Mais: number
   disciplinaPosCapes3a5: number
+  notaEtapaII: number
 }
 
 // para evitar NaN
@@ -24,7 +25,7 @@ export function paraNumeroSeguro(valor: number | undefined): number {
   return typeof valor === "number" && !Number.isNaN(valor) ? valor : 0
 }
 
-export function calcularMestradoNotaEtapa1({
+export function calcularMestradoNota({
   grad,
   area,
   enade,
@@ -34,7 +35,8 @@ export function calcularMestradoNotaEtapa1({
   poscomp,
   disciplinaPosCapes6Mais,
   disciplinaPosCapes3a5,
-}: CandidatoMestradoNotaEtapa1): { pontuacao: number; aprovado: boolean } {
+  notaEtapaII,
+}: CandidatoMestradoNota): { pontuacao: number; aprovado: boolean } {
   const RGRAD = (grad * area * 7 + enade * 2 * 3) / 10
 
   const RPQ_GRAD = Math.min(
@@ -47,7 +49,8 @@ export function calcularMestradoNotaEtapa1({
       Math.min(4, disciplinaPosCapes3a5)
   )
 
-  const pontuacao = (RGRAD * 8 + RPQ_GRAD * 2) / 10
+  const notaEtapaI = (RGRAD * 8 + RPQ_GRAD * 2) / 10
+  const pontuacao = (notaEtapaI + notaEtapaII) / 2
   return { pontuacao: pontuacao, aprovado: pontuacao >= 5 }
 }
 

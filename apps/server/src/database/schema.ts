@@ -72,6 +72,7 @@ export const NotaMestrado = pgTable("nota_mestrado", {
   disciplinaPosCapes3a5: numeric("disciplina_pos_capes_3_a_5", {
     mode: "number",
   }),
+  notaEtapaII: numeric("nota_etapa_ii", { mode: "number" }),
 });
 
 export type InsertNotaMestrado = typeof NotaMestrado.$inferInsert;

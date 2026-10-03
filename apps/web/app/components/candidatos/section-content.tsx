@@ -12,20 +12,18 @@ export default function SectionContent({ title, content, link }: SectionContentP
         {content.map((item, index) => (
           <div key={index}>
             <h4 className="text-sm text-gray-500">{item.label}</h4>
-            {
-              link ? (
-                <a
-                  href={String(item.value)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-blue-600 hover:underline"
-                >
-                  {item.value}
-                </a>
-              ) : (
-                <h3 className="font-semibold">{item.value}</h3>
-              )
-            }
+            {link ? (
+              <a
+                href={String(item.value)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-blue-600 hover:underline"
+              >
+                {item.value}
+              </a>
+            ) : (
+              <h3 className="font-semibold">{item.value}</h3>
+            )}
           </div>
         ))}
       </div>
