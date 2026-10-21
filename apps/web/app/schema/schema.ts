@@ -1,18 +1,61 @@
 import z from "zod"
 
+const uploadCandidatosMestradoSchema = z.array(
+  z.object({
+    primeiraAreaPreferencia: z.string().optional(),
+    segundaAreaPreferencia: z.string().optional(),
+
+    numeroInscricao: z.string().optional(),
+
+    cpf: z.string().optional(),
+    nome: z.string().optional(),
+    email: z.string().email("Email inválido").optional(),
+
+    cidade_residencia: z.string().optional(),
+
+    solicitouIsencaoTaxaInscricao: z.string().optional(),
+    isencaoAprovada: z.string().optional(),
+    gru: z.string().optional(),
+    gruLink: z.string().optional(),
+    homologa: z.string().optional(),
+
+    universidade: z.string().optional(),
+    curso: z.string().optional(),
+    cidadeGraduacao: z.string().optional(),
+
+    especiais: z.string().optional(),
+    cotas: z.string().optional(),
+    supra: z.string().optional(),
+
+    grad: z.number().nullable().optional(),
+    area: z.number().nullable().optional(),
+    enade: z.number().nullable().optional(),
+
+    a1a2a3a4: z.number().nullable().optional(),
+    b1b2b3b4: z.number().nullable().optional(),
+    icIt: z.number().nullable().optional(),
+    poscomp: z.number().nullable().optional(),
+
+    disciplinaPosCapes3a5: z.number().nullable().optional(),
+    disciplinaPosCapes6Mais: z.number().nullable().optional(),
+  })
+)
+export { uploadCandidatosMestradoSchema }
+
+const nomeAvaliadorSchema = (n: number) =>
+  z
+    .string()
+    .trim()
+    .max(30, `O nome do avaliador ${n} não pode ter mais de 30 caracteres`)
+    .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s]*$/, "O nome do avaliador deve conter apenas letras e espaços")
+    .transform((v) => (v === "" ? undefined : v))
+    .optional()
+
 const CandidatoMestradoNotaSchema = z.object({
-  avaliador1: z
-    .string()
-    .regex(/^[A-Za-zÀ-ÿ\s]+$/, "O nome do avaliador deve conter apenas letras e espaços")
-    .max(30, "O nome do avaliador 1 não pode ter mais de 30 caracteres")
-    .optional(),
-  avaliador2: z
-    .string()
-    .regex(/^[A-Za-zÀ-ÿ\s]+$/, "O nome do avaliador deve conter apenas letras e espaços")
-    .max(30, "O nome do avaliador 2 não pode ter mais de 30 caracteres")
-    .optional(),
-  solicitouIsencaoTaxaInscricao: z.boolean().optional(),
-  isencaoAprovada: z.boolean().optional(),
+  avaliador1: nomeAvaliadorSchema(1),
+  avaliador2: nomeAvaliadorSchema(2),
+  solicitouIsencaoTaxaInscricao: z.string().optional(),
+  isencaoAprovada: z.string().optional(),
   gru: z.string().optional(),
   Homologa: z.string().optional(),
   especiais: z.boolean().optional(),
@@ -21,7 +64,11 @@ const CandidatoMestradoNotaSchema = z.object({
 
   avaliado: z.boolean().optional(),
 
-  grad: z.coerce.number().max(10, "A nota da graduação não pode ser maior que 10").optional(),
+  grad: z.coerce
+    .number()
+    .min(0, "A nota da graduação não pode ser menor que 0")
+    .max(10, "A nota da graduação não pode ser maior que 10")
+    .optional(),
   area: z.coerce.number().optional(),
   enade: z
     .number()
@@ -36,7 +83,11 @@ const CandidatoMestradoNotaSchema = z.object({
   disciplinaPosCapes3a5: z.coerce.number().optional(),
   notaEtapaII: z.preprocess(
     (value) => (typeof value === "number" && Number.isNaN(value) ? undefined : value),
-    z.coerce.number().max(10, "A nota da etapa II não pode ser maior que 10").optional()
+    z.coerce
+      .number()
+      .min(0, "A nota da etapa II não pode ser menor que 0")
+      .max(10, "A nota da etapa II não pode ser maior que 10")
+      .optional()
   ),
 })
 

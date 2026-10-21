@@ -1,4 +1,4 @@
-import { Header } from "@/components/layout/Header"
+import { Header } from "@/components/layout/header"
 import type { Route } from "./+types/admin.teacher-invitations"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Convites de Professores" }]

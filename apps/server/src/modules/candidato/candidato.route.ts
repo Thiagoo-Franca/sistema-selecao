@@ -3,17 +3,15 @@ import type { AppVariables } from "../../types.js";
 import * as service from "./candidato.service.js";
 import { zValidator } from "@hono/zod-validator";
 import {
-  updateCandidatoDoutoradoSchema,
   updateCandidatoMestradoSchema,
-  updateNotaDoutoradoSchema,
   updateNotaMestradoSchema,
+  uploadCandidatosMestradoSchema,
 } from "./candidato.schema.js";
-import { match } from "ts-pattern";
 import { AppError } from "../../error.js";
 import { checkRole } from "../auth/auth.middleware.js";
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
-  .get("/", async (c) => {
+  .get("/", checkRole(["ADMIN", "TEACHER"]), async (c) => {
     const result = await service.getAllCandidatos(c);
     if (!result.ok) {
       throw new Error("Erro ao buscar candidatos");
@@ -21,7 +19,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     return c.json(result.data);
   })
 
-  .get("/mestrado", async (c) => {
+  .get("/mestrado", checkRole(["ADMIN", "TEACHER"]), async (c) => {
     const result = await service.getAllCandidatosMestrado(c);
     if (!result.ok) {
       throw new Error("Erro ao buscar candidatos de mestrado");
@@ -29,7 +27,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     return c.json(result.data);
   })
 
-  .get("/doutorado", async (c) => {
+  .get("/doutorado", checkRole(["ADMIN", "TEACHER"]), async (c) => {
     const result = await service.getAllCandidatosDoutorado(c);
     if (!result.ok) {
       throw new Error("Erro ao buscar candidatos de doutorado");
@@ -37,7 +35,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     return c.json(result.data);
   })
 
-  .get("/mestrado/:id", async (c) => {
+  .get("/mestrado/:id", checkRole(["ADMIN", "TEACHER"]), async (c) => {
     const id = c.req.param("id");
     const result = await service.getCandidatoMestradoById(c, id);
     if (!result.ok) {
@@ -46,7 +44,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     return c.json(result.data);
   })
 
-  .get("/doutorado/:id", async (c) => {
+  .get("/doutorado/:id", checkRole(["ADMIN", "TEACHER"]), async (c) => {
     const id = c.req.param("id");
     const result = await service.getCandidatoDoutoradoById(c, id);
     if (!result.ok) {
@@ -55,8 +53,42 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     return c.json(result.data);
   })
 
+  .post(
+    "/mestrado",
+    checkRole(["ADMIN"]),
+    zValidator("json", uploadCandidatosMestradoSchema),
+    async (c) => {
+      const candidatos = c.req.valid("json");
+      const result = await service.uploadCandidatosMestrado(c, candidatos);
+
+      if (!result.ok) {
+        console.error("Error uploading mestrado candidatos:", result.error);
+        throw new AppError(500, "Erro ao fazer upload de candidatos");
+      }
+      return c.json({
+        message: "Candidatos de mestrado adicionados com sucesso",
+      });
+    },
+  )
+  .delete("/mestrado/:id", checkRole(["ADMIN"]), async (c) => {
+    const id = c.req.param("id");
+    const result = await service.deleteCandidatoMestrado(c, id);
+
+    if (!result.ok) {
+      console.error(
+        `Error deleting mestrado candidato with ID ${id}:`,
+        result.error,
+      );
+      throw new AppError(500, "Erro ao deletar candidato");
+    }
+    if (!result.data) {
+      throw new AppError(404, "Candidato não encontrado");
+    }
+    return c.json({ message: "Candidato de mestrado deletado com sucesso" });
+  })
   .patch(
     "/mestrado/:id",
+    checkRole(["ADMIN", "TEACHER"]),
     zValidator("json", updateCandidatoMestradoSchema),
     async (c) => {
       const id = c.req.param("id");
@@ -68,12 +100,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
           `Error updating mestrado candidato with ID ${id}:`,
           result.error,
         );
-        throw match(result.error)
-          .with(
-            { type: "database_error" },
-            () => new AppError(500, "Erro ao atualizar candidato"),
-          )
-          .exhaustive();
+        throw new AppError(500, "Erro ao atualizar candidato");
       }
 
       if (!result.data) {
@@ -97,12 +124,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
           `Error updating mestrado candidato nota with ID ${id}:`,
           result.error,
         );
-        throw match(result.error)
-          .with(
-            { type: "database_error" },
-            () => new AppError(500, "Erro ao atualizar nota do candidato"),
-          )
-          .exhaustive();
+        throw new AppError(500, "Erro ao atualizar nota do candidato");
       }
 
       if (!result.data) {
@@ -111,8 +133,8 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
 
       return c.json(result.data);
     },
-  )
-
+  );
+/*
   .patch(
     "/doutorado/:id",
     zValidator("json", updateCandidatoDoutoradoSchema),
@@ -170,27 +192,8 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
       return c.json(result.data);
     },
   )
-  .delete("/mestrado/:id", checkRole(["ADMIN"]), async (c) => {
-    const id = c.req.param("id");
-    const result = await service.deleteCandidatoMestrado(c, id);
 
-    if (!result.ok) {
-      console.error(
-        `Error deleting mestrado candidato with ID ${id}:`,
-        result.error,
-      );
-      throw match(result.error)
-        .with(
-          { type: "database_error" },
-          () => new AppError(500, "Erro ao deletar candidato"),
-        )
-        .exhaustive();
-    }
-    if (!result.data) {
-      throw new AppError(404, "Candidato não encontrado");
-    }
-    return c.json({ message: "Candidato de mestrado deletado com sucesso" });
-  })
+  
   .delete("/doutorado/:id", checkRole(["ADMIN"]), async (c) => {
     const id = c.req.param("id");
     const result = await service.deleteCandidatoDoutorado(c, id);
@@ -212,4 +215,5 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     }
 
     return c.json({ message: "Candidato de doutorado deletado com sucesso" });
-  });
+  })
+*/

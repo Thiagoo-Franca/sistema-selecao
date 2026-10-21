@@ -1,4 +1,4 @@
-import { Header } from "../layout/Header"
+import { Header } from "../layout/header"
 import CandidateActions from "./candidate-actions"
 import CandidateHeader from "./candidate-header"
 import SectionContent from "./section-content"
@@ -9,17 +9,17 @@ interface CandidateDetailsProps {
   }
   candidato: {
     id: string
-    nome: string
-    linhaPesquisa: string
+    email: string | null
+    nome: string | null
     tipoCurso: "Doutorado" | "Mestrado"
   }
-  handleDelete: () => void
-  deleteCandidatoMutation: any
+  handleDelete?: () => void
+  deleteCandidatoMutation?: any
   SECTION_CONTENT: {
     title: string
     content: {
       label: string
-      value: string | boolean | Date | number | null | undefined
+      value: string | boolean | number | null | undefined
       link?: boolean
     }[]
   }[]

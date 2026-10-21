@@ -1,7 +1,7 @@
 import { FeatureRequests } from "@/components/feedback/FeatureRequests"
 import { FeedbackForm } from "@/components/feedback/FeedbackForm"
 import { FeedbackStatistics } from "@/components/feedback/FeedbackStatistics"
-import { Header } from "@/components/layout/Header"
+import { Header } from "@/components/layout/header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUser } from "@/services/useUser"
 import { Loader2 } from "lucide-react"

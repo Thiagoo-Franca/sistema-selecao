@@ -50,8 +50,17 @@ export function calcularMestradoNota({
   )
 
   const notaEtapaI = (RGRAD * 8 + RPQ_GRAD * 2) / 10
+
+  if (notaEtapaI < 6) {
+    return { pontuacao: notaEtapaI, aprovado: false }
+  }
+
+  if (notaEtapaII < 8) {
+    return { pontuacao: (notaEtapaI + notaEtapaII) / 2, aprovado: false }
+  }
+
   const pontuacao = (notaEtapaI + notaEtapaII) / 2
-  return { pontuacao: pontuacao, aprovado: pontuacao >= 5 }
+  return { pontuacao: pontuacao, aprovado: pontuacao >= 7 }
 }
 
 export function calcularNotaDoutoradoEtapa1({
@@ -71,6 +80,6 @@ export function calcularNotaDoutoradoEtapa1({
 
   return {
     pontuacao,
-    aprovado: pontuacao >= 5,
+    aprovado: pontuacao >= 7,
   }
 }

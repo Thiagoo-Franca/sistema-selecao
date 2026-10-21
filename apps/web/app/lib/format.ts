@@ -1,3 +1,11 @@
+export function capitalizarNomeCompleto(nomeCompleto: string): string {
+  return nomeCompleto
+    .toLowerCase()
+    .split(" ")
+    .map((palavra) => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+    .join(" ")
+}
+
 export function formatDate(dateString: string | null | undefined | Date): string {
   if (!dateString) {
     return "Não informado"

@@ -1,7 +1,6 @@
 interface CandidateHeaderProps {
   candidato: {
-    nome: string
-    linhaPesquisa: string
+    nome: string | null
     tipoCurso: "Mestrado" | "Doutorado"
   }
 }
@@ -9,12 +8,9 @@ interface CandidateHeaderProps {
 export default function CandidateHeader({ candidato }: CandidateHeaderProps) {
   return (
     <div className="my-4 flex flex-col gap-2 md:my-6">
-      <h1 className="text-2xl font-semibold">{candidato.nome}</h1>
+      <h1 className="text-2xl font-semibold">{candidato.nome ?? "Nome não informado"}</h1>
       <div className="flex flex-row gap-1 text-sm text-muted-foreground">
-        <p>
-          Candidato de {candidato.tipoCurso.toLocaleLowerCase()} - Linha de pesquisa:{" "}
-          {candidato.linhaPesquisa}
-        </p>
+        <p>Candidato {candidato.tipoCurso.toLocaleLowerCase()}</p>
       </div>
     </div>
   )

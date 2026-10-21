@@ -1,19 +1,23 @@
-import { useCandidatos } from "@/hooks/candidato.hooks"
+import { useCandidatos, useCandidatosDoutorado, useCandidatosMestrado } from "@/hooks"
 import CandidatosTabLoading from "./candidatos-tab-loading"
 import CandidatosTabError from "./candidatos-tab-error"
-import { TabsContent } from "../ui/tabs"
 import { HomeTableCandidatos } from "."
+import { TabsContent } from "../ui/tabs"
+
+type TipoCandidato = "mestrado" | "doutorado"
 
 interface CandidatosTabProps {
-  type: "mestrado" | "doutorado"
+  tabValue: string
+  type?: TipoCandidato // sem type = todos os candidatos
   searchQuery: string
   orderBy?: string
   order?: "asc" | "desc"
-  setOrderBy?: (value: string) => void
-  setOrder?: (value: "asc" | "desc") => void
+  setOrderBy?: (orderBy: string) => void
+  setOrder?: (order: "asc" | "desc") => void
 }
 
-export default function CandidatoTab({
+export function CandidatosTab({
+  tabValue,
   type,
   searchQuery,
   orderBy,
@@ -21,38 +25,37 @@ export default function CandidatoTab({
   setOrderBy,
   setOrder,
 }: CandidatosTabProps) {
-  const candidatosQuery = useCandidatos()
-  const candidatosData =
-    type === "mestrado" ? candidatosQuery.data?.mestrado : candidatosQuery.data?.doutorado
+  const todosQuery = useCandidatos()
+  const mestradoQuery = useCandidatosMestrado()
+  const doutoradoQuery = useCandidatosDoutorado()
 
-  if (candidatosQuery.isLoading) {
-    return <CandidatosTabLoading />
-  }
+  const query = { todos: todosQuery, mestrado: mestradoQuery, doutorado: doutoradoQuery }[
+    type ?? "todos"
+  ]
 
-  if (candidatosQuery.isError) {
-    return <CandidatosTabError error={candidatosQuery.error} />
-  }
+  function renderContent() {
+    if (query.isLoading) return <CandidatosTabLoading />
+    if (query.isError) return <CandidatosTabError error={query.error} />
 
-  if (!candidatosData || candidatosData.length === 0) {
-    return (
-      <TabsContent value={`candidatos-${type}`}>
+    if (!query.data || query.data.length === 0) {
+      return (
         <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
-          Nenhum candidato encontrado.
+          Ops, nenhum candidato encontrado.
         </div>
-      </TabsContent>
-    )
-  }
+      )
+    }
 
-  return (
-    <TabsContent value={`candidatos-${type}`}>
+    return (
       <HomeTableCandidatos
-        data={candidatosData}
+        data={query.data}
         searchQuery={searchQuery}
         orderBy={orderBy}
         order={order}
         setOrderBy={setOrderBy}
         setOrder={setOrder}
       />
-    </TabsContent>
-  )
+    )
+  }
+
+  return <TabsContent value={tabValue}>{renderContent()}</TabsContent>
 }

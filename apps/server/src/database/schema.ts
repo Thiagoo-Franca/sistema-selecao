@@ -15,6 +15,7 @@ import {
 export const tipoCursoEnum = pgEnum("tipo_curso", ["Doutorado", "Mestrado"]);
 export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number];
 
+/*
 export const sexoEnum = pgEnum("sexo", ["Masculino", "Feminino", "Outro"]);
 export type Sexo = (typeof sexoEnum.enumValues)[number];
 
@@ -25,6 +26,7 @@ export const estadoCivilEnum = pgEnum("estado_civil", [
 ]);
 export type EstadoCivil = (typeof estadoCivilEnum.enumValues)[number];
 
+ 
 export const AreaPreferencia = pgEnum("area_preferencia", [
   "CVIS - Computação Visual",
   "CD - Ciência de Dados",
@@ -52,6 +54,8 @@ export const Endereco = pgTable("endereco", {
 export type InsertEndereco = typeof Endereco.$inferInsert;
 export type SelectEndereco = typeof Endereco.$inferSelect;
 
+*/
+
 export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
   idCandidato: uuid("id_candidato")
@@ -59,16 +63,31 @@ export const NotaMestrado = pgTable("nota_mestrado", {
     .references(() => CandidatoMestrado.id)
     .unique(), // garante 1:1 com o candidato
 
+  gradLink: text("grad_link"),
   grad: numeric("grad", { mode: "number" }),
+
   area: numeric("area", { mode: "number" }),
+
+  enadeLink: text("enade_link"),
   enade: numeric("enade", { mode: "number" }),
+
+  a1a2a3a4Link: text("a1a2a3a4_link"),
   a1a2a3a4: numeric("a1a2a3a4", { mode: "number" }),
+
+  b1b2b3b4Link: text("b1b2b3b4_link"),
   b1b2b3b4: numeric("b1b2b3b4", { mode: "number" }),
+
+  icItLink: text("ic_it_link"),
   icIt: numeric("ic_it", { mode: "number" }),
+
+  poscompLink: text("poscomp_link"),
   poscomp: numeric("poscomp", { mode: "number" }),
+
+  disciplinaPosCapes6MaisLink: text("disciplina_pos_capes_6_mais_link"),
   disciplinaPosCapes6Mais: numeric("disciplina_pos_capes_6_mais", {
     mode: "number",
   }),
+  disciplinaPosCapes3a5Link: text("disciplina_pos_capes_3_a_5_link"),
   disciplinaPosCapes3a5: numeric("disciplina_pos_capes_3_a_5", {
     mode: "number",
   }),
@@ -97,71 +116,67 @@ export type InsertNotaDoutorado = typeof NotaDoutorado.$inferInsert;
 export type SelectNotaDoutorado = typeof NotaDoutorado.$inferSelect;
 
 const candidatoBaseColumns = {
-  // dados da inscricao
   id: uuid("id").primaryKey().defaultRandom(),
-  // The candidate tables share these columns, so their unique constraints
-  // must be explicitly table-scoped (constraint names are schema-global).
-  numeroInscricao: text("numero_inscricao").notNull(),
-  status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
-  dataInscricao: timestamp("data_inscricao").notNull(),
-
-  // pontuacao e classificacao
+  numeroInscricao: text("numero_inscricao"),
   avaliado: boolean("avaliado").notNull().default(false),
+  cpf: text("cpf"), // .notNull(), // CPF pode ser nulo por enquanto
+  nome: text("nome"),
+  email: text("email"),
+
+  solicitouIsencaoTaxaInscricao: text("solicitou_isencao_taxa_inscricao"),
+  isencaoAprovada: text("isencao_aprovada"),
+  gru: text("gru"),
+  gruLink: text("gru_link"), // link para PDF da GRU
+  homologa: text("homologa"), // link para PDF da homologação
+  // status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
+  // dataInscricao: timestamp("data_inscricao").notNull(),
+  // sexo: sexoEnum("sexo").notNull(), // Ex: 'Masculino', 'Feminino', 'Outro'
 
   // dados pessoais
-  cpf: text("cpf").notNull(),
-  sexo: sexoEnum("sexo").notNull(), // Ex: 'Masculino', 'Feminino', 'Outro'
-  nome: text("nome").notNull(),
-  estadoCivil: estadoCivilEnum("estado_civil").notNull(), // Ex: 'Solteiro', 'Casado', 'Divorciado'
-  email: text("email").notNull(),
-  dataNascimento: timestamp("data_nascimento").notNull(),
-  raca: text("raca").notNull(), // Ex: 'Branco', 'Preto', 'Pardo', 'Amarelo', 'Indígena'
-  nomeMae: text("nome_mae").notNull(),
-  nomePai: text("nome_pai"),
-  tipoEscolaEnsinoMedio: text("tipo_escola_ensino_medio").notNull(), // Ex: 'Publica', 'Privada', 'Particular'
+  // estadoCivil: estadoCivilEnum("estado_civil").notNull(), // Ex: 'Solteiro', 'Casado', 'Divorciado'
+  // dataNascimento: timestamp("data_nascimento").notNull(),
+  // raca: text("raca").notNull(), // Ex: 'Branco', 'Preto', 'Pardo', 'Amarelo', 'Indígena'
+  // nomeMae: text("nome_mae").notNull(),
+  // nomePai: text("nome_pai"),
+  // tipoEscolaEnsinoMedio: text("tipo_escola_ensino_medio").notNull(), // Ex: 'Publica', 'Privada', 'Particular'
 
   // naturalidade
-  pais: text("pais").notNull(), // Ex: 'Brasil', 'Argentina', etc.
-  estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
-  municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
+  // pais: text("pais").notNull(), // Ex: 'Brasil', 'Argentina', etc.
+  // estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
+  // municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
 
   // documentos
-  rg: text("rg").notNull(),
-  orgaoExpedidor: text("orgao_expedidor").notNull(), // Ex: 'SSP', 'DETRAN', etc.
-  estadoExpedicao: text("estado_expedicao").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
-  dataExpedicao: timestamp("data_expedicao").notNull(),
-  tituloEleitor: text("titulo_eleitor").notNull(),
-  secaoEleitoral: text("secao_eleitoral").notNull(),
-  zonaEleitoral: text("zona_eleitoral"),
-  passaporte: text("passaporte"),
+  // rg: text("rg").notNull(),
+  //orgaoExpedidor: text("orgao_expedidor").notNull(), // Ex: 'SSP', 'DETRAN', etc.
+  // estadoExpedicao: text("estado_expedicao").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
+  // dataExpedicao: timestamp("data_expedicao").notNull(),
+  // tituloEleitor: text("titulo_eleitor").notNull(),
+  // secaoEleitoral: text("secao_eleitoral").notNull(),
+  // zonaEleitoral: text("zona_eleitoral"),
+  // passaporte: text("passaporte"),
 
   // endereco
-  idEndereco: integer("id_endereco")
-    .notNull()
-    .references(() => Endereco.id),
+  // idEndereco: integer("id_endereco")
+  //  .notNull()
+  //  .references(() => Endereco.id),
 
-  telefoneFixo: text("telefone_fixo"),
-  telefoneCelular: text("telefone_celular").notNull(),
+  // telefoneFixo: text("telefone_fixo"),
+  // telefoneCelular: text("telefone_celular").notNull(),
 
   // outras informacoes para o processo seletivo
-  linhaPesquisa: text("linha_pesquisa").notNull(), // Ex: 'Inteligência Artificial', 'Sistemas de Informação', etc.
+  // linhaPesquisa: text("linha_pesquisa").notNull(), // Ex: 'Inteligência Artificial', 'Sistemas de Informação', etc.
 
   // formulario de inscricao para mestrado/doutorado em ciencia da computacao
-  comprovantePagTaxaInscricao: text("comprovante_pag_taxa_inscricao").notNull(), // link para PDF do comprovante
-  copiaCPF: text("copia_cpf").notNull(), // link para PDF da cópia do CPF
-  copiaPassaporteOuRNE: text("copia_passaporte_ou_rne"), // link para PDF da cópia do passaporte ou RNE, apenas para estrangeiros
-  copiaDocumentoIdentificacao: text("copia_documento_identificacao"), // link para PDF da cópia do RG ou CNH, apenas para brasileiros
-  solicitouIsencaoTaxaInscricao: boolean("solicitou_isencao_taxa_inscricao")
-    .notNull()
-    .default(false),
-  comprovacaoPesquisas: text("comprovacao_pesquisas").notNull(), // link para PDF de comprovação de participação em pesquisas, publicações, etc.
-  possuiNecessidadesEspeciais: boolean("possui_necessidades_especiais")
-    .notNull()
-    .default(false),
-  vagasNegrosPardos: boolean("vagas_negros_pardos").notNull().default(false),
-  vagasSupranumerarias: boolean("vagas_supranumerarias")
-    .notNull()
-    .default(false),
+  // copiaCPF: text("copia_cpf").notNull(), // link para PDF da cópia do CPF
+  // copiaPassaporteOuRNE: text("copia_passaporte_ou_rne"), // link para PDF da cópia do passaporte ou RNE, apenas para estrangeiros
+  // copiaDocumentoIdentificacao: text("copia_documento_identificacao"), // link para PDF da cópia do RG ou CNH, apenas para brasileiros
+  // comprovacaoPesquisas: text("comprovacao_pesquisas").notNull(), // link para PDF de comprovação de participação em pesquisas, publicações, etc.
+  // possuiNecessidadesEspeciais: boolean("possui_necessidades_especiais")
+  //.notNull()
+  //default(false),
+  especiais: text("especiais"),
+  cotas: text("cotas"),
+  supra: text("supra"),
 };
 
 export const CandidatoDoutorado = pgTable(
@@ -186,8 +201,7 @@ export const CandidatoDoutorado = pgTable(
     avaliador1: text("avaliador_1"),
     avaliador2: text("avaliador_2"),
     isencaoAprovada: boolean("isencao_aprovada"),
-    gru: text("gru"),
-    homologa: text("homologa"),
+
     areaPgcomp: text("area_pgcomp"),
     orientadorMestrado: text("orientador_mestrado"),
   },
@@ -197,13 +211,13 @@ export const CandidatoDoutorado = pgTable(
     ).on(table.numeroInscricao),
     cpfUnique: unique("candidato_doutorado_cpf_unique").on(table.cpf),
     emailUnique: unique("candidato_doutorado_email_unique").on(table.email),
-    rgUnique: unique("candidato_doutorado_rg_unique").on(table.rg),
-    tituloEleitorUnique: unique("candidato_doutorado_titulo_eleitor_unique").on(
-      table.tituloEleitor,
-    ),
-    passaporteUnique: unique("candidato_doutorado_passaporte_unique").on(
-      table.passaporte,
-    ),
+    // rgUnique: unique("candidato_doutorado_rg_unique").on(table.rg),
+    //tituloEleitorUnique: unique("candidato_doutorado_titulo_eleitor_unique").on(
+    //  table.tituloEleitor,
+    //),
+    //passaporteUnique: unique("candidato_doutorado_passaporte_unique").on(
+    //  table.passaporte,
+    //),
   }),
 );
 
@@ -216,28 +230,14 @@ export const CandidatoMestrado = pgTable(
     ...candidatoBaseColumns,
     // dados da inscricao
     tipoCurso: tipoCursoEnum("tipo_curso").default("Mestrado").notNull(),
+    primeiraAreaPreferencia: text("primeira_area_preferencia"),
+    segundaAreaPreferencia: text("segunda_area_preferencia"),
     avaliador1: text("avaliador_1"),
     avaliador2: text("avaliador_2"),
-    gru: text("gru"),
-    homologa: text("homologa"),
-    isencaoAprovada: boolean("isencao_aprovada"),
 
-    // formulario de inscricao para mestrado em ciencia da computacao
-    copiaDiplomaGraduacao: text("copia_diploma_graduacao").notNull(), // link para PDF da cópia do diploma da graduação
-    historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
-    nomeUniversidadeGraduacao: text("nome_universidade_graduacao").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
-    nomeCursoGraduacao: text("nome_curso_graduacao").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
-    cidadeOndeRealizouGraduacao: text(
-      "cidade_onde_realizou_graduacao",
-    ).notNull(), // Ex: 'Salvador', 'São Paulo', etc.
-    enadeDoCursoGraduacao: text("enade_do_curso_graduacao").notNull(), // link  para enedade so curos de graduacao, portal EMEC
-    valorDoEnadeDoCursoGraduacao: text(
-      "valor_do_enade_do_curso_graduacao",
-    ).notNull(), // Ex: '3.5', '4.0', etc.
-    notaPOSCOMP: text("nota_poscomp"),
-    primeiraAreaPreferencia: AreaPreferencia("primeira_area_preferencia"),
-    segundaAreaPreferencia: AreaPreferencia("segunda_area_preferencia"),
-    cartaMotivacao: text("carta_motivacao").notNull(), // Link para PDF
+    universidade: text("universidade"),
+    curso: text("curso"),
+    cidadeGraduacao: text("cidadeGraduacao"),
   },
   (table) => ({
     numeroInscricaoUnique: unique(
@@ -245,13 +245,13 @@ export const CandidatoMestrado = pgTable(
     ).on(table.numeroInscricao),
     cpfUnique: unique("candidato_mestrado_cpf_unique").on(table.cpf),
     emailUnique: unique("candidato_mestrado_email_unique").on(table.email),
-    rgUnique: unique("candidato_mestrado_rg_unique").on(table.rg),
-    tituloEleitorUnique: unique("candidato_mestrado_titulo_eleitor_unique").on(
-      table.tituloEleitor,
-    ),
-    passaporteUnique: unique("candidato_mestrado_passaporte_unique").on(
-      table.passaporte,
-    ),
+    // rgUnique: unique("candidato_mestrado_rg_unique").on(table.rg),
+    //tituloEleitorUnique: unique("candidato_mestrado_titulo_eleitor_unique").on(
+    //  table.tituloEleitor,
+    //),
+    //passaporteUnique: unique("candidato_mestrado_passaporte_unique").on(
+    //table.passaporte,
+    //),
   }),
 );
 

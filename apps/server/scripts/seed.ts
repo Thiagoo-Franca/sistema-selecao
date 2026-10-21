@@ -5,7 +5,7 @@ import {
   CandidatoMestrado,
   // Cursos,
   db,
-  Endereco,
+  // Endereco,
   // type InsertCurso,
   type InsertUser,
   NotaDoutorado,
@@ -53,6 +53,7 @@ const UserData: InsertUser[] = [
 
 async function seed() {
   await db.transaction(async (db) => {
+    /*
     const [endereco2, endereco3, endereco4] = await db
       .insert(Endereco)
       .values([
@@ -85,7 +86,7 @@ async function seed() {
 
     const candidatosExtras = [
       {
-        idEndereco: endereco2.id,
+  //      idEndereco: endereco2.id,
         numeroInscricao: "TEST-002",
         cpf: "98765432100",
         sexo: "Feminino",
@@ -196,7 +197,7 @@ async function seed() {
       }
     }
     console.log("Seeded candidatos mestrado 2-4.");
-
+    */
     /*
     console.log("Seeding cursos...");
     await db.insert(Cursos).values(cursosData).onConflictDoNothing();

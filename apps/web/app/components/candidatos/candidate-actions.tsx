@@ -17,7 +17,7 @@ interface CandidateActionsProps {
     id: string
     tipoCurso: "Doutorado" | "Mestrado"
   }
-  handleDelete: () => void
+  handleDelete?: () => void
   deleteCandidatoMutation: {
     isPending: boolean
   }
@@ -55,7 +55,7 @@ export default function CandidateActions({
                       <Button
                         className="w-full bg-red-500 hover:bg-red-600"
                         onClick={() => {
-                          handleDelete()
+                          handleDelete?.()
                         }}
                         disabled={deleteCandidatoMutation.isPending}
                       >

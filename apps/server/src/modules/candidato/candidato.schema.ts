@@ -1,12 +1,28 @@
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { AreaPreferencia } from "../../database/index.js";
+import { CandidatoMestrado, NotaMestrado } from "../../database/schema";
 
+const notaMestradoSchema = createInsertSchema(NotaMestrado)
+  .omit({ id: true, idCandidato: true, notaEtapaII: true })
+  .nullish();
+
+export const uploadCandidatosMestradoSchema = z.array(
+  createInsertSchema(CandidatoMestrado, {
+    numeroInscricao: (s) => s.min(1),
+  })
+    .omit({ id: true, avaliado: true, tipoCurso: true })
+    .extend({ notas: notaMestradoSchema }),
+);
+
+export type UploadCandidatosMestradoInput = z.infer<
+  typeof uploadCandidatosMestradoSchema
+>;
 const updateCandidatoMestradoSchema = z.object({
   avaliado: z.boolean().optional(),
   avaliador1: z.string().nullable().optional(),
   avaliador2: z.string().nullable().optional(),
-  primeiraAreaPreferencia: z.enum(AreaPreferencia.enumValues).optional(),
-  segundaAreaPreferencia: z.enum(AreaPreferencia.enumValues).optional(),
+  primeiraAreaPreferencia: z.string().optional(),
+  segundaAreaPreferencia: z.string().optional(),
   cpf: z
     .string()
     .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")
@@ -14,9 +30,11 @@ const updateCandidatoMestradoSchema = z.object({
   nome: z.string().min(1, "O nome é obrigatório").optional(),
   email: z.string().email("Email inválido").optional(),
   cidade: z.string().optional(),
-  solicitouIsencaoTaxaInscricao: z.boolean().optional(),
-  isencaoAprovada: z.boolean().optional(),
-  gru: z.string().optional(),
+  solicitouIsencaoTaxaInscricao: z.string().optional(),
+  isencaoAprovada: z.string().optional(),
+  gru: z
+    .enum(["isento", "pago", "aberto", "nao-isento", "nao-pagou"])
+    .optional(),
   homologa: z.string().optional(),
   universidade: z.string().optional(),
   cursoGrad: z.string().optional(),
