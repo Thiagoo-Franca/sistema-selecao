@@ -5,7 +5,7 @@ import {
   CandidatoMestrado,
   // Cursos,
   db,
-  Endereco,
+  // Endereco,
   // type InsertCurso,
   type InsertUser,
   NotaDoutorado,
@@ -20,10 +20,10 @@ const cursosData: InsertCurso[] = [
   { id: 2, nome: "Sistemas de Informação", sigla: "BSI" },
 ];
 */
-const passwordHash = await bcrypt.hash("admin@admin.com", 10);
+//const passwordHash = await bcrypt.hash("admin@admin.com", 10);
 
+/*
 const UserData: InsertUser[] = [
-  /*
   {
     id: 1,
     passwordHash:
@@ -36,7 +36,7 @@ const UserData: InsertUser[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
     role: "TEACHER",
-  },*/
+  },
   {
     email: "admin@admin.com",
     nome: "Root ACTIVE",
@@ -49,18 +49,164 @@ const UserData: InsertUser[] = [
     updatedAt: new Date(),
   },
 ];
+*/
 
 async function seed() {
   await db.transaction(async (db) => {
     /*
+    const [endereco2, endereco3, endereco4] = await db
+      .insert(Endereco)
+      .values([
+        {
+          cep: "40100-000",
+          logradouro: "Av. Sete de Setembro",
+          numero: "250",
+          bairro: "Barra",
+          estado: "Bahia",
+          municipio: "Salvador",
+        },
+        {
+          cep: "44001-000",
+          logradouro: "Rua das Flores",
+          numero: "45",
+          bairro: "Centro",
+          estado: "Bahia",
+          municipio: "Feira de Santana",
+        },
+        {
+          cep: "41800-000",
+          logradouro: "Rua do Sol",
+          numero: "78",
+          bairro: "Pituba",
+          estado: "Bahia",
+          municipio: "Salvador",
+        },
+      ])
+      .returning({ id: Endereco.id });
+
+    const candidatosExtras = [
+      {
+  //      idEndereco: endereco2.id,
+        numeroInscricao: "TEST-002",
+        cpf: "98765432100",
+        sexo: "Feminino",
+        nome: "Ana Souza",
+        estadoCivil: "Casado",
+        email: "ana@example.com",
+        dataNascimento: new Date("1993-06-20"),
+        raca: "Pardo",
+        nomeMae: "Lúcia Souza",
+        tipoEscolaEnsinoMedio: "Privada",
+        rg: "2345678",
+        tituloEleitor: "234567890",
+        telefoneCelular: "71988888888",
+        linhaPesquisa: "Banco de Dados",
+        primeiraAreaPreferencia:
+          "SIBW - Sistemas de Informação, Banco de Dados Web",
+        nomeCursoGraduacao: "Sistemas de Informação",
+        nomeUniversidadeGraduacao: "UNEB",
+        enadeDoCursoGraduacao: "2018",
+        valorDoEnadeDoCursoGraduacao: "4.0",
+        vagasNegrosPardos: true,
+        possuiNecessidadesEspeciais: false,
+      },
+      {
+        idEndereco: endereco3.id,
+        numeroInscricao: "TEST-003",
+        cpf: "11122233344",
+        sexo: "Masculino",
+        nome: "Carlos Oliveira",
+        estadoCivil: "Solteiro",
+        email: "carlos@example.com",
+        dataNascimento: new Date("1997-11-03"),
+        raca: "Preto",
+        nomeMae: "Rita Oliveira",
+        tipoEscolaEnsinoMedio: "Publica",
+        rg: "3456789",
+        tituloEleitor: "345678901",
+        telefoneCelular: "75977777777",
+        linhaPesquisa: "Redes de Computadores",
+        primeiraAreaPreferencia:
+          "ICOT - Inteligência Computacional e Otimização",
+        nomeCursoGraduacao: "Engenharia da Computação",
+        nomeUniversidadeGraduacao: "UEFS",
+        enadeDoCursoGraduacao: "2019",
+        valorDoEnadeDoCursoGraduacao: "3.8",
+        vagasNegrosPardos: true,
+        possuiNecessidadesEspeciais: false,
+      },
+      {
+        idEndereco: endereco4.id,
+        numeroInscricao: "TEST-004",
+        cpf: "55566677788",
+        sexo: "Feminino",
+        nome: "Beatriz Lima",
+        estadoCivil: "Solteiro",
+        email: "beatriz@example.com",
+        dataNascimento: new Date("1996-03-12"),
+        raca: "Branco",
+        nomeMae: "Helena Lima",
+        tipoEscolaEnsinoMedio: "Privada",
+        rg: "4567890",
+        tituloEleitor: "456789012",
+        telefoneCelular: "71966666666",
+        linhaPesquisa: "Visão Computacional",
+        primeiraAreaPreferencia: "ES - Engenharia de Software",
+        nomeCursoGraduacao: "Ciência da Computação",
+        nomeUniversidadeGraduacao: "UFBA",
+        enadeDoCursoGraduacao: "2020",
+        valorDoEnadeDoCursoGraduacao: "4.5",
+        vagasNegrosPardos: false,
+        possuiNecessidadesEspeciais: true,
+      },
+    ] as const;
+
+    for (const c of candidatosExtras) {
+      const [candidato] = await db
+        .insert(CandidatoMestrado)
+        .values({
+          status: "Inscricao Submetida",
+          dataInscricao: new Date(),
+          pais: "Brasil",
+          estado: "Bahia",
+          municipio: "Salvador",
+          orgaoExpedidor: "SSP",
+          estadoExpedicao: "Bahia",
+          dataExpedicao: new Date("2020-01-01"),
+          secaoEleitoral: "001",
+          comprovantePagTaxaInscricao: "link.pdf",
+          copiaCPF: "link.pdf",
+          copiaDocumentoIdentificacao: "link.pdf",
+          solicitouIsencaoTaxaInscricao: false,
+          comprovacaoPesquisas: "link.pdf",
+          vagasSupranumerarias: false,
+          copiaDiplomaGraduacao: "link.pdf",
+          historicoGraduacao: "link.pdf",
+          cidadeOndeRealizouGraduacao: "Salvador",
+          cartaMotivacao: "link.pdf",
+          ...c,
+        })
+        .onConflictDoNothing()
+        .returning({ id: CandidatoMestrado.id });
+
+      if (candidato) {
+        await db
+          .insert(NotaMestrado)
+          .values({ idCandidato: candidato.id })
+          .onConflictDoNothing();
+      }
+    }
+    console.log("Seeded candidatos mestrado 2-4.");
+    */
+    /*
     console.log("Seeding cursos...");
     await db.insert(Cursos).values(cursosData).onConflictDoNothing();
     console.log(`Seeded ${cursosData.length} cursos.`);
-    */
+
     console.log("Seeding usuarios...");
     await db.insert(Users).values(UserData).onConflictDoNothing();
     console.log(`Seeded ${UserData.length} usuarios.`);
-    /*
+  
     console.log("Seeding candidatos...");
 
     const [endereco1] = await db

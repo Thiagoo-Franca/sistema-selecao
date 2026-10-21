@@ -1,12 +1,11 @@
 import { useNavigate, useParams } from "react-router"
-import type { Route } from "./+types/banca.$id"
 import { useEffect, useState } from "react"
 import { useToast } from "@/hooks"
 import { useUser } from "@/services/useUser"
 import {
   useCandidatoDoutoradoById,
-  useUpdateCandidatoDoutorado,
-  useUpdateCandidatoDoutoradoNota,
+  // useUpdateCandidatoDoutorado,
+  // useUpdateCandidatoDoutoradoNota,
 } from "@/hooks/candidato.hooks"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -16,7 +15,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { calcularNotaDoutoradoEtapa1, paraNumeroSeguro } from "@/lib/calculoNotas"
-import { Header } from "@/components/layout/Header"
+import { Header } from "@/components/layout/header"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel, FieldLegend } from "@/components/ui/field"
@@ -29,9 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import type { CandidatoDoutorado } from "./dashboard"
+import type { Route } from "./+types/dashboard"
 
-export const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato Doutorado` }]
+const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato Doutorado` }]
 
 export default function AvaliacaoCandidatoDoutoradoPage() {
   const navigate = useNavigate()
@@ -139,8 +138,8 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
     setNota(resultado.pontuacao)
   }, [camposNotaEtapa1])
 
-  const updateCandidatoMutation = useUpdateCandidatoDoutorado()
-  const updateNotaMutation = useUpdateCandidatoDoutoradoNota()
+  //const updateCandidatoMutation = useUpdateCandidatoDoutorado()
+  // const updateNotaMutation = useUpdateCandidatoDoutoradoNota()
 
   async function onSubmit(dados: CandidatoDoutoradoNotaEtapa1) {
     if (!id) return

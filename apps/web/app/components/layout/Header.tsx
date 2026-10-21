@@ -38,7 +38,7 @@ export function Header(props: HeaderProps) {
       role="banner"
       aria-label="Cabeçalho principal"
     >
-      <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
+      <div className="flex items-center justify-between">
         {/* Left Side: Logo and Title */}
         <Link
           to="/dashboard"
@@ -48,10 +48,12 @@ export function Header(props: HeaderProps) {
           <img
             src="/icc-ufba.png"
             alt="Logo do Instituto de Computação da UFBA"
-            className="h-12 w-8"
+            className="h-auto w-8 md:w-10"
             aria-hidden="true"
           />
-          <span className="text-sm font-bold sm:text-base lg:inline-block">Sistema de seleção</span>
+          <span className="text-sm font-semibold text-gray-700 sm:text-base lg:inline-block">
+            Sistema de seleção
+          </span>
         </Link>
 
         {/* Mobile Menu Button */}

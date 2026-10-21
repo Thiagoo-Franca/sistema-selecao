@@ -1,16 +1,15 @@
-"use client"
-
-import { useUser } from "@/services/useUser"
+import { useEffect } from "react"
 import { useNavigate } from "react-router"
-import type { Route } from "./+types/dashboard"
+import { useUser } from "@/services/useUser"
 
-import { Header } from "@/components/layout/Header"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useQueryParamsState } from "@/hooks/use-query-param-state"
-import { CandidatosTab } from "@/components/candidatos-tab"
-import CandidatoTab from "@/components/candidatos-tab/candidato-tab"
+
+import type { Route } from "./+types/dashboard"
+import { UploadCandidatosMestrado } from "@/components/candidatos/upload-candidate"
+import { Header } from "@/components/layout/header"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import SearchBar from "@/components/ui/search-bar"
+import { CandidatosTab } from "@/components/candidatos-tab/candidato-tab"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -23,98 +22,67 @@ export const meta: Route.MetaFunction = () => [
     }),
   },
 ]
-
-const TABS: { value: string; label: string }[] = [
-  {
-    value: "candidatos",
-    label: "Todos os Candidatos",
-  },
-  {
-    value: "candidatos-mestrado",
-    label: "Mestrado",
-  },
-  {
-    value: "candidatos-doutorado",
-    label: "Doutorado",
-  },
-]
+const TABS = [
+  { value: "candidatos", label: "Todos os Candidatos", type: undefined },
+  { value: "candidatos-mestrado", label: "Mestrado", type: "mestrado" },
+  { value: "candidatos-doutorado", label: "Doutorado", type: "doutorado" },
+] as const
 
 export default function Home() {
-  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useQueryParamsState("searchQuery", "")
   const [orderBy, setOrderBy] = useQueryParamsState("orderBy", "nome")
   const [order, setOrder] = useQueryParamsState<"asc" | "desc">("order", "asc")
   const [activeTab, setActiveTab] = useQueryParamsState("activeTab", "candidatos")
 
+  const navigate = useNavigate()
+
   const userQuery = useUser()
-  const isTeacherOrAdmin = userQuery.data?.role === "TEACHER" || userQuery.data?.role === "ADMIN"
+  const isAdmin = userQuery.data?.role === "ADMIN"
+
+  const currentTab = TABS.some((t) => t.value === activeTab) ? activeTab : "candidatos"
+
+  useEffect(() => {
+    if (!userQuery.data && !userQuery.isLoading) {
+      navigate("/")
+    }
+  }, [userQuery.data, navigate])
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <Header className="mb-6" />
-      <div className="mb-6 flex flex-col items-center justify-between gap-4 lg:flex-row">
-        <div className="flex w-full flex-col items-center gap-4 self-stretch sm:flex-row">
-          <Input
-            id="candidato-search"
-            type="search"
-            placeholder="Buscar por nome…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full self-stretch md:max-w-lg"
-          />
+    <div className="mx-auto px-4 md:px-8">
+      <Header className="mb-6 py-2" />
+      <div className="mb-6 flex flex-row items-center justify-between gap-2">
+        <div className="flex w-full flex-col items-center gap-2 self-stretch md:flex-row md:gap-4">
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
-        {!!userQuery.data && userQuery.data.role === "ADMIN" && (
-          <Button
-            className="w-full bg-blue-500 hover:bg-blue-600 md:max-w-xs"
-            //  onClick={() => navigate("/")}
-          >
-            Adicionar Candidato
-          </Button>
-        )}
+        {!!isAdmin && <UploadCandidatosMestrado />}
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full hover:cursor-pointer">
-        <div className="flexitems-center mb-4 justify-between">
+      <Tabs value={currentTab} onValueChange={setActiveTab} className="w-full hover:cursor-pointer">
+        <div className="mb-4 flex items-center justify-between">
           <TabsList className="flex w-full flex-row items-center justify-between gap-2 rounded-lg border-none bg-white p-1 shadow-none md:max-w-lg">
-            {isTeacherOrAdmin &&
-              TABS.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="w-full rounded-lg bg-white px-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 data-[state=active]:shadow-md md:px-4"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
+            {TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="w-full rounded-lg bg-white px-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 data-[state=active]:shadow-md md:px-4"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </div>
-        {isTeacherOrAdmin && (
-          <>
-            <CandidatosTab
-              searchQuery={searchQuery}
-              orderBy={orderBy}
-              order={order}
-              setOrderBy={setOrderBy}
-              setOrder={setOrder}
-            />
-            <CandidatoTab
-              type="mestrado"
-              searchQuery={searchQuery}
-              orderBy={orderBy}
-              order={order}
-              setOrderBy={setOrderBy}
-              setOrder={setOrder}
-            />
-            <CandidatoTab
-              type="doutorado"
-              searchQuery={searchQuery}
-              orderBy={orderBy}
-              order={order}
-              setOrderBy={setOrderBy}
-              setOrder={setOrder}
-            />
-          </>
-        )}
+        {TABS.map((tab) => (
+          <CandidatosTab
+            key={tab.value}
+            tabValue={tab.value}
+            type={tab.type}
+            searchQuery={searchQuery}
+            orderBy={orderBy}
+            order={order}
+            setOrderBy={setOrderBy}
+            setOrder={setOrder}
+          />
+        ))}
       </Tabs>
     </div>
   )

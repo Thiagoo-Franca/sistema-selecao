@@ -1,48 +1,50 @@
 import { useNavigate, useParams } from "react-router"
 import { useToast } from "@/hooks"
-import { useState } from "react"
-import { useCandidatoDoutoradoById } from "@/hooks/candidato.hooks"
-import { useUser } from "@/services/useUser"
-import { Header } from "@/components/layout/Header"
-import { ArrowLeft, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
+import { useEffect } from "react"
+import { Loader2 } from "lucide-react"
+
 import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
+import { useCandidatoDoutoradoById, useDeleteCandidatoDoutorado } from "@/hooks/candidato.hooks"
+import { useUser } from "@/services/useUser"
+import { Header } from "@/components/layout/header"
 import type { Route } from "./+types/dashboard"
-import { formatBoolean, formatDate } from "@/lib/format"
+import { formatBoolean, formatCPF, formatDate, formatPhoneNumber } from "@/lib/format"
+import CandidateDetails from "@/components/candidatos/candidate-details"
+import CandidateNotFound from "@/components/candidatos/candidate-not-found"
 
 export const meta: Route.MetaFunction = () => [
   { title: "SISSEL - Candidato de doutorado", description: "Página do candidato de doutorado" },
 ]
 
 export default function CandidatoDoutoradoPage() {
-  const navigate = useNavigate()
   const { id } = useParams<{ id: string | undefined }>()
-  const { toast } = useToast()
-
   const userQuery = useUser()
 
-  const userLoading = userQuery.isLoading
+  const { toast } = useToast()
+  const navigate = useNavigate()
+  const candidatoQuery = useCandidatoDoutoradoById(id ?? "")
+  const deleteCandidatoMutation = useDeleteCandidatoDoutorado(id ?? "")
+  const user = userQuery.data
+  const candidato: CandidatoDoutoradoComRelacoes = candidatoQuery.data
+
+  useEffect(() => {
+    document.title = `SISSEL - ${candidato?.nome ?? "Candidato de doutorado"}`
+  }, [candidato?.nome])
+
   if (id === undefined) {
-    navigate("/")
+    navigate("/dashboard")
     return null
   }
-  const candidatoQuery = useCandidatoDoutoradoById(id)
-
-  const user = userQuery.data
 
   if (!id || !user) {
     navigate("/")
     return
   }
 
-  if (userLoading) {
+  // Ainda sem funcinalidade
+  const isAdmin = user?.role === "ADMIN"
+
+  if (candidatoQuery.isLoading || userQuery.isLoading) {
     return (
       <div className="container mx-auto p-4 md:p-8">
         <Header className="mb-6" />
@@ -53,406 +55,270 @@ export default function CandidatoDoutoradoPage() {
     )
   }
 
-  const isLoading = candidatoQuery.isLoading || userLoading
-  const error = candidatoQuery.error || userQuery.error
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <Header className="mb-6" />
-        <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    toast.error("Erro ao carregar candidato de doutorado")
-    navigate("/")
+  if (candidatoQuery.isError || userQuery.isError) {
+    toast.error({
+      title: "Erro",
+      description: "Erro ao carregar os dados do candidato.",
+    })
+    navigate("/dashboard")
     return null
   }
 
-  if (!candidatoQuery.data) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <Header className="mb-6" />
-        <div className="py-20 text-center">
-          <h2 className="mb-4 text-2xl font-semibold">Candidato não encontrado</h2>
-          <p className="text-muted-foreground">
-            O candidato que você está procurando não existe ou foi removido.
-          </p>
-          <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-          </Button>
-        </div>
-      </div>
-    )
+  if (!candidato) {
+    return <CandidateNotFound />
   }
 
-  const candidato = candidatoQuery.data as CandidatoDoutoradoComRelacoes
+  function handleDelete() {
+    if (!confirm("Tem certeza que deseja excluir este candidato?")) return
 
+    deleteCandidatoMutation
+      .mutateAsync()
+      .then(() => navigate("/dashboard"))
+      .catch(() => undefined)
+  }
+
+  const SECTION_CONTENT: {
+    title: string
+    content: { label: string; value: string | boolean | Date | null | undefined; link?: boolean }[]
+  }[] = [
+    {
+      title: "INFORMAÇÕES DA CANDIDATURA",
+      content: [
+        { label: "Número de inscrição", value: candidato.numeroInscricao },
+        { label: "Situação", value: candidato.status },
+        { label: "Data de Inscrição", value: formatDate(candidato.dataInscricao) },
+      ],
+    },
+    {
+      title: "INFORMAÇÕES DO CANDIDATO",
+      content: [
+        {
+          label: "CPF",
+          value: formatCPF(candidato.cpf),
+        },
+        {
+          label: "Nome",
+          value: candidato.nome,
+        },
+        {
+          label: "Sexo",
+          value: candidato.sexo,
+        },
+        {
+          label: "Estado civil",
+          value: candidato.estadoCivil,
+        },
+        {
+          label: "Email",
+          value: candidato.email,
+        },
+        {
+          label: "Data de Nascimento",
+          value: formatDate(candidato.dataNascimento),
+        },
+        {
+          label: "Nome da mãe",
+          value: candidato.nomeMae,
+        },
+        {
+          label: "Nome do pai",
+          value: candidato.nomePai,
+        },
+        {
+          label: "Tipo de escola no ensino médio",
+          value: candidato.tipoEscolaEnsinoMedio,
+        },
+        {
+          label: "Telefone fixo",
+          value: candidato.telefoneFixo,
+        },
+        {
+          label: "Telefone celular",
+          value: formatPhoneNumber(candidato.telefoneCelular),
+        },
+      ],
+    },
+    {
+      title: "NACIONALIDADE",
+      content: [
+        {
+          label: "País",
+          value: candidato.pais,
+        },
+        {
+          label: "Município",
+          value: candidato.municipio,
+        },
+        {
+          label: "UF",
+          value: candidato.estado,
+        },
+      ],
+    },
+    {
+      title: "DOCUMENTOS",
+      content: [
+        {
+          label: "RG",
+          value: candidato.rg,
+        },
+        {
+          label: "Orgão de expedição",
+          value: candidato.orgaoExpedidor,
+        },
+        {
+          label: "UF",
+          value: candidato.estadoExpedicao,
+        },
+        {
+          label: "Data de expedição",
+          value: formatDate(candidato.dataExpedicao),
+        },
+        {
+          label: "Título de eleitor",
+          value: candidato.tituloEleitor,
+        },
+        {
+          label: "Zona",
+          value: candidato.zonaEleitoral,
+        },
+        {
+          label: "Seção",
+          value: candidato.secaoEleitoral,
+        },
+        {
+          label: "Passaporte",
+          value: candidato.passaporte,
+        },
+      ],
+    },
+    {
+      title: "ENDEREÇO",
+      content: [
+        {
+          label: "CEP",
+          value: candidato.endereco?.cep,
+        },
+        {
+          label: "Logradouro",
+          value: candidato.endereco?.logradouro,
+        },
+        {
+          label: "Bairro",
+          value: candidato.endereco?.bairro,
+        },
+        {
+          label: "Complemento",
+          value: candidato.endereco?.complemento,
+        },
+        {
+          label: "UF",
+          value: candidato.endereco?.estado,
+        },
+        {
+          label: "Município",
+          value: candidato.endereco?.municipio,
+        },
+      ],
+    },
+    {
+      title: "INFORMAÇÕES ADICIONAIS",
+      content: [
+        {
+          label: "Comprovação de inscrição",
+          value: candidato.comprovantePagTaxaInscricao,
+          link: true,
+        },
+        {
+          label: "Cópia CPF",
+          value: candidato.copiaCPF,
+          link: true,
+        },
+        {
+          label: "Cópia Passaporte ou RNE (Apenas para estrageiros)",
+          value: candidato.copiaPassaporteOuRNE,
+          link: !!candidato.copiaPassaporteOuRNE,
+        },
+        {
+          label: "Isenção pagamento taxa de inscrição",
+          value: formatBoolean(candidato.solicitouIsencaoTaxaInscricao),
+        },
+        {
+          label: "Histórico acadêmico do curso de graduação",
+          value: candidato.historicoGraduacao,
+          link: true,
+        },
+        {
+          label: "Cópia de diploma de mestrado ou declaração de concluinte",
+          value: candidato.copiaDiplomaMestrado,
+          link: true,
+        },
+        {
+          label: "Histórico acadêmico do curso de mestrado",
+          value: candidato.historicoMestrado,
+          link: true,
+        },
+        {
+          label: "Nome da universidade/faculdade onde realizou mestrado",
+          value: candidato.nomeUniversidadeMestrado,
+        },
+        {
+          label: "Nome do curso de mestrado",
+          value: candidato.nomeCursoMestrado,
+        },
+        {
+          label: "Comprovações de pesquisa",
+          value: candidato.comprovacaoPesquisas,
+          link: true,
+        },
+        {
+          label: "Anteprojeto de tese",
+          value: candidato.anteprojetoTese,
+          link: true,
+        },
+        {
+          label: "Conceito CAPES do programa do curso de mestrado",
+          value: candidato.conceitoCapesMestrado,
+        },
+        {
+          label: "Possui necessidades especiais",
+          value: formatBoolean(candidato.possuiNecessidadesEspeciais),
+        },
+        {
+          label: "Concorre às vagas reservadas para negros(as) - preto(as) e pardos(as)",
+          value: formatBoolean(candidato.vagasNegrosPardos),
+        },
+        {
+          label: "Concorre às vagas supranumerárias",
+          value: formatBoolean(candidato.vagasSupranumerarias),
+        },
+      ],
+    },
+    {
+      title: "Opções para orientadores",
+      content: [
+        {
+          label: "Primeira opção de orientador(a)",
+          value: candidato.primeiraOpcaoOrientador,
+        },
+        {
+          label: "Segunda opção de orientador(a)",
+          value: candidato.segundaOpcaoOrientador,
+        },
+        {
+          label: "Terceira opção de orientador(a)",
+          value: candidato.terceiraOpcaoOrientador,
+        },
+      ],
+    },
+  ]
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <Header className="mb-6" />
-      <div className="mb-6 flex w-full flex-row justify-between">
-        <div className="flex flex-row items-center gap-4">
-          <Button onClick={() => navigate(-1)} variant="outline" className="">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-          </Button>
-          <h1 className="text-2xl font-bold">{candidato.nome}</h1>
-        </div>
-        <div className="flex flex-col items-center gap-4 self-stretch md:flex-row">
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Outras opções</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="flex flex-col gap-2 p-4">
-                    <li>
-                      <Button className="w-full bg-white text-black hover:bg-black/10">
-                        Editar candidato
-                      </Button>
-                    </li>
-                    <li>
-                      <Button className="w-full bg-red-500 hover:bg-red-600">
-                        Excluir candidato
-                      </Button>
-                    </li>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-          <Button
-            className="bg-blue-500 hover:bg-blue-600"
-            onClick={() => navigate(`/doutorado/${candidato.id}/avaliacao`)}
-          >
-            Avaliar
-          </Button>
-        </div>
-      </div>
-      <section>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="font-semibold">Número de inscrição</h3>
-            <p className="text-muted-foreground">{candidato.numeroInscricao}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Situação</h3>
-            <p className="text-muted-foreground">{candidato.status}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Data de Inscrição</h3>
-            <p className="text-muted-foreground">{formatDate(candidato.dataInscricao)}</p>
-          </div>
-        </div>
-        <hr className="my-4" />
-      </section>
-      <section>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="font-semibold">CPF</h3>
-            <p className="text-muted-foreground">{candidato.cpf}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Nome</h3>
-            <p className="text-muted-foreground">{candidato.nome}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Sexo</h3>
-            <p className="text-muted-foreground">{candidato.sexo}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Estado civil</h3>
-            <p className="text-muted-foreground">{candidato.estadoCivil}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Email</h3>
-            <p className="text-muted-foreground">{candidato.email}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Data de Nascimento</h3>
-            <p className="text-muted-foreground">{formatDate(candidato.dataNascimento)}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Nome da mãe</h3>
-            <p className="text-muted-foreground">{candidato.nomeMae}</p>
-          </div>
-          {candidato.nomePai && (
-            <div>
-              <h3 className="font-semibold">Nome do Pai</h3>
-              <p className="text-muted-foreground">{candidato.nomePai}</p>
-            </div>
-          )}
-          <div>
-            <h3 className="font-semibold">Tipo de escola no ensino médio</h3>
-            <p className="text-muted-foreground">{candidato.tipoEscolaEnsinoMedio}</p>
-          </div>
-        </div>
-        <hr className="my-4" />
-      </section>
-      <section>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="font-semibold">País</h3>
-            <p className="text-muted-foreground">{candidato.pais}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Município</h3>
-            <p className="text-muted-foreground">{candidato.municipio}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">UF</h3>
-            <p className="text-muted-foreground">{candidato.estado}</p>
-          </div>
-        </div>
-        <hr className="my-4" />
-      </section>
-      <section>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="font-semibold">RG</h3>
-            <p className="text-muted-foreground">{candidato.rg}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Orgão de expedição</h3>
-            <p className="text-muted-foreground">{candidato.orgaoExpedidor}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">UF</h3>
-            <p className="text-muted-foreground">{candidato.estadoExpedicao}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Data de expedição</h3>
-            <p className="text-muted-foreground">{formatDate(candidato.dataExpedicao)}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Titulo de Eleitor</h3>
-            <p className="text-muted-foreground">{candidato.tituloEleitor}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Zona</h3>
-            <p className="text-muted-foreground">{candidato.zonaEleitoral}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Seção</h3>
-            <p className="text-muted-foreground">{candidato.secaoEleitoral}</p>
-          </div>
-          {candidato.passaporte && (
-            <div>
-              <h3 className="font-semibold">Passaporte</h3>
-              <p className="text-muted-foreground">{candidato.passaporte}</p>
-            </div>
-          )}
-        </div>
-        <hr className="my-4" />
-      </section>
-      <section>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="font-semibold">CEP</h3>
-            <p className="text-muted-foreground">{candidato.endereco?.cep}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Logradouro</h3>
-            <p className="text-muted-foreground">{candidato.endereco?.logradouro}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Bairro</h3>
-            <p className="text-muted-foreground">{candidato.endereco?.bairro}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Complemento</h3>
-            <p className="text-muted-foreground">{candidato.endereco?.complemento}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">UF</h3>
-            <p className="text-muted-foreground">{candidato.endereco?.estado}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Município</h3>
-            <p className="text-muted-foreground">{candidato.endereco?.municipio}</p>
-          </div>
-          {candidato.telefoneFixo && (
-            <div>
-              <h3 className="font-semibold">Tel. Fixo</h3>
-              <p className="text-muted-foreground">{candidato.telefoneFixo}</p>
-            </div>
-          )}
-          <div>
-            <h3 className="font-semibold">Tel. Celular</h3>
-            <p className="text-muted-foreground">{candidato.telefoneCelular}</p>
-          </div>
-        </div>
-        <hr className="my-4" />
-      </section>
-      <section>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="font-semibold">Linha de pesquisa</h3>
-            <p className="text-muted-foreground">{candidato.linhaPesquisa}</p>
-          </div>
-        </div>
-        <hr className="my-4" />
-      </section>
-
-      <section>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="font-semibold">Comprovante de inscrição</h3>
-            <a
-              href={candidato.comprovantePagTaxaInscricao}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:underline"
-            >
-              {candidato.comprovantePagTaxaInscricao}
-            </a>
-          </div>
-          <div>
-            <h3 className="font-semibold">Cópia CPF</h3>
-            <a
-              href={candidato.copiaCPF}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:underline"
-            >
-              {candidato.copiaCPF}
-            </a>
-          </div>
-          {
-            candidato.copiaPassaporteOuRNE && (
-              <div>
-                <h3 className="font-semibold">Cópia Passaporte ou RNE (Apenas para estrageiros)</h3>
-
-                <a
-                  href={candidato.copiaPassaporteOuRNE}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:underline"
-                >
-                  {candidato.copiaPassaporteOuRNE}
-                </a>
-              </div>
-            )
-            // falta copia documento com foto e impressão digital (apenas para brasileiras)
-          }
-
-          <div>
-            <h3 className="font-semibold">Isenção pagamento taxa de inscrição </h3>
-            <p className="text-muted-foreground">
-              {formatBoolean(candidato.solicitouIsencaoTaxaInscricao)}
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold">HISTÓRICO ACADÊMICO DO CURSO DE GRADUAÇÃO</h3>
-            <a
-              href={candidato.historicoGraduacao}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:underline"
-            >
-              {candidato.historicoGraduacao}
-            </a>
-          </div>
-          <div>
-            <h3 className="font-semibold">
-              CÓPIA DE DIPLOMA DE MESTRADO OU DECLARAÇÃO DE CONCLUINTE
-            </h3>
-            <a
-              href={candidato.copiaDiplomaMestrado}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:underline"
-            >
-              {candidato.copiaDiplomaMestrado}
-            </a>
-          </div>
-          <div>
-            <h3 className="font-semibold">Histórico acadêmico do curso de mestrado</h3>
-            <a
-              href={candidato.historicoMestrado}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:underline"
-            >
-              {candidato.historicoMestrado}
-            </a>
-          </div>
-          <div>
-            <h3 className="font-semibold">Nome da universidade/faculdade onde realizou mestrado</h3>
-            <p className="text-muted-foreground">{candidato.nomeUniversidadeMestrado}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Nome do curso de mestrado</h3>
-            <p className="text-muted-foreground">{candidato.nomeCursoMestrado}</p>
-          </div>
-
-          <div>
-            <h3 className="font-semibold">Comprovações de pesquisa</h3>
-            <a
-              href={candidato.comprovacaoPesquisas}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:underline"
-            >
-              {candidato.comprovacaoPesquisas}
-            </a>
-          </div>
-
-          <div>
-            <h3 className="font-semibold">ANTEPROJETO DE TESE</h3>
-            <a
-              href={candidato.anteprojetoTese}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:underline"
-            >
-              {candidato.anteprojetoTese}
-            </a>
-          </div>
-          <div>
-            <h3 className="font-semibold">Conceito CAPES do programa do curso de mestrado</h3>
-            <p className="text-muted-foreground">{candidato.conceitoCapesMestrado}</p>
-          </div>
-
-          <div>
-            <h3 className="font-semibold">Possui necessidades especiais</h3>
-            <p className="text-muted-foreground">
-              {formatBoolean(candidato.possuiNecessidadesEspeciais)}
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold">
-              Concorre às vagas reservadas para negros(as) - preto(as) e pardos(as)
-            </h3>
-            <p className="text-muted-foreground">{formatBoolean(candidato.vagasNegrosPardos)}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Concorre às vagas supranumerárias</h3>
-            <p className="text-muted-foreground">{formatBoolean(candidato.vagasSupranumerarias)}</p>
-          </div>
-        </div>
-        <hr className="my-4" />
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <h3 className="font-semibold">Primeira opção de orientador(a)</h3>
-            <p className="text-muted-foreground">{candidato.primeiraOpcaoOrientador}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Segunda opção de orientador(a)</h3>
-            <p className="text-muted-foreground">{candidato.segundaOpcaoOrientador}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Terceira opção de orientador(a)</h3>
-            <p className="text-muted-foreground">{candidato.terceiraOpcaoOrientador}</p>
-          </div>
-        </div>
-
-        <hr className="my-4" />
-      </section>
-    </div>
+    <CandidateDetails
+      user={user}
+      candidato={candidato}
+      handleDelete={handleDelete}
+      deleteCandidatoMutation={deleteCandidatoMutation}
+      SECTION_CONTENT={SECTION_CONTENT}
+    />
   )
 }

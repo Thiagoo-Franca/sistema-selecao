@@ -1,4 +1,4 @@
-import { Header } from "@/components/layout/Header"
+import { Header } from "@/components/layout/header"
 import type { Route } from "./+types/users.$id"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

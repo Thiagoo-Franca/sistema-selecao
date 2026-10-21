@@ -1,4 +1,4 @@
-import { Header } from "@/components/layout/Header"
+import { Header } from "@/components/layout/header"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
