@@ -177,6 +177,7 @@ export const useDeleteCandidatoMestrado = (id: string | number) => {
   })
 }
 
+/*
 export const useDeleteCandidatoDoutorado = (id: string | number) => {
   const queryClient = useQueryClient()
 
@@ -197,6 +198,8 @@ export const useDeleteCandidatoDoutorado = (id: string | number) => {
     },
   })
 }
+
+*/
 
 const COLUNAS = [
   "primeiraAreaPreferencia",

@@ -4,7 +4,9 @@ import { useEffect } from "react"
 import { Loader2 } from "lucide-react"
 
 import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
-import { useCandidatoDoutoradoById, useDeleteCandidatoDoutorado } from "@/hooks/candidato.hooks"
+import { useCandidatoDoutoradoById, 
+  // useDeleteCandidatoDoutorado
+ } from "@/hooks/candidato.hooks"
 import { useUser } from "@/services/useUser"
 import { Header } from "@/components/layout/header"
 import type { Route } from "./+types/dashboard"

@@ -78,36 +78,6 @@ export const useStudents = () => {
   })
 }
 
-export const useStudentsAvailableForBanca = () => {
-  return useQuery({
-    queryKey: ["students", "available-for-banca"],
-    queryFn: async () => {
-      const response = await apiClient.usuario.students["available-for-banca"].$get()
-      return rpcReturn(response)
-    },
-  })
-}
-
-export type UserAssociations = {
-  bancasAsOrientador: { id: number; tituloTrabalho: string; autor: string }[]
-  bancasAsAluno: { id: number; tituloTrabalho: string; autor: string }[]
-  membrosEmBancas: { bancaId: number; tituloTrabalho: string; role: string }[]
-}
-
-export const useUserAssociations = (userId: number | null) => {
-  return useQuery({
-    queryKey: ["users", "associations", userId],
-    queryFn: async () => {
-      if (!userId) throw new Error("User ID required")
-      const res = await apiClient.usuario[":id"].associations.$get({
-        param: { id: userId.toString() },
-      })
-      return rpcReturn(res) as Promise<UserAssociations>
-    },
-    enabled: !!userId,
-  })
-}
-
 // Hook to fetch a user by ID
 export const useUserById = (id: string | undefined) => {
   return useQuery({
@@ -120,21 +90,6 @@ export const useUserById = (id: string | undefined) => {
       return rpcReturn(res)
     },
     enabled: !!id,
-  })
-}
-
-// Hook to fetch bancas for a user
-export const useUserBancas = (userId: string | undefined) => {
-  return useQuery({
-    queryKey: ["user", userId, "bancas"],
-    queryFn: async () => {
-      if (!userId) throw new Error("User ID não fornecido")
-      const res = await apiClient.usuario[":id"].bancas.$get({
-        param: { id: userId },
-      })
-      return rpcReturn(res)
-    },
-    enabled: !!userId,
   })
 }
 

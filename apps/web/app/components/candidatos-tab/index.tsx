@@ -70,6 +70,8 @@ export function HomeTableCandidatos({
       const buscaSemAcentos = removerAcentos(searchQuery.toLowerCase())
 
       const filteredData = data.filter((candidato) => {
+        if (!candidato.nome) return false
+
         const nomeSemAcentos = removerAcentos(candidato.nome.toLowerCase())
 
         return nomeSemAcentos.includes(buscaSemAcentos)
@@ -127,10 +129,10 @@ export function HomeTableCandidatos({
             <div
               className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr] items-center gap-4 rounded-lg border border-transparent bg-white px-0 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:grid-cols-4 md:px-4"
               key={candidato.id}
-              onClick={() => navigate(`/${candidato.tipo.toLocaleLowerCase()}/${candidato.id}`)}
+              onClick={() => navigate(`/${candidato.tipo?.toLocaleLowerCase()}/${candidato.id}`)}
             >
               <div className="col-span-1 font-medium text-neutral-900">
-                {capitalizarNomeCompleto(candidato.nome)}
+                {capitalizarNomeCompleto(candidato.nome ?? "")}
               </div>
               <span className="inline-flex w-fit items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700">
                 {candidato.tipo}

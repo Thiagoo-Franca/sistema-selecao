@@ -45,14 +45,3 @@ export function formatPhoneNumber(phoneNumber: string | null | undefined) {
     return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
   }
 }
-
-export function handleCopy(text: string, id: string) {
-  navigator.clipboard.writeText(text).then(() => {
-    setCopiedId(id)
-    toast({
-      title: "Copiado!",
-      description: "Texto copiado para a área de transferência.",
-    })
-    setTimeout(() => setCopiedId(null), 2000)
-  })
-}

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useUserById, useUserBancas } from "@/hooks"
+import { useUserById } from "@/hooks"
 import { useUser } from "@/services/useUser"
 import { ArrowLeft, Mail, School, User, GraduationCap, Hash } from "lucide-react"
 import { useNavigate, useParams } from "react-router"
@@ -17,17 +17,15 @@ export default function UserProfilePage() {
   const { id } = useParams<{ id: string }>()
   const currentUserQuery = useUser()
   const userQuery = useUserById(id)
-  const bancasQuery = useUserBancas(id)
 
   if (!id) {
     navigate("/")
     return null
   }
 
-  const isLoading = userQuery.isLoading || bancasQuery.isLoading
-  const error = userQuery.error || bancasQuery.error
+  const isLoading = userQuery.isLoading
+  const error = userQuery.error
   const user = userQuery.data
-  const bancas = bancasQuery.data || []
   const currentUser = currentUserQuery.data
   const isAdmin = currentUser?.role === "ADMIN"
 

@@ -148,7 +148,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
         avaliador1: candidato.avaliador1 ? candidato.avaliador1 : "",
         avaliador2: candidato.avaliador2 ? candidato.avaliador2 : "",
         solicitouIsencaoTaxaInscricao: valorIsencaoSelect(candidato.solicitouIsencaoTaxaInscricao),
-        isencaoAprovada: candidato.isencaoAprovada,
+        isencaoAprovada: candidato.isencaoAprovada ?? undefined,
         gru: normalizeGru(candidato.gru),
         Homologa: valorSimNaoSelect(candidato.homologa),
         especiais: paraBooleano(candidato.especiais),
