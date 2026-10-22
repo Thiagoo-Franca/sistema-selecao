@@ -16,7 +16,7 @@ const roleLabels: Record<string, string> = {
   avaliador: "Avaliador",
 }
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Detalhe do Usuário" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Detalhe do Usuário" }]
 
 export default function AdminUserDetailPage() {
   const navigate = useNavigate()

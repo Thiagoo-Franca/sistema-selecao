@@ -1,16 +1,17 @@
-import { Header } from "@/components/layout/header"
+import { useUserById } from "@/hooks"
+import { useNavigate, useParams } from "react-router"
+import { useUser } from "@/services/useUser"
+
 import type { Route } from "./+types/users.$id"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useUserById } from "@/hooks"
-import { useUser } from "@/services/useUser"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Mail, School, User, GraduationCap, Hash } from "lucide-react"
-import { useNavigate, useParams } from "react-router"
 import { match } from "ts-pattern"
+import { Header } from "@/components/layout/header"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Perfil do Usuário" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil do Usuário" }]
 
 export default function UserProfilePage() {
   const navigate = useNavigate()

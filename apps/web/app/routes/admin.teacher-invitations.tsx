@@ -1,7 +1,6 @@
 import { Header } from "@/components/layout/header"
 import type { Route } from "./+types/admin.teacher-invitations"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Convites de Professores" }]
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +41,8 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Navigate } from "react-router"
 import { z } from "zod"
+
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Convites de Professores" }]
 
 const createTeacherInvitationSchema = z.object({
   email: z.string().email("Email inválido"),

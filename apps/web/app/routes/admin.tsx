@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router"
 import { useEffect, useState } from "react"
 import type { Route } from "./+types/admin"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Administração" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Administração" }]
 
 export default function AdminLayout() {
   const [isClient, setIsClient] = useState(false)

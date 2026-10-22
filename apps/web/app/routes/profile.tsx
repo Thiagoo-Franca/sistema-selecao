@@ -1,7 +1,6 @@
 import { Header } from "@/components/layout/header"
 import type { Route } from "./+types/profile"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Perfil" }]
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -31,6 +30,8 @@ import { Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { href, Navigate } from "react-router"
 import { z } from "zod"
+
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil" }]
 
 const profileFormSchema = z.object({
   nome: z.string().min(2, {

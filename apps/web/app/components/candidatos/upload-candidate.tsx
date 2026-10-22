@@ -13,7 +13,6 @@ import {
   DialogTrigger,
 } from "../ui/dialog"
 import { Input } from "../ui/input"
-import { cn } from "@/lib/utils"
 
 export function UploadCandidatosMestrado() {
   const [file, setFile] = useState<File | null>(null)
