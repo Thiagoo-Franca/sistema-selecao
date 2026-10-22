@@ -3,7 +3,7 @@ import { useNavigate } from "react-router"
 
 import { Button } from "../ui/button"
 import { ArrowLeft } from "lucide-react"
-import { Header } from "../layout/header"
+import { Header } from "@/components/layout/header"
 
 export default function CandidateNotFound() {
   const navigate = useNavigate()
