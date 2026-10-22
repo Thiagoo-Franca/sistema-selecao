@@ -1,3 +1,14 @@
+import {
+  useAcceptTeacherInvitation,
+  useVerifyTeacherInvitation,
+  type AcceptTeacherInvitationData,
+} from "@/hooks"
+import { useEffect } from "react"
+import { useNavigate, useParams } from "react-router"
+
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+
 import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,20 +22,11 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  useAcceptTeacherInvitation,
-  useVerifyTeacherInvitation,
-  type AcceptTeacherInvitationData,
-} from "@/hooks"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CheckCircle, Clock, Mail, XCircle } from "lucide-react"
-import { useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { useNavigate, useParams } from "react-router"
-import { z } from "zod"
 import type { Route } from "./+types/teacher-invitation.$hash"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Convite de Professor" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Convite de Professor" }]
 
 const acceptTeacherInvitationSchema = z
   .object({

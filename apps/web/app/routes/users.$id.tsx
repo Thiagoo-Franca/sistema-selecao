@@ -1,33 +1,32 @@
-import { Header } from "@/components/layout/header"
+import { useUserById } from "@/hooks"
+import { useNavigate, useParams } from "react-router"
+import { useUser } from "@/services/useUser"
+
 import type { Route } from "./+types/users.$id"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useUserById, useUserBancas } from "@/hooks"
-import { useUser } from "@/services/useUser"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Mail, School, User, GraduationCap, Hash } from "lucide-react"
-import { useNavigate, useParams } from "react-router"
 import { match } from "ts-pattern"
+import { Header } from "@/components/layout/header"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Perfil do Usuário" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil do Usuário" }]
 
 export default function UserProfilePage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const currentUserQuery = useUser()
   const userQuery = useUserById(id)
-  const bancasQuery = useUserBancas(id)
 
   if (!id) {
     navigate("/")
     return null
   }
 
-  const isLoading = userQuery.isLoading || bancasQuery.isLoading
-  const error = userQuery.error || bancasQuery.error
+  const isLoading = userQuery.isLoading
+  const error = userQuery.error
   const user = userQuery.data
-  const bancas = bancasQuery.data || []
   const currentUser = currentUserQuery.data
   const isAdmin = currentUser?.role === "ADMIN"
 

@@ -57,7 +57,7 @@ import { useUser } from "@/services/useUser"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { SelectUser } from "@tcc/server"
 import { AlertTriangle, Eye, MoreHorizontal, Search, Trash2, UserPlus } from "lucide-react"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Navigate, useNavigate } from "react-router"
 import { match } from "ts-pattern"
@@ -322,7 +322,7 @@ function UserTable({
   )
 }
 
-import { useAllUsers, useDeleteUser, useUpdateUser, useUserAssociations } from "@/hooks"
+import { useAllUsers, useDeleteUser, useUpdateUser } from "@/hooks"
 
 const updateUserSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -497,9 +497,9 @@ function DeleteUserDialog({
 }) {
   const [showAssociations, setShowAssociations] = useState(false)
   const deleteUserMutation = useDeleteUser()
-  const associationsQuery = useUserAssociations(showAssociations && user ? user.id : null)
+  // const associationsQuery = useUserAssociations(showAssociations && user ? user.id : null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) setShowAssociations(false)
   }, [open])
 
@@ -520,13 +520,13 @@ function DeleteUserDialog({
 
   if (!user) return null
 
-  const associations = associationsQuery.data
+  /* const associations = associationsQuery.data
   const hasAssociations =
     associations &&
     (associations.bancasAsOrientador.length > 0 ||
       associations.bancasAsAluno.length > 0 ||
       associations.membrosEmBancas.length > 0)
-
+  */
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-h-[90vh] overflow-y-auto">
@@ -539,105 +539,9 @@ function DeleteUserDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {showAssociations && (
-          <div className="space-y-4">
-            {associationsQuery.isLoading ? (
-              <p className="text-sm text-muted-foreground">Carregando associações...</p>
-            ) : hasAssociations ? (
-              <Alert variant="destructive">
-                <AlertTitle>Associações encontradas</AlertTitle>
-                <AlertDescription>
-                  <ul className="mt-2 list-inside space-y-2 text-sm">
-                    {associations.bancasAsOrientador.length > 0 && (
-                      <li>
-                        <span className="font-medium">
-                          Orientador em {associations.bancasAsOrientador.length} banca(s):
-                        </span>
-                        <ul className="ml-4 mt-1 list-disc">
-                          {associations.bancasAsOrientador.map((b) => (
-                            <li key={b.id}>
-                              {b.tituloTrabalho} ({b.autor})
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    )}
-                    {associations.bancasAsAluno.length > 0 && (
-                      <li>
-                        <span className="font-medium">
-                          Aluno em {associations.bancasAsAluno.length} banca(s):
-                        </span>
-                        <ul className="ml-4 mt-1 list-disc">
-                          {associations.bancasAsAluno.map((b) => (
-                            <li key={b.id}>
-                              {b.tituloTrabalho} ({b.autor})
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    )}
-                    {associations.membrosEmBancas.length > 0 && (
-                      <li>
-                        <span className="font-medium">
-                          Membro em {associations.membrosEmBancas.length} banca(s):
-                        </span>
-                        <ul className="ml-4 mt-1 list-disc">
-                          {associations.membrosEmBancas.map((m) => (
-                            <li key={`${m.bancaId}-${m.role}`}>
-                              {m.tituloTrabalho} ({roleLabels[m.role] ?? m.role})
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    )}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <p className="text-sm text-muted-foreground">Nenhuma associação encontrada.</p>
-            )}
-            {hasAssociations && (
-              <Alert variant="destructive" className="border-2">
-                <AlertTriangle className="h-5 w-5" />
-                <AlertTitle className="font-semibold">Atenção: exclusão em cascata</AlertTitle>
-                <AlertDescription>
-                  <p className="font-medium">
-                    Ao clicar em &quot;Excluir mesmo assim&quot;, todas as bancas onde este usuário
-                    é orientador ou aluno serão removidas permanentemente.
-                  </p>
-                  <p className="mt-2">
-                    As participações como avaliador ou coorientador serão apenas desvinculadas (as
-                    bancas permanecem).
-                  </p>
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-        )}
-
         <AlertDialogFooter>
           <AlertDialogCancel onClick={() => setShowAssociations(false)}>Cancelar</AlertDialogCancel>
-          {showAssociations && hasAssociations ? (
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={(e) => {
-                e.preventDefault()
-                handleConfirm(true)
-              }}
-            >
-              {deleteUserMutation.isPending ? "Excluindo..." : "Excluir mesmo assim"}
-            </AlertDialogAction>
-          ) : (
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={(e) => {
-                e.preventDefault()
-                handleConfirm(false)
-              }}
-            >
-              {deleteUserMutation.isPending ? "Excluindo..." : "Excluir"}
-            </AlertDialogAction>
-          )}
+          {deleteUserMutation.isPending ? "Excluindo..." : "Excluir"}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

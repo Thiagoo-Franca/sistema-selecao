@@ -1,14 +1,17 @@
-import { useNavigate, useParams } from "react-router"
-import { useToast } from "@/hooks"
 import { useEffect } from "react"
-import { Loader2 } from "lucide-react"
-
+import { useNavigate, useParams } from "react-router"
+import {
+  useCandidatoDoutoradoById,
+  // useDeleteCandidatoDoutorado
+} from "@/hooks/candidato.hooks"
+import { useToast } from "@/hooks"
 import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
-import { useCandidatoDoutoradoById, useDeleteCandidatoDoutorado } from "@/hooks/candidato.hooks"
 import { useUser } from "@/services/useUser"
+
+import { formatBoolean, formatCPF, formatDate, formatPhoneNumber } from "@/lib/format"
+import { Loader2 } from "lucide-react"
 import { Header } from "@/components/layout/header"
 import type { Route } from "./+types/dashboard"
-import { formatBoolean, formatCPF, formatDate, formatPhoneNumber } from "@/lib/format"
 import CandidateDetails from "@/components/candidatos/candidate-details"
 import CandidateNotFound from "@/components/candidatos/candidate-not-found"
 
@@ -23,7 +26,7 @@ export default function CandidatoDoutoradoPage() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const candidatoQuery = useCandidatoDoutoradoById(id ?? "")
-  const deleteCandidatoMutation = useDeleteCandidatoDoutorado(id ?? "")
+  // const deleteCandidatoMutation = useDeleteCandidatoDoutorado(id ?? "")
   const user = userQuery.data
   const candidato: CandidatoDoutoradoComRelacoes = candidatoQuery.data
 

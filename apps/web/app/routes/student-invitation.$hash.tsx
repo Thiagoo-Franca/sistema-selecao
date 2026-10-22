@@ -24,7 +24,7 @@ import { useNavigate, useParams } from "react-router"
 import { z } from "zod"
 import type { Route } from "./+types/student-invitation.$hash"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Convite de Aluno" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Convite de Aluno" }]
 
 const acceptStudentInvitationSchema = z
   .object({

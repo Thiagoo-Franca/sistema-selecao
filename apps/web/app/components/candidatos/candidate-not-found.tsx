@@ -1,8 +1,9 @@
+import { useEffect } from "react"
 import { useNavigate } from "react-router"
-import { Header } from "../layout/header"
+
 import { Button } from "../ui/button"
 import { ArrowLeft } from "lucide-react"
-import { useEffect } from "react"
+import { Header } from "@/components/layout/header"
 
 export default function CandidateNotFound() {
   const navigate = useNavigate()

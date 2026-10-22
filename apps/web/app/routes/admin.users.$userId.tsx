@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useUserAssociations, useUserById } from "@/hooks"
+import { useUserById } from "@/hooks"
 import { ArrowLeft, GraduationCap, Hash, Mail, School, User } from "lucide-react"
 import { useNavigate, useParams } from "react-router"
 import { match } from "ts-pattern"
@@ -16,17 +16,17 @@ const roleLabels: Record<string, string> = {
   avaliador: "Avaliador",
 }
 
-export const meta: Route.MetaFunction = () => [{ title: "SISDEF - Detalhe do Usuário" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Detalhe do Usuário" }]
 
 export default function AdminUserDetailPage() {
   const navigate = useNavigate()
   const { userId } = useParams<{ userId: string }>()
   const userQuery = useUserById(userId)
-  const associationsQuery = useUserAssociations(userId ? parseInt(userId, 10) : null)
+  // const associationsQuery = useUserAssociations(userId ? parseInt(userId, 10) : null)
 
-  const isLoading = userQuery.isLoading || associationsQuery.isLoading
+  const isLoading = userQuery.isLoading // || associationsQuery.isLoading
   const user = userQuery.data
-  const associations = associationsQuery.data
+  // const associations = associationsQuery.data
 
   if (isLoading) {
     return (
@@ -89,12 +89,6 @@ export default function AdminUserDetailPage() {
     .with("ADMIN", () => "Administrador")
     .otherwise(() => user.role)
 
-  const hasAssociations =
-    associations &&
-    (associations.bancasAsOrientador.length > 0 ||
-      associations.bancasAsAluno.length > 0 ||
-      associations.membrosEmBancas.length > 0)
-
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
@@ -149,65 +143,6 @@ export default function AdminUserDetailPage() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Associações em Bancas</CardTitle>
-            <CardDescription>
-              {hasAssociations
-                ? "Bancas onde este usuário participa como orientador, aluno ou membro"
-                : "Este usuário não possui associações em bancas ou outras entidades"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {associationsQuery.isLoading ? (
-              <p className="text-sm text-muted-foreground">Carregando associações...</p>
-            ) : !hasAssociations ? (
-              <p className="text-sm text-muted-foreground">
-                Nenhuma banca ou participação encontrada.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {associations.bancasAsOrientador.length > 0 && (
-                  <div>
-                    <h4 className="mb-2 font-medium">Orientador</h4>
-                    <ul className="list-inside list-disc space-y-1 text-sm">
-                      {associations.bancasAsOrientador.map((b) => (
-                        <li key={b.id}>
-                          {b.tituloTrabalho} ({b.autor})
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {associations.bancasAsAluno.length > 0 && (
-                  <div>
-                    <h4 className="mb-2 font-medium">Aluno</h4>
-                    <ul className="list-inside list-disc space-y-1 text-sm">
-                      {associations.bancasAsAluno.map((b) => (
-                        <li key={b.id}>
-                          {b.tituloTrabalho} ({b.autor})
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {associations.membrosEmBancas.length > 0 && (
-                  <div>
-                    <h4 className="mb-2 font-medium">Membro</h4>
-                    <ul className="list-inside list-disc space-y-1 text-sm">
-                      {associations.membrosEmBancas.map((m) => (
-                        <li key={`${m.bancaId}-${m.role}`}>
-                          {m.tituloTrabalho} ({roleLabels[m.role] ?? m.role})
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

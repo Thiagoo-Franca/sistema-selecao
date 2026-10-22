@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import type { Route } from "./+types/dashboard"
+import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
 
 const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato Doutorado` }]
 
@@ -55,7 +56,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
   } = form
 
   const user = userQuery.data
-  const candidato: CandidatoDoutorado | null | undefined = candidatoQuery.data
+  const candidato: CandidatoDoutoradoComRelacoes | null | undefined = candidatoQuery.data
   const isAdmin = user?.role === "ADMIN"
   const isLoading = candidatoQuery.isLoading || userQuery.isLoading
 

@@ -1,7 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { Route } from "./+types/reset-password.$token"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Redefinir Senha" }]
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,6 +12,7 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router"
 
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Redefinir Senha" }]
 interface ResetPasswordFormValues {
   password: string
   confirmPassword: string
