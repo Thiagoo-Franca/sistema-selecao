@@ -15,30 +15,19 @@ import {
 export const tipoCursoEnum = pgEnum("tipo_curso", ["Doutorado", "Mestrado"]);
 export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number];
 
+export const Area = pgEnum("area_preferencia", [
+  "CVIS", //   Computação Visual",
+  "CD", //  Ciência de Dados",
+  "ICOT", //  Inteligência Computacional e Otimização",
+  "SIBW", //  Sistemas de Informação, Banco de Dados Web",
+  "IEDU", //  Informática & Educação",
+  "ES", //  Engenharia de Software",
+  "RCSD", //  Redes de Computadores e Sistemas Distribuídos",
+  "SCTR", //  Sistemas Ciberfísicos e de Tempo Real",
+  "SSEG", //  Segurança de Sistemas e Redes",
+]);
+export type AreaPreferencia = (typeof Area.enumValues)[number];
 /*
-export const sexoEnum = pgEnum("sexo", ["Masculino", "Feminino", "Outro"]);
-export type Sexo = (typeof sexoEnum.enumValues)[number];
-
-export const estadoCivilEnum = pgEnum("estado_civil", [
-  "Solteiro",
-  "Casado",
-  "Divorciado",
-]);
-export type EstadoCivil = (typeof estadoCivilEnum.enumValues)[number];
-
- 
-export const AreaPreferencia = pgEnum("area_preferencia", [
-  "CVIS - Computação Visual",
-  "CD - Ciência de Dados",
-  "ICOT - Inteligência Computacional e Otimização",
-  "SIBW - Sistemas de Informação, Banco de Dados Web",
-  "IEDU - Informática & Educação",
-  "ES - Engenharia de Software",
-  "RCSD - Redes de Computadores e Sistemas Distribuídos",
-  "SCTR - Sistemas Ciberfísicos e de Tempo Real",
-  "SSEG - Segurança de Sistemas e Redes",
-]);
-export type AreaPreferencia = (typeof AreaPreferencia.enumValues)[number];
 
 export const Endereco = pgTable("endereco", {
   id: serial("id").primaryKey(),
@@ -198,8 +187,8 @@ export const CandidatoDoutorado = pgTable(
     primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
     segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
     terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
-    avaliador1: text("avaliador_1"),
-    avaliador2: text("avaliador_2"),
+    avaliador: text("avaliador"),
+    auditor: text("auditor"),
     isencaoAprovada: boolean("isencao_aprovada"),
 
     areaPgcomp: text("area_pgcomp"),
@@ -232,8 +221,8 @@ export const CandidatoMestrado = pgTable(
     tipoCurso: tipoCursoEnum("tipo_curso").default("Mestrado").notNull(),
     primeiraAreaPreferencia: text("primeira_area_preferencia"),
     segundaAreaPreferencia: text("segunda_area_preferencia"),
-    avaliador1: text("avaliador_1"),
-    avaliador2: text("avaliador_2"),
+    avaliador: text("avaliador"),
+    auditor: text("auditor"),
 
     universidade: text("universidade"),
     curso: text("curso"),
@@ -258,8 +247,19 @@ export const CandidatoMestrado = pgTable(
 export type InsertCandidatoMestrado = typeof CandidatoMestrado.$inferInsert;
 export type SelectCandidatoMestrado = typeof CandidatoMestrado.$inferSelect;
 
-export const userRole = pgEnum("user_role", ["STUDENT", "TEACHER", "ADMIN"]);
+export const userRole = pgEnum("user_role", ["TEACHER", "ADMIN"]);
 export type UserRole = (typeof userRole.enumValues)[number];
+export const userArea = pgEnum("user_area", [
+  "CVIS", //   Computação Visual",
+  "CD", //  Ciência de Dados",
+  "ICOT", //  Inteligência Computacional e Otimização",
+  "SIBW", //  Sistemas de Informação, Banco de Dados Web",
+  "IEDU", //  Informática & Educação",
+  "ES", //  Engenharia de Software",
+  "RCSD", //  Redes de Computadores e Sistemas Distribuídos",
+  "SCTR", //  Sistemas Ciberfísicos e de Tempo Real",
+  "SSEG", //  Segurança de Sistemas e Redes",
+]);
 export const Users = pgTable("usuario", {
   id: serial("id").primaryKey(),
   passwordHash: text("password_has").notNull(), // Nome da coluna original era password_has
@@ -267,6 +267,8 @@ export const Users = pgTable("usuario", {
   nome: text("nome").notNull(),
   school: text("school").notNull(), // Ex: Instituto de Computação
   matricula: text("matricula").notNull(),
+  // areas: text("areas").array().notNull(), // Ex: ["CVIS", "CD"]
+  areas: userArea("areas"), // Ex: ["CVIS", "CD"]
   academicTitle: text("academic_title").notNull(), // Ex: Doutorado
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
@@ -380,6 +382,7 @@ export const teacherInvitations = pgTable("teacher_invitation", {
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
+
   expiresAt: timestamp("expires_at").notNull(),
   invitedBy: integer("invited_by")
     .notNull()

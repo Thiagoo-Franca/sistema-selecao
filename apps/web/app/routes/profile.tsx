@@ -30,6 +30,7 @@ import { Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { href, Navigate } from "react-router"
 import { z } from "zod"
+import Loading from "@/components/layout/loading"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil" }]
 
@@ -150,14 +151,7 @@ export default function ProfilePage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <Header className="mb-6" />
-        <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
-        </div>
-      </div>
-    )
+    return <Loading />
   }
 
   if (isError || !user) {
@@ -165,7 +159,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
+    <div className="p-4 md:p-8">
       <Header className="mb-6" />
 
       <div className="mx-auto max-w-2xl">
@@ -242,7 +236,7 @@ export default function ProfilePage() {
 
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50"
                       disabled={updateProfileMutation.isPending}
                     >
                       {updateProfileMutation.isPending ? (
@@ -336,7 +330,7 @@ export default function ProfilePage() {
 
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50"
                       disabled={changePasswordMutation.isPending}
                     >
                       {changePasswordMutation.isPending ? (

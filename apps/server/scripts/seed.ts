@@ -22,8 +22,8 @@ const cursosData: InsertCurso[] = [
 */
 //const passwordHash = await bcrypt.hash("admin@admin.com", 10);
 
-/*
 const UserData: InsertUser[] = [
+  /*
   {
     id: 1,
     passwordHash:
@@ -48,11 +48,33 @@ const UserData: InsertUser[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  
+  */
+  {
+    id: 65,
+    passwordHash:
+      "$2b$10$e19ALK1zwD2lFD5/kIuTieluwwmhxxYb7T2lGjHVcrDUfYtIWyGQ.",
+    email: "robespierre.pita@ufba.br",
+    nome: "Robespierre Dantas da Rocha Pita",
+    school: "Universidade Federal da Bahia",
+    academicTitle:
+      "Doutor em Ciência da Computação - Universidade Federal da Bahia (UFBA), 2019 Mestre em Ciência da Computação - Universidade Federal da Bahia (UFBA), 2015 Especialista em Redes de Computadores - Universidade Salvador (UNIFACS), 2010 Graduado em Sistemas de Informação - Universidade Salvador (UNIFACS), 2009",
+    matricula: "123",
+    role: "TEACHER",
+    areas: "ICOT",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
 ];
-*/
 
 async function seed() {
   await db.transaction(async (db) => {
+    console.log("Seeding users...");
+    const insertedUsers = await db
+      .insert(Users)
+      .values(UserData)
+      .returning({ id: Users.id });
+
     /*
     const [endereco2, endereco3, endereco4] = await db
       .insert(Endereco)

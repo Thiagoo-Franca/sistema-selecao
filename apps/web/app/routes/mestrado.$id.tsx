@@ -153,8 +153,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
   useEffect(() => {
     if (candidato) {
       reset({
-        avaliador1: candidato.avaliador1 ? candidato.avaliador1 : "",
-        avaliador2: candidato.avaliador2 ? candidato.avaliador2 : "",
+        avaliador: candidato.avaliador ? candidato.avaliador : "",
+        auditor: candidato.auditor ? candidato.auditor : "",
         solicitouIsencaoTaxaInscricao: valorIsencaoSelect(candidato.solicitouIsencaoTaxaInscricao),
         isencaoAprovada: candidato.isencaoAprovada ?? undefined,
         gru: normalizeGru(candidato.gru),
@@ -240,8 +240,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
           id,
           body: {
             avaliado: true,
-            avaliador1: dados.avaliador1 || undefined,
-            avaliador2: dados.avaliador2 || undefined,
+            avaliador: dados.avaliador || undefined,
+            auditor: dados.auditor || undefined,
             solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
             isencaoAprovada: dados.isencaoAprovada ?? undefined,
             gru: dados.gru || undefined,

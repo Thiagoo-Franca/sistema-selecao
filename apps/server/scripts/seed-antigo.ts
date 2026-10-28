@@ -481,20 +481,7 @@ const UserData: InsertUser[] = [
     updatedAt: new Date("2023-08-09 11:16:17"),
     role: "TEACHER",
   },
-  {
-    id: 65,
-    passwordHash:
-      "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
-    email: "robespierre.pita@ufba.br",
-    nome: "Robespierre Dantas da Rocha Pita",
-    school: "Universidade Federal da Bahia",
-    academicTitle:
-      "Doutor em Ciência da Computação - Universidade Federal da Bahia (UFBA), 2019 Mestre em Ciência da Computação - Universidade Federal da Bahia (UFBA), 2015 Especialista em Redes de Computadores - Universidade Salvador (UNIFACS), 2010 Graduado em Sistemas de Informação - Universidade Salvador (UNIFACS), 2009",
-    matricula: "123",
-    createdAt: new Date("2023-08-09 11:16:17"),
-    updatedAt: new Date("2023-08-09 11:16:17"),
-    role: "TEACHER",
-  },
+  
   {
     id: 66,
     passwordHash:
@@ -580,7 +567,7 @@ const UserData: InsertUser[] = [
   },
   {
     id: 72,
-    passwordHash:
+    passwordHash: 
       "$2y$13$wT/lWjkyz31VlxSPLAH/f.HK6eU04r5f3GYxLGuag6Afw1M.IxrVW",
     email: "pregnier@ufba.br",
     nome: "Paul Denis Etienne Regnier",

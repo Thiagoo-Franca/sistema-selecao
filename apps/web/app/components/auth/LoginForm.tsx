@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useLoginMutation, useRequestPasswordResetMutation } from "@/services/authService"
 import { useUser } from "@/services/useUser"
 import { useQueryClient } from "@tanstack/react-query"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Eye, EyeClosed, EyeOff, EyeOffIcon } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router"
@@ -25,6 +25,7 @@ export function LoginForm(p: { onSuccess?: () => void }) {
   const loginMutation = useLoginMutation()
   const requestPasswordResetMutation = useRequestPasswordResetMutation()
   const navigate = useNavigate()
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
   const {
     register,
@@ -176,21 +177,40 @@ export function LoginForm(p: { onSuccess?: () => void }) {
         {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>}
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="login-password">Senha</Label>
-        <Input
-          id="login-password"
-          type="password"
-          className=""
-          placeholder="********"
-          disabled={loginMutation.isPending}
-          {...register("password", {
-            required: "Senha é obrigatória",
-          })}
-        />
+        <div className="flex items-center justify-between">
+          <Label htmlFor="login-password">Senha</Label>
+        </div>
+
+        <div className="relative">
+          <Input
+            id="login-password"
+            type={isPasswordVisible ? "text" : "password"}
+            autoComplete="current-password"
+            placeholder="********"
+            className="pr-10"
+            aria-invalid={!!errors.password}
+            aria-describedby={errors.password ? "login-password-error" : undefined}
+            {...register("password")}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0 h-full"
+            aria-label={isPasswordVisible ? "Ocultar senha" : "Mostrar senha"}
+            aria-pressed={isPasswordVisible}
+            onClick={() => setIsPasswordVisible((v) => !v)}
+          >
+            {isPasswordVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </Button>
+        </div>
+
         {errors.password && (
-          <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
+          <p id="login-password-error" className="text-sm text-destructive">
+            {errors.password.message}
+          </p>
         )}
-      </div>
+      </div>{" "}
       <Button
         type="submit"
         className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50"

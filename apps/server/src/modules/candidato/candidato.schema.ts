@@ -19,8 +19,8 @@ export type UploadCandidatosMestradoInput = z.infer<
 >;
 const updateCandidatoMestradoSchema = z.object({
   avaliado: z.boolean().optional(),
-  avaliador1: z.string().nullable().optional(),
-  avaliador2: z.string().nullable().optional(),
+  avaliador: z.string().nullable().optional(),
+  auditor: z.string().nullable().optional(),
   primeiraAreaPreferencia: z.string().optional(),
   segundaAreaPreferencia: z.string().optional(),
   cpf: z
@@ -62,8 +62,8 @@ export { updateNotaMestradoSchema };
 
 const updateCandidatoDoutoradoSchema = z.object({
   avaliado: z.boolean().optional(),
-  avaliador1: z.string().nullable().optional(),
-  avaliador2: z.string().nullable().optional(),
+  avaliador: z.string().nullable().optional(),
+  auditor: z.string().nullable().optional(),
   cpf: z
     .string()
     .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")

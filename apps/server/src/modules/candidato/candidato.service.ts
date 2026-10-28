@@ -29,9 +29,11 @@ export type CandidatoResumo = {
   numeroInscricao: string | null;
   nome: string | null;
   email: string | null;
-  avaliador1: string | null;
-  avaliador2: string | null;
+  avaliador: string | null;
+  auditor: string | null;
   avaliado: boolean;
+  area1: string | null;
+  area2: string | null;
 };
 
 export const getAllCandidatos = async (
@@ -48,9 +50,11 @@ export const getAllCandidatos = async (
           numeroInscricao: CandidatoMestrado.numeroInscricao,
           nome: CandidatoMestrado.nome,
           email: CandidatoMestrado.email,
-          avaliador1: CandidatoMestrado.avaliador1,
-          avaliador2: CandidatoMestrado.avaliador2,
+          avaliador: CandidatoMestrado.avaliador,
+          auditor: CandidatoMestrado.auditor,
           avaliado: CandidatoMestrado.avaliado,
+          area1: CandidatoMestrado.primeiraAreaPreferencia,
+          area2: CandidatoMestrado.segundaAreaPreferencia,
         })
         .from(CandidatoMestrado),
       db
@@ -60,9 +64,11 @@ export const getAllCandidatos = async (
           numeroInscricao: CandidatoDoutorado.numeroInscricao,
           nome: CandidatoDoutorado.nome,
           email: CandidatoDoutorado.email,
-          avaliador1: CandidatoDoutorado.avaliador1,
-          avaliador2: CandidatoDoutorado.avaliador2,
+          avaliador: CandidatoDoutorado.avaliador,
+          auditor: CandidatoDoutorado.auditor,
           avaliado: CandidatoDoutorado.avaliado,
+          area1: CandidatoDoutorado.primeiraOpcaoOrientador,
+          area2: CandidatoDoutorado.segundaOpcaoOrientador,
         })
         .from(CandidatoDoutorado),
     ]);
@@ -93,9 +99,11 @@ export const getAllCandidatosMestrado = async (
         numeroInscricao: CandidatoMestrado.numeroInscricao,
         nome: CandidatoMestrado.nome,
         email: CandidatoMestrado.email,
-        avaliador1: CandidatoMestrado.avaliador1,
-        avaliador2: CandidatoMestrado.avaliador2,
+        avaliador: CandidatoMestrado.avaliador,
+        auditor: CandidatoMestrado.auditor,
         avaliado: CandidatoMestrado.avaliado,
+        area1: CandidatoMestrado.primeiraAreaPreferencia,
+        area2: CandidatoMestrado.segundaAreaPreferencia,
       })
       .from(CandidatoMestrado)
       .orderBy(CandidatoMestrado.nome);
@@ -119,9 +127,11 @@ export const getAllCandidatosDoutorado = async (
         numeroInscricao: CandidatoDoutorado.numeroInscricao,
         nome: CandidatoDoutorado.nome,
         email: CandidatoDoutorado.email,
-        avaliador1: CandidatoDoutorado.avaliador1,
-        avaliador2: CandidatoDoutorado.avaliador2,
+        avaliador: CandidatoDoutorado.avaliador,
+        auditor: CandidatoDoutorado.auditor,
         avaliado: CandidatoDoutorado.avaliado,
+        area1: CandidatoDoutorado.primeiraOpcaoOrientador,
+        area2: CandidatoDoutorado.segundaOpcaoOrientador,
       })
       .from(CandidatoDoutorado)
       .orderBy(CandidatoDoutorado.nome);

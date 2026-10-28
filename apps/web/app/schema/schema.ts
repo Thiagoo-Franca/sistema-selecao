@@ -42,18 +42,18 @@ const uploadCandidatosMestradoSchema = z.array(
 )
 export { uploadCandidatosMestradoSchema }
 
-const nomeAvaliadorSchema = (n: number) =>
+const nomeAvaliadorSchema = () =>
   z
     .string()
     .trim()
-    .max(30, `O nome do avaliador ${n} não pode ter mais de 30 caracteres`)
+    .max(30, `O nome do avaliador/auditor não pode ter mais de 30 caracteres`)
     .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s]*$/, "O nome do avaliador deve conter apenas letras e espaços")
     .transform((v) => (v === "" ? undefined : v))
     .optional()
 
 const CandidatoMestradoNotaSchema = z.object({
-  avaliador1: nomeAvaliadorSchema(1),
-  avaliador2: nomeAvaliadorSchema(2),
+  avaliador: nomeAvaliadorSchema(),
+  auditor: nomeAvaliadorSchema(),
   solicitouIsencaoTaxaInscricao: z.string().optional(),
   isencaoAprovada: z.string().optional(),
   gru: z.string().optional(),
@@ -96,8 +96,8 @@ export type CandidatoMestradoNota = z.infer<typeof CandidatoMestradoNotaSchema>
 export { CandidatoMestradoNotaSchema }
 
 const CandidatoDoutoradoNotaEtapa1Schema = z.object({
-  avaliador1: z.string(),
-  avaliador2: z.string().optional(),
+  avaliador: z.string(),
+  auditor: z.string().optional(),
   cpf: z.string().regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos"),
   nome: z.string().min(1, "O nome é obrigatório"),
   email: z.string().email("Email inválido"),
