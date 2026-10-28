@@ -1,14 +1,22 @@
-import { useCandidatos, useCandidatosDoutorado, useCandidatosMestrado } from "@/hooks"
+import {
+  useCandidatesByTeacherId,
+  useCandidatos,
+  useCandidatosDoutorado,
+  useCandidatosMestrado,
+  useTeachers,
+} from "@/hooks"
 import CandidatosTabLoading from "./candidatos-tab-loading"
 import CandidatosTabError from "./candidatos-tab-error"
 import { HomeTableCandidatos } from "."
 import { TabsContent } from "../ui/tabs"
+import { useUser } from "@/services/useUser"
+import ProfessoresTab from "./professores-tab"
 
-type TipoCandidato = "mestrado" | "doutorado"
+type TabsType = "mestrado" | "doutorado" | "professores" | undefined
 
 interface CandidatosTabProps {
   tabValue: string
-  type?: TipoCandidato // sem type = todos os candidatos
+  type?: TabsType // sem type = todos os candidatos
   searchQuery: string
   orderBy?: string
   order?: "asc" | "desc"
@@ -28,10 +36,27 @@ export function CandidatosTab({
   const todosQuery = useCandidatos()
   const mestradoQuery = useCandidatosMestrado()
   const doutoradoQuery = useCandidatosDoutorado()
+  const professoresQuery = useTeachers()
 
-  const query = { todos: todosQuery, mestrado: mestradoQuery, doutorado: doutoradoQuery }[
-    type ?? "todos"
-  ]
+  const user = useUser().data
+
+  if (!user) {
+    return (
+      <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
+        Ops, nenhum usuário encontrado.
+      </div>
+    )
+  }
+
+  const meusCandidatosQuery = useCandidatesByTeacherId(user.id)
+
+  const query = {
+    todos: todosQuery,
+    mestrado: mestradoQuery,
+    doutorado: doutoradoQuery,
+    meus: meusCandidatosQuery,
+    professores: professoresQuery,
+  }[type ?? "todos"]
 
   function renderContent() {
     if (query.isLoading) return <CandidatosTabLoading />
@@ -40,8 +65,21 @@ export function CandidatosTab({
     if (!query.data || query.data.length === 0) {
       return (
         <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
-          Ops, nenhum candidato encontrado.
+          Ops, nenhum {type === "professores" ? "professor" : "candidato"} encontrado.
         </div>
+      )
+    }
+
+    if (type === "professores") {
+      return (
+        <ProfessoresTab
+          data={query.data}
+          searchQuery={searchQuery}
+          orderBy={orderBy}
+          order={order}
+          setOrderBy={setOrderBy}
+          setOrder={setOrder}
+        />
       )
     }
 

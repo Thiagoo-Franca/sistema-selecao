@@ -53,6 +53,15 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     return c.json(result.data);
   })
 
+  .get("/:id", checkRole(["ADMIN", "TEACHER"]), async (c) => {
+    const id = c.req.param("id");
+    const result = await service.getAllMyCandidates(c, id);
+
+    if (!result.ok) {
+      throw new Error("Erro ao buscar candidatos do avaliador");
+    }
+    return c.json(result.data);
+  })
   .post(
     "/mestrado",
     checkRole(["ADMIN"]),

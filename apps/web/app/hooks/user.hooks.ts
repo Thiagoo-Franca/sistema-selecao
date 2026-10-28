@@ -68,16 +68,6 @@ export const useTeachers = () => {
   })
 }
 
-export const useStudents = () => {
-  return useQuery({
-    queryKey: ["students"],
-    queryFn: async () => {
-      const response = await apiClient.usuario.students.$get()
-      return rpcReturn(response)
-    },
-  })
-}
-
 // Hook to fetch a user by ID
 export const useUserById = (id: string | undefined) => {
   return useQuery({

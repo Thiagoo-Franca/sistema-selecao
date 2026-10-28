@@ -17,6 +17,17 @@ export const useCandidatos = () => {
     },
   })
 }
+export const useCandidatesByTeacherId = (id: string | number) => {
+  return useQuery({
+    queryKey: ["candidatos", "lista", id],
+    queryFn: async () => {
+      const response = await apiClient.candidato[":id"].$get({
+        param: { id: String(id) },
+      })
+      return rpcReturn(response)
+    },
+  })
+}
 
 export const useCandidatosMestrado = () => {
   return useQuery({

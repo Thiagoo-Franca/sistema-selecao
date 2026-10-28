@@ -6,11 +6,17 @@ import {
   CandidatoMestrado,
   NotaDoutorado,
   NotaMestrado,
+  Users,
   type InsertCandidatoMestrado,
   type InsertNotaMestrado,
   type SelectCandidatoMestrado,
 } from "../../database/schema.js";
-import { eq } from "drizzle-orm";
+import { and, arrayContains, asc, eq, notInArray, or, sql } from "drizzle-orm";
+import type { db } from "../../database/index.js";
+import { alias } from "drizzle-orm/pg-core";
+
+const Avaliador = alias(Users, "avaliador");
+const Auditor = alias(Users, "auditor");
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown };
 
@@ -29,11 +35,87 @@ export type CandidatoResumo = {
   numeroInscricao: string | null;
   nome: string | null;
   email: string | null;
+  avaliadorId: number | null;
   avaliador: string | null;
+  auditorId: number | null;
   auditor: string | null;
   avaliado: boolean;
   area1: string | null;
   area2: string | null;
+};
+
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export const getAllMyCandidates = async (
+  c: Context<{ Variables: AppVariables }>,
+  avaliadorId: string,
+): Promise<AppResult<CandidatoResumo[], GetAllCandidatosError>> => {
+  const db = c.get("db");
+
+  try {
+    const [mestrado, doutorado] = await Promise.all([
+      db
+        .select({
+          id: CandidatoMestrado.id,
+          tipo: CandidatoMestrado.tipoCurso,
+          numeroInscricao: CandidatoMestrado.numeroInscricao,
+          nome: CandidatoMestrado.nome,
+          email: CandidatoMestrado.email,
+          avaliadorId: CandidatoMestrado.avaliadorId,
+          avaliador: Avaliador.nome,
+          auditorId: CandidatoMestrado.auditorId,
+          auditor: Auditor.nome,
+          avaliado: CandidatoMestrado.avaliado,
+          area1: CandidatoMestrado.primeiraAreaPreferencia,
+          area2: CandidatoMestrado.segundaAreaPreferencia,
+        })
+        .from(CandidatoMestrado)
+        .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
+        .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id))
+        .where(
+          or(
+            eq(CandidatoMestrado.avaliadorId, parseInt(avaliadorId)),
+            eq(CandidatoMestrado.auditorId, parseInt(avaliadorId)),
+          ),
+        ),
+      db
+        .select({
+          id: CandidatoDoutorado.id,
+          tipo: CandidatoDoutorado.tipoCurso,
+          numeroInscricao: CandidatoDoutorado.numeroInscricao,
+          nome: CandidatoDoutorado.nome,
+          email: CandidatoDoutorado.email,
+          avaliadorId: CandidatoDoutorado.avaliadorId,
+          avaliador: Avaliador.nome,
+          auditorId: CandidatoDoutorado.auditorId,
+          auditor: Auditor.nome,
+          avaliado: CandidatoDoutorado.avaliado,
+          area1: CandidatoDoutorado.primeiraOpcaoOrientador,
+          area2: CandidatoDoutorado.segundaOpcaoOrientador,
+        })
+        .from(CandidatoDoutorado)
+        .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
+        .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id))
+        .where(
+          or(
+            eq(CandidatoDoutorado.avaliadorId, parseInt(avaliadorId)),
+            eq(CandidatoDoutorado.auditorId, parseInt(avaliadorId)),
+          ),
+        ),
+    ]);
+
+    const todos = [...mestrado, ...doutorado].sort((a, b) =>
+      (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR"),
+    );
+
+    return ok(todos);
+  } catch (error) {
+    console.error(
+      "Error fetching all my candidates:",
+      (error as { code?: string })?.code ?? "unknown",
+    );
+    return err({ type: "database_error", error });
+  }
 };
 
 export const getAllCandidatos = async (
@@ -50,13 +132,17 @@ export const getAllCandidatos = async (
           numeroInscricao: CandidatoMestrado.numeroInscricao,
           nome: CandidatoMestrado.nome,
           email: CandidatoMestrado.email,
-          avaliador: CandidatoMestrado.avaliador,
-          auditor: CandidatoMestrado.auditor,
+          avaliadorId: CandidatoMestrado.avaliadorId,
+          avaliador: Avaliador.nome,
+          auditorId: CandidatoMestrado.auditorId,
+          auditor: Auditor.nome,
           avaliado: CandidatoMestrado.avaliado,
           area1: CandidatoMestrado.primeiraAreaPreferencia,
           area2: CandidatoMestrado.segundaAreaPreferencia,
         })
-        .from(CandidatoMestrado),
+        .from(CandidatoMestrado)
+        .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
+        .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id)),
       db
         .select({
           id: CandidatoDoutorado.id,
@@ -64,13 +150,17 @@ export const getAllCandidatos = async (
           numeroInscricao: CandidatoDoutorado.numeroInscricao,
           nome: CandidatoDoutorado.nome,
           email: CandidatoDoutorado.email,
-          avaliador: CandidatoDoutorado.avaliador,
-          auditor: CandidatoDoutorado.auditor,
+          avaliadorId: CandidatoDoutorado.avaliadorId,
+          avaliador: Avaliador.nome,
+          auditorId: CandidatoDoutorado.auditorId,
+          auditor: Auditor.nome,
           avaliado: CandidatoDoutorado.avaliado,
           area1: CandidatoDoutorado.primeiraOpcaoOrientador,
           area2: CandidatoDoutorado.segundaOpcaoOrientador,
         })
-        .from(CandidatoDoutorado),
+        .from(CandidatoDoutorado)
+        .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
+        .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id)),
     ]);
 
     const todos = [...mestrado, ...doutorado].sort((a, b) =>
@@ -99,13 +189,17 @@ export const getAllCandidatosMestrado = async (
         numeroInscricao: CandidatoMestrado.numeroInscricao,
         nome: CandidatoMestrado.nome,
         email: CandidatoMestrado.email,
-        avaliador: CandidatoMestrado.avaliador,
-        auditor: CandidatoMestrado.auditor,
+        avaliadorId: CandidatoMestrado.avaliadorId,
+        avaliador: Avaliador.nome,
+        auditorId: CandidatoMestrado.auditorId,
+        auditor: Auditor.nome,
         avaliado: CandidatoMestrado.avaliado,
         area1: CandidatoMestrado.primeiraAreaPreferencia,
         area2: CandidatoMestrado.segundaAreaPreferencia,
       })
       .from(CandidatoMestrado)
+      .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
+      .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id))
       .orderBy(CandidatoMestrado.nome);
     return ok(result);
   } catch (error) {
@@ -127,13 +221,17 @@ export const getAllCandidatosDoutorado = async (
         numeroInscricao: CandidatoDoutorado.numeroInscricao,
         nome: CandidatoDoutorado.nome,
         email: CandidatoDoutorado.email,
-        avaliador: CandidatoDoutorado.avaliador,
-        auditor: CandidatoDoutorado.auditor,
+        avaliadorId: CandidatoDoutorado.avaliadorId,
+        avaliador: Avaliador.nome,
+        auditorId: CandidatoDoutorado.auditorId,
+        auditor: Auditor.nome,
         avaliado: CandidatoDoutorado.avaliado,
         area1: CandidatoDoutorado.primeiraOpcaoOrientador,
         area2: CandidatoDoutorado.segundaOpcaoOrientador,
       })
       .from(CandidatoDoutorado)
+      .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
+      .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id))
       .orderBy(CandidatoDoutorado.nome);
     return ok(result);
   } catch (error) {
@@ -405,11 +503,41 @@ export const deleteCandidatoDoutorado = async (
 };
 
 */
+
 type CandidatoComNotas = InsertCandidatoMestrado & {
   notas?: Omit<InsertNotaMestrado, "id" | "idCandidato"> | null;
 };
 
 export type UploadCandidatosError = { type: "database_error"; error: unknown };
+
+async function escolherProfessor(
+  tx: Tx,
+  area: userArea,
+  excluirIds: number[] = [],
+) {
+  const carga = sql<number>`(
+    select count(*) from candidato_mestrado cm
+      where cm.avaliador_id = ${Users.id} or cm.auditor_id = ${Users.id}
+  ) + (
+    select count(*) from candidato_doutorado cd
+      where cd.avaliador_id = ${Users.id} or cd.auditor_id = ${Users.id}
+  )`;
+
+  const [prof] = await tx
+    .select({ id: Users.id })
+    .from(Users)
+    .where(
+      and(
+        eq(Users.role, "TEACHER"),
+        area ? arrayContains(Users.areas, [area]) : undefined,
+        excluirIds.length ? notInArray(Users.id, excluirIds) : undefined,
+      ),
+    )
+    .orderBy(asc(carga), asc(Users.id))
+    .limit(1);
+
+  return prof?.id ?? null;
+}
 
 export const uploadCandidatosMestrado = async (
   c: Context<{ Variables: AppVariables }>,
@@ -420,6 +548,12 @@ export const uploadCandidatosMestrado = async (
 
   try {
     const inseridos = await db.transaction(async (tx) => {
+      // 1. Lock: serializa alocações concorrentes (uploads/criações simultâneas)
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtext('alocacao_avaliadores'))`,
+      );
+
+      // 2. Insert dos candidatos
       const rows = await tx
         .insert(CandidatoMestrado)
         .values(candidatos.map(({ notas, ...candidato }) => candidato))
@@ -429,6 +563,7 @@ export const uploadCandidatosMestrado = async (
         rows.map((r) => [r.numeroInscricao, r.id]),
       );
 
+      // 3. Insert das notas
       const notas = candidatos.flatMap((c) =>
         c.notas
           ? [
@@ -446,7 +581,50 @@ export const uploadCandidatosMestrado = async (
       if (notas.length > 0) {
         await tx.insert(NotaMestrado).values(notas);
       }
-      return rows;
+
+      // 4. Alocação automática, um candidato por vez.
+      // Cada iteração enxerga as alocações anteriores (mesma transação),
+      // então o balanceamento funciona dentro do próprio lote.
+      const resultado: typeof rows = [];
+
+      for (const row of rows) {
+        // Ordem de tentativa: 1ª área, depois 2ª (ignora as vazias)
+        const areas = [
+          row.primeiraAreaPreferencia,
+          row.segundaAreaPreferencia,
+        ].filter((a): a is userArea => !!a);
+
+        // Avaliador: 1ª área; se não houver professor, 2ª; se não, fica vazio
+        let avaliadorId: number | null = null;
+        for (const area of areas) {
+          avaliadorId = await escolherProfessor(tx, area);
+          if (avaliadorId) break;
+        }
+
+        // Auditor: mesma ordem de áreas, diferente do avaliador;
+        // se não houver ninguém nas áreas, qualquer professor (menor carga)
+        const excluir = avaliadorId ? [avaliadorId] : [];
+        let auditorId: number | null = null;
+        for (const area of areas) {
+          auditorId = await escolherProfessor(tx, area, excluir);
+          if (auditorId) break;
+        }
+        auditorId ??= await escolherProfessor(tx, null, excluir);
+
+        if (!avaliadorId && !auditorId) {
+          resultado.push(row);
+          continue;
+        }
+
+        const [atualizado] = await tx
+          .update(CandidatoMestrado)
+          .set({ avaliadorId, auditorId })
+          .where(eq(CandidatoMestrado.id, row.id))
+          .returning();
+
+        resultado.push(atualizado ?? row);
+      }
+      return resultado;
     });
 
     return ok(inseridos);

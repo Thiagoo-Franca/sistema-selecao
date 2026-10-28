@@ -166,6 +166,9 @@ const candidatoBaseColumns = {
   especiais: text("especiais"),
   cotas: text("cotas"),
   supra: text("supra"),
+
+  avaliadorId: integer("avaliador_id").references(() => Users.id),
+  auditorId: integer("auditor_id").references(() => Users.id),
 };
 
 export const CandidatoDoutorado = pgTable(
@@ -187,8 +190,6 @@ export const CandidatoDoutorado = pgTable(
     primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
     segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
     terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
-    avaliador: text("avaliador"),
-    auditor: text("auditor"),
     isencaoAprovada: boolean("isencao_aprovada"),
 
     areaPgcomp: text("area_pgcomp"),
@@ -210,6 +211,18 @@ export const CandidatoDoutorado = pgTable(
   }),
 );
 
+export const userArea = pgEnum("user_area", [
+  "CVIS", //   Computação Visual",
+  "CD", //  Ciência de Dados",
+  "ICOT", //  Inteligência Computacional e Otimização",
+  "SIBW", //  Sistemas de Informação, Banco de Dados Web",
+  "IEDU", //  Informática & Educação",
+  "ES", //  Engenharia de Software",
+  "RCSD", //  Redes de Computadores e Sistemas Distribuídos",
+  "SCTR", //  Sistemas Ciberfísicos e de Tempo Real",
+  "SSEG", //  Segurança de Sistemas e Redes",
+]);
+
 export type InsertCandidatoDoutorado = typeof CandidatoDoutorado.$inferInsert;
 export type SelectCandidatoDoutorado = typeof CandidatoDoutorado.$inferSelect;
 
@@ -219,10 +232,8 @@ export const CandidatoMestrado = pgTable(
     ...candidatoBaseColumns,
     // dados da inscricao
     tipoCurso: tipoCursoEnum("tipo_curso").default("Mestrado").notNull(),
-    primeiraAreaPreferencia: text("primeira_area_preferencia"),
-    segundaAreaPreferencia: text("segunda_area_preferencia"),
-    avaliador: text("avaliador"),
-    auditor: text("auditor"),
+    primeiraAreaPreferencia: userArea("primeira_area_preferencia"),
+    segundaAreaPreferencia: userArea("segunda_area_preferencia"),
 
     universidade: text("universidade"),
     curso: text("curso"),
@@ -249,17 +260,6 @@ export type SelectCandidatoMestrado = typeof CandidatoMestrado.$inferSelect;
 
 export const userRole = pgEnum("user_role", ["TEACHER", "ADMIN"]);
 export type UserRole = (typeof userRole.enumValues)[number];
-export const userArea = pgEnum("user_area", [
-  "CVIS", //   Computação Visual",
-  "CD", //  Ciência de Dados",
-  "ICOT", //  Inteligência Computacional e Otimização",
-  "SIBW", //  Sistemas de Informação, Banco de Dados Web",
-  "IEDU", //  Informática & Educação",
-  "ES", //  Engenharia de Software",
-  "RCSD", //  Redes de Computadores e Sistemas Distribuídos",
-  "SCTR", //  Sistemas Ciberfísicos e de Tempo Real",
-  "SSEG", //  Segurança de Sistemas e Redes",
-]);
 export const Users = pgTable("usuario", {
   id: serial("id").primaryKey(),
   passwordHash: text("password_has").notNull(), // Nome da coluna original era password_has
@@ -267,8 +267,7 @@ export const Users = pgTable("usuario", {
   nome: text("nome").notNull(),
   school: text("school").notNull(), // Ex: Instituto de Computação
   matricula: text("matricula").notNull(),
-  // areas: text("areas").array().notNull(), // Ex: ["CVIS", "CD"]
-  areas: userArea("areas"), // Ex: ["CVIS", "CD"]
+  areas: userArea("areas").array(), // Ex: ["CVIS", "CD"]
   academicTitle: text("academic_title").notNull(), // Ex: Doutorado
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),

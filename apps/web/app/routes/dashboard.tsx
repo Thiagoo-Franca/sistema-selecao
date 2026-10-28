@@ -10,6 +10,7 @@ import { Header } from "@/components/layout/header"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import SearchBar from "@/components/ui/search-bar"
 import { CandidatosTab } from "@/components/candidatos-tab/candidato-tab"
+import { useTeachers } from "@/hooks"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -23,10 +24,11 @@ export const meta: Route.MetaFunction = () => [
   },
 ]
 const TABS = [
-  { value: "meus-candidatos", label: "Meus Candidatos", type: undefined },
-  { value: "candidatos", label: "Todos os Candidatos", type: undefined },
-  { value: "candidatos-mestrado", label: "Mestrado", type: "mestrado" },
-  { value: "candidatos-doutorado", label: "Doutorado", type: "doutorado" },
+  { value: "meus-candidatos", label: "Meus Candidatos", type: "meus", onlyAdmin: false },
+  { value: "candidatos", label: "Todos os Candidatos", type: undefined, onlyAdmin: false },
+  { value: "candidatos-mestrado", label: "Mestrado", type: "mestrado", onlyAdmin: false },
+  { value: "candidatos-doutorado", label: "Doutorado", type: "doutorado", onlyAdmin: false },
+  { value: "professores", label: "Professores", type: "professores", onlyAdmin: true },
 ] as const
 
 export default function Home() {
@@ -40,6 +42,9 @@ export default function Home() {
   const userQuery = useUser()
   const isAdmin = userQuery.data?.role === "ADMIN"
 
+  const teachers = useTeachers()
+
+  console.log("teachers", teachers.data)
   const currentTab = TABS.some((t) => t.value === activeTab) ? activeTab : "candidatos"
 
   useEffect(() => {
@@ -61,7 +66,7 @@ export default function Home() {
       <Tabs value={currentTab} onValueChange={setActiveTab} className="w-full hover:cursor-pointer">
         <div className="mb-4 flex items-center justify-between">
           <TabsList className="flex w-full flex-row items-center justify-between gap-2 overflow-x-auto rounded-lg border-none bg-gradient-to-r from-white to-transparent p-1 shadow-none md:max-w-lg md:overflow-x-visible">
-            {TABS.map((tab) => (
+            {TABS.filter((tab) => !tab.onlyAdmin || isAdmin).map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
@@ -72,7 +77,7 @@ export default function Home() {
             ))}
           </TabsList>
         </div>
-        {TABS.map((tab) => (
+        {TABS.filter((tab) => !tab.onlyAdmin || isAdmin).map((tab) => (
           <CandidatosTab
             key={tab.value}
             tabValue={tab.value}
