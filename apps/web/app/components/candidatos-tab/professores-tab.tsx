@@ -105,7 +105,7 @@ export default function ProfessoresTab({
             <div
               className="grid w-full cursor-pointer grid-cols-2 items-center gap-4 rounded-lg border border-transparent bg-white px-0 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:flex md:px-4"
               key={professor.id}
-              onClick={() => navigate(`/${professor}/${professor.id}`)}
+              onClick={() => navigate(`/admin/users/${professor.id}`)}
             >
               <div className="w-full font-medium text-neutral-900 md:w-1/4">
                 {capitalizarNomeCompleto(professor.nome ?? "")}

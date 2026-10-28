@@ -81,6 +81,30 @@ export const getTeachers = async (
   }
 };
 
+export const getTeachersSimplified = async (
+  c: Context<{ Variables: AppVariables }>,
+): Promise<
+  AppResult<InferResultType<typeof Users, "select">[], GetTeachersError>
+> => {
+  const dbInstance = c.get("db");
+
+  try {
+    const teachers = await dbInstance
+      .select({
+        name: Users.nome,
+        id: Users.id,
+      })
+      .from(Users)
+      .where(and(or(eq(Users.role, "TEACHER"), eq(Users.role, "ADMIN"))))
+      .orderBy(Users.nome);
+
+    return ok(teachers);
+  } catch (error) {
+    console.error("Error fetching teachers (simplified):", error);
+    return err({ type: "database_error", error });
+  }
+};
+
 type CreateUserError =
   | { type: "duplicate_email" }
   | { type: "duplicate_username" }

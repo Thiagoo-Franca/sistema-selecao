@@ -52,6 +52,19 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
+  .get("/teachers/simplified", checkRole(["ADMIN"]), async (c) => {
+    const result = await service.getTeachersSimplified(c);
+    if (!result.ok) {
+      throw match(result.error)
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao buscar professores"),
+        )
+        .exhaustive();
+    }
+    return c.json(result.data);
+  })
+
   .get("/students", async (c) => {
     const result = await service.getStudents(c);
     if (!result.ok) {
@@ -274,7 +287,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     },
   )
     */
-   /*
+  /*
   .get(
     "/:id/associations",
     checkRole(["ADMIN"]),

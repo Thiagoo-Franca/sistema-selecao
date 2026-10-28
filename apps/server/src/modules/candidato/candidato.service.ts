@@ -23,11 +23,15 @@ type GetAllCandidatosError = { type: "database_error"; error: unknown };
 export type CandidatoMestradoComRelacoes =
   typeof CandidatoMestrado.$inferSelect & {
     notas: typeof NotaMestrado.$inferSelect | null;
+    avaliador: { id: number; nome: string } | null;
+    auditor: { id: number; nome: string } | null;
   };
 
 export type CandidatoDoutoradoComRelacoes =
   typeof CandidatoDoutorado.$inferSelect & {
     notas: typeof NotaDoutorado.$inferSelect | null;
+    avaliador: { id: number; nome: string } | null;
+    auditor: { id: number; nome: string } | null;
   };
 export type CandidatoResumo = {
   id: string;
@@ -250,23 +254,39 @@ export const getCandidatoMestradoById = async (
 
   try {
     const result = await dbInstance
-      .select()
+      .select({
+        candidato: CandidatoMestrado,
+        notas: NotaMestrado,
+        avaliadorId: Avaliador.id,
+        avaliadorNome: Avaliador.nome,
+        auditorId: Auditor.id,
+        auditorNome: Auditor.nome,
+      })
       .from(CandidatoMestrado)
       .leftJoin(
         NotaMestrado,
         eq(NotaMestrado.idCandidato, CandidatoMestrado.id),
       )
+      .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
+      .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id))
       .where(eq(CandidatoMestrado.id, id))
       .limit(1);
 
-    if (!result[0]) return ok(null);
+    const row = result[0];
+    if (!row) return ok(null);
 
-    const candidato = {
-      ...result[0].candidato_mestrado,
-      notas: result[0].nota_mestrado,
-    };
-
-    return ok(candidato);
+    return ok({
+      ...row.candidato,
+      notas: row.notas,
+      avaliador:
+        row.avaliadorId !== null && row.avaliadorNome !== null
+          ? { id: row.avaliadorId, nome: row.avaliadorNome }
+          : null,
+      auditor:
+        row.auditorId !== null && row.auditorNome !== null
+          ? { id: row.auditorId, nome: row.auditorNome }
+          : null,
+    });
   } catch (error) {
     console.error(`Error fetching mestrado candidato with ID ${id}:`, error);
     return err({ type: "database_error", error });
@@ -288,6 +308,8 @@ export const getCandidatoDoutoradoById = async (
         NotaDoutorado,
         eq(NotaDoutorado.idCandidato, CandidatoDoutorado.id),
       )
+      .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
+      .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id))
       .where(eq(CandidatoDoutorado.id, id))
       .limit(1);
 

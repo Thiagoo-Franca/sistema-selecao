@@ -17,12 +17,23 @@ export const uploadCandidatosMestradoSchema = z.array(
 export type UploadCandidatosMestradoInput = z.infer<
   typeof uploadCandidatosMestradoSchema
 >;
+const areaEnum = z.enum([
+  "CVIS",
+  "CD",
+  "ICOT",
+  "SIBW",
+  "IEDU",
+  "ES",
+  "RCSD",
+  "SCTR",
+  "SSEG",
+]);
 const updateCandidatoMestradoSchema = z.object({
   avaliado: z.boolean().optional(),
-  avaliador: z.string().nullable().optional(),
-  auditor: z.string().nullable().optional(),
-  primeiraAreaPreferencia: z.string().optional(),
-  segundaAreaPreferencia: z.string().optional(),
+  avaliadorId: z.number().int().positive().nullable().optional(),
+  auditorId: z.number().int().positive().nullable().optional(),
+  primeiraAreaPreferencia: areaEnum.optional(),
+  segundaAreaPreferencia: areaEnum.optional(),
   cpf: z
     .string()
     .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")

@@ -1,65 +1,12 @@
-import { useCandidatos } from "@/hooks/candidato.hooks"
-import { TabsContent } from "../ui/tabs"
-import { href, useNavigate } from "react-router"
-import type { CandidatoDoutoradoComRelacoes, CandidatoMestradoComRelacoes } from "@tcc/server"
-import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react"
-import CandidatosTabLoading from "./candidatos-tab-loading"
-import CandidatosTabError from "./candidatos-tab-error"
 import { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router"
+
+import { LABELS } from "@/lib/constants"
 import { capitalizarNomeCompleto } from "@/lib/format"
+import { ChevronUp } from "lucide-react"
+import type { CandidatoHome } from "@/types"
+import { handleSort, removerAcentos } from "@/lib/helpers"
 
-const LABELS = [
-  {
-    key: "nome",
-    label: "Nome",
-  },
-  {
-    key: "tipoCurso",
-    label: "Nível",
-  },
-  {
-    key: "email",
-    label: "Email",
-    hiddenOnMobile: true,
-  },
-  {
-    key: "avaliado",
-    label: "Avaliado",
-  },
-  {
-    key: "area1",
-    label: "Área 1",
-    hiddenOnMobile: true,
-  },
-  {
-    key: "area2",
-    label: "Área 2",
-    hiddenOnMobile: true,
-  },
-  {
-    key: "avaliador",
-    label: "Avaliador",
-    hiddenOnMobile: true,
-  },
-  {
-    key: "auditor",
-    label: "Auditor",
-    hiddenOnMobile: true,
-  },
-]
-
-type CandidatoHome = {
-  id: string
-  avaliado: boolean
-  avaliador: string | null
-  auditor: string | null
-  email: string | null
-  nome: string | null
-  numeroInscricao: string | null
-  tipo: "Mestrado" | "Doutorado" | undefined
-  area1: string | null
-  area2: string | null
-}
 interface HomeTableCandidatosProps {
   data: CandidatoHome[]
   searchQuery: string
@@ -81,10 +28,6 @@ export function HomeTableCandidatos({
 
   const [candidatos, setCandidatos] = useState(data)
 
-  const removerAcentos = (str: string) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-  }
-
   useEffect(() => {
     if (!searchQuery) {
       setCandidatos(data)
@@ -101,11 +44,6 @@ export function HomeTableCandidatos({
       setCandidatos(filteredData)
     }
   }, [searchQuery, data])
-
-  const handleSort = (key: string) => {
-    setOrder?.(orderBy === key && order === "asc" ? "desc" : "asc")
-    setOrderBy?.(key)
-  }
 
   const sortedCandidatos = useMemo(() => {
     if (!orderBy) return candidatos
@@ -133,7 +71,7 @@ export function HomeTableCandidatos({
         {LABELS.map((label) => (
           <div
             key={label.key}
-            onClick={() => handleSort(label.key)}
+            onClick={() => handleSort(label.key, setOrderBy, setOrder, orderBy, order)}
             className={`flex items-center gap-1 ${label.hiddenOnMobile ? "hidden md:flex" : ""}`}
           >
             <ChevronUp

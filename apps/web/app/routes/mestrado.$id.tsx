@@ -1,6 +1,13 @@
-import { useNavigate, useParams } from "react-router"
-import { useToast } from "@/hooks"
 import { useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router"
+
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+import { CandidatoMestradoNotaSchema, type CandidatoMestradoNota } from "@/schema/schema"
+import type { CandidatoMestradoComRelacoes } from "@tcc/server"
+import { calcularMestradoNota, paraNumeroSeguro } from "@/lib/calculoNotas"
+import { useTeachersSimplified, useToast } from "@/hooks"
 import {
   useCandidatoMestradoById,
   useDeleteCandidatoMestrado,
@@ -8,8 +15,9 @@ import {
   useUpdateCandidatoMestradoNota,
 } from "@/hooks/candidato.hooks"
 import { useUser } from "@/services/useUser"
+
 import { Header } from "@/components/layout/header"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldError, FieldLabel, FieldLegend } from "@/components/ui/field"
 import {
@@ -21,11 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CandidatoMestradoNotaSchema, type CandidatoMestradoNota } from "@/schema/schema"
-import { calcularMestradoNota, paraNumeroSeguro } from "@/lib/calculoNotas"
-import type { CandidatoMestradoComRelacoes } from "@tcc/server"
 import type { Route } from "../+types/root"
 import {
   NavigationMenu,
@@ -36,90 +39,38 @@ import {
 } from "@/components/ui/navigation-menu"
 import Loading from "@/components/layout/loading"
 import CandidateNotFound from "@/components/layout/candidate-not-found"
+import {
+  handleDelete,
+  normalizeGru,
+  paraBooleano,
+  valorBooleanoSelect,
+  valorIsencaoSelect,
+  valorSimNaoSelect,
+} from "@/lib/helpers"
+import { TeacherCombobox } from "@/components/ui/teacher-combox"
+import { GRU_OPTIONS } from "@/lib/constants"
+
+type TeacherOption = { id: number; nome: string }
+type TeacherData = { id: number; nome?: string | null; name?: string | null }
 
 export const meta: Route.MetaFunction = () => [
   { title: `SISSEL - Avaliação candidato Mestrado` },
   { description: "Página de avaliação do candidato de mestrado" },
 ]
 
-const GRU_OPTIONS = [
-  { value: "isento", label: "ISENTO" },
-  { value: "pago", label: "PAGO" },
-  { value: "aberto", label: "ABERTO" },
-  { value: "nao-isento", label: "NÃO ISENTO" },
-  { value: "nao-pagou", label: "NÃO PAGOU" },
-] as const
-
-const NAO_SOLICITOU = "NÃO SOLICITOU"
-
-function valorIsencaoSelect(valor?: string | null) {
-  if (valor == null) return undefined
-  return valor.trim().toUpperCase() === NAO_SOLICITOU ? "nao" : "sim"
-}
-
-function normalizeGru(value: string | null | undefined) {
-  const v = (value ?? "")
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove acentos
-    .toLowerCase()
-    .replace(/\s+/g, "-") // "nao pagou" -> "nao-pagou"
-
-  return GRU_OPTIONS.find((o) => o.value === v)?.value ?? ""
-}
-
-function paraBooleano(value: unknown): boolean | undefined {
-  if (value === true || value === 1) return true
-  if (value === false || value === 0) return false
-
-  if (typeof value === "string") {
-    const normalizedValue = value.trim().toLowerCase()
-    if (["true", "t", "sim", "1"].includes(normalizedValue)) return true
-    if (["false", "f", "nao", "não", "0"].includes(normalizedValue)) return false
-  }
-
-  return undefined
-}
-
-function valorBooleanoSelect(value: boolean | undefined) {
-  return value === undefined ? "" : value ? "sim" : "nao"
-}
-
-function valorSimNaoSelect(value: unknown) {
-  if (value === true || value === 1) return "sim"
-  if (value === false || value === 0) return "nao"
-
-  if (typeof value === "string") {
-    const normalizedValue = value.trim().toLowerCase()
-    if (["sim", "true", "t", "1"].includes(normalizedValue)) return "sim"
-    if (["nao", "não", "false", "f", "0"].includes(normalizedValue)) return "nao"
-  }
-
-  return ""
-}
-
-function handleDelete(
-  deleteCandidatoMutation: ReturnType<typeof useDeleteCandidatoMestrado>,
-  navigate: ReturnType<typeof useNavigate>
-) {
-  if (!confirm("Tem certeza que deseja excluir este candidato?")) return
-
-  deleteCandidatoMutation
-    .mutateAsync()
-    .then(() => navigate("/dashboard"))
-    .catch(() => undefined)
-}
-
 export default function AvaliacaoCandidatoMestradoPage() {
-  const navigate = useNavigate()
   const { id } = useParams<{ id: string | undefined }>()
   const [nota, setNota] = useState(0)
-  const { toast } = useToast()
-
-  const deleteCandidatoMutation = useDeleteCandidatoMestrado(id ?? "")
 
   const userQuery = useUser()
   const candidatoQuery = useCandidatoMestradoById(id ?? "")
+  const deleteCandidatoMutation = useDeleteCandidatoMestrado(id ?? "")
+  const teachers = useTeachersSimplified()
+  const updateCandidatoMutation = useUpdateCandidatoMestrado()
+  const updateNotaMutation = useUpdateCandidatoMestradoNota()
+
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const form = useForm<CandidatoMestradoNota>({
     resolver: zodResolver(CandidatoMestradoNotaSchema),
@@ -129,6 +80,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
     register,
     handleSubmit,
     control,
+    watch,
     reset,
     formState: { errors, isSubmitting },
   } = form
@@ -137,6 +89,14 @@ export default function AvaliacaoCandidatoMestradoPage() {
   const candidato: CandidatoMestradoComRelacoes | null | undefined = candidatoQuery.data
   const isLoading = candidatoQuery.isLoading || userQuery.isLoading
   const isAdmin = user?.role === "ADMIN"
+
+  const isTeachersLoading = teachers.isLoading || teachers.isFetching
+
+  const teachersData: TeacherOption[] =
+    (teachers.data as unknown as TeacherData[] | undefined)?.map((t) => ({
+      id: t.id,
+      nome: t.nome ?? t.name ?? "",
+    })) ?? []
 
   useEffect(() => {
     if (!user && !userQuery.isLoading) {
@@ -150,11 +110,13 @@ export default function AvaliacaoCandidatoMestradoPage() {
     }
   }, [candidato])
 
+  // console.log(candidato)
+
   useEffect(() => {
     if (candidato) {
       reset({
-        avaliador: candidato.avaliador ? candidato.avaliador : "",
-        auditor: candidato.auditor ? candidato.auditor : "",
+        avaliadorId: candidato.avaliadorId ?? undefined,
+        auditorId: candidato.auditorId ?? undefined,
         solicitouIsencaoTaxaInscricao: valorIsencaoSelect(candidato.solicitouIsencaoTaxaInscricao),
         isencaoAprovada: candidato.isencaoAprovada ?? undefined,
         gru: normalizeGru(candidato.gru),
@@ -228,9 +190,6 @@ export default function AvaliacaoCandidatoMestradoPage() {
     setNota(resultado.pontuacao)
   }, [camposNota])
 
-  const updateCandidatoMutation = useUpdateCandidatoMestrado()
-  const updateNotaMutation = useUpdateCandidatoMestradoNota()
-
   async function onSubmit(dados: CandidatoMestradoNota) {
     if (!id) return
 
@@ -240,8 +199,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
           id,
           body: {
             avaliado: true,
-            avaliador: dados.avaliador || undefined,
-            auditor: dados.auditor || undefined,
+            avaliadorId: dados.avaliadorId || undefined,
+            auditorId: dados.auditorId || undefined,
             solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
             isencaoAprovada: dados.isencaoAprovada ?? undefined,
             gru: dados.gru || undefined,
@@ -303,7 +262,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
         <Button onClick={() => navigate(-1)} variant="outline">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
-        {user?.role === "ADMIN" && (
+        {isAdmin && (
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -354,33 +313,59 @@ export default function AvaliacaoCandidatoMestradoPage() {
       <form className="container mx-auto flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
         <FieldLegend className="font-bold text-muted-foreground">Avaliadores</FieldLegend>
         <div className="grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">
-          {/* Avaliador 1 */}
+          {/* Avaliador */}
 
           <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="avaliador1" className="font-bold text-muted-foreground">
-              Avaliador 1
+            <FieldLabel htmlFor="avaliadorId" className="font-bold text-muted-foreground">
+              Avaliador
             </FieldLabel>
-            <Input
-              {...register("avaliador1")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="avaliador1"
-            />
-            <FieldError>{errors.avaliador1?.message}</FieldError>
+            {isAdmin ? (
+              <Controller
+                control={control}
+                name="avaliadorId"
+                render={({ field }) => (
+                  <TeacherCombobox
+                    options={teachersData}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder={
+                      candidato.avaliador ? candidato.avaliador.nome : "Selecione um avaliador"
+                    }
+                    isLoading={isTeachersLoading}
+                  />
+                )}
+              />
+            ) : (
+              <p>{candidato.avaliador?.nome ?? "Não alocado"}</p>
+            )}
+            <FieldError>{errors.avaliadorId?.message}</FieldError>
           </Field>
 
-          {/* Avaliador 2 */}
+          {/* Auditor */}
           <Field className="flex flex-col gap-4">
-            <FieldLabel htmlFor="avaliador2" className="font-bold text-muted-foreground">
-              Avaliador 2
+            <FieldLabel htmlFor="auditorId" className="font-bold text-muted-foreground">
+              Auditor
             </FieldLabel>
-            <Input
-              {...register("avaliador2")}
-              className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-              type="text"
-              id="avaliador2"
-            />
-            <FieldError>{errors.avaliador2?.message}</FieldError>
+            {isAdmin ? (
+              <Controller
+                control={control}
+                name="auditorId"
+                render={({ field }) => (
+                  <TeacherCombobox
+                    options={teachersData}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder={
+                      candidato.auditor ? candidato.auditor.nome : "Selecione um auditor"
+                    }
+                    isLoading={isTeachersLoading}
+                  />
+                )}
+              />
+            ) : (
+              <p>{candidato.auditor?.nome ?? "Não alocado"}</p>
+            )}
+            <FieldError>{errors.auditorId?.message}</FieldError>
           </Field>
         </div>
         <div className="mt-4 grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">

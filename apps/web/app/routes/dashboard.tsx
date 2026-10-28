@@ -10,7 +10,6 @@ import { Header } from "@/components/layout/header"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import SearchBar from "@/components/ui/search-bar"
 import { CandidatosTab } from "@/components/candidatos-tab/candidato-tab"
-import { useTeachers } from "@/hooks"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -42,9 +41,6 @@ export default function Home() {
   const userQuery = useUser()
   const isAdmin = userQuery.data?.role === "ADMIN"
 
-  const teachers = useTeachers()
-
-  console.log("teachers", teachers.data)
   const currentTab = TABS.some((t) => t.value === activeTab) ? activeTab : "candidatos"
 
   useEffect(() => {

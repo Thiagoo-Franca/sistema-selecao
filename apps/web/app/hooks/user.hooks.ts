@@ -68,6 +68,16 @@ export const useTeachers = () => {
   })
 }
 
+export const useTeachersSimplified = () => {
+  return useQuery({
+    queryKey: ["teachersSimplified"],
+    queryFn: async () => {
+      const response = await apiClient.usuario.teachers.simplified.$get()
+      return rpcReturn(response)
+    },
+  })
+}
+
 // Hook to fetch a user by ID
 export const useUserById = (id: string | undefined) => {
   return useQuery({
