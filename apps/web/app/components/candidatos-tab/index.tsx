@@ -26,17 +26,39 @@ const LABELS = [
     key: "avaliado",
     label: "Avaliado",
   },
+  {
+    key: "area1",
+    label: "Área 1",
+    hiddenOnMobile: true,
+  },
+  {
+    key: "area2",
+    label: "Área 2",
+    hiddenOnMobile: true,
+  },
+  {
+    key: "avaliador",
+    label: "Avaliador",
+    hiddenOnMobile: true,
+  },
+  {
+    key: "auditor",
+    label: "Auditor",
+    hiddenOnMobile: true,
+  },
 ]
 
 type CandidatoHome = {
   id: string
   avaliado: boolean
-  avaliador1: string | null
-  avaliador2: string | null
+  avaliador: string | null
+  auditor: string | null
   email: string | null
   nome: string | null
   numeroInscricao: string | null
   tipo: "Mestrado" | "Doutorado" | undefined
+  area1: string | null
+  area2: string | null
 }
 interface HomeTableCandidatosProps {
   data: CandidatoHome[]
@@ -107,7 +129,7 @@ export function HomeTableCandidatos({
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="grid w-full grid-cols-[2fr_1fr_1fr] gap-2 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid-cols-4 md:gap-4 md:px-8 md:py-3">
+      <div className="grid w-full grid-cols-[2fr_1fr_1fr] gap-2 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid-cols-[2fr_1fr_2fr_1fr_1fr_1fr_2fr_2fr] md:gap-4 md:px-8 md:py-3">
         {LABELS.map((label) => (
           <div
             key={label.key}
@@ -127,7 +149,7 @@ export function HomeTableCandidatos({
         {sortedCandidatos?.length > 0 ? (
           sortedCandidatos.map((candidato: CandidatoHome) => (
             <div
-              className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr] items-center gap-4 rounded-lg border border-transparent bg-white px-0 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:grid-cols-4 md:px-4"
+              className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr] items-center gap-4 rounded-lg border border-transparent bg-white px-0 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:grid-cols-[2fr_1fr_2fr_1fr_1fr_1fr_2fr_2fr] md:px-4"
               key={candidato.id}
               onClick={() => navigate(`/${candidato.tipo?.toLocaleLowerCase()}/${candidato.id}`)}
             >
@@ -141,9 +163,21 @@ export function HomeTableCandidatos({
                 {candidato.email}
               </div>
               <div
-                className={`col-span-1 text-sm ${candidato.avaliado ? "text-green-600" : "text-gray-500"}`}
+                className={`col-span-1 text-sm ${candidato.avaliado ? "text-green-600" : "text-red-600"}`}
               >
                 {candidato.avaliado ? "Sim" : "Pendente"}
+              </div>
+              <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
+                {candidato.area1}
+              </div>
+              <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
+                {candidato.area2}
+              </div>
+              <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
+                {candidato.avaliador}
+              </div>
+              <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
+                {candidato.auditor}
               </div>
             </div>
           ))

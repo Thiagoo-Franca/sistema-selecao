@@ -23,6 +23,7 @@ export const meta: Route.MetaFunction = () => [
   },
 ]
 const TABS = [
+  { value: "meus-candidatos", label: "Meus Candidatos", type: undefined },
   { value: "candidatos", label: "Todos os Candidatos", type: undefined },
   { value: "candidatos-mestrado", label: "Mestrado", type: "mestrado" },
   { value: "candidatos-doutorado", label: "Doutorado", type: "doutorado" },
@@ -59,7 +60,7 @@ export default function Home() {
 
       <Tabs value={currentTab} onValueChange={setActiveTab} className="w-full hover:cursor-pointer">
         <div className="mb-4 flex items-center justify-between">
-          <TabsList className="flex w-full flex-row items-center justify-between gap-2 rounded-lg border-none bg-white p-1 shadow-none md:max-w-lg">
+          <TabsList className="flex w-full flex-row items-center justify-between gap-2 overflow-x-auto rounded-lg border-none bg-gradient-to-r from-white to-transparent p-1 shadow-none md:max-w-lg md:overflow-x-visible">
             {TABS.map((tab) => (
               <TabsTrigger
                 key={tab.value}
