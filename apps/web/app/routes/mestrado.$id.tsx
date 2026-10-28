@@ -34,6 +34,8 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
+import Loading from "@/components/layout/loading"
+import CandidateNotFound from "@/components/layout/candidate-not-found"
 
 export const meta: Route.MetaFunction = () => [
   { title: `SISSEL - Avaliação candidato Mestrado` },
@@ -141,6 +143,12 @@ export default function AvaliacaoCandidatoMestradoPage() {
       navigate("/")
     }
   }, [user, userQuery.isLoading, navigate])
+
+  useEffect(() => {
+    if (!!candidato) {
+      document.title = `SISSEL |  Avaliação - ${candidato.nome}`
+    }
+  }, [candidato])
 
   useEffect(() => {
     if (candidato) {
@@ -281,39 +289,17 @@ export default function AvaliacaoCandidatoMestradoPage() {
     }
   }
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <Header className="mb-6" />
-        <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
-        </div>
-      </div>
-    )
+    return <Loading />
   }
 
   if (!candidato) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <Header className="mb-6" />
-        <div className="py-20 text-center">
-          <h2 className="mb-4 text-2xl font-semibold">Candidato não encontrado</h2>
-          <p className="text-muted-foreground">
-            O candidato que você está procurando não existe ou foi removido.
-          </p>
-          <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-          </Button>
-        </div>
-      </div>
-    )
+    return <CandidateNotFound />
   }
 
-  console.log("Candidato:", candidato)
-
   return (
-    <div className="container mx-auto p-4 md:p-8">
+    <div className="p-4 md:p-8">
       <Header className="mb-6" />
-      <div className="mb-6 flex w-full flex-row items-center justify-between">
+      <div className="container mx-auto mb-6 flex w-full flex-row items-center justify-between">
         <Button onClick={() => navigate(-1)} variant="outline">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
@@ -347,12 +333,13 @@ export default function AvaliacaoCandidatoMestradoPage() {
           </NavigationMenu>
         )}
       </div>
-      <div className="my-4 flex flex-col gap-2 md:my-6">
+      <div className="container mx-auto my-4 flex flex-col gap-2 md:my-6">
         <h1 className="text-2xl font-semibold">{candidato.nome}</h1>
         <div className="flex flex-col gap-1 text-sm text-muted-foreground">
           <p>
             Avalie o candidato: {candidato.nome} - {candidato.email}
           </p>
+          <p>Número de inscrição: {candidato.numeroInscricao}</p>
           <p className="text-sm text-muted-foreground">
             Áreas de interesse do candidato: {candidato.primeiraAreaPreferencia}
             {candidato.segundaAreaPreferencia ? `, ${candidato.segundaAreaPreferencia}` : null}
@@ -364,7 +351,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
         </div>
       </div>
 
-      <form className="flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
+      <form className="container mx-auto flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
         <FieldLegend className="font-bold text-muted-foreground">Avaliadores</FieldLegend>
         <div className="grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">
           {/* Avaliador 1 */}
