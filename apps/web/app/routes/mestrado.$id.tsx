@@ -386,9 +386,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   PEDIU ISENÇÃO?
                 </FieldLabel>
                 <Select
-                  key={valorBooleanoSelect(field.value)}
+                  key={field.value}
                   onValueChange={(v) => field.onChange(v === "sim" ? "sim" : "nao")}
-                  value={valorBooleanoSelect(field.value)}
+                  value={field.value}
                 >
                   <SelectTrigger
                     className="w-full max-w-[400px]"
@@ -438,9 +438,9 @@ export default function AvaliacaoCandidatoMestradoPage() {
                   </FieldDescription>
                 </div>
                 <Select
-                  key={valorBooleanoSelect(field.value)}
+                  key={field.value}
                   onValueChange={(v) => field.onChange(v === "sim" ? "sim" : "nao")}
-                  value={valorBooleanoSelect(field.value)}
+                  value={field.value}
                 >
                   {" "}
                   <SelectTrigger className="w-full max-w-[400px]" id="isencaoAprovada">
@@ -620,9 +620,13 @@ export default function AvaliacaoCandidatoMestradoPage() {
                 GRAD
               </FieldLabel>
               <FieldDescription>
-                <a href={candidato.notas?.gradLink} target="_blank" rel="noopener noreferrer">
-                  Ver histórico.
-                </a>
+                {candidato.notas?.gradLink ? (
+                  <a href={candidato.notas?.gradLink} target="_blank" rel="noopener noreferrer">
+                    Ver histórico.
+                  </a>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Histórico não disponível</span>
+                )}
               </FieldDescription>
             </div>
             <Input
@@ -635,7 +639,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
             <FieldError>{errors.grad?.message}</FieldError>
           </Field>
 
-          {/* AREA */}
+          {/* AREA 
           <Field className="flex flex-col gap-4">
             <FieldLabel htmlFor="area" className="font-bold text-muted-foreground">
               AREA
@@ -649,11 +653,65 @@ export default function AvaliacaoCandidatoMestradoPage() {
             />
             <FieldError>{errors.area?.message}</FieldError>
           </Field>
+              */}
+          {/* AREA */}
+          <Controller
+            control={control}
+            name="area"
+            render={({ field }) => {
+              const areaValue =
+                typeof field.value === "number" &&
+                Number.isFinite(field.value) &&
+                field.value >= 0 &&
+                field.value <= 1
+                  ? String(field.value)
+                  : ""
+
+              return (
+                <Field className="flex flex-col gap-4">
+                  <div className="flex flex-row items-center justify-between gap-2">
+                    <FieldLabel htmlFor="area" className="font-bold text-muted-foreground">
+                      ÁREA
+                    </FieldLabel>
+                    <FieldDescription>
+                      <a
+                        href={candidato.notas?.gradLink ?? "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Ver comprovante.
+                      </a>
+                    </FieldDescription>
+                  </div>
+
+                  <Select
+                    key={areaValue || "empty"}
+                    value={areaValue}
+                    onValueChange={(value) => field.onChange(Number(value))}
+                  >
+                    <SelectTrigger className="w-full max-w-[400px]" id="area">
+                      <SelectValue placeholder={candidato.notas?.area ?? "0"} />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="0">0</SelectItem>
+                        <SelectItem value="0.5">0.5</SelectItem>
+                        <SelectItem value="0.6">0.6</SelectItem>
+                        <SelectItem value="0.7">0.7</SelectItem>
+                        <SelectItem value="0.85">0.85</SelectItem>
+                        <SelectItem value="0.9">0.9</SelectItem>
+                        <SelectItem value="1">1</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldError>{errors.area?.message}</FieldError>
+                </Field>
+              )
+            }}
+          />
 
           {/* ENADE */}
-          {
-            // Enade precisa de ajuste no link de comprovante
-          }
           <Controller
             control={control}
             name="enade"
@@ -689,7 +747,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
                     onValueChange={(value) => field.onChange(Number(value))}
                   >
                     <SelectTrigger className="w-full max-w-[400px]" id="enade">
-                      <SelectValue placeholder="0" />
+                      <SelectValue placeholder={candidato.notas?.enade ?? "0"} />
                     </SelectTrigger>
 
                     <SelectContent>
@@ -708,15 +766,11 @@ export default function AvaliacaoCandidatoMestradoPage() {
             }}
           />
           <div>
-            {
-              // Aqui confirmar se produções são todas no mesmo link
-            }
-
             <a
               href={candidato.notas?.a1a2a3a4Link ?? "#"}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-[#70C8EA] hover:underline"
+              className="text-sm font-semibold text-blue-500 hover:text-[#70C8EA] hover:underline"
             >
               Clique aqui para ver as produções
             </a>
