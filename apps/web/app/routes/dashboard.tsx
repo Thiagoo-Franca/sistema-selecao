@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useNavigate } from "react-router"
 import { useUser } from "@/services/useUser"
 
@@ -10,6 +10,7 @@ import { Header } from "@/components/layout/header"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import SearchBar from "@/components/ui/search-bar"
 import { CandidatosTab } from "@/components/candidatos-tab/candidato-tab"
+import { TABS } from "@/lib/constants"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -23,32 +24,31 @@ export const meta: Route.MetaFunction = () => [
   },
 ]
 
-const TABS = [
-  { value: "meus-candidatos", label: "Meus Candidatos", type: "meus", onlyAdmin: false },
-  { value: "candidatos", label: "Todos os Candidatos", type: undefined, onlyAdmin: false },
-  { value: "candidatos-mestrado", label: "Mestrado", type: "mestrado", onlyAdmin: false },
-  { value: "candidatos-doutorado", label: "Doutorado", type: "doutorado", onlyAdmin: false },
-  { value: "professores", label: "Professores", type: "professores", onlyAdmin: true },
-] as const
-
 export default function Home() {
   const [searchQuery, setSearchQuery] = useQueryParamsState("searchQuery", "")
   const [orderBy, setOrderBy] = useQueryParamsState("orderBy", "nome")
   const [order, setOrder] = useQueryParamsState<"asc" | "desc">("order", "asc")
-  const [activeTab, setActiveTab] = useQueryParamsState("activeTab", "candidatos")
+  const [activeTab, setActiveTab] = useQueryParamsState("activeTab", "meus-candidatos")
 
   const navigate = useNavigate()
 
   const userQuery = useUser()
   const isAdmin = userQuery.data?.role === "ADMIN"
 
-  const currentTab = TABS.some((t) => t.value === activeTab) ? activeTab : "candidatos"
+  const currentTab = TABS.some((t) => t.value === activeTab) ? activeTab : "meus-candidatos"
 
   useEffect(() => {
     if (!userQuery.data && !userQuery.isLoading) {
       navigate("/")
     }
-  }, [userQuery.data, navigate])
+  }, [userQuery.data, userQuery.isLoading, navigate])
+
+  const listRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const activeTrigger = listRef.current?.querySelector<HTMLElement>('[data-state="active"]')
+    activeTrigger?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
+  }, [currentTab])
 
   return (
     <div className="mx-auto px-4 md:px-8">
@@ -61,13 +61,16 @@ export default function Home() {
       </div>
 
       <Tabs value={currentTab} onValueChange={setActiveTab} className="w-full hover:cursor-pointer">
-        <div className="mb-4 flex items-center justify-between">
-          <TabsList className="flex w-full flex-row items-center justify-between gap-2 overflow-x-auto rounded-lg border-none bg-gradient-to-r from-white to-transparent p-1 shadow-none md:max-w-lg md:overflow-x-visible">
+        <div className="mb-4">
+          <TabsList
+            ref={listRef}
+            className="relative flex h-auto w-full snap-x justify-start gap-1 overflow-x-auto rounded-full border bg-white p-1 shadow-none [scrollbar-width:none] md:max-w-lg md:overflow-x-visible [&::-webkit-scrollbar]:hidden"
+          >
             {TABS.filter((tab) => !tab.onlyAdmin || isAdmin).map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="w-full rounded-lg bg-white px-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 data-[state=active]:shadow-md md:px-4"
+                className="shrink-0 snap-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md md:flex-1"
               >
                 {tab.label}
               </TabsTrigger>
