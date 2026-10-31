@@ -3,9 +3,11 @@ export * from "./user.hooks"
 export * from "./teacher-invitation.hooks"
 export * from "./student-invitation.hooks"
 export * from "./candidato.hooks"
+export * from "./auth/useLogin"
+export * from "./auth/useResetPassword"
 
 // Re-export existing hooks
 export { useToast } from "./use-toast"
-export { default as useIsTeacher } from "./use-role"
+export { useIsTeacher } from "./use-role"
 export { useIsMobile } from "./use-mobile"
 export { useQueryParamsState } from "./use-query-param-state"

@@ -1,5 +1,6 @@
 import type { Route } from "./+types/_index"
-import { LoginForm } from "@/components/auth/LoginForm"
+import AuthBrand from "@/components/auth/auth-brand"
+import Login from "@/components/auth/login"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -15,22 +16,14 @@ export const meta: Route.MetaFunction = () => [
 
 export default function LandingPage() {
   return (
-    <main className="flex h-screen animate-gradient-move items-center justify-center bg-white bg-[size:500%_500%] md:bg-[linear-gradient(to_right,_#F0523E,_#F8D65A,_#7BCB61,_#70C8EA)]">
-      <div className="flex w-full flex-col gap-6 rounded-lg bg-white p-6 md:h-auto md:w-1/2 md:gap-4 md:shadow-lg lg:w-1/3">
-        <section className="flex flex-col items-center justify-center gap-4">
-          <img
-            src="/icc-ufba.png"
-            alt="Logo do Instituto de Computação da UFBA"
-            className="h-auto w-24 object-contain lg:w-28"
-          />
-          <h1 className="text-center text-2xl text-lg font-semibold tracking-tight text-gray-800">
-            SISSEL - Sistema Seleção
-          </h1>
-        </section>
-        <section aria-labelledby="login-title" className="flex w-full items-center justify-center">
-          <div className="w-full max-w-md">
-            <LoginForm />
-          </div>
+    <main className="flex min-h-dvh animate-gradient-move items-center justify-center bg-white bg-[size:500%_500%] md:bg-[linear-gradient(to_right,_#F0523E,_#F8D65A,_#7BCB61,_#70C8EA)]">
+      <div className="flex w-full max-w-md flex-col items-center justify-center gap-6 rounded-lg bg-white p-8 md:p-12 md:shadow-lg">
+        <AuthBrand className="flex-shrink-0" title="SISSEL - Sistema Seleção" />
+        <section
+          aria-labelledby="login-title"
+          className="flex w-full flex-col items-center justify-center gap-6"
+        >
+          <Login />
         </section>
       </div>
     </main>

@@ -22,6 +22,7 @@ export const meta: Route.MetaFunction = () => [
     }),
   },
 ]
+
 const TABS = [
   { value: "meus-candidatos", label: "Meus Candidatos", type: "meus", onlyAdmin: false },
   { value: "candidatos", label: "Todos os Candidatos", type: undefined, onlyAdmin: false },

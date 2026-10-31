@@ -16,9 +16,9 @@ import { ChevronDown, LogOut, Menu, MessageSquare, User, Users, X } from "lucide
 import { useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { match } from "ts-pattern"
-import { LoginForm } from "../auth/LoginForm"
-import { RegisterForm } from "../auth/RegisterForm"
 import { DialogDescription, DialogHeader } from "../ui/dialog"
+import LoginForm from "../auth/login/login-form"
+import { RegisterForm } from "../auth/login/register-form"
 
 interface HeaderProps {
   className?: string
@@ -26,7 +26,6 @@ interface HeaderProps {
 
 export function Header(props: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false)
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false)
 
   return (
@@ -77,8 +76,6 @@ export function Header(props: HeaderProps) {
         <div className="hidden lg:flex lg:flex-1 lg:items-center lg:gap-4">
           <DesktopNavLinks />
           <RightSideButtons
-            loginDialogOpen={loginDialogOpen}
-            setLoginDialogOpen={setLoginDialogOpen}
             registerDialogOpen={registerDialogOpen}
             setRegisterDialogOpen={setRegisterDialogOpen}
           />
@@ -95,7 +92,6 @@ export function Header(props: HeaderProps) {
             <div className="container space-y-2 px-4 py-4">
               <MobileRightSideButtons
                 onClose={() => setMobileMenuOpen(false)}
-                setLoginDialogOpen={setLoginDialogOpen}
                 setRegisterDialogOpen={setRegisterDialogOpen}
               />
             </div>
@@ -104,7 +100,7 @@ export function Header(props: HeaderProps) {
       </div>
 
       {/* Shared Dialogs - Outside mobile menu so they persist when menu closes */}
-      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+      <Dialog>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Login</DialogTitle>

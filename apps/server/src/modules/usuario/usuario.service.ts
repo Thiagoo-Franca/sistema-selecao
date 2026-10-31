@@ -18,7 +18,6 @@ import {
 } from "../../services/email.service.js";
 import { type AppVariables } from "../../types.js";
 import { createUserSchema, updateUserSchema } from "./usuario.schema.js";
-import type { InferResultType } from "../../database/type-utils.js";
 
 type GetUserByIdError =
   { type: "user_not_found" } | { type: "database_error"; error: unknown };
@@ -83,9 +82,7 @@ export const getTeachers = async (
 
 export const getTeachersSimplified = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<
-  AppResult<InferResultType<typeof Users, "select">[], GetTeachersError>
-> => {
+): Promise<AppResult<{ name: string; id: number }[], GetTeachersError>> => {
   const dbInstance = c.get("db");
 
   try {
@@ -98,7 +95,7 @@ export const getTeachersSimplified = async (
       .where(and(or(eq(Users.role, "TEACHER"), eq(Users.role, "ADMIN"))))
       .orderBy(Users.nome);
 
-    return ok(teachers);
+    return ok(teachers as { name: string; id: number }[]);
   } catch (error) {
     console.error("Error fetching teachers (simplified):", error);
     return err({ type: "database_error", error });
@@ -110,6 +107,7 @@ type CreateUserError =
   | { type: "duplicate_username" }
   | { type: "hashing_error"; error: unknown }
   | { type: "database_error"; error: unknown };
+
 export const createUser = async (
   c: Context<{ Variables: AppVariables }>,
   userData: z.infer<typeof createUserSchema>,

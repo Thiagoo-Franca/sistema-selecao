@@ -118,3 +118,33 @@ const CandidatoDoutoradoNotaEtapa1Schema = z.object({
 export type CandidatoDoutoradoNotaEtapa1 = z.infer<typeof CandidatoDoutoradoNotaEtapa1Schema>
 
 export { CandidatoDoutoradoNotaEtapa1Schema }
+
+const registerSchema = z.object({
+  nome: z.string().min(1, "O nome é obrigatório"),
+  email: z.string().email("Email inválido"),
+  school: z.string().min(1, "A universidade é obrigatória"),
+  academicTitle: z.string().min(1, "O título acadêmico é obrigatório"),
+  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  matricula: z.string().min(1, "A matrícula é obrigatória"),
+})
+
+export type RegisterFormValues = z.infer<typeof registerSchema>
+
+export { registerSchema }
+
+const loginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+})
+
+export type LoginFormValues = z.infer<typeof loginSchema>
+
+export { loginSchema }
+
+const passwordResetSchema = z.object({
+  email: z.string().email("Email inválido"),
+})
+
+export type PasswordResetFormValues = z.infer<typeof passwordResetSchema>
+
+export { passwordResetSchema }

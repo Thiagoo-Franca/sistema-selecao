@@ -302,7 +302,14 @@ export const getCandidatoDoutoradoById = async (
 
   try {
     const result = await dbInstance
-      .select()
+      .select({
+        candidato: CandidatoDoutorado,
+        notas: NotaDoutorado,
+        avaliadorId: Avaliador.id,
+        avaliadorNome: Avaliador.nome,
+        auditorId: Auditor.id,
+        auditorNome: Auditor.nome,
+      })
       .from(CandidatoDoutorado)
       .leftJoin(
         NotaDoutorado,
@@ -313,14 +320,21 @@ export const getCandidatoDoutoradoById = async (
       .where(eq(CandidatoDoutorado.id, id))
       .limit(1);
 
-    if (!result[0]) return ok(null);
+    const row = result[0];
+    if (!row) return ok(null);
 
-    const candidato = {
-      ...result[0].candidato_doutorado,
-      notas: result[0].nota_doutorado,
-    };
-
-    return ok(candidato);
+    return ok({
+      ...row.candidato,
+      notas: row.notas,
+      avaliador:
+        row.avaliadorId !== null && row.avaliadorNome !== null
+          ? { id: row.avaliadorId, nome: row.avaliadorNome }
+          : null,
+      auditor:
+        row.auditorId !== null && row.auditorNome !== null
+          ? { id: row.auditorId, nome: row.auditorNome }
+          : null,
+    });
   } catch (error) {
     console.error(`Error fetching doutorado candidato with ID ${id}:`, error);
     return err({ type: "database_error", error });
@@ -532,9 +546,11 @@ type CandidatoComNotas = InsertCandidatoMestrado & {
 
 export type UploadCandidatosError = { type: "database_error"; error: unknown };
 
+type UserArea = NonNullable<SelectCandidatoMestrado["primeiraAreaPreferencia"]>;
+
 async function escolherProfessor(
   tx: Tx,
-  area: userArea,
+  area: UserArea | null,
   excluirIds: number[] = [],
 ) {
   const carga = sql<number>`(
@@ -614,7 +630,7 @@ export const uploadCandidatosMestrado = async (
         const areas = [
           row.primeiraAreaPreferencia,
           row.segundaAreaPreferencia,
-        ].filter((a): a is userArea => !!a);
+        ].filter((a): a is UserArea => !!a);
 
         // Avaliador: 1ª área; se não houver professor, 2ª; se não, fica vazio
         let avaliadorId: number | null = null;

@@ -258,7 +258,7 @@ export const CandidatoMestrado = pgTable(
 export type InsertCandidatoMestrado = typeof CandidatoMestrado.$inferInsert;
 export type SelectCandidatoMestrado = typeof CandidatoMestrado.$inferSelect;
 
-export const userRole = pgEnum("user_role", ["TEACHER", "ADMIN"]);
+export const userRole = pgEnum("user_role", ["TEACHER", "ADMIN", "STUDENT"]); // student É TEMPORÁRIO, apenas para testes. O correto é TEACHER e ADMIN. Alunos não devem ter acesso ao sistema.
 export type UserRole = (typeof userRole.enumValues)[number];
 export const Users = pgTable("usuario", {
   id: serial("id").primaryKey(),
@@ -269,8 +269,8 @@ export const Users = pgTable("usuario", {
   matricula: text("matricula").notNull(),
   areas: userArea("areas").array(), // Ex: ["CVIS", "CD"]
   academicTitle: text("academic_title").notNull(), // Ex: Doutorado
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   role: userRole("role").notNull(),
 });
 export type InsertUser = typeof Users.$inferInsert;
