@@ -8,18 +8,22 @@ import { useRegisterMutation } from "@/services/authService"
 import type { RegisterUserInput } from "@tcc/server"
 import { AlertCircle } from "lucide-react"
 import { useForm } from "react-hook-form"
-import { Form } from "../ui/form"
+import { Form } from "../../ui/form"
+import type { RegisterFormValues } from "@/schema/schema"
+import { useRegister } from "@/hooks/auth/useRegister"
 
-export function RegisterForm(p: { onSuccess?: () => void }) {
-  const { mutate: registerUser, isPending, error } = useRegisterMutation()
-  const form = useForm<RegisterUserInput>({
+interface RegisterFormProps {
+  onBackToLogin: () => void
+}
+export function RegisterForm({ onBackToLogin }: RegisterFormProps) {
+  const form = useForm<RegisterFormValues>({
     defaultValues: {
-      nome: __DEV__ ? "John Doe" : "",
-      email: __DEV__ ? `john.doe+${Math.random()}@example.com` : "",
-      school: __DEV__ ? "Universidade Federal da Bahia" : "Universidade Federal da Bahia",
-      academicTitle: __DEV__ ? "Doutor" : "",
-      password: __DEV__ ? "password" : "",
-      matricula: __DEV__ ? "123456789" : "",
+      nome: "",
+      email: "",
+      school: "Universidade Federal da Bahia",
+      academicTitle: "",
+      password: "",
+      matricula: "",
     },
   })
   const {
@@ -27,41 +31,13 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
     formState: { errors },
   } = form
 
-  const { toast } = useToast()
-  const onSubmit = (data: RegisterUserInput) => {
-    registerUser(
-      {
-        json: {
-          email: data.email,
-          password: data.password,
-          nome: data.nome,
-          school: data.school,
-          academicTitle: data.academicTitle,
-          matricula: data.matricula,
-        },
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Conta criada com sucesso! ✅",
-            description: "Você já pode fazer o login.",
-          })
-          p.onSuccess?.()
-        },
-      }
-    )
-  }
-
-  const errorMessage =
-    error instanceof Error
-      ? error.cause instanceof Error
-        ? error.cause.message
-        : error.message
-      : null
+  const { onSubmit, isPending, errorMessage } = useRegister({
+    onBackToLogin,
+  })
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
         {errorMessage && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -73,6 +49,7 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
           <Label htmlFor="register-nome">Nome Completo</Label>
           <Input
             id="register-nome"
+            className="focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/20"
             placeholder="Seu nome completo"
             disabled={isPending}
             {...register("nome", { required: "Nome é obrigatório" })}
@@ -83,17 +60,12 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
         <div>
           <Label htmlFor="register-email">Email</Label>
           <Input
+            className="focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/20"
             id="register-email"
             type="email"
             placeholder="seu@email.com"
             disabled={isPending}
-            {...register("email", {
-              required: "Email é obrigatório",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Email inválido",
-              },
-            })}
+            {...register("email")}
           />
           {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>}
         </div>
@@ -102,9 +74,10 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
           <Label htmlFor="register-universidade">Universidade</Label>
           <Input
             id="register-universidade"
+            className="focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/20"
             placeholder="Nome da sua universidade"
             disabled={isPending}
-            {...register("school", { required: "Universidade é obrigatória" })}
+            {...register("school")}
           />
           {errors.school && (
             <p className="mt-1 text-sm text-destructive">{errors.school.message}</p>
@@ -114,10 +87,11 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
         <div>
           <Label htmlFor="register-matricula">Matrícula</Label>
           <Input
+            className="focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/20"
             id="register-matricula"
             placeholder="Número de matrícula"
             disabled={isPending}
-            {...register("matricula", { required: "Matrícula é obrigatória" })}
+            {...register("matricula")}
           />
           {errors.matricula && (
             <p className="mt-1 text-sm text-destructive">{errors.matricula.message}</p>
@@ -127,10 +101,12 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
         <div>
           <Label htmlFor="register-academic_title">Título Acadêmico</Label>
           <Input
+            className="focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/20"
+
             id="register-academic_title"
             placeholder="Ex: Doutor, Mestre, Bacharel"
             disabled={isPending}
-            {...register("academicTitle", { required: "Título acadêmico é obrigatório" })}
+            {...register("academicTitle")}
           />
           {errors.academicTitle && (
             <p className="mt-1 text-sm text-destructive">{errors.academicTitle.message}</p>
@@ -140,25 +116,27 @@ export function RegisterForm(p: { onSuccess?: () => void }) {
         <div>
           <Label htmlFor="register-password">Senha</Label>
           <Input
+            className="focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/20"
             id="register-password"
             type="password"
             placeholder="Crie uma senha segura"
             disabled={isPending}
-            {...register("password", {
-              required: "Senha é obrigatória",
-              minLength: {
-                value: 6,
-                message: "A senha deve ter pelo menos 6 caracteres",
-              },
-            })}
+            {...register("password")}
           />
           {errors.password && (
             <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isPending}>
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          disabled={isPending}
+        >
           {isPending ? "Registrando..." : "Registrar"}
+        </Button>
+        <Button type="button" variant="link" className="w-full text-sm" onClick={onBackToLogin}>
+          Voltar para o login
         </Button>
       </form>
     </Form>

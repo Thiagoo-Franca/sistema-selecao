@@ -52,6 +52,19 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
+  .get("/teachers/simplified", checkRole(["ADMIN"]), async (c) => {
+    const result = await service.getTeachersSimplified(c);
+    if (!result.ok) {
+      throw match(result.error)
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao buscar professores"),
+        )
+        .exhaustive();
+    }
+    return c.json(result.data);
+  })
+
   .get("/students", async (c) => {
     const result = await service.getStudents(c);
     if (!result.ok) {
@@ -251,53 +264,6 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
       return c.body(null, 204);
     },
   )
-  /*
-  .get(
-    "/:id/bancas",
-    zValidator("param", schema.idParamSchema.shape.param),
-    async (c) => {
-      const { id } = c.req.valid("param");
-      const result = await service.getUserBancas(c, id);
-      if (!result.ok) {
-        throw match(result.error)
-          .with(
-            { type: "database_error" },
-            () => new AppError(500, "Erro ao buscar bancas"),
-          )
-          .with(
-            { type: "user_not_found" },
-            () => new AppError(404, "Usuário não encontrado"),
-          )
-          .exhaustive();
-      }
-      return c.json(result.data);
-    },
-  )
-    */
-   /*
-  .get(
-    "/:id/associations",
-    checkRole(["ADMIN"]),
-    zValidator("param", schema.idParamSchema.shape.param),
-    async (c) => {
-      const { id } = c.req.valid("param");
-      const result = await service.getUserAssociations(c, id);
-      if (!result.ok) {
-        throw match(result.error)
-          .with(
-            { type: "database_error" },
-            () => new AppError(500, "Erro ao buscar associações"),
-          )
-          .with(
-            { type: "user_not_found" },
-            () => new AppError(404, "Usuário não encontrado"),
-          )
-          .exhaustive();
-      }
-      return c.json(result.data);
-    },
-  )
-    */
   .post(
     "/request-password-reset",
     zValidator("json", schema.requestPasswordResetSchema),

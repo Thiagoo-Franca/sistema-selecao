@@ -1,43 +1,12 @@
-import { useCandidatos } from "@/hooks/candidato.hooks"
-import { TabsContent } from "../ui/tabs"
-import { href, useNavigate } from "react-router"
-import type { CandidatoDoutoradoComRelacoes, CandidatoMestradoComRelacoes } from "@tcc/server"
-import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react"
-import CandidatosTabLoading from "./candidatos-tab-loading"
-import CandidatosTabError from "./candidatos-tab-error"
 import { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router"
+
+import { LABELS } from "@/lib/constants"
 import { capitalizarNomeCompleto } from "@/lib/format"
+import { ChevronUp } from "lucide-react"
+import type { CandidatoHome } from "@/types"
+import { handleSort, removerAcentos } from "@/lib/helpers"
 
-const LABELS = [
-  {
-    key: "nome",
-    label: "Nome",
-  },
-  {
-    key: "tipoCurso",
-    label: "Nível",
-  },
-  {
-    key: "email",
-    label: "Email",
-    hiddenOnMobile: true,
-  },
-  {
-    key: "avaliado",
-    label: "Avaliado",
-  },
-]
-
-type CandidatoHome = {
-  id: string
-  avaliado: boolean
-  avaliador1: string | null
-  avaliador2: string | null
-  email: string | null
-  nome: string | null
-  numeroInscricao: string | null
-  tipo: "Mestrado" | "Doutorado" | undefined
-}
 interface HomeTableCandidatosProps {
   data: CandidatoHome[]
   searchQuery: string
@@ -59,10 +28,6 @@ export function HomeTableCandidatos({
 
   const [candidatos, setCandidatos] = useState(data)
 
-  const removerAcentos = (str: string) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-  }
-
   useEffect(() => {
     if (!searchQuery) {
       setCandidatos(data)
@@ -79,11 +44,6 @@ export function HomeTableCandidatos({
       setCandidatos(filteredData)
     }
   }, [searchQuery, data])
-
-  const handleSort = (key: string) => {
-    setOrder?.(orderBy === key && order === "asc" ? "desc" : "asc")
-    setOrderBy?.(key)
-  }
 
   const sortedCandidatos = useMemo(() => {
     if (!orderBy) return candidatos
@@ -107,11 +67,11 @@ export function HomeTableCandidatos({
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="grid w-full grid-cols-[2fr_1fr_1fr] gap-2 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid-cols-4 md:gap-4 md:px-8 md:py-3">
+      <div className="grid w-full grid-cols-[2fr_1fr_1fr] gap-2 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid-cols-[2fr_1fr_2fr_1fr_1fr_1fr_2fr_2fr] md:gap-4 md:px-8 md:py-3">
         {LABELS.map((label) => (
           <div
             key={label.key}
-            onClick={() => handleSort(label.key)}
+            onClick={() => handleSort(label.key, setOrderBy, setOrder, orderBy, order)}
             className={`flex items-center gap-1 ${label.hiddenOnMobile ? "hidden md:flex" : ""}`}
           >
             <ChevronUp
@@ -127,7 +87,7 @@ export function HomeTableCandidatos({
         {sortedCandidatos?.length > 0 ? (
           sortedCandidatos.map((candidato: CandidatoHome) => (
             <div
-              className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr] items-center gap-4 rounded-lg border border-transparent bg-white px-0 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:grid-cols-4 md:px-4"
+              className="grid w-full cursor-pointer grid-cols-[2fr_1fr_1fr] items-center gap-4 rounded-lg border border-transparent bg-white px-0 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:grid-cols-[2fr_1fr_2fr_1fr_1fr_1fr_2fr_2fr] md:px-4"
               key={candidato.id}
               onClick={() => navigate(`/${candidato.tipo?.toLocaleLowerCase()}/${candidato.id}`)}
             >
@@ -141,9 +101,21 @@ export function HomeTableCandidatos({
                 {candidato.email}
               </div>
               <div
-                className={`col-span-1 text-sm ${candidato.avaliado ? "text-green-600" : "text-gray-500"}`}
+                className={`col-span-1 text-sm ${candidato.avaliado ? "text-green-600" : "text-red-600"}`}
               >
                 {candidato.avaliado ? "Sim" : "Pendente"}
+              </div>
+              <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
+                {candidato.area1}
+              </div>
+              <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
+                {candidato.area2}
+              </div>
+              <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
+                {candidato.avaliador}
+              </div>
+              <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
+                {candidato.auditor}
               </div>
             </div>
           ))

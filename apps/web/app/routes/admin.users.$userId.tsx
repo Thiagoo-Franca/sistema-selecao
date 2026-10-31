@@ -85,7 +85,6 @@ export default function AdminUserDetailPage() {
 
   const roleLabel = match(user.role)
     .with("TEACHER", () => "Professor")
-    .with("STUDENT", () => "Aluno")
     .with("ADMIN", () => "Administrador")
     .otherwise(() => user.role)
 
@@ -93,7 +92,7 @@ export default function AdminUserDetailPage() {
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
       <div className="mx-auto max-w-4xl space-y-6">
-        <Button onClick={() => navigate("/admin/users")} variant="outline" className="mb-4">
+        <Button onClick={() => navigate(-1)} variant="outline" className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
 
@@ -135,11 +134,18 @@ export default function AdminUserDetailPage() {
                   <p className="text-sm">{user.school}</p>
                 </div>
               </div>
+
               <div className="flex items-start gap-3">
                 <GraduationCap className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Título Acadêmico</p>
                   <p className="text-sm">{user.academicTitle}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Áreas de Atuação</p>
+                  <p className="text-sm">{user.areas?.join(", ")}</p>
                 </div>
               </div>
             </div>

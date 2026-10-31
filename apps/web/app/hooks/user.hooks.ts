@@ -68,11 +68,11 @@ export const useTeachers = () => {
   })
 }
 
-export const useStudents = () => {
+export const useTeachersSimplified = () => {
   return useQuery({
-    queryKey: ["students"],
+    queryKey: ["teachersSimplified"],
     queryFn: async () => {
-      const response = await apiClient.usuario.students.$get()
+      const response = await apiClient.usuario.teachers.simplified.$get()
       return rpcReturn(response)
     },
   })

@@ -76,6 +76,7 @@ export const removeAuthToken = (): void => {
   }
 }
 
+/*
 export const useSendCeagDeclarationsMutation = () => {
   type Query = RpcType<(typeof apiClient.documentos)["send-ceag-declarations"][":bancaId"]["$post"]>
   return useMutation({
@@ -86,3 +87,5 @@ export const useSendCeagDeclarationsMutation = () => {
     },
   })
 }
+
+  */

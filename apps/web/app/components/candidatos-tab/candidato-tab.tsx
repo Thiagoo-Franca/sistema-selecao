@@ -1,14 +1,23 @@
-import { useCandidatos, useCandidatosDoutorado, useCandidatosMestrado } from "@/hooks"
+import {
+  useCandidatesByTeacherId,
+  useCandidatos,
+  useCandidatosDoutorado,
+  useCandidatosMestrado,
+  useTeachers,
+} from "@/hooks"
+
 import CandidatosTabLoading from "./candidatos-tab-loading"
 import CandidatosTabError from "./candidatos-tab-error"
 import { HomeTableCandidatos } from "."
 import { TabsContent } from "../ui/tabs"
+import { useUser } from "@/services/useUser"
+import ProfessoresTab from "./professores-tab"
 
-type TipoCandidato = "mestrado" | "doutorado"
+type TabsType = "mestrado" | "doutorado" | "meus" | "professores" | undefined
 
 interface CandidatosTabProps {
   tabValue: string
-  type?: TipoCandidato // sem type = todos os candidatos
+  type?: TabsType // sem type = todos os candidatos
   searchQuery: string
   orderBy?: string
   order?: "asc" | "desc"
@@ -25,19 +34,59 @@ export function CandidatosTab({
   setOrderBy,
   setOrder,
 }: CandidatosTabProps) {
+  const user = useUser().data
   const todosQuery = useCandidatos()
   const mestradoQuery = useCandidatosMestrado()
   const doutoradoQuery = useCandidatosDoutorado()
+  const meusCandidatosQuery = useCandidatesByTeacherId(user?.id ?? 0)
+  const professoresQuery = useTeachers()
 
-  const query = { todos: todosQuery, mestrado: mestradoQuery, doutorado: doutoradoQuery }[
-    type ?? "todos"
-  ]
+  if (!user) {
+    return (
+      <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
+        Ops, nenhum usuário encontrado.
+      </div>
+    )
+  }
+
+  const candidateQuery = {
+    todos: todosQuery,
+    mestrado: mestradoQuery,
+    doutorado: doutoradoQuery,
+    meus: meusCandidatosQuery,
+  }[type === "professores" ? "todos" : (type ?? "todos")]
 
   function renderContent() {
-    if (query.isLoading) return <CandidatosTabLoading />
-    if (query.isError) return <CandidatosTabError error={query.error} />
+    if (type === "professores") {
+      if (professoresQuery.isLoading) return <CandidatosTabLoading />
+      if (professoresQuery.isError) {
+        return <CandidatosTabError error={professoresQuery.error} />
+      }
 
-    if (!query.data || query.data.length === 0) {
+      if (!professoresQuery.data || professoresQuery.data.length === 0) {
+        return (
+          <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
+            Ops, nenhum professor encontrado.
+          </div>
+        )
+      }
+
+      return (
+        <ProfessoresTab
+          data={professoresQuery.data}
+          searchQuery={searchQuery}
+          orderBy={orderBy}
+          order={order}
+          setOrderBy={setOrderBy}
+          setOrder={setOrder}
+        />
+      )
+    }
+
+    if (candidateQuery.isLoading) return <CandidatosTabLoading />
+    if (candidateQuery.isError) return <CandidatosTabError error={candidateQuery.error} />
+
+    if (!candidateQuery.data || candidateQuery.data.length === 0) {
       return (
         <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
           Ops, nenhum candidato encontrado.
@@ -47,7 +96,7 @@ export function CandidatosTab({
 
     return (
       <HomeTableCandidatos
-        data={query.data}
+        data={candidateQuery.data}
         searchQuery={searchQuery}
         orderBy={orderBy}
         order={order}

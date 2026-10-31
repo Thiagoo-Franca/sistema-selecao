@@ -42,18 +42,9 @@ const uploadCandidatosMestradoSchema = z.array(
 )
 export { uploadCandidatosMestradoSchema }
 
-const nomeAvaliadorSchema = (n: number) =>
-  z
-    .string()
-    .trim()
-    .max(30, `O nome do avaliador ${n} não pode ter mais de 30 caracteres`)
-    .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ\s]*$/, "O nome do avaliador deve conter apenas letras e espaços")
-    .transform((v) => (v === "" ? undefined : v))
-    .optional()
-
 const CandidatoMestradoNotaSchema = z.object({
-  avaliador1: nomeAvaliadorSchema(1),
-  avaliador2: nomeAvaliadorSchema(2),
+  avaliadorId: z.number().optional(),
+  auditorId: z.number().optional(),
   solicitouIsencaoTaxaInscricao: z.string().optional(),
   isencaoAprovada: z.string().optional(),
   gru: z.string().optional(),
@@ -96,8 +87,8 @@ export type CandidatoMestradoNota = z.infer<typeof CandidatoMestradoNotaSchema>
 export { CandidatoMestradoNotaSchema }
 
 const CandidatoDoutoradoNotaEtapa1Schema = z.object({
-  avaliador1: z.string(),
-  avaliador2: z.string().optional(),
+  avaliadorId: z.string(),
+  auditorId: z.string().optional(),
   cpf: z.string().regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos"),
   nome: z.string().min(1, "O nome é obrigatório"),
   email: z.string().email("Email inválido"),
@@ -127,3 +118,33 @@ const CandidatoDoutoradoNotaEtapa1Schema = z.object({
 export type CandidatoDoutoradoNotaEtapa1 = z.infer<typeof CandidatoDoutoradoNotaEtapa1Schema>
 
 export { CandidatoDoutoradoNotaEtapa1Schema }
+
+const registerSchema = z.object({
+  nome: z.string().min(1, "O nome é obrigatório"),
+  email: z.string().email("Email inválido"),
+  school: z.string().min(1, "A universidade é obrigatória"),
+  academicTitle: z.string().min(1, "O título acadêmico é obrigatório"),
+  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  matricula: z.string().min(1, "A matrícula é obrigatória"),
+})
+
+export type RegisterFormValues = z.infer<typeof registerSchema>
+
+export { registerSchema }
+
+const loginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+})
+
+export type LoginFormValues = z.infer<typeof loginSchema>
+
+export { loginSchema }
+
+const passwordResetSchema = z.object({
+  email: z.string().email("Email inválido"),
+})
+
+export type PasswordResetFormValues = z.infer<typeof passwordResetSchema>
+
+export { passwordResetSchema }

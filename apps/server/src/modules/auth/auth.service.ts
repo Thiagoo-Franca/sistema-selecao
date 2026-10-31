@@ -107,6 +107,7 @@ export const loginUserService = async (
         role: user.role,
         school: user.school,
         matricula: user.matricula,
+        areas: user.areas,
         academicTitle: user.academicTitle,
         updatedAt: user.updatedAt,
       },
