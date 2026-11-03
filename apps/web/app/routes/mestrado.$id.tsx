@@ -97,7 +97,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
         solicitouIsencaoTaxaInscricao: valorIsencaoSelect(candidato.solicitouIsencaoTaxaInscricao),
         isencaoAprovada: candidato.isencaoAprovada ?? undefined,
         gru: normalizeGru(candidato.gru),
-        Homologa: valorSimNaoSelect(candidato.homologa),
+        homologa:
+          candidato.homologa === true ? true : candidato.homologa === false ? false : undefined,
         especiais: paraBooleano(candidato.especiais),
         cotas: paraBooleano(candidato.cotas),
         SUPRA: paraBooleano(candidato.supra),
@@ -182,7 +183,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
             solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
             isencaoAprovada: dados.isencaoAprovada ?? undefined,
             gru: dados.gru || undefined,
-            homologa: dados.Homologa || undefined,
+            homologa: dados.homologa === true ? true : dados.homologa === false ? false : undefined,
             especiais: dados.especiais ?? undefined,
             vagasNegrosPardos: dados.cotas ?? undefined,
             vagasSupranumerarias: dados.SUPRA ?? undefined,

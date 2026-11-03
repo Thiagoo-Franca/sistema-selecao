@@ -3,14 +3,18 @@ import type { AppVariables } from "../../types.js";
 import * as service from "./candidato.service.js";
 import { zValidator } from "@hono/zod-validator";
 import {
+  updateCandidatoDoutoradoSchema,
   updateCandidatoMestradoSchema,
+  updateNotaDoutoradoSchema,
   updateNotaMestradoSchema,
   uploadCandidatosMestradoSchema,
 } from "./candidato.schema.js";
 import { AppError } from "../../error.js";
 import { checkRole } from "../auth/auth.middleware.js";
+import { match } from "ts-pattern";
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
+  // GETS
   .get("/", checkRole(["ADMIN", "TEACHER"]), async (c) => {
     const result = await service.getAllCandidatos(c);
     if (!result.ok) {
@@ -62,6 +66,8 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
+
+  // POSTS
   .post(
     "/mestrado",
     checkRole(["ADMIN"]),
@@ -79,6 +85,8 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
       });
     },
   )
+
+  // DELETS
   .delete("/mestrado/:id", checkRole(["ADMIN"]), async (c) => {
     const id = c.req.param("id");
     const result = await service.deleteCandidatoMestrado(c, id);
@@ -95,6 +103,31 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json({ message: "Candidato de mestrado deletado com sucesso" });
   })
+
+  .delete("/doutorado/:id", checkRole(["ADMIN"]), async (c) => {
+    const id = c.req.param("id");
+    const result = await service.deleteCandidatoDoutorado(c, id);
+
+    if (!result.ok) {
+      console.error(
+        `Error deleting doutorado candidato with ID ${id}:`,
+        result.error,
+      );
+      throw match(result.error)
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao deletar candidato"),
+        )
+        .exhaustive();
+    }
+    if (!result.data) {
+      throw new AppError(404, "Candidato não encontrado");
+    }
+
+    return c.json({ message: "Candidato de doutorado deletado com sucesso" });
+  })
+
+  // PATCHES
   .patch(
     "/mestrado/:id",
     checkRole(["ADMIN", "TEACHER"]),
@@ -121,31 +154,8 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   )
 
   .patch(
-    "/mestrado/:id/nota",
-    zValidator("json", updateNotaMestradoSchema),
-    async (c) => {
-      const id = c.req.param("id");
-      const body = c.req.valid("json");
-      const result = await service.updateNotaMestrado(c, id, body);
-
-      if (!result.ok) {
-        console.error(
-          `Error updating mestrado candidato nota with ID ${id}:`,
-          result.error,
-        );
-        throw new AppError(500, "Erro ao atualizar nota do candidato");
-      }
-
-      if (!result.data) {
-        throw new AppError(404, "Nota do candidato não encontrada");
-      }
-
-      return c.json(result.data);
-    },
-  );
-/*
-  .patch(
     "/doutorado/:id",
+    checkRole(["ADMIN", "TEACHER"]),
     zValidator("json", updateCandidatoDoutoradoSchema),
     async (c) => {
       const id = c.req.param("id");
@@ -174,7 +184,33 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   )
 
   .patch(
+    "/mestrado/:id/nota",
+    checkRole(["ADMIN", "TEACHER"]),
+    zValidator("json", updateNotaMestradoSchema),
+    async (c) => {
+      const id = c.req.param("id");
+      const body = c.req.valid("json");
+      const result = await service.updateNotaMestrado(c, id, body);
+
+      if (!result.ok) {
+        console.error(
+          `Error updating mestrado candidato nota with ID ${id}:`,
+          result.error,
+        );
+        throw new AppError(500, "Erro ao atualizar nota do candidato");
+      }
+
+      if (!result.data) {
+        throw new AppError(404, "Nota do candidato não encontrada");
+      }
+
+      return c.json(result.data);
+    },
+  )
+
+  .patch(
     "/doutorado/:id/nota",
+    checkRole(["ADMIN", "TEACHER"]),
     zValidator("json", updateNotaDoutoradoSchema),
     async (c) => {
       const id = c.req.param("id");
@@ -200,29 +236,4 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
 
       return c.json(result.data);
     },
-  )
-
-  
-  .delete("/doutorado/:id", checkRole(["ADMIN"]), async (c) => {
-    const id = c.req.param("id");
-    const result = await service.deleteCandidatoDoutorado(c, id);
-
-    if (!result.ok) {
-      console.error(
-        `Error deleting doutorado candidato with ID ${id}:`,
-        result.error,
-      );
-      throw match(result.error)
-        .with(
-          { type: "database_error" },
-          () => new AppError(500, "Erro ao deletar candidato"),
-        )
-        .exhaustive();
-    }
-    if (!result.data) {
-      throw new AppError(404, "Candidato não encontrado");
-    }
-
-    return c.json({ message: "Candidato de doutorado deletado com sucesso" });
-  })
-*/
+  );

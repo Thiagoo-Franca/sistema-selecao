@@ -237,18 +237,18 @@ export default function FormsAvaliacaoMestrado({
         {/* Homologa */}
         <Controller
           control={control}
-          name="Homologa"
+          name="homologa"
           render={({ field }) => (
             <Field className="flex flex-col gap-4">
-              <FieldLabel htmlFor="Homologa" className="font-bold text-muted-foreground">
+              <FieldLabel htmlFor="homologa" className="font-bold text-muted-foreground">
                 Homologa?
               </FieldLabel>
               <Select
                 key={valorSimNaoSelect(field.value)}
-                onValueChange={(v) => field.onChange(v === "sim" ? "sim" : "nao")}
+                onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
                 value={valorSimNaoSelect(field.value)}
               >
-                <SelectTrigger className="w-full max-w-[400px]" id="Homologa">
+                <SelectTrigger className="w-full max-w-[400px]" id="homologa">
                   <SelectValue placeholder="Homologa?" />
                 </SelectTrigger>
                 <SelectContent>
@@ -258,7 +258,7 @@ export default function FormsAvaliacaoMestrado({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FieldError>{errors.Homologa?.message}</FieldError>
+              <FieldError>{errors.homologa?.message}</FieldError>
             </Field>
           )}
         />

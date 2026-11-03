@@ -1,6 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { CandidatoMestrado, NotaMestrado } from "../../database/schema";
+import { AREAS } from "@tcc/shared";
 
 const notaMestradoSchema = createInsertSchema(NotaMestrado)
   .omit({ id: true, idCandidato: true, notaEtapaII: true })
@@ -17,17 +18,7 @@ export const uploadCandidatosMestradoSchema = z.array(
 export type UploadCandidatosMestradoInput = z.infer<
   typeof uploadCandidatosMestradoSchema
 >;
-const areaEnum = z.enum([
-  "CVIS",
-  "CD",
-  "ICOT",
-  "SIBW",
-  "IEDU",
-  "ES",
-  "RCSD",
-  "SCTR",
-  "SSEG",
-]);
+const areaEnum = z.enum(AREAS);
 const updateCandidatoMestradoSchema = z.object({
   avaliado: z.boolean().optional(),
   avaliadorId: z.number().int().positive().nullable().optional(),

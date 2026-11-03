@@ -422,7 +422,7 @@ export const updateNotaMestrado = async (
     return err({ type: "database_error", error });
   }
 };
-/*
+
 export const updateCandidatoDoutorado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
@@ -521,7 +521,7 @@ export const deleteCandidatoMestrado = async (
     return err({ type: "database_error", error });
   }
 };
-/*
+
 export const deleteCandidatoDoutorado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
@@ -566,8 +566,6 @@ export const deleteCandidatoDoutorado = async (
     return err({ type: "database_error", error });
   }
 };
-
-*/
 
 type CandidatoComNotas = InsertCandidatoMestrado & {
   notas?: Omit<InsertNotaMestrado, "id" | "idCandidato"> | null;

@@ -48,7 +48,7 @@ const CandidatoMestradoNotaSchema = z.object({
   solicitouIsencaoTaxaInscricao: z.string().optional(),
   isencaoAprovada: z.string().optional(),
   gru: z.string().optional(),
-  Homologa: z.string().optional(),
+  homologa: z.boolean().optional(),
   especiais: z.boolean().optional(),
   cotas: z.boolean().optional(),
   SUPRA: z.boolean().optional(),
