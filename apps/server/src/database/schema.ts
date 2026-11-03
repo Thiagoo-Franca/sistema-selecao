@@ -1,7 +1,9 @@
 import { AREAS } from "@tcc/shared";
 import { relations, sql } from "drizzle-orm";
+import { GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
 import {
   boolean,
+  index,
   integer,
   numeric,
   pgEnum,
@@ -19,6 +21,8 @@ export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number];
 
 export const areaEnum = pgEnum("area", AREAS);
 export type Area = (typeof areaEnum.enumValues)[number];
+export const isencaoStatusEnum = pgEnum("isencao_status", ISENCAO_STATUS);
+export const gruStatusEnum = pgEnum("gru_status", GRU_STATUS);
 
 export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
@@ -94,8 +98,10 @@ const candidatoBaseColumns = {
   email: text("email"),
 
   solicitouIsencaoTaxaInscricao: text("solicitou_isencao_taxa_inscricao"),
-  isencaoAprovada: text("isencao_aprovada"),
-  gru: text("gru"),
+  isencaoAprovada: isencaoStatusEnum("isencao_aprovada")
+    .notNull()
+    .default("nao-solicitou"),
+  gru: gruStatusEnum("gru"),
   gruLink: text("gru_link"), // Link para PDF do GRU pago
   homologa: boolean("homologa"),
 
@@ -103,8 +109,14 @@ const candidatoBaseColumns = {
   cotas: text("cotas"), // Texto pois pode conter links para documentos comprobatórios
   supra: text("supra"), // Texto pois pode conter links para documentos comprobatórios
 
-  avaliadorId: uuid("avaliador_id").references(() => Users.id),
-  auditorId: uuid("auditor_id").references(() => Users.id),
+  avaliadorId: uuid("avaliador_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
+  auditorId: uuid("auditor_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 };
 
 export const CandidatoDoutorado = pgTable(
@@ -131,6 +143,12 @@ export const CandidatoDoutorado = pgTable(
     ).on(table.numeroInscricao),
     cpfUnique: unique("candidato_doutorado_cpf_unique").on(table.cpf),
     emailUnique: unique("candidato_doutorado_email_unique").on(table.email),
+    avaliadorIdIdx: index("candidato_doutorado_avaliador_id_idx").on(
+      table.avaliadorId,
+    ),
+    auditorIdIdx: index("candidato_doutorado_auditor_id_idx").on(
+      table.auditorId,
+    ),
   }),
 );
 
@@ -148,7 +166,7 @@ export const CandidatoMestrado = pgTable(
 
     universidade: text("universidade"),
     curso: text("curso"),
-    cidadeGraduacao: text("cidadeGraduacao"),
+    cidadeGraduacao: text("cidade_graduacao"),
   },
   (table) => ({
     numeroInscricaoUnique: unique(
@@ -156,6 +174,12 @@ export const CandidatoMestrado = pgTable(
     ).on(table.numeroInscricao),
     cpfUnique: unique("candidato_mestrado_cpf_unique").on(table.cpf),
     emailUnique: unique("candidato_mestrado_email_unique").on(table.email),
+    avaliadorIdIdx: index("candidato_mestrado_avaliador_id_idx").on(
+      table.avaliadorId,
+    ),
+    auditorIdIdx: index("candidato_mestrado_auditor_id_idx").on(
+      table.auditorId,
+    ),
   }),
 );
 

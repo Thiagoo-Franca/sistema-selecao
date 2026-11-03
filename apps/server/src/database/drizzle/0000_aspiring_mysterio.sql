@@ -1,4 +1,6 @@
 CREATE TYPE "public"."area" AS ENUM('CVIS', 'CD', 'ICOT', 'SIBW', 'IEDU', 'ES', 'RCSD', 'SCTR', 'SSEG');--> statement-breakpoint
+CREATE TYPE "public"."gru_status" AS ENUM('isento', 'pago', 'aberto', 'nao-isento', 'nao-pagou');--> statement-breakpoint
+CREATE TYPE "public"."isencao_status" AS ENUM('sim', 'nao', 'nao-solicitou');--> statement-breakpoint
 CREATE TYPE "public"."tipo_curso" AS ENUM('doutorado', 'mestrado');--> statement-breakpoint
 CREATE TYPE "public"."user_role" AS ENUM('TEACHER', 'ADMIN');--> statement-breakpoint
 CREATE TABLE "candidato_doutorado" (
@@ -8,8 +10,8 @@ CREATE TABLE "candidato_doutorado" (
 	"nome" text NOT NULL,
 	"email" text,
 	"solicitou_isencao_taxa_inscricao" text,
-	"isencao_aprovada" text,
-	"gru" text,
+	"isencao_aprovada" "isencao_status" DEFAULT 'nao-solicitou' NOT NULL,
+	"gru" "gru_status",
 	"gru_link" text,
 	"homologa" boolean,
 	"especiais" text,
@@ -17,6 +19,8 @@ CREATE TABLE "candidato_doutorado" (
 	"supra" text,
 	"avaliador_id" uuid,
 	"auditor_id" uuid,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"tipo_curso" "tipo_curso" DEFAULT 'doutorado' NOT NULL,
 	"historico_graduacao" text NOT NULL,
 	"copia_diploma_mestrado" text NOT NULL,
@@ -42,8 +46,8 @@ CREATE TABLE "candidato_mestrado" (
 	"nome" text NOT NULL,
 	"email" text,
 	"solicitou_isencao_taxa_inscricao" text,
-	"isencao_aprovada" text,
-	"gru" text,
+	"isencao_aprovada" "isencao_status" DEFAULT 'nao-solicitou' NOT NULL,
+	"gru" "gru_status",
 	"gru_link" text,
 	"homologa" boolean,
 	"especiais" text,
@@ -51,12 +55,14 @@ CREATE TABLE "candidato_mestrado" (
 	"supra" text,
 	"avaliador_id" uuid,
 	"auditor_id" uuid,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"tipo_curso" "tipo_curso" DEFAULT 'mestrado' NOT NULL,
 	"primeira_area_preferencia" "area",
 	"segunda_area_preferencia" "area",
 	"universidade" text,
 	"curso" text,
-	"cidadeGraduacao" text,
+	"cidade_graduacao" text,
 	CONSTRAINT "candidato_mestrado_numero_inscricao_unique" UNIQUE("numero_inscricao"),
 	CONSTRAINT "candidato_mestrado_cpf_unique" UNIQUE("cpf"),
 	CONSTRAINT "candidato_mestrado_email_unique" UNIQUE("email")
@@ -157,14 +163,18 @@ CREATE TABLE "reset_password" (
 	CONSTRAINT "reset_password_reset_password_hash_unique" UNIQUE("reset_password_hash")
 );
 --> statement-breakpoint
-ALTER TABLE "candidato_doutorado" ADD CONSTRAINT "candidato_doutorado_avaliador_id_usuario_id_fk" FOREIGN KEY ("avaliador_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "candidato_doutorado" ADD CONSTRAINT "candidato_doutorado_auditor_id_usuario_id_fk" FOREIGN KEY ("auditor_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "candidato_mestrado" ADD CONSTRAINT "candidato_mestrado_avaliador_id_usuario_id_fk" FOREIGN KEY ("avaliador_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "candidato_mestrado" ADD CONSTRAINT "candidato_mestrado_auditor_id_usuario_id_fk" FOREIGN KEY ("auditor_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "candidato_doutorado" ADD CONSTRAINT "candidato_doutorado_avaliador_id_usuario_id_fk" FOREIGN KEY ("avaliador_id") REFERENCES "public"."usuario"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "candidato_doutorado" ADD CONSTRAINT "candidato_doutorado_auditor_id_usuario_id_fk" FOREIGN KEY ("auditor_id") REFERENCES "public"."usuario"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "candidato_mestrado" ADD CONSTRAINT "candidato_mestrado_avaliador_id_usuario_id_fk" FOREIGN KEY ("avaliador_id") REFERENCES "public"."usuario"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "candidato_mestrado" ADD CONSTRAINT "candidato_mestrado_auditor_id_usuario_id_fk" FOREIGN KEY ("auditor_id") REFERENCES "public"."usuario"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "nota_doutorado" ADD CONSTRAINT "nota_doutorado_id_candidato_candidato_doutorado_id_fk" FOREIGN KEY ("id_candidato") REFERENCES "public"."candidato_doutorado"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "nota_mestrado" ADD CONSTRAINT "nota_mestrado_id_candidato_candidato_mestrado_id_fk" FOREIGN KEY ("id_candidato") REFERENCES "public"."candidato_mestrado"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "feature_request_vote" ADD CONSTRAINT "feature_request_vote_user_id_usuario_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "feature_request_vote" ADD CONSTRAINT "feature_request_vote_feature_request_id_feature_request_id_fk" FOREIGN KEY ("feature_request_id") REFERENCES "public"."feature_request"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "feature_request" ADD CONSTRAINT "feature_request_user_id_usuario_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "feedback_submission" ADD CONSTRAINT "feedback_submission_user_id_usuario_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reset_password" ADD CONSTRAINT "reset_password_user_id_usuario_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "reset_password" ADD CONSTRAINT "reset_password_user_id_usuario_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "candidato_doutorado_avaliador_id_idx" ON "candidato_doutorado" USING btree ("avaliador_id");--> statement-breakpoint
+CREATE INDEX "candidato_doutorado_auditor_id_idx" ON "candidato_doutorado" USING btree ("auditor_id");--> statement-breakpoint
+CREATE INDEX "candidato_mestrado_avaliador_id_idx" ON "candidato_mestrado" USING btree ("avaliador_id");--> statement-breakpoint
+CREATE INDEX "candidato_mestrado_auditor_id_idx" ON "candidato_mestrado" USING btree ("auditor_id");

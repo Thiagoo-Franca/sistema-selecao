@@ -1,7 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { CandidatoMestrado, NotaMestrado } from "../../database/schema";
-import { AREAS } from "@tcc/shared";
+import { AREAS, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
 
 const notaMestradoSchema = createInsertSchema(NotaMestrado)
   .omit({ id: true, idCandidato: true, notaEtapaII: true })
@@ -32,10 +32,8 @@ const updateCandidatoMestradoSchema = z.object({
   email: z.string().email("Email inválido").optional(),
   cidade: z.string().optional(),
   solicitouIsencaoTaxaInscricao: z.string().optional(),
-  isencaoAprovada: z.string().optional(),
-  gru: z
-    .enum(["isento", "pago", "aberto", "nao-isento", "nao-pagou"])
-    .optional(),
+  isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
+  gru: z.enum(GRU_STATUS).optional(),
   homologa: z.boolean().nullable().optional(),
   universidade: z.string().optional(),
   cursoGrad: z.string().optional(),
@@ -71,8 +69,8 @@ export const updateCandidatoDoutoradoSchema = z.object({
   nome: z.string().min(1, "O nome é obrigatório").optional(),
   email: z.string().email("Email inválido").optional(),
   solicitouIsencaoTaxaInscricao: z.boolean().optional(),
-  isencaoAprovada: z.string().optional(),
-  gru: z.string().optional(),
+  isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
+  gru: z.enum(GRU_STATUS).optional(),
   homologa: z.boolean().nullable().optional(),
   areaPgcomp: z.string().optional(),
   orientadorMestrado: z.string().optional(),

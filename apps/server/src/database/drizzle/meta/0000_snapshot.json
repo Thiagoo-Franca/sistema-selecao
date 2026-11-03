@@ -1,5 +1,5 @@
 {
-  "id": "f2129ea7-1d3b-43e0-9fe5-509bcb2b8073",
+  "id": "fa3b3ec0-ad3d-422c-a219-ba0850243555",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -47,13 +47,16 @@
         },
         "isencao_aprovada": {
           "name": "isencao_aprovada",
-          "type": "text",
+          "type": "isencao_status",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'nao-solicitou'"
         },
         "gru": {
           "name": "gru",
-          "type": "text",
+          "type": "gru_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
@@ -98,6 +101,20 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         },
         "tipo_curso": {
           "name": "tipo_curso",
@@ -180,7 +197,38 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "candidato_doutorado_avaliador_id_idx": {
+          "name": "candidato_doutorado_avaliador_id_idx",
+          "columns": [
+            {
+              "expression": "avaliador_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "candidato_doutorado_auditor_id_idx": {
+          "name": "candidato_doutorado_auditor_id_idx",
+          "columns": [
+            {
+              "expression": "auditor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "candidato_doutorado_avaliador_id_usuario_id_fk": {
           "name": "candidato_doutorado_avaliador_id_usuario_id_fk",
@@ -192,7 +240,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "candidato_doutorado_auditor_id_usuario_id_fk": {
@@ -205,7 +253,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -280,13 +328,16 @@
         },
         "isencao_aprovada": {
           "name": "isencao_aprovada",
-          "type": "text",
+          "type": "isencao_status",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'nao-solicitou'"
         },
         "gru": {
           "name": "gru",
-          "type": "text",
+          "type": "gru_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
@@ -332,6 +383,20 @@
           "primaryKey": false,
           "notNull": false
         },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
         "tipo_curso": {
           "name": "tipo_curso",
           "type": "tipo_curso",
@@ -366,14 +431,45 @@
           "primaryKey": false,
           "notNull": false
         },
-        "cidadeGraduacao": {
-          "name": "cidadeGraduacao",
+        "cidade_graduacao": {
+          "name": "cidade_graduacao",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "candidato_mestrado_avaliador_id_idx": {
+          "name": "candidato_mestrado_avaliador_id_idx",
+          "columns": [
+            {
+              "expression": "avaliador_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "candidato_mestrado_auditor_id_idx": {
+          "name": "candidato_mestrado_auditor_id_idx",
+          "columns": [
+            {
+              "expression": "auditor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "candidato_mestrado_avaliador_id_usuario_id_fk": {
           "name": "candidato_mestrado_avaliador_id_usuario_id_fk",
@@ -385,7 +481,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "candidato_mestrado_auditor_id_usuario_id_fk": {
@@ -398,7 +494,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -1102,6 +1198,26 @@
         "RCSD",
         "SCTR",
         "SSEG"
+      ]
+    },
+    "public.gru_status": {
+      "name": "gru_status",
+      "schema": "public",
+      "values": [
+        "isento",
+        "pago",
+        "aberto",
+        "nao-isento",
+        "nao-pagou"
+      ]
+    },
+    "public.isencao_status": {
+      "name": "isencao_status",
+      "schema": "public",
+      "values": [
+        "sim",
+        "nao",
+        "nao-solicitou"
       ]
     },
     "public.tipo_curso": {
