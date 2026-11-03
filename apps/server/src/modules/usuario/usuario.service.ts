@@ -7,8 +7,6 @@ import {
   feedbackSubmissions,
   resetPasswords,
   type SelectUser,
-  studentInvitations,
-  teacherInvitations,
   Users,
 } from "../../database/schema.js";
 import { type AppResult, err, ok } from "../../result.js";
@@ -126,56 +124,6 @@ export const createUser = async (
       // invitation, claim it — update the stub with the real password & data and
       // mark the invitation as used. Avoids "duplicate_email" friction for users
       // who sign up directly instead of clicking the invite link.
-      const [pendingInvite] = await dbInstance
-        .select({
-          id: studentInvitations.id,
-          userId: studentInvitations.userId,
-        })
-        .from(studentInvitations)
-        .where(
-          and(
-            eq(studentInvitations.email, userData.email),
-            eq(studentInvitations.status, "pending"),
-            eq(studentInvitations.userId, existingUser[0].id),
-          ),
-        )
-        .limit(1);
-
-      if (pendingInvite) {
-        let passwordHash: string;
-        try {
-          passwordHash = await bcrypt.hash(userData.password, 10);
-        } catch (hashError) {
-          return err({ type: "hashing_error", error: hashError });
-        }
-        const now = new Date();
-        const [claimed] = await dbInstance
-          .update(Users)
-          .set({
-            nome: userData.nome.trim(),
-            matricula: userData.matricula.trim(),
-            school: userData.school,
-            academicTitle: userData.academicTitle.trim(),
-            passwordHash,
-            updatedAt: now,
-          })
-          .where(eq(Users.id, pendingInvite.userId))
-          .returning();
-
-        if (!claimed) {
-          return err({
-            type: "database_error",
-            error: "Failed to claim invitation stub",
-          });
-        }
-
-        await dbInstance
-          .update(studentInvitations)
-          .set({ status: "used" })
-          .where(eq(studentInvitations.id, pendingInvite.id));
-
-        return ok(claimed);
-      }
 
       return err({ type: "duplicate_email" });
     }
@@ -413,14 +361,7 @@ export const deleteUser = async (
     await dbInstance
       .delete(feedbackSubmissions)
       .where(eq(feedbackSubmissions.userId, id));
-    await dbInstance
-      .delete(teacherInvitations)
-      .where(
-        or(
-          eq(teacherInvitations.userId, id),
-          eq(teacherInvitations.invitedBy, id),
-        ),
-      );
+
     // }
 
     await dbInstance.delete(Users).where(eq(Users.id, id));

@@ -14,40 +14,29 @@ import {
 import { and, arrayContains, asc, eq, notInArray, or, sql } from "drizzle-orm";
 import type { db } from "../../database/index.js";
 import { alias } from "drizzle-orm/pg-core";
-import { calcularMestradoNota, paraNumeroSeguro } from "@tcc/shared";
+import {
+  calcularMestradoNota,
+  paraNumeroSeguro,
+  type CandidatoComRelacoes,
+  type CandidatoResumo,
+  type NotaMestradoUpdate,
+} from "@tcc/shared";
+import type { UpdateCandidatoDoutoradoInput } from "./candidato.schema.js";
 
 const Avaliador = alias(Users, "avaliador");
 const Auditor = alias(Users, "auditor");
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown };
 
-export type CandidatoMestradoComRelacoes =
-  typeof CandidatoMestrado.$inferSelect & {
-    notas: typeof NotaMestrado.$inferSelect | null;
-    avaliador: { id: number; nome: string } | null;
-    auditor: { id: number; nome: string } | null;
-  };
+export type CandidatoMestradoComRelacoes = CandidatoComRelacoes<
+  typeof CandidatoMestrado.$inferSelect,
+  typeof NotaMestrado.$inferSelect
+>;
 
-export type CandidatoDoutoradoComRelacoes =
-  typeof CandidatoDoutorado.$inferSelect & {
-    notas: typeof NotaDoutorado.$inferSelect | null;
-    avaliador: { id: number; nome: string } | null;
-    auditor: { id: number; nome: string } | null;
-  };
-export type CandidatoResumo = {
-  id: string;
-  tipo: "Mestrado" | "Doutorado";
-  numeroInscricao: string | null;
-  nome: string | null;
-  email: string | null;
-  avaliadorId: number | null;
-  avaliador: string | null;
-  auditorId: number | null;
-  auditor: string | null;
-  avaliado: boolean;
-  area1: string | null;
-  area2: string | null;
-};
+export type CandidatoDoutoradoComRelacoes = CandidatoComRelacoes<
+  typeof CandidatoDoutorado.$inferSelect,
+  typeof NotaDoutorado.$inferSelect
+>;
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -70,11 +59,15 @@ export const getAllMyCandidates = async (
           avaliador: Avaliador.nome,
           auditorId: CandidatoMestrado.auditorId,
           auditor: Auditor.nome,
-          avaliado: CandidatoMestrado.avaliado,
+          avaliado: sql<boolean>`coalesce(${NotaMestrado.avaliado}, false)`,
           area1: CandidatoMestrado.primeiraAreaPreferencia,
           area2: CandidatoMestrado.segundaAreaPreferencia,
         })
         .from(CandidatoMestrado)
+        .leftJoin(
+          NotaMestrado,
+          eq(NotaMestrado.idCandidato, CandidatoMestrado.id),
+        )
         .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
         .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id))
         .where(
@@ -94,11 +87,15 @@ export const getAllMyCandidates = async (
           avaliador: Avaliador.nome,
           auditorId: CandidatoDoutorado.auditorId,
           auditor: Auditor.nome,
-          avaliado: CandidatoDoutorado.avaliado,
+          avaliado: sql<boolean>`coalesce(${NotaDoutorado.avaliado}, false)`,
           area1: CandidatoDoutorado.primeiraOpcaoOrientador,
           area2: CandidatoDoutorado.segundaOpcaoOrientador,
         })
         .from(CandidatoDoutorado)
+        .leftJoin(
+          NotaDoutorado,
+          eq(NotaDoutorado.idCandidato, CandidatoDoutorado.id),
+        )
         .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
         .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id))
         .where(
@@ -141,11 +138,15 @@ export const getAllCandidatos = async (
           avaliador: Avaliador.nome,
           auditorId: CandidatoMestrado.auditorId,
           auditor: Auditor.nome,
-          avaliado: CandidatoMestrado.avaliado,
+          avaliado: sql<boolean>`coalesce(${NotaMestrado.avaliado}, false)`,
           area1: CandidatoMestrado.primeiraAreaPreferencia,
           area2: CandidatoMestrado.segundaAreaPreferencia,
         })
         .from(CandidatoMestrado)
+        .leftJoin(
+          NotaMestrado,
+          eq(NotaMestrado.idCandidato, CandidatoMestrado.id),
+        )
         .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
         .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id)),
       db
@@ -159,11 +160,15 @@ export const getAllCandidatos = async (
           avaliador: Avaliador.nome,
           auditorId: CandidatoDoutorado.auditorId,
           auditor: Auditor.nome,
-          avaliado: CandidatoDoutorado.avaliado,
+          avaliado: sql<boolean>`coalesce(${NotaDoutorado.avaliado}, false)`,
           area1: CandidatoDoutorado.primeiraOpcaoOrientador,
           area2: CandidatoDoutorado.segundaOpcaoOrientador,
         })
         .from(CandidatoDoutorado)
+        .leftJoin(
+          NotaDoutorado,
+          eq(NotaDoutorado.idCandidato, CandidatoDoutorado.id),
+        )
         .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
         .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id)),
     ]);
@@ -198,11 +203,15 @@ export const getAllCandidatosMestrado = async (
         avaliador: Avaliador.nome,
         auditorId: CandidatoMestrado.auditorId,
         auditor: Auditor.nome,
-        avaliado: CandidatoMestrado.avaliado,
+        avaliado: sql<boolean>`coalesce(${NotaMestrado.avaliado}, false)`,
         area1: CandidatoMestrado.primeiraAreaPreferencia,
         area2: CandidatoMestrado.segundaAreaPreferencia,
       })
       .from(CandidatoMestrado)
+      .leftJoin(
+        NotaMestrado,
+        eq(NotaMestrado.idCandidato, CandidatoMestrado.id),
+      )
       .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
       .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id))
       .orderBy(CandidatoMestrado.nome);
@@ -230,11 +239,15 @@ export const getAllCandidatosDoutorado = async (
         avaliador: Avaliador.nome,
         auditorId: CandidatoDoutorado.auditorId,
         auditor: Auditor.nome,
-        avaliado: CandidatoDoutorado.avaliado,
+        avaliado: sql<boolean>`coalesce(${NotaDoutorado.avaliado}, false)`,
         area1: CandidatoDoutorado.primeiraOpcaoOrientador,
         area2: CandidatoDoutorado.segundaOpcaoOrientador,
       })
       .from(CandidatoDoutorado)
+      .leftJoin(
+        NotaDoutorado,
+        eq(NotaDoutorado.idCandidato, CandidatoDoutorado.id),
+      )
       .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
       .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id))
       .orderBy(CandidatoDoutorado.nome);
@@ -366,7 +379,7 @@ export const updateCandidatoMestrado = async (
 export const updateNotaMestrado = async (
   c: Context<{ Variables: AppVariables }>,
   idCandidato: string,
-  body: Partial<typeof NotaMestrado.$inferInsert>,
+  body: NotaMestradoUpdate,
 ): Promise<
   AppResult<typeof NotaMestrado.$inferSelect | null, GetAllCandidatosError>
 > => {
@@ -398,16 +411,24 @@ export const updateNotaMestrado = async (
         notaEtapaII: n(partes.notaEtapaII),
       });
 
-      const values = {
+      const values: NotaMestradoUpdate & {
+        avaliado: boolean;
+        notaFinal: number;
+        formulaVersion: number;
+      } = {
         ...body,
-        notaFinal: pontuacao.toFixed(2),
+        avaliado: true,
+        notaFinal: pontuacao,
         formulaVersion: 1,
       };
 
       const [salva] = await tx
         .insert(NotaMestrado)
         .values({ idCandidato, ...values })
-        .onConflictDoUpdate({ target: NotaMestrado.idCandidato, set: values })
+        .onConflictDoUpdate({
+          target: NotaMestrado.idCandidato,
+          set: values,
+        })
         .returning();
 
       return salva;
@@ -426,7 +447,7 @@ export const updateNotaMestrado = async (
 export const updateCandidatoDoutorado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
-  body: Partial<typeof CandidatoDoutorado.$inferInsert>,
+  body: UpdateCandidatoDoutoradoInput,
 ): Promise<
   AppResult<
     | (typeof CandidatoDoutorado.$inferSelect & {
@@ -439,9 +460,33 @@ export const updateCandidatoDoutorado = async (
   const dbInstance = c.get("db");
 
   try {
+    const asText = (value: boolean | undefined) =>
+      value === undefined ? undefined : value ? "sim" : "nao";
+    const updateData: Partial<typeof CandidatoDoutorado.$inferInsert> = {
+      cpf: body.cpf,
+      nome: body.nome,
+      email: body.email,
+      solicitouIsencaoTaxaInscricao: asText(
+        body.solicitouIsencaoTaxaInscricao,
+      ),
+      isencaoAprovada: body.isencaoAprovada,
+      gru: body.gru,
+      homologa: body.homologa,
+      areaPgcomp: body.areaPgcomp,
+      orientadorMestrado: body.orientadorMestrado,
+      primeiraOpcaoOrientador: body.primeiraOpcaoOrientador,
+      segundaOpcaoOrientador: body.segundaOpcaoOrientador ?? undefined,
+      terceiraOpcaoOrientador: body.terceiraOpcaoOrientador,
+      nomeUniversidadeMestrado: body.nomeUniversidadeMestrado,
+      nomeCursoMestrado: body.nomeCursoMestrado,
+      especiais: asText(body.possuiNecessidadesEspeciais),
+      cotas: asText(body.vagasNegrosPardos),
+      supra: asText(body.vagasSupranumerarias),
+    };
+
     const [candidatoAtualizado] = await dbInstance
       .update(CandidatoDoutorado)
-      .set(body)
+      .set(updateData)
       .where(eq(CandidatoDoutorado.id, id))
       .returning();
 
@@ -492,7 +537,7 @@ export const updateNotaDoutorado = async (
     return err({ type: "database_error", error });
   }
 };
-*/
+
 export const deleteCandidatoMestrado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
@@ -541,21 +586,6 @@ export const deleteCandidatoDoutorado = async (
         });
 
       if (!candidato) return null;
-
-      const [outroCandidatoDoutorado] = await tx
-        .select({ id: CandidatoDoutorado.id })
-        .from(CandidatoDoutorado)
-        // .where(eq(CandidatoDoutorado.idEndereco, candidato.idEndereco))
-        .limit(1);
-      const [outroCandidatoMestrado] = await tx
-        .select({ id: CandidatoMestrado.id })
-        .from(CandidatoMestrado)
-        .where(eq(CandidatoMestrado.idEndereco, candidato.idEndereco))
-        .limit(1);
-
-      if (!outroCandidatoMestrado && !outroCandidatoDoutorado) {
-        await tx.delete(Endereco).where(eq(Endereco.id, candidato.idEndereco));
-      }
 
       return { id: candidato.id };
     });

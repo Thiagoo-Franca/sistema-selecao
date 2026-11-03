@@ -5,8 +5,8 @@ import { toast } from "sonner"
 import type {
   CandidatoDoutoradoComRelacoes,
   CandidatoMestradoComRelacoes,
-  InsertNotaMestrado,
 } from "@tcc/server"
+import type { NotaMestradoUpdate } from "@tcc/shared"
 
 export const useCandidatos = () => {
   return useQuery({
@@ -149,12 +149,12 @@ export const useUpdateCandidatoMestradoNota = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: { id: string | number; body: Partial<InsertNotaMestrado | any> }) => {
+    mutationFn: async (data: { id: string | number; body: NotaMestradoUpdate }) => {
       const response = await apiClient.candidato.mestrado[":id"].nota.$patch({
         param: { id: String(data.id) },
         json: data.body,
       })
-      return rpcReturn(response) as unknown as InsertNotaMestrado | any
+      return rpcReturn(response)
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["candidatos"] })

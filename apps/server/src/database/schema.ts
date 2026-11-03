@@ -122,7 +122,6 @@ export const CandidatoDoutorado = pgTable(
     primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
     segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
     terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
-    isencaoAprovada: boolean("isencao_aprovada"),
     areaPgcomp: text("area_pgcomp"),
     orientadorMestrado: text("orientador_mestrado"),
   },

@@ -192,7 +192,6 @@ export default function AvaliacaoCandidatoMestradoPage() {
         updateNotaMutation.mutateAsync({
           id,
           body: {
-            avaliado: true,
             grad: dados.grad,
             area: dados.area,
             enade: dados.enade,

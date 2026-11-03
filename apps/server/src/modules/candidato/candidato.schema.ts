@@ -11,7 +11,7 @@ export const uploadCandidatosMestradoSchema = z.array(
   createInsertSchema(CandidatoMestrado, {
     numeroInscricao: (s) => s.min(1),
   })
-    .omit({ id: true, avaliado: true, tipoCurso: true })
+    .omit({ id: true, tipoCurso: true })
     .extend({ notas: notaMestradoSchema }),
 );
 
@@ -20,7 +20,6 @@ export type UploadCandidatosMestradoInput = z.infer<
 >;
 const areaEnum = z.enum(AREAS);
 const updateCandidatoMestradoSchema = z.object({
-  avaliado: z.boolean().optional(),
   avaliadorId: z.number().int().positive().nullable().optional(),
   auditorId: z.number().int().positive().nullable().optional(),
   primeiraAreaPreferencia: areaEnum.optional(),
@@ -37,7 +36,7 @@ const updateCandidatoMestradoSchema = z.object({
   gru: z
     .enum(["isento", "pago", "aberto", "nao-isento", "nao-pagou"])
     .optional(),
-  homologa: z.string().optional(),
+  homologa: z.boolean().nullable().optional(),
   universidade: z.string().optional(),
   cursoGrad: z.string().optional(),
   cidadeGrad: z.string().optional(),
@@ -62,8 +61,7 @@ const updateNotaMestradoSchema = z.object({
 });
 export { updateNotaMestradoSchema };
 
-const updateCandidatoDoutoradoSchema = z.object({
-  avaliado: z.boolean().optional(),
+export const updateCandidatoDoutoradoSchema = z.object({
   avaliador: z.string().nullable().optional(),
   auditor: z.string().nullable().optional(),
   cpf: z
@@ -73,9 +71,9 @@ const updateCandidatoDoutoradoSchema = z.object({
   nome: z.string().min(1, "O nome é obrigatório").optional(),
   email: z.string().email("Email inválido").optional(),
   solicitouIsencaoTaxaInscricao: z.boolean().optional(),
-  isencaoAprovada: z.boolean().optional(),
+  isencaoAprovada: z.string().optional(),
   gru: z.string().optional(),
-  homologa: z.string().optional(),
+  homologa: z.boolean().nullable().optional(),
   areaPgcomp: z.string().optional(),
   orientadorMestrado: z.string().optional(),
   primeiraOpcaoOrientador: z.string().optional(),
@@ -88,7 +86,9 @@ const updateCandidatoDoutoradoSchema = z.object({
   nomeCursoMestrado: z.string().optional(),
   cidadeOndeRealizouMestrado: z.string().optional(),
 });
-export { updateCandidatoDoutoradoSchema };
+export type UpdateCandidatoDoutoradoInput = z.infer<
+  typeof updateCandidatoDoutoradoSchema
+>;
 
 const updateNotaDoutoradoSchema = z.object({
   msc: z.number().optional(),
