@@ -25,8 +25,8 @@ import FormsAvaliacaoMestrado from "@/components/avaliacao/mestrado/forms"
 import CandidateInfo from "@/components/avaliacao/mestrado/candidate-info"
 import CandidateActions from "@/components/avaliacao/mestrado/candidate-actions"
 
-type TeacherOption = { id: number; nome: string }
-type TeacherData = { id: number; nome?: string | null; name?: string | null }
+type TeacherOption = { id: string; nome: string }
+type TeacherData = { id: string; nome?: string | null; name?: string | null }
 
 export const meta: Route.MetaFunction = () => [
   { title: `SISSEL - Avaliação candidato Mestrado` },

@@ -72,8 +72,8 @@ export const getAllMyCandidates = async (
         .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id))
         .where(
           or(
-            eq(CandidatoMestrado.avaliadorId, parseInt(avaliadorId)),
-            eq(CandidatoMestrado.auditorId, parseInt(avaliadorId)),
+            eq(CandidatoMestrado.avaliadorId, avaliadorId),
+            eq(CandidatoMestrado.auditorId, avaliadorId),
           ),
         ),
       db
@@ -100,8 +100,8 @@ export const getAllMyCandidates = async (
         .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id))
         .where(
           or(
-            eq(CandidatoDoutorado.avaliadorId, parseInt(avaliadorId)),
-            eq(CandidatoDoutorado.auditorId, parseInt(avaliadorId)),
+            eq(CandidatoDoutorado.avaliadorId, avaliadorId),
+            eq(CandidatoDoutorado.auditorId, avaliadorId),
           ),
         ),
     ]);
@@ -608,7 +608,7 @@ type UserArea = NonNullable<SelectCandidatoMestrado["primeiraAreaPreferencia"]>;
 async function escolherProfessor(
   tx: Tx,
   area: UserArea | null,
-  excluirIds: number[] = [],
+  excluirIds: string[] = [],
 ) {
   const carga = sql<number>`(
     select count(*) from candidato_mestrado cm
@@ -690,7 +690,7 @@ export const uploadCandidatosMestrado = async (
         ].filter((a): a is UserArea => !!a);
 
         // Avaliador: 1ª área; se não houver professor, 2ª; se não, fica vazio
-        let avaliadorId: number | null = null;
+        let avaliadorId: string | null = null;
         for (const area of areas) {
           avaliadorId = await escolherProfessor(tx, area);
           if (avaliadorId) break;
@@ -699,7 +699,7 @@ export const uploadCandidatosMestrado = async (
         // Auditor: mesma ordem de áreas, diferente do avaliador;
         // se não houver ninguém nas áreas, qualquer professor (menor carga)
         const excluir = avaliadorId ? [avaliadorId] : [];
-        let auditorId: number | null = null;
+        let auditorId: string | null = null;
         for (const area of areas) {
           auditorId = await escolherProfessor(tx, area, excluir);
           if (auditorId) break;

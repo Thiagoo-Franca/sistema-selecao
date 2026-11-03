@@ -1,1 +1,0 @@
-ALTER TABLE "feedback_submission" DROP COLUMN "would_use_system";

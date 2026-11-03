@@ -66,7 +66,6 @@ export interface FeedbackStatistics {
   averageSatisfaction: number;
   completedAllTasksCount: number;
   notCompletedAllTasksCount: number;
-  studentSubmissions: number;
   teacherSubmissions: number;
 }
 
@@ -87,7 +86,6 @@ export const getFeedbackStatistics = async (
         averageSatisfaction: avg(feedbackSubmissions.satisfactionRating),
         completedAllTasksCount: sql<number>`SUM(CASE WHEN ${feedbackSubmissions.completedAllTasks} = true THEN 1 ELSE 0 END)`,
         notCompletedAllTasksCount: sql<number>`SUM(CASE WHEN ${feedbackSubmissions.completedAllTasks} = false THEN 1 ELSE 0 END)`,
-        studentSubmissions: sql<number>`SUM(CASE WHEN ${Users.role} = 'STUDENT' THEN 1 ELSE 0 END)`,
         teacherSubmissions: sql<number>`SUM(CASE WHEN ${Users.role} = 'TEACHER' OR ${Users.role} = 'ADMIN' THEN 1 ELSE 0 END)`,
       })
       .from(feedbackSubmissions)
@@ -102,7 +100,6 @@ export const getFeedbackStatistics = async (
         averageSatisfaction: 0,
         completedAllTasksCount: 0,
         notCompletedAllTasksCount: 0,
-        studentSubmissions: 0,
         teacherSubmissions: 0,
       });
     }
@@ -116,7 +113,6 @@ export const getFeedbackStatistics = async (
       averageSatisfaction: Number(statistics.averageSatisfaction) || 0,
       completedAllTasksCount: Number(statistics.completedAllTasksCount),
       notCompletedAllTasksCount: Number(statistics.notCompletedAllTasksCount),
-      studentSubmissions: Number(statistics.studentSubmissions),
       teacherSubmissions: Number(statistics.teacherSubmissions),
     });
   } catch (error) {

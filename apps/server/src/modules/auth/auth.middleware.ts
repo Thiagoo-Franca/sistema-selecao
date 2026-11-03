@@ -15,7 +15,7 @@ export const checkRole = (roles: UserRole[]) =>
     if (!userId) {
       throw new AppError(401, "Usuário não autenticado");
     }
-    const result = await getUserById(c, Number(userId));
+    const result = await getUserById(c, userId);
     if (!result.ok) {
       throw match(result.error)
         .with(

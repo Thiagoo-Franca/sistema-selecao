@@ -13,14 +13,14 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 export interface TeacherOption {
-  id: number
+  id: string
   nome: string
 }
 
 interface TeacherComboboxProps {
   options: TeacherOption[]
   value: number | null | undefined
-  onChange: (id: number | null) => void
+  onChange: (id: string | null) => void
   placeholder?: string
   isLoading?: boolean
   disabled?: boolean

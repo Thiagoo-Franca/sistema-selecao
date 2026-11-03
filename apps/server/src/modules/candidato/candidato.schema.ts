@@ -20,8 +20,8 @@ export type UploadCandidatosMestradoInput = z.infer<
 >;
 const areaEnum = z.enum(AREAS);
 const updateCandidatoMestradoSchema = z.object({
-  avaliadorId: z.number().int().positive().nullable().optional(),
-  auditorId: z.number().int().positive().nullable().optional(),
+  avaliadorId: z.string().uuid().nullable().optional(),
+  auditorId: z.string().uuid().nullable().optional(),
   primeiraAreaPreferencia: areaEnum.optional(),
   segundaAreaPreferencia: areaEnum.optional(),
   cpf: z

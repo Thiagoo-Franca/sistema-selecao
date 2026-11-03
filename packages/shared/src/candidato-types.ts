@@ -1,7 +1,7 @@
 export type TipoCandidato = "mestrado" | "doutorado";
 
 export type ResponsavelCandidato = {
-  id: number;
+  id: string;
   nome: string;
 };
 
@@ -11,9 +11,9 @@ export type CandidatoResumo = {
   numeroInscricao: string | null;
   nome: string;
   email: string | null;
-  avaliadorId: number | null;
+  avaliadorId: string | null;
   avaliador: string | null;
-  auditorId: number | null;
+  auditorId: string | null;
   auditor: string | null;
   avaliado: boolean;
   area1: string | null;

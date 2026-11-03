@@ -19,16 +19,6 @@ export const useLoginMutation = () => {
   })
 }
 
-export const useRegisterMutation = () => {
-  type Query = RpcType<typeof apiClient.auth.register.$post>
-  return useMutation({
-    mutationFn: async (request: Query["input"]) => {
-      const response = await apiClient.auth.register.$post(request)
-      return rpcReturn(response)
-    },
-  })
-}
-
 export const useRequestPasswordResetMutation = () => {
   type Query = RpcType<(typeof apiClient.usuario)["request-password-reset"]["$post"]>
   return useMutation({

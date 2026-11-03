@@ -18,12 +18,10 @@ export const seedTestData = async (db: Database) => {
     // Seed Cursos
     const cursosData: InsertCurso[] = [
       {
-        id: 1,
         nome: "Ciência da Computação",
         sigla: "BCC",
       },
       {
-        id: 2,
         nome: "Sistemas de Informação",
         sigla: "BSI",
       },
@@ -38,7 +36,6 @@ export const seedTestData = async (db: Database) => {
     "$2b$10$Tc0O8gfKK5QQNCEOaZzQ2uFaekULT0N3mWxaZ/aVp0q29zNBYN79S";
   const usersData: InsertUser[] = [
     {
-      id: 1,
       passwordHash: adminPasswordHash,
       email: "admin@test.com",
       nome: "Admin Test",
@@ -50,7 +47,6 @@ export const seedTestData = async (db: Database) => {
       role: "ADMIN",
     },
     {
-      id: 2,
       passwordHash: adminPasswordHash,
       email: "teacher@test.com",
       nome: "Professor Test",
@@ -62,19 +58,6 @@ export const seedTestData = async (db: Database) => {
       role: "TEACHER",
     },
     {
-      id: 3,
-      passwordHash: adminPasswordHash,
-      email: "student@test.com",
-      nome: "Aluno Test",
-      school: "UFBA",
-      academicTitle: "Bacharel",
-      matricula: "STU123",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      role: "STUDENT",
-    },
-    {
-      id: 4,
       passwordHash: adminPasswordHash,
       email: "teacher2@test.com",
       nome: "Professor Test 2",

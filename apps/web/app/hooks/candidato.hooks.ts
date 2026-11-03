@@ -2,10 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import apiClient from "@/services/apiClient"
 import { rpcReturn } from "@/lib/utils"
 import { toast } from "sonner"
-import type {
-  CandidatoDoutoradoComRelacoes,
-  CandidatoMestradoComRelacoes,
-} from "@tcc/server"
+import type { CandidatoDoutoradoComRelacoes, CandidatoMestradoComRelacoes } from "@tcc/server"
 import type { NotaMestradoUpdate } from "@tcc/shared"
 
 export const useCandidatos = () => {
@@ -248,7 +245,9 @@ const TOTAL_COLUNAS = COLUNAS.length + NOTAS.length
 
 const HYPERLINK = /^=HYPERLINK\(\s*"([^"]*)"\s*[;,]\s*"([^"]*)"\s*\)$/i
 
-type CandidatoBase = Record<(typeof COLUNAS)[number], string | null>
+type CandidatoBase = Omit<Record<(typeof COLUNAS)[number], string | null>, "homologa"> & {
+  homologa: boolean | null
+}
 type Notas = Record<
   Exclude<(typeof NOTAS)[number]["chave"], "area" | "enade"> | "enadeLink",
   string | null
@@ -282,6 +281,18 @@ export function parseNumero(texto: string | null): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+function parseHomologa(texto: string | null): boolean | null {
+  if (!texto) return null
+
+  const valor = texto.trim().toUpperCase()
+  if (valor === "HOMOLOGA?" || valor === "NAO" || valor === "NÃO" || valor === "FALSE") {
+    return false
+  }
+  if (valor === "SIM" || valor === "TRUE") return true
+
+  return null
+}
+
 export function parseCandidatosMestrado(text: string): CandidatoMestradoUpload[] {
   const candidatos: CandidatoMestradoUpload[] = []
 
@@ -304,6 +315,10 @@ export function parseCandidatosMestrado(text: string): CandidatoMestradoUpload[]
       const candidato = {} as CandidatoBase
       COLUNAS.forEach((coluna, i) => {
         const { link, texto } = parseHyperlink(celulas[i])
+        if (coluna === "homologa") {
+          candidato.homologa = parseHomologa(texto)
+          return
+        }
         candidato[coluna] = link ?? texto
       })
 

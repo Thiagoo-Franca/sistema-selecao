@@ -4,8 +4,6 @@ import { err, ok, type AppResult } from "../result.js";
 import {
   createCalendarInviteEmail,
   createPasswordResetEmail as createPasswordResetEmailTemplate,
-  createStudentInvitationEmail as createStudentInvitationEmailTemplate,
-  createTeacherInvitationEmail as createTeacherInvitationEmailTemplate,
   type CalendarInviteEmailProps,
 } from "../templates/email/index.js";
 
@@ -98,20 +96,6 @@ export const sendEmail = async (
     console.error("Email sending failed:", error);
     return err({ type: "email_error" });
   }
-};
-
-export const createTeacherInvitationEmail = (
-  nome: string,
-  invitationUrl: string,
-): string => {
-  return createTeacherInvitationEmailTemplate({ nome, invitationUrl });
-};
-
-export const createStudentInvitationEmail = (
-  nome: string,
-  invitationUrl: string,
-): string => {
-  return createStudentInvitationEmailTemplate({ nome, invitationUrl });
 };
 
 export const createPasswordResetEmail = (

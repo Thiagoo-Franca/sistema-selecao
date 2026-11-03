@@ -12,7 +12,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
   .get("/me", async (c) => {
     const result = await service.getUserById(
       c,
-      Number(c.get("jwtPayload").sub),
+      c.get("jwtPayload").sub,
     );
     if (!result.ok) {
       throw match(result.error)
@@ -65,32 +65,6 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     return c.json(result.data);
   })
 
-  .get("/students", async (c) => {
-    const result = await service.getStudents(c);
-    if (!result.ok) {
-      throw match(result.error)
-        .with(
-          { type: "database_error" },
-          () => new AppError(500, "Erro ao buscar discentes"),
-        )
-        .exhaustive();
-    }
-    return c.json(result.data);
-  })
-  /*
-  .get("/students/available-for-banca", async (c) => {
-    const result = await service.getStudentsAvailableForBanca(c);
-    if (!result.ok) {
-      throw match(result.error)
-        .with(
-          { type: "database_error" },
-          () => new AppError(500, "Erro ao buscar discentes"),
-        )
-        .exhaustive();
-    }
-    return c.json(result.data);
-  })
-    */
   .post(
     "/",
     checkRole(["ADMIN", "TEACHER"]),
@@ -149,7 +123,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
       const validatedUpdateData = c.req.valid("json");
       const result = await service.updateUser(
         c,
-        Number(c.get("jwtPayload").sub),
+        c.get("jwtPayload").sub,
         validatedUpdateData,
       );
       if (!result.ok) {
@@ -176,7 +150,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     zValidator("json", schema.changePasswordSchema),
     async (c) => {
       const { currentPassword, newPassword } = c.req.valid("json");
-      const userId = Number(c.get("jwtPayload").sub);
+      const userId = c.get("jwtPayload").sub;
 
       const result = await service.changeUserPassword(
         c,

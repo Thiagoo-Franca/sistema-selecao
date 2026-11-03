@@ -18,7 +18,6 @@ import { Link, useNavigate } from "react-router"
 import { match } from "ts-pattern"
 import { DialogDescription, DialogHeader } from "../ui/dialog"
 import LoginForm from "../auth/login/login-form"
-import { RegisterForm } from "../auth/login/register-form"
 
 interface HeaderProps {
   className?: string
@@ -26,7 +25,7 @@ interface HeaderProps {
 
 export function Header(props: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [registerDialogOpen, setRegisterDialogOpen] = useState(false)
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false)
 
   return (
     <header
@@ -76,8 +75,8 @@ export function Header(props: HeaderProps) {
         <div className="hidden lg:flex lg:flex-1 lg:items-center lg:gap-4">
           <DesktopNavLinks />
           <RightSideButtons
-            registerDialogOpen={registerDialogOpen}
-            setRegisterDialogOpen={setRegisterDialogOpen}
+            loginDialogOpen={loginDialogOpen}
+            setLoginDialogOpen={setLoginDialogOpen}
           />
         </div>
 
@@ -92,7 +91,7 @@ export function Header(props: HeaderProps) {
             <div className="container space-y-2 px-4 py-4">
               <MobileRightSideButtons
                 onClose={() => setMobileMenuOpen(false)}
-                setRegisterDialogOpen={setRegisterDialogOpen}
+                setLoginDialogOpen={setLoginDialogOpen}
               />
             </div>
           </div>
@@ -100,25 +99,16 @@ export function Header(props: HeaderProps) {
       </div>
 
       {/* Shared Dialogs - Outside mobile menu so they persist when menu closes */}
-      <Dialog>
+      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Login</DialogTitle>
             <DialogDescription>Insira seu email e senha para acessar sua conta.</DialogDescription>
           </DialogHeader>
-          <LoginForm onSuccess={() => setLoginDialogOpen(false)} />
+          <LoginForm onForgotPassword={() => setLoginDialogOpen(false)} />
         </DialogContent>
       </Dialog>
 
-      <Dialog open={registerDialogOpen} onOpenChange={setRegisterDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Criar Conta</DialogTitle>
-            <DialogDescription>Preencha os campos abaixo para se registrar.</DialogDescription>
-          </DialogHeader>
-          <RegisterForm onSuccess={() => setRegisterDialogOpen(false)} />
-        </DialogContent>
-      </Dialog>
     </header>
   )
 }
@@ -139,8 +129,6 @@ function DesktopNavLinks() {
 interface RightSideButtonsProps {
   loginDialogOpen: boolean
   setLoginDialogOpen: (open: boolean) => void
-  registerDialogOpen: boolean
-  setRegisterDialogOpen: (open: boolean) => void
 }
 
 function RightSideButtons(props: RightSideButtonsProps) {
@@ -180,7 +168,6 @@ function RightSideButtons(props: RightSideButtonsProps) {
                 <Badge variant="outline" className="hidden sm:inline-flex">
                   {match(user.role)
                     .with("TEACHER", () => "Professor")
-                    .with("STUDENT", () => "Aluno")
                     .with("ADMIN", () => "Administrador")
                     .exhaustive()}
                 </Badge>
@@ -239,7 +226,6 @@ function RightSideButtons(props: RightSideButtonsProps) {
 interface MobileRightSideButtonsProps {
   onClose: () => void
   setLoginDialogOpen: (open: boolean) => void
-  setRegisterDialogOpen: (open: boolean) => void
 }
 
 function MobileRightSideButtons(props: MobileRightSideButtonsProps) {
@@ -281,7 +267,6 @@ function MobileRightSideButtons(props: MobileRightSideButtonsProps) {
           <Badge variant="outline">
             {match(user.role)
               .with("TEACHER", () => "Professor")
-              .with("STUDENT", () => "Aluno")
               .with("ADMIN", () => "Administrador")
               .exhaustive()}
           </Badge>
@@ -338,13 +323,6 @@ function LoggedOutButtonsContent(props: RightSideButtonsProps) {
         Login
       </Button>
 
-      <Button
-        variant="outline"
-        className="focus:ring-2 focus:ring-primary focus:ring-offset-2"
-        onClick={() => props.setRegisterDialogOpen(true)}
-      >
-        Registre-se
-      </Button>
     </>
   )
 }
@@ -370,16 +348,6 @@ function MobileLoggedOutButtons(props: MobileRightSideButtonsProps) {
         Login
       </Button>
 
-      <Button
-        variant="outline"
-        className="w-full justify-start"
-        onClick={() => {
-          props.setRegisterDialogOpen(true)
-          props.onClose()
-        }}
-      >
-        Registre-se
-      </Button>
     </div>
   )
 }

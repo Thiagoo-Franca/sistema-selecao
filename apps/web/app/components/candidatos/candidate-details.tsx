@@ -5,7 +5,7 @@ import SectionContent from "./section-content"
 
 interface CandidateDetailsProps {
   user: {
-    role: "STUDENT" | "TEACHER" | "ADMIN"
+    role: "TEACHER" | "ADMIN"
   }
   candidato: {
     id: string

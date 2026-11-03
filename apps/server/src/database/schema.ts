@@ -103,8 +103,8 @@ const candidatoBaseColumns = {
   cotas: text("cotas"), // Texto pois pode conter links para documentos comprobatórios
   supra: text("supra"), // Texto pois pode conter links para documentos comprobatórios
 
-  avaliadorId: integer("avaliador_id").references(() => Users.id),
-  auditorId: integer("auditor_id").references(() => Users.id),
+  avaliadorId: uuid("avaliador_id").references(() => Users.id),
+  auditorId: uuid("auditor_id").references(() => Users.id),
 };
 
 export const CandidatoDoutorado = pgTable(
@@ -162,11 +162,11 @@ export const CandidatoMestrado = pgTable(
 export type InsertCandidatoMestrado = typeof CandidatoMestrado.$inferInsert;
 export type SelectCandidatoMestrado = typeof CandidatoMestrado.$inferSelect;
 
-export const userRole = pgEnum("user_role", ["TEACHER", "ADMIN", "STUDENT"]); // student É TEMPORÁRIO, apenas para testes. O correto é TEACHER e ADMIN. Alunos não devem ter acesso ao sistema.
+export const userRole = pgEnum("user_role", ["TEACHER", "ADMIN"]);
 export type UserRole = (typeof userRole.enumValues)[number];
 export const Users = pgTable("usuario", {
-  id: serial("id").primaryKey(),
-  passwordHash: text("password_has").notNull(), // Nome da coluna original era password_has
+  id: uuid("id").primaryKey().defaultRandom(),
+  passwordHash: text("password_hash").notNull(),
   email: text("email").notNull().unique(),
   nome: text("nome").notNull(),
   school: text("school").notNull(), // Ex: Instituto de Computação
@@ -182,7 +182,7 @@ export type SelectUser = typeof Users.$inferSelect;
 
 export const resetPasswords = pgTable("reset_password", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => Users.id),
   resetPasswordHash: text("reset_password_hash").unique(),
@@ -192,52 +192,11 @@ export const resetPasswords = pgTable("reset_password", {
   expiresAt: timestamp("expires_at").notNull(), // Adicionado para controle
 });
 
-/*
-export const teacherInvitations = pgTable("teacher_invitation", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  nome: text("nome").notNull(),
-  invitationHash: text("invitation_hash").unique().notNull(),
-  status: text("status").default("pending").notNull(), // pending, used, expired
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-
-  expiresAt: timestamp("expires_at").notNull(),
-  invitedBy: integer("invited_by")
-    .notNull()
-    .references(() => Users.id), // Admin who sent the invitation
-  userId: integer("user_id").references(() => Users.id), // Set when account is created
-});
-export type InsertTeacherInvitation = typeof teacherInvitations.$inferInsert;
-export type SelectTeacherInvitation = typeof teacherInvitations.$inferSelect;
-
-export const studentInvitations = pgTable("student_invitation", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  nome: text("nome").notNull(),
-  matricula: text("matricula").notNull(),
-  invitationHash: text("invitation_hash").unique().notNull(),
-  status: text("status").default("pending").notNull(), // pending, used
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  invitedBy: integer("invited_by")
-    .notNull()
-    .references(() => Users.id), // Teacher/Admin who sent the invitation
-  userId: integer("user_id")
-    .notNull()
-    .references(() => Users.id), // Stub Users row created with the invitation
-});
-export type InsertStudentInvitation = typeof studentInvitations.$inferInsert;
-export type SelectStudentInvitation = typeof studentInvitations.$inferSelect;
-*/
-
 // === FEEDBACK SYSTEM ===
 
 export const feedbackSubmissions = pgTable("feedback_submission", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => Users.id)
     .unique(), // Only one feedback per user
@@ -257,7 +216,7 @@ export type SelectFeedbackSubmission = typeof feedbackSubmissions.$inferSelect;
 
 export const featureRequests = pgTable("feature_request", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => Users.id),
   title: text("title").notNull(),
@@ -274,7 +233,7 @@ export const featureRequestVotes = pgTable(
   "feature_request_vote",
   {
     id: serial("id").primaryKey(),
-    userId: integer("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => Users.id),
     featureRequestId: integer("feature_request_id")
