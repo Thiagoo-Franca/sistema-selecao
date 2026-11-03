@@ -1,6 +1,5 @@
-import { AREAS } from "@tcc/shared";
+import { AREAS, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
 import { relations, sql } from "drizzle-orm";
-import { GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
 import {
   boolean,
   index,
@@ -28,9 +27,17 @@ export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
   idCandidato: uuid("id_candidato")
     .notNull()
-    .references(() => CandidatoMestrado.id)
+    .references(() => CandidatoMestrado.id, { onDelete: "cascade" })
     .unique(), // garante 1:1 com o candidato
   avaliado: boolean("avaliado").notNull().default(false),
+  notaFinal: numeric("nota_final", { precision: 5, scale: 2, mode: "number" }),
+  formulaVersion: integer("formula_version").notNull().default(1),
+  avaliadoEm: timestamp("avaliado_em"),
+  avaliadoPorId: uuid("avaliado_por_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
   gradLink: text("grad_link"),
   grad: numeric("grad", { mode: "number" }),
@@ -61,23 +68,27 @@ export const NotaMestrado = pgTable("nota_mestrado", {
     mode: "number",
   }),
   notaEtapaII: numeric("nota_etapa_ii", { mode: "number" }),
-  notaFinal: numeric("nota_final", { mode: "number" }),
-  formulaVersion: integer("formula_version").notNull().default(1),
 });
 
 export type InsertNotaMestrado = typeof NotaMestrado.$inferInsert;
 export type SelectNotaMestrado = typeof NotaMestrado.$inferSelect;
 
-{
-  // REVISÃO PENDENTE: candidatos do tipo doutorado
-}
+// Notas específicas da avaliação de candidatos ao doutorado.
 export const NotaDoutorado = pgTable("nota_doutorado", {
   id: serial("id").primaryKey(),
   idCandidato: uuid("id_candidato")
     .notNull()
-    .references(() => CandidatoDoutorado.id)
+    .references(() => CandidatoDoutorado.id, { onDelete: "cascade" })
     .unique(), // garante 1:1 com o candidato
   avaliado: boolean("avaliado").notNull().default(false),
+  notaFinal: numeric("nota_final", { precision: 5, scale: 2, mode: "number" }),
+  formulaVersion: integer("formula_version").notNull().default(1),
+  avaliadoEm: timestamp("avaliado_em"),
+  avaliadoPorId: uuid("avaliado_por_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
   msc: numeric("msc", { mode: "number" }), // nota do mestrado
   areaFormacaoGraduacao: numeric("area_formacao_graduacao", { mode: "number" }),
