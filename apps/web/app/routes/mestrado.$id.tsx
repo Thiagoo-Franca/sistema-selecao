@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { CandidatoMestradoNotaSchema, type CandidatoMestradoNota } from "@/schema/schema"
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
-import { calcularMestradoNota, paraNumeroSeguro } from "@/lib/calculoNotas"
+import { calcularMestradoNota, paraNumeroSeguro } from "@tcc/shared"
 import { useTeachersSimplified, useToast } from "@/hooks"
 import {
   useCandidatoMestradoById,
@@ -36,6 +36,8 @@ export const meta: Route.MetaFunction = () => [
 export default function AvaliacaoCandidatoMestradoPage() {
   const { id } = useParams<{ id: string | undefined }>()
   const [nota, setNota] = useState(0)
+  const [RGRAD, setRGRAD] = useState(0)
+  const [RPQ_GRAD, setRPQ_GRAD] = useState(0)
 
   const userQuery = useUser()
   const candidatoQuery = useCandidatoMestradoById(id ?? "")
@@ -163,6 +165,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
     })
 
     setNota(resultado.pontuacao)
+    setRGRAD(resultado.RGRAD)
+    setRPQ_GRAD(resultado.RPQ_GRAD)
   }, [camposNota])
 
   async function onSubmit(dados: CandidatoMestradoNota) {
@@ -173,7 +177,6 @@ export default function AvaliacaoCandidatoMestradoPage() {
         updateCandidatoMutation.mutateAsync({
           id,
           body: {
-            avaliado: true,
             avaliadorId: dados.avaliadorId || undefined,
             auditorId: dados.auditorId || undefined,
             solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
@@ -188,6 +191,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
         updateNotaMutation.mutateAsync({
           id,
           body: {
+            avaliado: true,
             grad: dados.grad,
             area: dados.area,
             enade: dados.enade,
@@ -241,6 +245,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
         control={control}
         errors={errors}
         isSubmitting={isSubmitting}
+        RGRAD={RGRAD}
+        RPQ_GRAD={RPQ_GRAD}
         nota={nota}
         isAdmin={isAdmin}
         teachersData={teachersData}

@@ -1,6 +1,5 @@
 import {
   useCandidatesByTeacherId,
-  useCandidatos,
   useCandidatosDoutorado,
   useCandidatosMestrado,
   useTeachers,

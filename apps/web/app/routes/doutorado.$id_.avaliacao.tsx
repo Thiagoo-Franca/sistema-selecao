@@ -8,13 +8,14 @@ import {
   // useUpdateCandidatoDoutoradoNota,
 } from "@/hooks/candidato.hooks"
 import { Controller, useForm, useWatch } from "react-hook-form"
+import { calcularDoutoradoNota, paraNumeroSeguro } from "@tcc/shared"
+
 import {
   CandidatoDoutoradoNotaEtapa1Schema,
   type CandidatoDoutoradoNotaEtapa1,
 } from "@/schema/schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 
-import { calcularNotaDoutoradoEtapa1, paraNumeroSeguro } from "@/lib/calculoNotas"
 import { Header } from "@/components/layout/header"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -127,7 +128,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
     const [MSC, areaFormacaoGraduacao, conceitoCapesMestrado, notaAnteprojeto, a1a2a3a4, b1b2b3b4] =
       camposNotaEtapa1
 
-    const resultado = calcularNotaDoutoradoEtapa1({
+    const resultado = calcularDoutoradoNota({
       msc: paraNumeroSeguro(MSC),
       areaFormacaoGraduacao: paraNumeroSeguro(areaFormacaoGraduacao),
       conceitoCapesMestrado: paraNumeroSeguro(conceitoCapesMestrado),

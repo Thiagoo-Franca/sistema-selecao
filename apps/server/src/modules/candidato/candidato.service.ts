@@ -14,6 +14,7 @@ import {
 import { and, arrayContains, asc, eq, notInArray, or, sql } from "drizzle-orm";
 import type { db } from "../../database/index.js";
 import { alias } from "drizzle-orm/pg-core";
+import { calcularMestradoNota, paraNumeroSeguro } from "@tcc/shared";
 
 const Avaliador = alias(Users, "avaliador");
 const Auditor = alias(Users, "auditor");
@@ -369,30 +370,58 @@ export const updateNotaMestrado = async (
 ): Promise<
   AppResult<typeof NotaMestrado.$inferSelect | null, GetAllCandidatosError>
 > => {
-  const dbInstance = c.get("db");
+  const db = c.get("db");
 
   try {
-    const [notaAtualizada] = await dbInstance
-      .insert(NotaMestrado)
-      .values({
-        idCandidato: idCandidato,
+    const nota = await db.transaction(async (tx) => {
+      const [atual] = await tx
+        .select()
+        .from(NotaMestrado)
+        .where(eq(NotaMestrado.idCandidato, idCandidato))
+        .limit(1)
+        .for("update");
+
+      const partes = { ...atual, ...body }; // body sobrescreve o já salvo
+      const n = (v: unknown) =>
+        paraNumeroSeguro(v == null ? undefined : Number(v)); // numeric volta como string
+
+      const { pontuacao } = calcularMestradoNota({
+        grad: n(partes.grad),
+        area: n(partes.area),
+        enade: n(partes.enade),
+        a1a2a3a4: n(partes.a1a2a3a4),
+        b1b2b3b4: n(partes.b1b2b3b4),
+        icIt: n(partes.icIt),
+        poscomp: n(partes.poscomp),
+        disciplinaPosCapes6Mais: n(partes.disciplinaPosCapes6Mais),
+        disciplinaPosCapes3a5: n(partes.disciplinaPosCapes3a5),
+        notaEtapaII: n(partes.notaEtapaII),
+      });
+
+      const values = {
         ...body,
-      })
-      .onConflictDoUpdate({
-        target: NotaMestrado.idCandidato, // Assumindo que idCandidato é UNIQUE
-        set: body,
-      })
-      .returning();
-    return ok(notaAtualizada ?? null);
+        notaFinal: pontuacao.toFixed(2),
+        formulaVersion: 1,
+      };
+
+      const [salva] = await tx
+        .insert(NotaMestrado)
+        .values({ idCandidato, ...values })
+        .onConflictDoUpdate({ target: NotaMestrado.idCandidato, set: values })
+        .returning();
+
+      return salva;
+    });
+
+    return ok(nota ?? null);
   } catch (error) {
     console.error(
-      `Error updating/inserting nota mestrado for candidato ID ${idCandidato}:`,
+      `Error updating nota mestrado for candidato ID ${idCandidato}:`,
       error,
     );
     return err({ type: "database_error", error });
   }
 };
-
 /*
 export const updateCandidatoDoutorado = async (
   c: Context<{ Variables: AppVariables }>,

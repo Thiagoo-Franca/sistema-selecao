@@ -33,6 +33,8 @@ interface FormsAvaliacaoMestradoProps {
   isTeachersLoading: boolean
   candidato: CandidatoMestradoComRelacoes
   onSubmit: (data: any) => Promise<void>
+  RGRAD: number
+  RPQ_GRAD: number
 }
 
 export default function FormsAvaliacaoMestrado({
@@ -47,6 +49,8 @@ export default function FormsAvaliacaoMestrado({
   isTeachersLoading,
   candidato,
   onSubmit,
+  RGRAD,
+  RPQ_GRAD,
 }: FormsAvaliacaoMestradoProps) {
   return (
     <form className="container mx-auto flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
@@ -614,6 +618,9 @@ export default function FormsAvaliacaoMestrado({
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         {/* Prévia Nota */}
         <Field className="flex flex-col gap-4">
+          <FieldDescription className="text-sm text-muted-foreground">
+            RGRAD: {RGRAD.toFixed(2)} | RPQ_GRAD: {RPQ_GRAD.toFixed(2)}
+          </FieldDescription>
           <FieldLabel
             htmlFor=" notaFinal"
             className="text-lg font-bold text-muted-foreground"

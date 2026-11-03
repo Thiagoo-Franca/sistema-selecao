@@ -27,23 +27,6 @@ export const Area = pgEnum("area_preferencia", [
   "SSEG", //  Segurança de Sistemas e Redes",
 ]);
 export type AreaPreferencia = (typeof Area.enumValues)[number];
-/*
-
-export const Endereco = pgTable("endereco", {
-  id: serial("id").primaryKey(),
-  cep: text("cep").notNull(),
-  logradouro: text("logradouro").notNull(),
-  numero: text("numero"),
-  bairro: text("bairro").notNull(),
-  complemento: text("complemento"),
-  estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
-  municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
-});
-
-export type InsertEndereco = typeof Endereco.$inferInsert;
-export type SelectEndereco = typeof Endereco.$inferSelect;
-
-*/
 
 export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
@@ -51,6 +34,7 @@ export const NotaMestrado = pgTable("nota_mestrado", {
     .notNull()
     .references(() => CandidatoMestrado.id)
     .unique(), // garante 1:1 com o candidato
+  avaliado: boolean("avaliado").notNull().default(false),
 
   gradLink: text("grad_link"),
   grad: numeric("grad", { mode: "number" }),
@@ -81,6 +65,8 @@ export const NotaMestrado = pgTable("nota_mestrado", {
     mode: "number",
   }),
   notaEtapaII: numeric("nota_etapa_ii", { mode: "number" }),
+  notaFinal: numeric("nota_final", { mode: "number" }),
+  formulaVersion: integer("formula_version").notNull().default(1),
 });
 
 export type InsertNotaMestrado = typeof NotaMestrado.$inferInsert;
@@ -92,6 +78,7 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
     .notNull()
     .references(() => CandidatoDoutorado.id)
     .unique(), // garante 1:1 com o candidato
+  avaliado: boolean("avaliado").notNull().default(false),
 
   msc: numeric("msc", { mode: "number" }), // nota do mestrado
   areaFormacaoGraduacao: numeric("area_formacao_graduacao", { mode: "number" }),
@@ -107,7 +94,6 @@ export type SelectNotaDoutorado = typeof NotaDoutorado.$inferSelect;
 const candidatoBaseColumns = {
   id: uuid("id").primaryKey().defaultRandom(),
   numeroInscricao: text("numero_inscricao"),
-  avaliado: boolean("avaliado").notNull().default(false),
   cpf: text("cpf"), // .notNull(), // CPF pode ser nulo por enquanto
   nome: text("nome"),
   email: text("email"),
