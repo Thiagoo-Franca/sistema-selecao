@@ -1,4 +1,4 @@
-import { AREAS, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
+import { AREAS, GRU_STATUS } from "@tcc/shared";
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
@@ -20,7 +20,6 @@ export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number];
 
 export const areaEnum = pgEnum("area", AREAS);
 export type Area = (typeof areaEnum.enumValues)[number];
-export const isencaoStatusEnum = pgEnum("isencao_status", ISENCAO_STATUS);
 export const gruStatusEnum = pgEnum("gru_status", GRU_STATUS);
 
 export const NotaMestrado = pgTable("nota_mestrado", {
@@ -109,7 +108,7 @@ const candidatoBaseColumns = {
   email: text("email"),
 
   solicitouIsencaoTaxaInscricao: text("solicitou_isencao_taxa_inscricao"),
-  isencaoAprovada: isencaoStatusEnum("isencao_aprovada")
+  isencaoAprovada: text("isencao_aprovada")
     .notNull()
     .default("nao-solicitou"),
   gru: gruStatusEnum("gru"),
