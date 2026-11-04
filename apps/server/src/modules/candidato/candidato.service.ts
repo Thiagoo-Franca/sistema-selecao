@@ -7,16 +7,10 @@ import {
   NotaDoutorado,
   NotaMestrado,
   Users,
-  type InsertCandidatoMestrado,
-  type InsertNotaMestrado,
-  type SelectCandidatoMestrado,
 } from "../../database/schema.js";
-import { and, arrayContains, asc, eq, notInArray, or, sql } from "drizzle-orm";
-import type { db } from "../../database/index.js";
+import { and, asc, eq, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import {
-  type CandidatoResumo,
-} from "@tcc/shared";
+import type { CandidatoResumo } from "@tcc/shared";
 import type { UpdateCandidatoDoutoradoInput } from "./candidato.schema.js";
 import {
   toCandidatoDoutoradoDetalhe,
@@ -33,7 +27,6 @@ type GetAllCandidatosError = { type: "database_error"; error: unknown };
 export type CandidatoMestradoComRelacoes = CandidatoMestradoDetalhe;
 export type CandidatoDoutoradoComRelacoes = CandidatoDoutoradoDetalhe;
 
-type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export const getAllMyCandidates = async (
   c: Context<{ Variables: AppVariables }>,
@@ -466,138 +459,6 @@ export const deleteCandidatoDoutorado = async (
     return ok(candidatoExcluido);
   } catch (error) {
     console.error(`Error deleting doutorado candidato with ID ${id}:`, error);
-    return err({ type: "database_error", error });
-  }
-};
-
-type CandidatoComNotas = InsertCandidatoMestrado & {
-  notas?: Omit<InsertNotaMestrado, "id" | "idCandidato"> | null;
-};
-
-export type UploadCandidatosError = { type: "database_error"; error: unknown };
-
-type UserArea = NonNullable<SelectCandidatoMestrado["primeiraAreaPreferencia"]>;
-
-async function escolherProfessor(
-  tx: Tx,
-  area: UserArea | null,
-  excluirIds: string[] = [],
-) {
-  const carga = sql<number>`(
-    select count(*) from candidato_mestrado cm
-      where cm.avaliador_id = ${Users.id} or cm.auditor_id = ${Users.id}
-  ) + (
-    select count(*) from candidato_doutorado cd
-      where cd.avaliador_id = ${Users.id} or cd.auditor_id = ${Users.id}
-  )`;
-
-  const [prof] = await tx
-    .select({ id: Users.id })
-    .from(Users)
-    .where(
-      and(
-        eq(Users.role, "TEACHER"),
-        area ? arrayContains(Users.areas, [area]) : undefined,
-        excluirIds.length ? notInArray(Users.id, excluirIds) : undefined,
-      ),
-    )
-    .orderBy(asc(carga), asc(Users.id))
-    .limit(1);
-
-  return prof?.id ?? null;
-}
-
-export const uploadCandidatosMestrado = async (
-  c: Context<{ Variables: AppVariables }>,
-  candidatos: CandidatoComNotas[],
-): Promise<AppResult<SelectCandidatoMestrado[], UploadCandidatosError>> => {
-  const db = c.get("db");
-  if (candidatos.length === 0) return ok([]);
-
-  try {
-    const inseridos = await db.transaction(async (tx) => {
-      // 1. Lock: serializa alocações concorrentes (uploads/criações simultâneas)
-      await tx.execute(
-        sql`select pg_advisory_xact_lock(hashtext('alocacao_avaliadores'))`,
-      );
-
-      // 2. Insert dos candidatos
-      const rows = await tx
-        .insert(CandidatoMestrado)
-        .values(candidatos.map(({ notas, ...candidato }) => candidato))
-        .returning();
-
-      const idPorInscricao = new Map(
-        rows.map((r) => [r.numeroInscricao, r.id]),
-      );
-
-      // 3. Insert das notas
-      const notas = candidatos.flatMap((c) =>
-        c.notas
-          ? [
-              {
-                ...c.notas,
-                idCandidato:
-                  idPorInscricao.get(
-                    c.numeroInscricao ? c.numeroInscricao : "",
-                  ) ?? "",
-              },
-            ]
-          : [],
-      );
-
-      if (notas.length > 0) {
-        await tx.insert(NotaMestrado).values(notas);
-      }
-
-      // 4. Alocação automática, um candidato por vez.
-      // Cada iteração enxerga as alocações anteriores (mesma transação),
-      // então o balanceamento funciona dentro do próprio lote.
-      const resultado: typeof rows = [];
-
-      for (const row of rows) {
-        // Ordem de tentativa: 1ª área, depois 2ª (ignora as vazias)
-        const areas = [
-          row.primeiraAreaPreferencia,
-          row.segundaAreaPreferencia,
-        ].filter((a): a is UserArea => !!a);
-
-        // Avaliador: 1ª área; se não houver professor, 2ª; se não, fica vazio
-        let avaliadorId: string | null = null;
-        for (const area of areas) {
-          avaliadorId = await escolherProfessor(tx, area);
-          if (avaliadorId) break;
-        }
-
-        // Auditor: mesma ordem de áreas, diferente do avaliador;
-        // se não houver ninguém nas áreas, qualquer professor (menor carga)
-        const excluir = avaliadorId ? [avaliadorId] : [];
-        let auditorId: string | null = null;
-        for (const area of areas) {
-          auditorId = await escolherProfessor(tx, area, excluir);
-          if (auditorId) break;
-        }
-        auditorId ??= await escolherProfessor(tx, null, excluir);
-
-        if (!avaliadorId && !auditorId) {
-          resultado.push(row);
-          continue;
-        }
-
-        const [atualizado] = await tx
-          .update(CandidatoMestrado)
-          .set({ avaliadorId, auditorId })
-          .where(eq(CandidatoMestrado.id, row.id))
-          .returning();
-
-        resultado.push(atualizado ?? row);
-      }
-      return resultado;
-    });
-
-    return ok(inseridos);
-  } catch (error) {
-    console.error("Error uploading mestrado candidatos:", error);
     return err({ type: "database_error", error });
   }
 };

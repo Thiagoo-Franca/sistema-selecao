@@ -5,8 +5,11 @@ import { zValidator } from "@hono/zod-validator";
 import {
   updateCandidatoDoutoradoSchema,
   updateCandidatoMestradoSchema,
-  uploadCandidatosMestradoSchema,
 } from "./candidato.schema.js";
+import {
+  uploadCandidatosMestrado,
+  uploadCandidatosMestradoSchema,
+} from "../importacao/index.js";
 import {
   updateNotaDoutorado,
   updateNotaDoutoradoSchema,
@@ -78,7 +81,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     zValidator("json", uploadCandidatosMestradoSchema),
     async (c) => {
       const candidatos = c.req.valid("json");
-      const result = await service.uploadCandidatosMestrado(c, candidatos);
+      const result = await uploadCandidatosMestrado(c, candidatos);
 
       if (!result.ok) {
         console.error("Error uploading mestrado candidatos:", result.error);

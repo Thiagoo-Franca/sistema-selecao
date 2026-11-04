@@ -1,24 +1,5 @@
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { CandidatoMestrado } from "../../database/schema.js";
 import { AREAS, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
-import { notaMestradoInputSchema } from "../nota/nota.schema.js";
-
-export const uploadCandidatosMestradoSchema = z.array(
-  createInsertSchema(CandidatoMestrado, {
-    numeroInscricao: (s) => s.min(1),
-  })
-    .omit({ id: true, tipoCurso: true })
-    .extend({
-      notas: notaMestradoInputSchema
-        .omit({ notaEtapaII: true })
-        .nullish(),
-    }),
-);
-
-export type UploadCandidatosMestradoInput = z.infer<
-  typeof uploadCandidatosMestradoSchema
->;
 const areaEnum = z.enum(AREAS);
 const updateCandidatoMestradoSchema = z.object({
   avaliadorId: z.string().uuid().nullable().optional(),
