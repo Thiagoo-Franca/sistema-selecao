@@ -9,6 +9,7 @@ import {
   type SelectUser,
   Users,
 } from "../../database/schema.js";
+import { databaseError, logDatabaseError } from "../../database/errors.js";
 import { type AppResult, err, ok } from "../../result.js";
 import {
   createPasswordResetEmail,
@@ -16,7 +17,11 @@ import {
 } from "../../services/email.service.js";
 import { type AppVariables } from "../../types.js";
 import { createUserSchema, updateUserSchema } from "./usuario.schema.js";
-import { toUsuarioPublico, type UsuarioPublico } from "./usuario.dto.js";
+import {
+  toUsuarioPublico,
+  usuarioPublicoProjection,
+  type UsuarioPublico,
+} from "./usuario.dto.js";
 
 type GetUserByIdError =
   { type: "user_not_found" } | { type: "database_error"; error: unknown };
@@ -37,25 +42,14 @@ export const getAllUsers = async (
   const dbInstance = c.get("db");
   try {
     const allUsers = await dbInstance
-      .select({
-        id: Users.id,
-        email: Users.email,
-        nome: Users.nome,
-        school: Users.school,
-        matricula: Users.matricula,
-        areas: Users.areas,
-        academicTitle: Users.academicTitle,
-        ativo: Users.ativo,
-        updatedAt: Users.updatedAt,
-        role: Users.role,
-      })
+      .select(usuarioPublicoProjection)
       .from(Users)
       .orderBy(asc(Users.nome));
 
     return ok(allUsers);
   } catch (error) {
-    console.error("Error fetching all users:", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching all users:", error);
+    return databaseError(error);
   }
 };
 
@@ -66,26 +60,15 @@ export const getTeachers = async (
   const dbInstance = c.get("db");
   try {
     const teachers = await dbInstance
-      .select({
-        id: Users.id,
-        email: Users.email,
-        nome: Users.nome,
-        school: Users.school,
-        matricula: Users.matricula,
-        areas: Users.areas,
-        academicTitle: Users.academicTitle,
-        ativo: Users.ativo,
-        updatedAt: Users.updatedAt,
-        role: Users.role,
-      })
+      .select(usuarioPublicoProjection)
       .from(Users)
       .where(and(or(eq(Users.role, "TEACHER"), eq(Users.role, "ADMIN"))))
       .orderBy(Users.nome);
 
     return ok(teachers);
   } catch (error) {
-    console.error("Error fetching teachers:", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching teachers:", error);
+    return databaseError(error);
   }
 };
 
@@ -106,8 +89,8 @@ export const getTeachersSimplified = async (
 
     return ok(teachers);
   } catch (error) {
-    console.error("Error fetching teachers (simplified):", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching teachers (simplified):", error);
+    return databaseError(error);
   }
 };
 
@@ -173,8 +156,8 @@ export const createUser = async (
 
     return ok(toUsuarioPublico(newUserResult));
   } catch (error) {
-    console.error("Database error during user creation:", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Database error during user creation:", error);
+    return databaseError(error);
   }
 };
 
@@ -187,7 +170,7 @@ export const getUserById = async (
   const dbInstance = c.get("db");
   try {
     const result = await dbInstance
-      .select()
+      .select(usuarioPublicoProjection)
       .from(Users)
       .where(eq(Users.id, id))
       .limit(1);
@@ -196,10 +179,10 @@ export const getUserById = async (
     if (!user) {
       return err({ type: "user_not_found" });
     }
-    return ok(toUsuarioPublico(user));
+    return ok(user);
   } catch (error) {
-    console.error(`Error fetching user with ID ${id}:`, error);
-    return err({ type: "database_error", error });
+    logDatabaseError(`Error fetching user with ID ${id}:`, error);
+    return databaseError(error);
   }
 };
 

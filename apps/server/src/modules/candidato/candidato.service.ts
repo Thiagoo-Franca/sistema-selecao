@@ -8,10 +8,12 @@ import {
   NotaMestrado,
   Users,
 } from "../../database/schema.js";
-import { and, asc, eq, or, sql } from "drizzle-orm";
+import { and, asc, eq, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import { databaseError, logDatabaseError } from "../../database/errors.js";
 import type { CandidatoResumo } from "@tcc/shared";
 import type { UpdateCandidatoDoutoradoInput } from "./candidato.schema.js";
+import { createCandidatoResumoProjection } from "./candidato.projection.js";
 import {
   toCandidatoDoutoradoDetalhe,
   toCandidatoMestradoDetalhe,
@@ -37,20 +39,16 @@ export const getAllMyCandidates = async (
   try {
     const [mestrado, doutorado] = await Promise.all([
       db
-        .select({
-          id: CandidatoMestrado.id,
-          tipo: CandidatoMestrado.tipoCurso,
-          numeroInscricao: CandidatoMestrado.numeroInscricao,
-          nome: CandidatoMestrado.nome,
-          email: CandidatoMestrado.email,
-          avaliadorId: CandidatoMestrado.avaliadorId,
-          avaliador: Avaliador.nome,
-          auditorId: CandidatoMestrado.auditorId,
-          auditor: Auditor.nome,
-          avaliado: sql<boolean>`coalesce(${NotaMestrado.avaliado}, false)`,
-          area1: CandidatoMestrado.primeiraAreaPreferencia,
-          area2: CandidatoMestrado.segundaAreaPreferencia,
-        })
+        .select(
+          createCandidatoResumoProjection(
+            CandidatoMestrado,
+            NotaMestrado,
+            CandidatoMestrado.primeiraAreaPreferencia,
+            CandidatoMestrado.segundaAreaPreferencia,
+            Avaliador.nome,
+            Auditor.nome,
+          ),
+        )
         .from(CandidatoMestrado)
         .leftJoin(
           NotaMestrado,
@@ -65,20 +63,16 @@ export const getAllMyCandidates = async (
           ),
         ),
       db
-        .select({
-          id: CandidatoDoutorado.id,
-          tipo: CandidatoDoutorado.tipoCurso,
-          numeroInscricao: CandidatoDoutorado.numeroInscricao,
-          nome: CandidatoDoutorado.nome,
-          email: CandidatoDoutorado.email,
-          avaliadorId: CandidatoDoutorado.avaliadorId,
-          avaliador: Avaliador.nome,
-          auditorId: CandidatoDoutorado.auditorId,
-          auditor: Auditor.nome,
-          avaliado: sql<boolean>`coalesce(${NotaDoutorado.avaliado}, false)`,
-          area1: CandidatoDoutorado.primeiraOpcaoOrientador,
-          area2: CandidatoDoutorado.segundaOpcaoOrientador,
-        })
+        .select(
+          createCandidatoResumoProjection(
+            CandidatoDoutorado,
+            NotaDoutorado,
+            CandidatoDoutorado.primeiraOpcaoOrientador,
+            CandidatoDoutorado.segundaOpcaoOrientador,
+            Avaliador.nome,
+            Auditor.nome,
+          ),
+        )
         .from(CandidatoDoutorado)
         .leftJoin(
           NotaDoutorado,
@@ -95,16 +89,13 @@ export const getAllMyCandidates = async (
     ]);
 
     const todos = [...mestrado, ...doutorado].sort((a, b) =>
-      (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR"),
+      String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR"),
     );
 
     return ok(todos);
   } catch (error) {
-    console.error(
-      "Error fetching all my candidates:",
-      (error as { code?: string })?.code ?? "unknown",
-    );
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching all my candidates:", error);
+    return databaseError(error);
   }
 };
 
@@ -116,20 +107,16 @@ export const getAllCandidatos = async (
   try {
     const [mestrado, doutorado] = await Promise.all([
       db
-        .select({
-          id: CandidatoMestrado.id,
-          tipo: CandidatoMestrado.tipoCurso,
-          numeroInscricao: CandidatoMestrado.numeroInscricao,
-          nome: CandidatoMestrado.nome,
-          email: CandidatoMestrado.email,
-          avaliadorId: CandidatoMestrado.avaliadorId,
-          avaliador: Avaliador.nome,
-          auditorId: CandidatoMestrado.auditorId,
-          auditor: Auditor.nome,
-          avaliado: sql<boolean>`coalesce(${NotaMestrado.avaliado}, false)`,
-          area1: CandidatoMestrado.primeiraAreaPreferencia,
-          area2: CandidatoMestrado.segundaAreaPreferencia,
-        })
+        .select(
+          createCandidatoResumoProjection(
+            CandidatoMestrado,
+            NotaMestrado,
+            CandidatoMestrado.primeiraAreaPreferencia,
+            CandidatoMestrado.segundaAreaPreferencia,
+            Avaliador.nome,
+            Auditor.nome,
+          ),
+        )
         .from(CandidatoMestrado)
         .leftJoin(
           NotaMestrado,
@@ -138,20 +125,16 @@ export const getAllCandidatos = async (
         .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
         .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id)),
       db
-        .select({
-          id: CandidatoDoutorado.id,
-          tipo: CandidatoDoutorado.tipoCurso,
-          numeroInscricao: CandidatoDoutorado.numeroInscricao,
-          nome: CandidatoDoutorado.nome,
-          email: CandidatoDoutorado.email,
-          avaliadorId: CandidatoDoutorado.avaliadorId,
-          avaliador: Avaliador.nome,
-          auditorId: CandidatoDoutorado.auditorId,
-          auditor: Auditor.nome,
-          avaliado: sql<boolean>`coalesce(${NotaDoutorado.avaliado}, false)`,
-          area1: CandidatoDoutorado.primeiraOpcaoOrientador,
-          area2: CandidatoDoutorado.segundaOpcaoOrientador,
-        })
+        .select(
+          createCandidatoResumoProjection(
+            CandidatoDoutorado,
+            NotaDoutorado,
+            CandidatoDoutorado.primeiraOpcaoOrientador,
+            CandidatoDoutorado.segundaOpcaoOrientador,
+            Avaliador.nome,
+            Auditor.nome,
+          ),
+        )
         .from(CandidatoDoutorado)
         .leftJoin(
           NotaDoutorado,
@@ -162,16 +145,13 @@ export const getAllCandidatos = async (
     ]);
 
     const todos = [...mestrado, ...doutorado].sort((a, b) =>
-      (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR"),
+      String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR"),
     );
 
     return ok(todos);
   } catch (error) {
-    console.error(
-      "Error fetching all candidatos:",
-      (error as { code?: string })?.code ?? "unknown",
-    );
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching all candidatos:", error);
+    return databaseError(error);
   }
 };
 export const getAllCandidatosMestrado = async (
@@ -181,20 +161,16 @@ export const getAllCandidatosMestrado = async (
 
   try {
     const result = await db
-      .select({
-        id: CandidatoMestrado.id,
-        tipo: CandidatoMestrado.tipoCurso,
-        numeroInscricao: CandidatoMestrado.numeroInscricao,
-        nome: CandidatoMestrado.nome,
-        email: CandidatoMestrado.email,
-        avaliadorId: CandidatoMestrado.avaliadorId,
-        avaliador: Avaliador.nome,
-        auditorId: CandidatoMestrado.auditorId,
-        auditor: Auditor.nome,
-        avaliado: sql<boolean>`coalesce(${NotaMestrado.avaliado}, false)`,
-        area1: CandidatoMestrado.primeiraAreaPreferencia,
-        area2: CandidatoMestrado.segundaAreaPreferencia,
-      })
+      .select(
+        createCandidatoResumoProjection(
+          CandidatoMestrado,
+          NotaMestrado,
+          CandidatoMestrado.primeiraAreaPreferencia,
+          CandidatoMestrado.segundaAreaPreferencia,
+          Avaliador.nome,
+          Auditor.nome,
+        ),
+      )
       .from(CandidatoMestrado)
       .leftJoin(
         NotaMestrado,
@@ -205,8 +181,8 @@ export const getAllCandidatosMestrado = async (
       .orderBy(CandidatoMestrado.nome);
     return ok(result);
   } catch (error) {
-    console.error("Error fetching all mestrado candidatos:", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching all mestrado candidatos:", error);
+    return databaseError(error);
   }
 };
 
@@ -217,20 +193,16 @@ export const getAllCandidatosDoutorado = async (
 
   try {
     const result = await db
-      .select({
-        id: CandidatoDoutorado.id,
-        tipo: CandidatoDoutorado.tipoCurso,
-        numeroInscricao: CandidatoDoutorado.numeroInscricao,
-        nome: CandidatoDoutorado.nome,
-        email: CandidatoDoutorado.email,
-        avaliadorId: CandidatoDoutorado.avaliadorId,
-        avaliador: Avaliador.nome,
-        auditorId: CandidatoDoutorado.auditorId,
-        auditor: Auditor.nome,
-        avaliado: sql<boolean>`coalesce(${NotaDoutorado.avaliado}, false)`,
-        area1: CandidatoDoutorado.primeiraOpcaoOrientador,
-        area2: CandidatoDoutorado.segundaOpcaoOrientador,
-      })
+      .select(
+        createCandidatoResumoProjection(
+          CandidatoDoutorado,
+          NotaDoutorado,
+          CandidatoDoutorado.primeiraOpcaoOrientador,
+          CandidatoDoutorado.segundaOpcaoOrientador,
+          Avaliador.nome,
+          Auditor.nome,
+        ),
+      )
       .from(CandidatoDoutorado)
       .leftJoin(
         NotaDoutorado,
@@ -241,8 +213,8 @@ export const getAllCandidatosDoutorado = async (
       .orderBy(CandidatoDoutorado.nome);
     return ok(result);
   } catch (error) {
-    console.error("Error fetching all doutorado candidatos:", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching all doutorado candidatos:", error);
+    return databaseError(error);
   }
 };
 
@@ -279,8 +251,8 @@ export const getCandidatoMestradoById = async (
 
     return ok(toCandidatoMestradoDetalhe(row));
   } catch (error) {
-    console.error(`Error fetching mestrado candidato with ID ${id}:`, error);
-    return err({ type: "database_error", error });
+    logDatabaseError(`Error fetching mestrado candidato with ID ${id}:`, error);
+    return databaseError(error);
   }
 };
 export const getCandidatoDoutoradoById = async (
@@ -316,8 +288,11 @@ export const getCandidatoDoutoradoById = async (
 
     return ok(toCandidatoDoutoradoDetalhe(row));
   } catch (error) {
-    console.error(`Error fetching doutorado candidato with ID ${id}:`, error);
-    return err({ type: "database_error", error });
+    logDatabaseError(
+      `Error fetching doutorado candidato with ID ${id}:`,
+      error,
+    );
+    return databaseError(error);
   }
 };
 export const updateCandidatoMestrado = async (
@@ -337,8 +312,8 @@ export const updateCandidatoMestrado = async (
 
     return ok({ ...candidatoAtualizado });
   } catch (error) {
-    console.error(`Error updating mestrado candidato with ID ${id}:`, error);
-    return err({ type: "database_error", error });
+    logDatabaseError(`Error updating mestrado candidato with ID ${id}:`, error);
+    return databaseError(error);
   }
 };
 
@@ -400,8 +375,11 @@ export const updateCandidatoDoutorado = async (
       //  endereco: enderecoAtual ?? null
     });
   } catch (error) {
-    console.error(`Error updating doutorado candidato with ID ${id}:`, error);
-    return err({ type: "database_error", error });
+    logDatabaseError(
+      `Error updating doutorado candidato with ID ${id}:`,
+      error,
+    );
+    return databaseError(error);
   }
 };
 export const deleteCandidatoMestrado = async (
@@ -428,8 +406,8 @@ export const deleteCandidatoMestrado = async (
 
     return ok(candidatoExcluido);
   } catch (error) {
-    console.error(`Error deleting mestrado candidato with ID ${id}:`, error);
-    return err({ type: "database_error", error });
+    logDatabaseError(`Error deleting mestrado candidato with ID ${id}:`, error);
+    return databaseError(error);
   }
 };
 
@@ -458,7 +436,10 @@ export const deleteCandidatoDoutorado = async (
 
     return ok(candidatoExcluido);
   } catch (error) {
-    console.error(`Error deleting doutorado candidato with ID ${id}:`, error);
-    return err({ type: "database_error", error });
+    logDatabaseError(
+      `Error deleting doutorado candidato with ID ${id}:`,
+      error,
+    );
+    return databaseError(error);
   }
 };
