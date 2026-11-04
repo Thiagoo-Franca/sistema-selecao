@@ -5,10 +5,14 @@ import { zValidator } from "@hono/zod-validator";
 import {
   updateCandidatoDoutoradoSchema,
   updateCandidatoMestradoSchema,
-  updateNotaDoutoradoSchema,
-  updateNotaMestradoSchema,
   uploadCandidatosMestradoSchema,
 } from "./candidato.schema.js";
+import {
+  updateNotaDoutorado,
+  updateNotaDoutoradoSchema,
+  updateNotaMestrado,
+  updateNotaMestradoSchema,
+} from "../nota/index.js";
 import { AppError } from "../../error.js";
 import { checkRole } from "../auth/auth.middleware.js";
 import { match } from "ts-pattern";
@@ -190,7 +194,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     async (c) => {
       const id = c.req.param("id");
       const body = c.req.valid("json");
-      const result = await service.updateNotaMestrado(c, id, body);
+      const result = await updateNotaMestrado(c, id, body);
 
       if (!result.ok) {
         console.error(
@@ -215,7 +219,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     async (c) => {
       const id = c.req.param("id");
       const body = c.req.valid("json");
-      const result = await service.updateNotaDoutorado(c, id, body);
+      const result = await updateNotaDoutorado(c, id, body);
 
       if (!result.ok) {
         console.error(

@@ -1,18 +1,19 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { CandidatoMestrado, NotaMestrado } from "../../database/schema";
+import { CandidatoMestrado } from "../../database/schema.js";
 import { AREAS, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
-
-const notaMestradoSchema = createInsertSchema(NotaMestrado)
-  .omit({ id: true, idCandidato: true, notaEtapaII: true })
-  .nullish();
+import { notaMestradoInputSchema } from "../nota/nota.schema.js";
 
 export const uploadCandidatosMestradoSchema = z.array(
   createInsertSchema(CandidatoMestrado, {
     numeroInscricao: (s) => s.min(1),
   })
     .omit({ id: true, tipoCurso: true })
-    .extend({ notas: notaMestradoSchema }),
+    .extend({
+      notas: notaMestradoInputSchema
+        .omit({ notaEtapaII: true })
+        .nullish(),
+    }),
 );
 
 export type UploadCandidatosMestradoInput = z.infer<
@@ -45,19 +46,6 @@ const updateCandidatoMestradoSchema = z.object({
 });
 
 export { updateCandidatoMestradoSchema };
-const updateNotaMestradoSchema = z.object({
-  grad: z.number().optional(),
-  area: z.number().optional(),
-  enade: z.number().optional(),
-  a1a2a3a4: z.number().optional(),
-  b1b2b3b4: z.number().optional(),
-  icIt: z.number().optional(),
-  poscomp: z.number().optional(),
-  disciplinaPosCapes6Mais: z.number().optional(),
-  disciplinaPosCapes3a5: z.number().optional(),
-  notaEtapaII: z.number().optional(),
-});
-export { updateNotaMestradoSchema };
 
 export const updateCandidatoDoutoradoSchema = z.object({
   avaliador: z.string().nullable().optional(),
@@ -87,14 +75,3 @@ export const updateCandidatoDoutoradoSchema = z.object({
 export type UpdateCandidatoDoutoradoInput = z.infer<
   typeof updateCandidatoDoutoradoSchema
 >;
-
-const updateNotaDoutoradoSchema = z.object({
-  msc: z.number().optional(),
-  areaFormacaoGraduacao: z.number().optional(),
-  conceitoCapesMestrado: z.number().optional(),
-  a1a2a3a4: z.number().optional(),
-  b1b2b3b4: z.number().optional(),
-  notaAnteprojeto: z.number().optional(),
-});
-
-export { updateNotaDoutoradoSchema };

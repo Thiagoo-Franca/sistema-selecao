@@ -15,10 +15,7 @@ import { and, arrayContains, asc, eq, notInArray, or, sql } from "drizzle-orm";
 import type { db } from "../../database/index.js";
 import { alias } from "drizzle-orm/pg-core";
 import {
-  calcularMestradoNota,
-  paraNumeroSeguro,
   type CandidatoResumo,
-  type NotaMestradoUpdate,
 } from "@tcc/shared";
 import type { UpdateCandidatoDoutoradoInput } from "./candidato.schema.js";
 import {
@@ -352,74 +349,6 @@ export const updateCandidatoMestrado = async (
   }
 };
 
-export const updateNotaMestrado = async (
-  c: Context<{ Variables: AppVariables }>,
-  idCandidato: string,
-  body: NotaMestradoUpdate,
-): Promise<
-  AppResult<typeof NotaMestrado.$inferSelect | null, GetAllCandidatosError>
-> => {
-  const db = c.get("db");
-
-  try {
-    const nota = await db.transaction(async (tx) => {
-      const [atual] = await tx
-        .select()
-        .from(NotaMestrado)
-        .where(eq(NotaMestrado.idCandidato, idCandidato))
-        .limit(1)
-        .for("update");
-
-      const partes = { ...atual, ...body }; // body sobrescreve o já salvo
-      const n = (v: unknown) =>
-        paraNumeroSeguro(v == null ? undefined : Number(v)); // numeric volta como string
-
-      const { pontuacao } = calcularMestradoNota({
-        grad: n(partes.grad),
-        area: n(partes.area),
-        enade: n(partes.enade),
-        a1a2a3a4: n(partes.a1a2a3a4),
-        b1b2b3b4: n(partes.b1b2b3b4),
-        icIt: n(partes.icIt),
-        poscomp: n(partes.poscomp),
-        disciplinaPosCapes6Mais: n(partes.disciplinaPosCapes6Mais),
-        disciplinaPosCapes3a5: n(partes.disciplinaPosCapes3a5),
-        notaEtapaII: n(partes.notaEtapaII),
-      });
-
-      const values: NotaMestradoUpdate & {
-        avaliado: boolean;
-        notaFinal: number;
-        formulaVersion: number;
-      } = {
-        ...body,
-        avaliado: true,
-        notaFinal: pontuacao,
-        formulaVersion: 1,
-      };
-
-      const [salva] = await tx
-        .insert(NotaMestrado)
-        .values({ idCandidato, ...values })
-        .onConflictDoUpdate({
-          target: NotaMestrado.idCandidato,
-          set: values,
-        })
-        .returning();
-
-      return salva;
-    });
-
-    return ok(nota ?? null);
-  } catch (error) {
-    console.error(
-      `Error updating nota mestrado for candidato ID ${idCandidato}:`,
-      error,
-    );
-    return err({ type: "database_error", error });
-  }
-};
-
 export const updateCandidatoDoutorado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
@@ -482,38 +411,6 @@ export const updateCandidatoDoutorado = async (
     return err({ type: "database_error", error });
   }
 };
-export const updateNotaDoutorado = async (
-  c: Context<{ Variables: AppVariables }>,
-  idCandidato: string,
-  body: Partial<typeof NotaDoutorado.$inferInsert>,
-): Promise<
-  AppResult<typeof NotaDoutorado.$inferSelect | null, GetAllCandidatosError>
-> => {
-  const dbInstance = c.get("db");
-
-  try {
-    const [notaAtualizada] = await dbInstance
-      .insert(NotaDoutorado)
-      .values({
-        idCandidato: idCandidato,
-        ...body,
-      })
-      .onConflictDoUpdate({
-        target: NotaDoutorado.idCandidato, // Assumindo que idCandidato é UNIQUE
-        set: body,
-      })
-      .returning();
-
-    return ok(notaAtualizada ?? null);
-  } catch (error) {
-    console.error(
-      `Error updating/inserting nota doutorado for candidato ID ${idCandidato}:`,
-      error,
-    );
-    return err({ type: "database_error", error });
-  }
-};
-
 export const deleteCandidatoMestrado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
