@@ -1,15 +1,57 @@
-# 🏗️ ARQUITETURA COMPLETA DO PROJETO
+# 🏗️ ARQUITETURA DO SISSEL
 
-> **Documento Mestre**: Análise profunda de toda a arquitetura do Sistema de Gerenciamento de Banca de Defesa
+> **Documento mestre** da arquitetura do SISSEL, sistema de seleção de candidatos a **mestrado e doutorado** do PGCOMP/UFBA.
+>
+> Este documento substitui a versão anterior, que descrevia o sistema de bancas de defesa. Em caso de divergência, **o código é a fonte da verdade**. Itens marcados com 🎯 são o estado-alvo das Fases 1 e 2 da revisão e podem ainda não estar totalmente no código.
 
 ## 📋 Índice
 
-1. [Estrutura Geral](#estrutura-geral)
-2. [Frontend Detalhado](#frontend-detalhado)
-3. [Backend Detalhado](#backend-detalhado)
-4. [Comunicação Frontend-Backend](#comunicação-frontend-backend)
-5. [Banco de Dados](#banco-de-dados)
-6. [Autenticação e Segurança](#autenticação-e-segurança)
+1. [Visão Geral e Domínio](#visão-geral-e-domínio)
+2. [Estrutura Geral](#estrutura-geral)
+3. [Frontend Detalhado](#frontend-detalhado)
+4. [Backend Detalhado](#backend-detalhado)
+5. [Comunicação Frontend-Backend](#comunicação-frontend-backend)
+6. [Banco de Dados](#banco-de-dados)
+7. [Autenticação e Segurança](#autenticação-e-segurança)
+8. [Convenções e Padrões](#convenções-e-padrões)
+9. [Performance](#performance)
+10. [Legado](#legado)
+
+---
+
+## Visão Geral e Domínio
+
+### O que o sistema faz
+
+1. Candidatos de **mestrado** e **doutorado** são importados de planilhas.
+2. Cada candidato recebe automaticamente um **avaliador** e um **auditor** (professores), por área e carga de trabalho.
+3. Avaliador e auditor lançam as **notas** em etapas; o servidor calcula e persiste a **nota final**.
+4. O ADMIN gerencia professores, importações e atribuições.
+
+### O que o sistema **não** é
+
+Não é sistema de bancas, defesas ou cursos. Não existem (e não devem ser criados sem pedido explícito) as entidades: edital/processo seletivo, inscrição, ranking, recurso ou prazos. **Candidatos não são usuários** e nunca acessam o sistema.
+
+### Papéis
+
+| Papel     | Pode                                                                                                             |
+| --------- | ---------------------------------------------------------------------------------------------------------------- |
+| `ADMIN`   | Tudo: usuários, importação, atribuição, exclusão, leitura e edição de qualquer candidato                         |
+| `TEACHER` | Ler e editar **somente** candidatos em que é avaliador **ou** auditor (os dois têm as mesmas permissões de nota) |
+
+### Regras de nota
+
+- Mestrado e doutorado têm campos, etapas e fórmulas diferentes (`calcularMestradoNota`, `calcularNotaDoutoradoEtapa1`). **Não se unificam** em um modelo genérico.
+- A `notaFinal` é **persistida** junto das partes e de `formulaVersion`. Mudar a fórmula significa nova versão, nunca recálculo silencioso de quem já foi avaliado.
+- `avaliado`, `notaFinal`, `formulaVersion`, `avaliadoEm` e `avaliadoPorId` são escritos **apenas pelo service de nota**, na mesma transação que lê e trava a linha. Nunca vêm do cliente.
+- `avaliado` só vira `true` quando algum campo de **nota** foi de fato alterado, e não quando apenas o avaliador foi trocado.
+
+### Regras de alocação
+
+- **Avaliador**: professor ativo da 1ª área de preferência com menor carga; se não houver, da 2ª; senão fica vazio.
+- **Auditor**: mesma ordem de áreas, diferente do avaliador; se não houver ninguém nas áreas, qualquer outro professor ativo de menor carga.
+- A alocação roda dentro da transação de importação, sob advisory lock, para serializar uploads concorrentes.
+- Mudar as áreas de um professor **não realoca** candidatos existentes; a realocação é uma ação explícita do ADMIN.
 
 ---
 
@@ -20,857 +62,736 @@
 ```
 sistema-selecao/
 ├── apps/
-│   ├── web/                    # Frontend React Router v7 (SSR-ready)
+│   ├── web/                    # Frontend React Router v7 (SSR)
 │   ├── server/                 # Backend Hono API
-│   └── yii2-organizacao-de-defesas/  # Legacy (deprecated)
+│   ├── frontend-old/           # Legado (deprecated)
+│   └── yii2-organizacao-de-defesas/  # Legado (deprecated)
 ├── packages/
-│   ├── pdf-components/         # Componentes React para PDF
-│   └── tests/                  # Utilidades de teste compartilhadas
+│   ├── shared/                 # @tcc/shared: código puro (fórmulas, AREAS, ISENCAO_STATUS)
+│   ├── tests/                  # Utilidades e fixtures de teste
+│   └── pdf-components/         # Legado das bancas; não estender
 ├── scripts/
 │   └── deploy.ts               # Script de deployment
 ├── package.json                # Workspace raiz (npm workspaces)
-├── turbo.json                  # Config do Turbo task runner
-└── docker-compose.yml          # PostgreSQL + serviços
+├── turbo.json                  # Turbo task runner
+└── docker-compose.yml          # PostgreSQL local
 ```
 
-### Stack Tecnológico Completo
+### Pacote `@tcc/shared`
 
-**Frontend:**
-- React Router v7 + SSR
-- TailwindCSS v4 + Radix UI
-- TanStack Query (React Query)
-- React Hook Form + Zod
-- Hono RPC Client (type-safe)
-- Playwright (E2E tests)
+Código **puro** usado por web e server: sem React, DOM, Hono ou Drizzle.
 
-**Backend:**
-- Hono (lightweight HTTP framework)
-- PostgreSQL + Drizzle ORM
-- JWT + bcryptjs
-- Zod validation
-- Nodemailer
-- Vitest (unit tests)
+```
+packages/shared/src/
+├── index.ts            # reexporta tudo (única porta de entrada)
+├── calculo-notas.ts    # calcularMestradoNota, calcularNotaDoutoradoEtapa1, paraNumeroSeguro
+├── areas.ts            # AREAS, AREA_LABEL
+└── isencao.ts          # ISENCAO_STATUS, ISENCAO_LABEL
+```
 
-**DevOps:**
-- Docker + Docker Compose
-- Turborepo
-- npm workspaces
-- Dokku (deployment)
+- Importar sempre `from "@tcc/shared"`, **nunca** de subpath (`@tcc/shared/src/...`): o campo `exports` do pacote bloqueia (`ERR_PACKAGE_PATH_NOT_EXPORTED`).
+- As constantes alimentam o `pgEnum` do Drizzle, o Zod e os selects do front: **uma fonte única**.
+- O server roda TypeScript com `tsx`, então consome o pacote como código-fonte, sem build.
+
+### Stack Tecnológico
+
+**Frontend:** React Router v7 + SSR · TailwindCSS v4 + Radix UI · TanStack Query · React Hook Form + Zod · Hono RPC Client · Sonner · Playwright
+
+**Backend:** Hono · PostgreSQL (Supabase) + Drizzle ORM · JWT (HS256) + bcryptjs · Zod + `zValidator` · ts-pattern · Nodemailer · Vitest + PGlite
+
+**DevOps:** Docker Compose (banco local) · Turborepo · npm workspaces · Dokku
 
 ---
 
 ## Frontend Detalhado
 
-### 2.1 Ciclo de Vida da Aplicação
+> A estrutura de pastas e rotas abaixo segue as convenções do projeto; confira os nomes reais em `apps/web/app/`, que ainda pode conter pastas e telas legadas das bancas.
 
-#### Inicialização (root.tsx)
+### 3.1 Ciclo de Vida da Aplicação
+
+#### Inicialização (`root.tsx`)
 
 ```typescript
-// Layout raiz com providers
 export function Layout({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
-    () => new QueryClient({
-      defaultOptions: { queries: { retry: false } }
-    })
+    () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
   )
-  
+
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools initialIsOpen={false} />
         {children}
-        <Toaster />  {/* Sonner notifications */}
+        <Toaster />  {/* Sonner */}
       </QueryClientProvider>
     </html>
   )
 }
 ```
 
-**O que acontece:**
-1. `QueryClient` criado uma única vez (singleton por renderização)
-2. `QueryClientProvider` fornece client para todos os hooks
-3. `Outlet` renderiza rotas
-4. `Toaster` container para notificações
+1. `QueryClient` é criado uma vez por renderização do layout.
+2. `QueryClientProvider` fornece o client a todos os hooks.
+3. `Outlet` renderiza as rotas.
+4. `Toaster` é o container de notificações.
 
-#### Sistema de Rotas (File-Based)
+#### Sistema de Rotas (file-based)
 
-Arquivos em `app/routes/` são automaticamente rotas:
+Arquivos em `app/routes/` viram rotas. Exemplo (confira os nomes reais):
 
 ```
-_index.tsx                    → /
-banca.$id.tsx                → /banca/:id
-banca.$id_.edit.tsx          → /banca/:id/edit
-teacher-invitation.$hash.tsx → /teacher-invitation/:hash
+_index.tsx                       → /
+login.tsx                        → /login
+candidatos.$id.tsx               → /candidatos/:id
+admin.usuarios.tsx               → /admin/usuarios
+reset-password.$token.tsx        → /reset-password/:token
 ```
 
-**Type-safe pela convention:**
-```typescript
-export default function BancaDetail({ params }: Route.ComponentProps) {
-  const { id } = params  // ← TypeScript sabe que 'id' é string
-  // ...
-}
-```
+O `:id` do candidato é um **UUID**. Expor o UUID na URL não é problema de segurança por si só (não é adivinhável); o que protege os dados é a **checagem de dono no service**. Nunca use matrícula, número de inscrição ou CPF em URL.
 
-### 2.2 API Client (Hono RPC)
+### 3.2 API Client (Hono RPC)
 
-**Arquivo: apps/web/app/services/apiClient.ts**
+**Arquivo: `apps/web/app/services/apiClient.ts`**
 
 ```typescript
-import { hc } from "hono/client"
-import type { AppType } from "@tcc/server"  // ← Type-safe!
+import { hc } from "hono/client";
+import type { AppType } from "@tcc/server"; // somente tipos
 
 const client = hc<AppType>(env.VITE_API_URL, {
   headers() {
-    const token = localStorage.getItem(AUTH_TOKEN_KEY)
-    return { Authorization: `Bearer ${token}` }
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    return token ? { Authorization: `Bearer ${token}` } : {};
   },
-})
+});
 
-export default client
+export default client;
 ```
 
-**Type-Safety Automática:**
-- `apiClient.auth.login.$post()` ← TypeScript valida endpoint existe
-- `apiClient.banca[":id"].$get()` ← TypeScript valida param existe
-- `{ json: {...} }` ← TypeScript valida schema do corpo
+- Só **tipos** cruzam de `@tcc/server` para o web; nunca código de runtime do server.
+- Mudar rota ou schema Zod muda o `AppType`: o `npm run tscheck` do web vira a lista de telas a ajustar.
+- Envie o header só quando houver token (evita `Bearer null`, que o servidor passou a rejeitar com 401).
 
-### 2.3 Gerenciamento de Estado
+### 3.3 Gerenciamento de Estado
 
-**Padrão Único:**
+| Tipo               | Lib                  | Localização           | Exemplo                                       |
+| ------------------ | -------------------- | --------------------- | --------------------------------------------- |
+| Server State       | TanStack Query       | Hooks em `app/hooks/` | `useMeusCandidatos()`                         |
+| Estado local de UI | `useState`           | No componente         | `const [isOpen, setIsOpen] = useState(false)` |
+| Auth               | `localStorage`       | Browser               | JWT                                           |
+| Estado na URL      | `useQueryParamState` | Query string          | `?page=2`                                     |
 
-| Tipo | Lib | Localização | Exemplo |
-|------|-----|------------|---------|
-| Server State | React Query | Centralizado | `useUser()`, `useBancas()` |
-| Local UI State | useState | Componente | `const [isOpen, setIsOpen] = useState(false)` |
-| Auth State | localStorage | Browser | JWT token |
-| URL State | useQueryParamState | URL query | `?page=2&sort=date` |
-
-**Exemplo: Query com Cache**
+**Query com chave única:**
 
 ```typescript
-export const useBancas = (options?: { page?: number }) => {
-  return useQuery({
-    queryKey: ["bancas", options],  // ← Chave única
-    queryFn: async () => {
-      const response = await apiClient.banca.$get()
-      return rpcReturn(response)
-    },
-    staleTime: 60 * 1000,      // Cache válido 1 min
-    gcTime: 5 * 60 * 1000,     // Limpar após 5 min inativo
-  })
-}
+export const useMeusCandidatos = () =>
+  useQuery({
+    queryKey: ["candidatos", "meus"],
+    queryFn: async () => rpcReturn(await apiClient.candidato.meus.$get()),
+    staleTime: 60 * 1000,
+  });
 ```
 
-### 2.4 Formulários e Validação
+Regras:
 
-**Stack: React Hook Form + Zod**
+- A lista "meus candidatos" **não recebe id no path**: o servidor deduz o usuário pelo token.
+- O front **não recalcula `notaFinal`** com a fórmula vigente (isso reintroduziria o bug de nota retroativa). Mostra o valor salvo pelo servidor; calcular no cliente só serve como **preview** num formulário.
+
+### 3.4 Formulários e Validação
+
+React Hook Form + Zod, validando em duas camadas:
+
+1. **Cliente**: feedback imediato.
+2. **Servidor**: segurança (nunca confie no cliente).
 
 ```typescript
-const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
-})
+const form = useForm<FormData>({
+  resolver: zodResolver(schema),
+  defaultValues: {/* ... */},
+});
 
-type LoginData = z.infer<typeof loginSchema>
-
-export function LoginForm() {
-  const form = useForm<LoginData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" }
-  })
-
-  const onSubmit = (data: LoginData) => {
-    // Dados garantidos como LoginData (type-safe)
-    loginMutation.mutate({ json: data })
-  }
-
-  return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <input {...form.register("email")} />
-      {form.formState.errors.email && (
-        <span>{form.formState.errors.email.message}</span>
-      )}
-      {/* ... */}
-    </form>
-  )
-}
+const mutation = useUpdateNotaMestrado();
+const onSubmit = (data: FormData) =>
+  mutation.mutate({ param: { id }, json: data });
 ```
 
-**Validação em 2 Camadas:**
-1. Client-side (Zod): Feedback imediato (UX melhor)
-2. Server-side (Zod): Segurança (não confie no cliente)
+Os selects de área e de isenção usam as constantes e labels de `@tcc/shared`, não listas redeclaradas.
 
-### 2.5 Componentes e Organização
+### 3.5 Componentes e Organização
 
-**Convenção de Naming:**
-- **Componentes React**: PascalCase → `LoginForm.tsx`, `BancaDetail.tsx`
-- **Hooks**: camelCase com prefixo `use` → `useUser()`, `useBancas()`
-- **Serviços**: camelCase com sufixo `Service` → `authService.ts`
+- Componentes React em PascalCase, hooks em camelCase com `use`, serviços em camelCase com sufixo `Service`.
+- Componentes acima de ~150 linhas ou com JSX repetido são divididos.
 
-**Estrutura:**
 ```
 components/
-├── auth/                   # Autenticação
-├── banca/                  # Defesas
-├── calendar/               # Calendário
-├── feedback/               # Feedback
-├── pdf/                    # PDFs
-├── ui/                     # Primitivos Radix customizados
-└── users/                  # Usuários
+├── ui/              # Primitivos Radix customizados
+├── auth/            # Login e reset de senha
+├── candidato/       # Listagem, detalhe, formulário de notas
+├── usuarios/        # Tela de admin (professores)
+└── feedback/        # Sistema de feedback
 
-hooks/
-├── user.hooks.ts           # Queries de usuário
-├── banca.hooks.ts          # Queries de banca
-├── teacher-invitation.hooks.ts
-└── use-query-param-state.ts  # Sincronização URL
-
-services/
-├── apiClient.ts            # Cliente Hono RPC
-└── authService.ts          # Mutations de autenticação
-
-lib/
-└── utils.ts                # Helpers (cn, rpcReturn, RpcType)
+hooks/               # useMeusCandidatos, useCandidato, use-query-param-state...
+services/            # apiClient.ts, authService.ts
+lib/                 # utils (cn, rpcReturn, RpcType)
 ```
 
-### 2.6 Tratamento de Erros (Frontend)
-
-**Padrão: rpcReturn helper**
+### 3.6 Tratamento de Erros
 
 ```typescript
-export const rpcReturn = async <T>(clientResponse: ClientResponse<T>) => {
-  const data = await clientResponse.json()
-  
-  if (clientResponse.ok) {
-    return data  // Tipado como T
+export const rpcReturn = async <T>(res: ClientResponse<T>) => {
+  const data = await res.json();
+  if (res.ok) return data;
+
+  if (res.status === 401) {
+    removeAuthToken();
+    window.location.assign("/login"); // único ponto que trata 401
   }
 
-  // Erro Zod (validação)
   if ((data as any)?.error?.name === "ZodError") {
-    const issues = (data as any).error.issues
-    throw new Error(issues.map((i) => i.message).join(", "))
+    throw new Error(
+      (data as any).error.issues.map((i: any) => i.message).join(", "),
+    );
   }
-
-  // Erro AppError (aplicação)
-  throw new Error((data as { message: string })?.message || "Erro desconhecido")
-}
+  throw new Error(
+    (data as { message?: string })?.message || "Erro desconhecido",
+  );
+};
 ```
 
-**Uso em Hook:**
-
-```typescript
-export const useLoginMutation = () => {
-  return useMutation({
-    mutationFn: async (request) => {
-      const response = await apiClient.auth.login.$post(request)
-      return rpcReturn(response)  // ← Processa erros
-    },
-    onSuccess: (data) => {
-      storeAuthToken(data.token)
-    },
-    onError: (error) => {
-      console.error(error.message)
-    },
-  })
-}
-```
+- **401** é tratado em um único lugar: limpa o token e redireciona ao login.
+- **404** em candidato mostra mensagem neutra ("Candidato não encontrado"); o servidor responde 404 também quando o usuário não tem acesso.
+- Mensagens ao usuário são em português, via toast.
 
 ---
 
 ## Backend Detalhado
 
-### 3.1 Arquitetura Modular
+### 4.1 Arquitetura Modular
 
-**Padrão Consistente (cada módulo):**
+Módulos em `apps/server/src/modules/`:
+
+| Módulo        | Responsabilidade                                                          |
+| ------------- | ------------------------------------------------------------------------- |
+| `auth`        | Login, reset de senha, JWT e middleware de identidade                     |
+| `usuario`     | Gestão de professores (tela de admin), perfil, mapper público             |
+| `candidato`   | Consultas, atualização, exclusão e importação de candidatos               |
+| `nota` 🎯     | Atualização de notas (hoje dentro de `candidato`)                         |
+| `alocacao` 🎯 | Política pura de alocação e sua persistência (hoje dentro de `candidato`) |
+| `feedback`    | Feedback e pedidos de funcionalidade                                      |
+
+Padrão de arquivos por módulo:
 
 ```
 modulo/
-├── modulo.route.ts         # Rotas HTTP + validação
-├── modulo.service.ts       # Lógica de negócio + BD
-├── modulo.schema.ts        # Schemas Zod
-├── modulo.dao.ts           # [OPT] Query builder
-└── modulo.test.ts          # Testes Vitest
+├── modulo.route.ts     # Validação, checkRole e mapeamento de erros
+├── modulo.service.ts   # Casos de uso: lógica de negócio + banco
+├── modulo.schema.ts    # Schemas Zod
+└── modulo.test.ts      # Testes Vitest
 ```
 
-**Fluxo de Requisição:**
+### Camadas (atômica)
+
+| Camada        | O que é                                                                            | Regra                                                                                                             |
+| ------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Átomo**     | Função pura (cálculo de nota, normalização, regra de acesso, política de alocação) | Sem I/O, sem Hono, sem Drizzle; testável sem banco                                                                |
+| **Molécula**  | Service / caso de uso                                                              | Compõe átomos e acessa o banco; transação quando há várias tabelas ou leitura-mescla-escrita; retorna `AppResult` |
+| **Organismo** | Rota                                                                               | Só valida, aplica `checkRole`, chama o service e mapeia o erro para HTTP                                          |
+
+Princípios: extrair só duplicação **real** (mesma regra, mudaria junta); manter separado o que diverge de fato (fórmulas e campos de mestrado × doutorado); **sem** repositories, containers de DI ou use cases genéricos.
+
+### Fluxo de Requisição
 
 ```
 HTTP Request
   ↓
-1. index.ts: Middlewares globais
-   ├─ poweredBy()       → X-Powered-By header
-   ├─ logger()          → Log request
-   ├─ cors()            → CORS validation
-   ├─ prettyJSON()      → Format response
-   └─ appJwt()          → ⭐ JWT decode
+1. index.ts: middlewares globais
+   ├─ poweredBy() / logger()
+   ├─ cors()          → origem restrita ao FRONTEND_URL em produção
+   ├─ prettyJSON()
+   └─ appJwt()        → ⭐ decodifica o JWT; token fornecido e inválido = 401
   ↓
-2. modulo.route.ts: Handler
-   ├─ zValidator()      → Input validation
-   ├─ checkRole()       → Auth check
-   └─ Chama service
+2. modulo.route.ts
+   ├─ checkRole()     → carrega o usuário do banco, rejeita inativo, expõe em c.var
+   ├─ zValidator()    → param (UUID), query e json (allowlist + .strict())
+   └─ chama o service
   ↓
-3. modulo.service.ts: Lógica
-   ├─ DB queries
-   ├─ Validações
+3. modulo.service.ts
+   ├─ regra de acesso (podeAcessarCandidato)
+   ├─ queries/transação
    └─ AppResult<T, E>
   ↓
-4. Route: Mapeia resultado
-   ├─ match(result.error)
+4. Rota mapeia o resultado
+   ├─ match(result.error).exhaustive()
    ├─ throw AppError
-   └─ return c.json()
+   └─ return c.json(dto)
   ↓
-Global ErrorHandler
-  ├─ Se AppError → return status + message
-  ├─ Senão → 500 Internal Error
-  └─
-HTTP Response
+ErrorHandler global
+  ├─ AppError → status + mensagem
+  └─ demais → 500 genérico
 ```
 
-### 3.2 Padrão AppResult + AppError
-
-**Error Handling Type-Safe:**
+### 4.2 AppResult + AppError
 
 ```typescript
 // result.ts
-type AppResult<TData, TError> = 
-  | { ok: true; data: TData }
-  | { ok: false; error: TError }
-
-const ok = (data) => ({ ok: true, data })
-const err = (error) => ({ ok: false, error })
+type AppResult<TData, TError> =
+  { ok: true; data: TData } | { ok: false; error: TError };
 
 // error.ts
 class AppError extends Error {
-  status: number  // HTTP status code
-  constructor(status, message) {
-    super(message)
-    this.status = status
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
   }
 }
 ```
 
-**Uso no Service:**
+Regras:
+
+- Erros de domínio são **tipos discriminados** por módulo (`candidato_not_found`, `duplicate_email`, `database_error`).
+- **Nunca** use `ok(null)` para "não encontrado": retorne `err({ type: "candidato_not_found" })`.
+- A rota mapeia com `match(...).exhaustive()`; se faltar um caso, não compila.
+
+**Service (esboço):**
 
 ```typescript
-export const createUser = async (
-  c: Context,
-  userData: CreateUserInput
-): Promise<AppResult<User, CreateUserError>> => {
+export const createUsuario = async (
+  c: Context<{ Variables: AppVariables }>,
+  data: CreateUsuarioInput,
+): Promise<AppResult<SelectUser, CreateUsuarioError>> => {
+  const db = c.get("db");
   try {
-    // Lógica de negócio pura (sem HTTP concerns)
-    const existing = await db.select().from(Users)
-      .where(eq(Users.email, userData.email))
-      .limit(1)
+    const [existente] = await db
+      .select({ id: Users.id })
+      .from(Users)
+      .where(eq(Users.email, data.email))
+      .limit(1);
+    if (existente) return err({ type: "duplicate_email" });
 
-    if (existing.length > 0) {
-      return err({ type: "duplicate_email" })
-    }
-
-    const passwordHash = await bcryptjs.hash(userData.password, 10)
-    const [newUser] = await db.insert(Users)
-      .values({ ...userData, passwordHash })
-      .returning()
-
-    return ok(newUser)
+    const [novo] = await db.insert(Users).values(data).returning();
+    return ok(novo);
   } catch (error) {
-    return err({ type: "database_error", error })
+    logDbError("createUsuario", error); // só code e constraint, nunca o valor
+    return err({ type: "database_error", error });
   }
-}
+};
 ```
 
-**Uso na Route:**
+**Rota:**
 
 ```typescript
-.post("/", zValidator("json", createUserSchema), async (c) => {
-  const userData = c.req.valid("json")
-  const result = await createUser(c, userData)
-
+.post("/", checkRole(["ADMIN"]), zValidator("json", createUsuarioSchema), async (c) => {
+  const result = await createUsuario(c, c.req.valid("json"))
   if (!result.ok) {
     throw match(result.error)
-      .with({ type: "duplicate_email" },
-        () => new AppError(409, "Email já cadastrado"))
-      .with({ type: "database_error" },
-        () => new AppError(500, "Erro ao criar usuário"))
-      .exhaustive()  // ← Força todas cases
+      .with({ type: "duplicate_email" }, () => new AppError(409, "Email já cadastrado"))
+      .with({ type: "database_error" }, () => new AppError(500, "Erro ao criar usuário"))
+      .exhaustive()
   }
-
-  return c.json(result.data, 201)
+  return c.json(toUsuarioPublico(result.data), 201)   // nunca devolve passwordHash
 })
 ```
 
-**Benefícios:**
-- Service é testável sem HTTP
-- Erros mapeados com type safety (exhaustive matching)
-- Separação clara de responsabilidades
+### 4.3 Validação com Zod
 
-### 3.3 Validação com Zod
-
-**Estratégia Dupla:**
+Schemas de **atualização** usam allowlist e rejeitam campos desconhecidos:
 
 ```typescript
-// Server-side: Gera schema a partir de Drizzle table
-export const insertBancaSchema = createInsertSchema(Bancas)
-  .omit({ id: true, createdAt: true, updatedAt: true })
-  .refine(
-    (data) => new Date(data.dataRealizacao) > new Date(),
-    { message: "Data deve ser no futuro" }
-  )
-
-// Uso em Route
-.post("/", zValidator("json", insertBancaSchema), async (c) => {
-  const bancaData = c.req.valid("json")  // ← Tipo inferido
-  // ...
-})
+export const updateNotaMestradoSchema = createUpdateSchema(NotaMestrado)
+  .pick({
+    grad: true,
+    area: true,
+    enade: true,
+    a1a2a3a4: true,
+    b1b2b3b4: true,
+    icIt: true,
+    poscomp: true,
+    disciplinaPosCapes6Mais: true,
+    disciplinaPosCapes3a5: true,
+    notaEtapaII: true,
+    // + os campos *Link correspondentes
+  })
+  .strict(); // avaliado, notaFinal, formulaVersion etc. => 400
 ```
 
-### 3.4 Middlewares
+- **Nunca** passe o corpo da requisição direto para `.set()` ou `.values()` (mass assignment).
+- Todo `:id` de candidato é validado com `z.string().uuid()`, para UUID malformado dar 400 e não um erro de cast do Postgres (500).
+- Valores de planilha (isenção, GRU, área) são normalizados para os enums do `@tcc/shared`, com erro por linha para valores desconhecidos.
 
-**appJwt: Decodifica JWT**
+### 4.4 Middlewares
+
+**`appJwt`: decodifica o JWT** 🎯
 
 ```typescript
-export const appJwt = (options: { secret: string }) => {
-  return createMiddleware(async (ctx, next) => {
-    const credentials = ctx.req.raw.headers.get("Authorization")
-    
-    if (!credentials) {
-      return await next()  // Sem token, continua público
-    }
+export const appJwt = (options: { secret: string }) =>
+  createMiddleware(async (c, next) => {
+    const header = c.req.header("Authorization");
+    if (!header) return next(); // sem token: segue sem identidade
 
-    const [, token] = credentials.split(/\s+/)  // "Bearer <token>"
+    const [scheme, token] = header.split(/\s+/);
+    if (scheme !== "Bearer" || !token)
+      throw new AppError(401, "Não autenticado");
 
     try {
-      const payload = await verify(token, options.secret)
-      ctx.set("jwtPayload", payload)  // { sub: userId, role, iat, exp }
-    } catch (e) {
-      // Token inválido, continua sem autenticação
+      const payload = await verify(token, options.secret, "HS256");
+      if (typeof payload.sub !== "string" || !isUuid(payload.sub))
+        throw new Error();
+      c.set("jwtPayload", payload);
+    } catch {
+      throw new AppError(401, "Não autenticado"); // mensagem genérica, sem distinguir a causa
     }
-
-    await next()
-  })
-}
+    await next();
+  });
 ```
 
-**checkRole: Valida Permissões**
+Token **fornecido e inválido, malformado ou expirado nunca segue como anônimo**: é 401. Só a ausência de token segue adiante, e quem decide é o `checkRole`.
+
+**`checkRole`: identidade e papel** 🎯
 
 ```typescript
 export const checkRole = (allowedRoles: UserRole[]) =>
   createMiddleware(async (c, next) => {
-    const userId = c.get("jwtPayload")?.sub
+    const userId = c.get("jwtPayload")?.sub;
+    if (!userId) throw new AppError(401, "Não autenticado");
 
-    if (!userId) {
-      throw new AppError(401, "Não autenticado")
-    }
+    const result = await getUsuarioById(c, userId); // lê do banco, não do JWT
+    if (!result.ok) throw new AppError(500, "Erro interno");
+    if (!result.data || !result.data.ativo)
+      throw new AppError(401, "Não autenticado");
+    if (!allowedRoles.includes(result.data.role))
+      throw new AppError(403, "Sem permissão");
 
-    const result = await getUserById(c, Number(userId))
-
-    if (!result.ok) {
-      throw new AppError(404, "Usuário não encontrado")
-    }
-
-    if (!allowedRoles.includes(result.data.role as UserRole)) {
-      throw new AppError(403, "Sem permissão")
-    }
-
-    return next()
-  })
+    c.set("usuario", { id: result.data.id, role: result.data.role });
+    return next();
+  });
 ```
 
-**Uso:**
+- O papel vem do **banco**, nunca do payload: desativar ou rebaixar um professor vale na hora, sem esperar o token de 24h expirar.
+- Rotas e services leem o usuário de `c.var` (`getUsuarioAutenticado(c)`); **identidade nunca vem da URL nem do corpo**.
+
+### 4.5 Autorização por dono
+
+Regra pura (átomo), reutilizada em detalhe, listagem, atualização e nota:
 
 ```typescript
-.post("/", checkRole(["TEACHER", "ADMIN"]), async (c) => {
-  // Só TEACHER ou ADMIN pode executar
-})
+export type UsuarioAutenticado = { id: string; role: UserRole };
+export type VinculoCandidato = {
+  avaliadorId: string | null;
+  auditorId: string | null;
+};
+
+export function podeAcessarCandidato(
+  u: UsuarioAutenticado,
+  c: VinculoCandidato,
+): boolean {
+  if (u.role === "ADMIN") return true;
+  return c.avaliadorId === u.id || c.auditorId === u.id;
+}
 ```
 
-### 3.5 Serviços Compartilhados
+Equivalente em SQL para listagens: `undefined` para ADMIN e `or(eq(avaliadorId, id), eq(auditorId, id))` para TEACHER.
 
-#### Email Service
+- Acesso negado a candidato responde **404** (não 403), para não confirmar que o UUID existe.
+- Rotas administrativas (reatribuir avaliador, criar professor, excluir, importar) respondem 403 a TEACHER.
+- A checagem é no **service**, antes de qualquer escrita; o frontend nunca é a barreira.
+
+### 4.6 Atualização de nota (caso de uso central)
 
 ```typescript
-// Desenvolvimento: Ethereal (test email)
-// Produção: Gmail SMTP
+export const updateNotaMestrado = async (
+  c: Context<{ Variables: AppVariables }>,
+  idCandidato: string,
+  body: UpdateNotaMestradoInput,
+) => {
+  const db = c.get("db");
+  const usuario = getUsuarioAutenticado(c);
+  try {
+    return await db.transaction(async (tx) => {
+      // 1. dono: candidato existe e o usuário tem vínculo (senão 404)
+      // 2. lê a nota atual com lock: .for("update")
+      // 3. mescla: { ...atual, ...body }  (nunca zerar campos ausentes com ?? 0)
+      // 4. calcula com calcularMestradoNota (átomo de @tcc/shared)
+      // 5. grava partes + notaFinal + formulaVersion
+      //    + avaliado/avaliadoEm/avaliadoPorId (usuário autenticado) se houve mudança de nota
+      // 6. retorna a nota salva
+    });
+  } catch (error) {
+    logDbError("updateNotaMestrado", error);
+    return err({ type: "database_error", error });
+  }
+};
+```
 
+Cuidados de domínio: sem `notaEtapaII` a nota é só da etapa I (não calcular com `0`); a etapa I abaixo de 6 reprova; `aprovado` só vale com as etapas exigidas.
+
+### 4.7 Serviços compartilhados
+
+**E-mail (`services/email.service.ts`)**
+
+```typescript
+// Desenvolvimento: Ethereal (prévia no console) · Produção: Gmail SMTP
 export const sendEmail = async (
-  input: SendEmailInput
+  input: SendEmailInput,
 ): Promise<AppResult<void, SendEmailError>> => {
   try {
-    const info = await transporter.sendMail(input)
-    
-    if (NODE_ENV !== "production") {
-      console.log("Preview:", nodemailer.getTestMessageUrl(info))
-    }
-    
-    return ok(undefined)
+    const info = await transporter.sendMail(input);
+    if (NODE_ENV !== "production")
+      console.log("Preview:", nodemailer.getTestMessageUrl(info));
+    return ok(undefined);
   } catch (error) {
-    return err({ type: "send_failed", error })
+    return err({ type: "send_failed", error });
   }
-}
+};
 ```
 
-#### PDF Document Service
+Templates (`createXxxEmail()`): redefinição de senha (1 hora) e "defina sua senha" para professor novo (7 dias). Não há e-mails de convite.
 
-```typescript
-import { renderToFile } from "@react-pdf/renderer"
-import AtaDefesa from "@tcc/pdf-components/ata-defesa"
+**Configuração**
 
-export const generateBancaAtaPDF = async (bancaData: any) => {
-  const buffer = await renderToFile(
-    <AtaDefesa banca={bancaData} />,
-    { filename: `ata-${bancaData.id}.pdf` }
-  )
-  return buffer
-}
-```
+Todas as variáveis são lidas por um `envSchema` único com Zod. `JWT_SECRET` é obrigatório, com no mínimo 32 caracteres e **sem fallback**; em produção a aplicação falha ao iniciar se faltar.
 
 ---
 
 ## Comunicação Frontend-Backend
 
-### 4.1 Fluxo de API Call
+### 5.1 Fluxo de API Call
 
 ```
-Frontend Component
+Componente
   ↓
-useQuery/useMutation hook
+hook (useQuery / useMutation)
   ↓
-apiClient.endpoint.$method()
+apiClient.rota.$metodo()
   ↓
-Hono RPC Client
-  ├─ Intercepta headers
-  ├─ Injeta Authorization
-  └─ HTTP Request enviado
+Hono RPC Client: injeta Authorization (se houver token)
   ↓
-HTTP POST /endpoint
-  Authorization: Bearer <token>
-  ├─ appJwt() middleware decodifica
-  ├─ Route handler executado
-  ├─ Service processa
-  └─ Response retorna
+HTTP  →  appJwt → checkRole → zValidator → service
   ↓
-Frontend recebe
+Resposta
   ↓
-rpcReturn() processa
-  ├─ Se ok → retorna data (tipado)
-  ├─ Se erro → throw Error
-  └─ React Query cache atualizado
+rpcReturn()
+  ├─ ok → dados tipados
+  ├─ 401 → limpa token e vai para /login
+  └─ erro → throw Error (toast)
   ↓
-Component re-renderiza com dados
+Cache do React Query atualizado, componente re-renderiza
 ```
 
-### 4.2 Token Management
+### 5.2 Token
 
-**Storage:**
+- Salvo em `localStorage` (`AUTH_TOKEN_KEY`) e injetado pelo `apiClient`.
+- JWT HS256, `sub` = UUID do usuário, expiração de 24h.
+- Logout remove o token; a próxima requisição sem header cai em 401 nas rotas protegidas.
 
-```typescript
-// localStorage (Browser)
-localStorage.setItem("authToken", token)     // Persiste
-localStorage.getItem("authToken")
-localStorage.removeItem("authToken")
-```
-
-**Injectionem Requests:**
-
-```typescript
-// apiClient.ts automaticamente adiciona:
-headers() {
-  const token = localStorage.getItem(AUTH_TOKEN_KEY)
-  return { Authorization: `Bearer ${token}` }
-}
-```
-
-**Verificação Servidor:**
-
-```typescript
-// appJwt() decodifica
-const payload = await verify(token, JWT_SECRET)
-// payload = { sub: userId, role, iat, exp }
-```
-
-### 4.3 Autenticação Completa
-
-**Login:**
+### 5.3 Login
 
 ```
-1. User preenche email/password
-2. Frontend valida com Zod (client-side)
-3. POST /auth/login enviado
-4. Backend valida com Zod (server-side)
-5. SELECT user WHERE email = $
-6. bcryptjs.compare(password, hash)
-7. JWT gerado com payload { sub, role, iat, exp }
-8. Retorna { token, user }
-9. Frontend storeAuthToken(token)
-10. React Query cache atualizado
-11. Redirect to /dashboard
+1. Usuário preenche e-mail e senha
+2. Validação Zod no cliente
+3. POST /auth/login
+4. Validação Zod no servidor
+5. Busca usuário por e-mail (normalizado em minúsculas); inativo ou inexistente = credenciais inválidas
+6. bcryptjs.compare(senha, hash)
+7. JWT { sub: uuid, iat, exp } assinado com JWT_SECRET
+8. Retorna { token, user } (user via toUsuarioPublico, sem passwordHash)
+9. Front guarda o token e atualiza o cache
+10. Redireciona
 ```
 
-**Próximas Requisições:**
-
-```
-GET /banca
-Authorization: Bearer <token>
-  ↓
-appJwt() decodifica
-  ↓
-ctx.set("jwtPayload", { sub: userId, role, iat, exp })
-  ↓
-Route handler acessa userId
-  ↓
-SELECT banca WHERE orientador_id = $userId
-  ↓
-Retorna apenas bancas do professor
-```
-
-**Logout:**
-
-```
-1. User clica "Sair"
-2. removeAuthToken() → localStorage.removeItem(AUTH_TOKEN_KEY)
-3. Próxima requisição sem Authorization header
-4. Backend retorna 401 ou dados públicos
-5. Frontend redirect to /login
-```
+A mensagem de erro de login é a mesma para e-mail inexistente, senha errada e usuário inativo.
 
 ---
 
 ## Banco de Dados
 
-### 5.1 Tabelas Principais
+Fonte: `apps/server/src/database/schema.ts`. Convenções: colunas em `snake_case`, campos TS em `camelCase`, UUID nas chaves de usuários e candidatos, `createdAt`/`updatedAt` (com `$onUpdate`), `onDelete` explícito em toda FK, enums via `pgEnum` alimentados por `@tcc/shared`, `.enableRLS()` em todas as tabelas.
 
-**Users**
+### 6.1 Tabelas principais 🎯
+
+**usuario**
 
 ```sql
-id: SERIAL PRIMARY KEY
-email: TEXT UNIQUE NOT NULL
+id: UUID PRIMARY KEY DEFAULT gen_random_uuid()
+email: TEXT UNIQUE NOT NULL          -- normalizado em minúsculas
 nome: TEXT NOT NULL
-password_hash: TEXT NOT NULL          -- bcrypt hash
-school: TEXT                          -- "Instituto de Computação"
-matricula: TEXT NOT NULL              -- "20230001"
-academic_title: TEXT                  -- "Doutor", "Mestre", "Graduado"
-role: ENUM('STUDENT', 'TEACHER', 'ADMIN')
-created_at: TIMESTAMP DEFAULT NOW()
-updated_at: TIMESTAMP DEFAULT NOW()
+password_hash: TEXT NOT NULL         -- bcrypt; nunca sai em resposta
+school, matricula, academic_title    -- obrigatórios conforme o fluxo do admin
+areas: area[] NOT NULL DEFAULT '{}'  -- usadas na alocação
+role: ENUM('TEACHER', 'ADMIN')
+ativo: BOOLEAN NOT NULL DEFAULT true
+criado_por_id: UUID FK(usuario) ON DELETE SET NULL
+created_at, updated_at
 ```
 
-**Banca (Defesa)**
+**candidato_mestrado** e **candidato_doutorado** (colunas base compartilhadas)
 
 ```sql
-id: SERIAL PRIMARY KEY
-orientador_id: INT FK(Users)          -- Professor orientador
-aluno_id: INT FK(Users)               -- Aluno defendendo
-curso_id: INT FK(Curso)
-autor: TEXT NOT NULL                  -- Nome do aluno
-titulo_trabalho: TEXT NOT NULL
-resumo: TEXT NOT NULL
-abstract: TEXT NOT NULL
-palavras_chave: TEXT NOT NULL         -- "keyword1, keyword2"
-data_realizacao: TIMESTAMP NOT NULL
-nota_final: TEXT
-local: TEXT                           -- "Sala 501" ou "Google Meet:"
-modalidade: ENUM('remoto', 'local')
-visible: BOOLEAN DEFAULT true
-UNIQUE(aluno_id, curso_id)            -- Um aluno por curso
-```
-
-**UsuariosBancas (Many-to-Many)**
-
-```sql
-id: SERIAL PRIMARY KEY
-usuario_id: INT FK(Users)
-banca_id: INT FK(Bancas)
-role: ENUM('orientador', 'coorientador', 'aluno', 'avaliador')
-nota: TEXT                            -- Nota atribuída (se avaliador)
-UNIQUE(usuario_id, banca_id)
-```
-
-**TeacherInvitations**
-
-```sql
-id: SERIAL PRIMARY KEY
-email: TEXT UNIQUE NOT NULL
+id: UUID PRIMARY KEY
+numero_inscricao, cpf, email: TEXT UNIQUE (cada um)
 nome: TEXT NOT NULL
-invitation_hash: TEXT UNIQUE NOT NULL
-status: ENUM('pending', 'used', 'expired')
-created_at: TIMESTAMP DEFAULT NOW()
-expires_at: TIMESTAMP                 -- +7 dias
-invited_by: INT FK(Users)             -- Admin que criou
-user_id: INT FK(Users) NULL           -- Quando aceito
+solicitou_isencao_taxa_inscricao: TEXT
+isencao_aprovada: ENUM('sim', 'nao', 'nao-solicitou') DEFAULT 'nao-solicitou'
+gru: TEXT (ou enum), gru_link: TEXT, homologa: BOOLEAN
+especiais, cotas, supra: TEXT
+avaliador_id, auditor_id: UUID FK(usuario) ON DELETE SET NULL   -- com índice
+tipo_curso: ENUM('mestrado', 'doutorado')
+created_at, updated_at
 ```
 
-**ResetPasswords**
+Mestrado acrescenta `primeira_area_preferencia`, `segunda_area_preferencia` (enum `area`), `universidade`, `curso`, `cidade_graduacao`. Doutorado acrescenta documentos e dados do mestrado anterior, anteprojeto e opções de orientador.
+
+**nota_mestrado** e **nota_doutorado**
 
 ```sql
 id: SERIAL PRIMARY KEY
-user_id: INT FK(Users)
-reset_password_hash: TEXT UNIQUE NOT NULL
-created_at: TIMESTAMP DEFAULT NOW()
-expires_at: TIMESTAMP                 -- +1 hora
+id_candidato: UUID UNIQUE NOT NULL FK ON DELETE CASCADE   -- 1:1 com o candidato
+-- partes da nota (campos específicos de cada programa; *_link no mestrado)
+avaliado: BOOLEAN NOT NULL DEFAULT false
+nota_final: NUMERIC(5,2)
+formula_version: INTEGER NOT NULL DEFAULT 1
+avaliado_em: TIMESTAMP
+avaliado_por_id: UUID FK(usuario) ON DELETE SET NULL
+created_at, updated_at
 ```
 
-### 5.2 Relationships
+**reset_password**
+
+```sql
+id: SERIAL PRIMARY KEY
+user_id: UUID FK(usuario)
+reset_password_hash: TEXT UNIQUE
+created_at, expires_at              -- 1 hora (reset) ou 7 dias (primeira senha)
+```
+
+**Feedback:** `feedback_submission` (um por usuário, notas de 1 a 5, `usage_purposes` em `jsonb`), `feature_request` e `feature_request_vote`.
+
+### 6.2 Relacionamentos
 
 ```
-Users 1──→ ∞ Bancas (orientador_id)
-Users 1──→ ∞ Bancas (aluno_id)
-Users ∞──→ ∞ Bancas (via UsuariosBancas)
-Cursos 1──→ ∞ Bancas
+usuario 1──→ ∞ candidato_mestrado   (avaliador_id)
+usuario 1──→ ∞ candidato_mestrado   (auditor_id)
+usuario 1──→ ∞ candidato_doutorado  (avaliador_id / auditor_id)
+candidato_mestrado 1──1 nota_mestrado
+candidato_doutorado 1──1 nota_doutorado
+usuario 1──→ ∞ nota_*               (avaliado_por_id)
+usuario 1──→ ∞ reset_password
 ```
 
-### 5.3 Migrations (Drizzle)
+### 6.3 Índices
+
+- `UNIQUE` já cria índice (CPF, e-mail, inscrição, `id_candidato` das notas): não duplique.
+- FKs **não** ganham índice automático: crie em `avaliador_id` e `auditor_id` das duas tabelas de candidatos (usados em "meus candidatos" e na carga de alocação).
+
+### 6.4 RLS (Supabase)
+
+Todas as tabelas têm `.enableRLS()` e **nenhuma policy permissiva**. O backend conecta como `postgres` via `DATABASE_URL` (ignora RLS); o RLS só fecha a API REST pública do Supabase, que de outra forma exporia dados pessoais com a chave `anon`.
+
+### 6.5 Migrations (Drizzle)
 
 ```bash
-# Adiciona coluna em schema.ts
-
-# Gera migration
-npm run migration:gen
-# → Cria apps/server/src/database/drizzle/0011_add_column.sql
-
-# Executa
-npm run migration:run
-# → Aplica SQL ao database
-
-# Ou push direto (recomendado)
+# Desenvolvimento: sincroniza o schema direto
 npm run db:push
-# → Sincroniza schema.ts com database
+
+# Baseline versionado (quando o schema fechar): apague drizzle/ inteira, incluindo meta/
+npm run migration:gen
+npm run migration:run    # testar em banco limpo
 ```
+
+⚠️ Renomear **valor de enum** exige `ALTER TYPE ... RENAME VALUE` no banco; só mudar o schema faz o `db:push` falhar.
+
+### 6.6 Seed
+
+- **Desenvolvimento**: dados de teste.
+- **Produção** 🎯: cria **apenas o primeiro admin**, a partir de `ADMIN_EMAIL` e `ADMIN_PASSWORD`, de forma idempotente e sem credenciais no repositório.
 
 ---
 
 ## Autenticação e Segurança
 
-### 6.1 Fluxo de Senha Reset
+### 7.1 Fluxo de Redefinição de Senha
 
 ```
-1. User solicita reset
-   POST /usuario/request-password-reset
-   { email: "user@example.com" }
-
+1. POST /auth/request-password-reset  { email }
 2. Backend:
-   SELECT * FROM users WHERE email = $
-   ├─ Se não existe, silenciosamente retorna ok (segurança)
-   ├─ Se existe:
-   │   ├─ Gera crypto.randomBytes(32).toString('hex')
-   │   ├─ INSERT reset_password com TTL 1 hora
-   │   └─ Envia email com link /reset-password/{hash}
-
-3. User clica email link
-   GET /reset-password/{hash}
-   ├─ Frontend verifica hash existe
-   └─ Renderiza form de nova senha
-
-4. User entra nova senha
-   POST /auth/reset-password/reset
-   { hash, newPassword }
-
-5. Backend:
-   SELECT FROM reset_password WHERE hash = $ AND expires_at > NOW()
-   ├─ Se inválido/expirado → erro
-   ├─ Se válido:
-   │   ├─ Faz hash da nova senha
-   │   ├─ UPDATE users SET password_hash = $
-   │   └─ DELETE reset_password (consume token)
-
-6. Sucesso → User pode fazer login com nova senha
+   ├─ Resposta é sempre a mesma (não revela se o e-mail existe)
+   └─ Se existe e está ativo: gera crypto.randomBytes(32), grava em reset_password
+      (1 hora) e envia o link /reset-password/{token}
+3. Usuário abre o link; o front verifica o token
+4. POST /auth/reset-password  { token, newPassword }
+5. Backend valida token e expiração, faz hash da nova senha, atualiza o usuário
+   e apaga o token (uso único)
 ```
 
-### 6.2 Fluxo de Convite Professor
+### 7.2 Fluxo de Criação de Professor 🎯
+
+Substitui o antigo fluxo de convite.
 
 ```
-1. Admin cria convite
-   POST /teacher-invitation
-   { email, nome }
-
-2. Backend:
-   ├─ Gera crypto.randomBytes(32).toString('hex')
-   ├─ INSERT teacher_invitation com TTL 7 dias, status=pending
-   └─ Envia email com link /teacher-invitation/{hash}
-
-3. Professor clica email
-   GET /teacher-invitation/verify/{hash}
-   ├─ Valida hash, status=pending, não expirou
-   └─ Retorna { email, nome, expiresAt }
-
-4. Professor preenche dados
-   POST /teacher-invitation/accept
-   { hash, password, school, academicTitle }
-
-5. Backend:
-   ├─ Valida hash, não expirou
-   ├─ Cria novo User com role=TEACHER
-   ├─ UPDATE teacher_invitation SET status=used, user_id=newUserId
-   ├─ Gera JWT para novo user
-   └─ Retorna { token, user }
-
-6. Frontend:
-   ├─ Armazena token
-   ├─ Redireciona para dashboard
-   └─ Professor já autenticado!
+1. ADMIN cria o professor na tela de usuários
+   (nome, e-mail em minúsculas, matrícula, título, áreas, papel)
+2. Backend cria o usuário com um password hash aleatório e inutilizável
+   (ninguém conhece a senha) e registra criado_por_id
+3. Gera token de reset com validade de 7 dias e envia o e-mail "defina sua senha"
+4. O professor define a senha pelo fluxo de redefinição
+5. O ADMIN pode editar (allowlist: nome, matrícula, título, áreas, ativo, papel) e
+   desativar (ativo = false). Professor não é apagado, por causa das FKs
 ```
 
-### 6.3 Segurança: Camadas
+Salvaguardas: o admin não pode desativar nem rebaixar a si mesmo nem o último admin ativo; e-mail duplicado responde 409; a resposta nunca devolve token ou senha.
+
+### 7.3 Camadas de segurança
 
 ```
-Layer 1: HTTPS/TLS (produção)
-  └─ Criptografa tráfego
-
-Layer 2: CORS
-  └─ Controla origem das requisições
-
-Layer 3: JWT + Autenticação
-  └─ Valida usuário
-
-Layer 4: Autorização (Roles)
-  └─ checkRole middleware
-
-Layer 5: Validação Zod
-  └─ Validação de entrada (client + server)
-
-Layer 6: Prepared Statements (Drizzle)
-  └─ Previne SQL injection
-
-Layer 7: bcryptjs
-  └─ Hash de senhas (não reversível)
+1. HTTPS/TLS (produção)
+2. CORS restrito ao FRONTEND_URL em produção
+3. JWT estrito: HS256, sub UUID, qualquer token inválido = 401
+4. checkRole: usuário lido do banco, inativo rejeitado, papel nunca vem do token
+5. Autorização por dono no service (podeAcessarCandidato), 404 se negado
+6. Validação Zod: UUID nos params, allowlist + .strict() nos corpos
+7. Drizzle: statements parametrizados (contra SQL injection)
+8. bcryptjs para senhas; passwordHash nunca sai em resposta (toUsuarioPublico)
+9. RLS ligada em todas as tabelas, sem policies permissivas
+10. Logs sem token, senha, CPF ou e-mail (em erros do banco, só code e constraint)
 ```
+
+Endpoints públicos permitidos: login, solicitação de reset, verificação e consumo do token de reset. Todo o resto exige autenticação.
 
 ---
 
 ## Convenções e Padrões
 
-### File Naming
+### Nomes de arquivo
 
-- **Componentes React**: PascalCase → `LoginForm.tsx`
-- **Hooks**: camelCase com `use` → `useUser.ts`
-- **Services**: camelCase com `Service` → `authService.ts`
-- **Schemas**: camelCase com `schema` → `banca.schema.ts`
-- **DAOs**: camelCase com `dao` → `banca.dao.ts`
+- **Componentes React**: PascalCase (`LoginForm.tsx`)
+- **Hooks**: camelCase com `use`
+- **Services**: kebab-case no server (`candidato.service.ts`), camelCase com sufixo `Service` no web (`authService.ts`)
+- **Schemas**: `candidato.schema.ts`
 
-### Code Style
+### Estilo de código
 
-- **Backend services**: Retornam `AppResult<T, E>`, nunca HTTP direto
-- **Routes**: Chamam services, mapeiam resultado → HTTP
-- **Frontend components**: Chamam hooks customizados para data
-- **Validation**: Zod em ambos frontend e backend
+- **Services**: retornam `AppResult<T, E>`, recebem `c: Context<{ Variables: AppVariables }>` primeiro e nunca conhecem HTTP.
+- **Rotas**: validam, aplicam `checkRole`, chamam o service e mapeiam o erro.
+- **Componentes**: chamam hooks customizados para dados; sem `fetch` direto.
+- **Validação**: Zod em front e back; no back, allowlist e `.strict()`.
+- **Mensagens ao usuário** em português.
 
 ### Organização
 
 ```
-✅ CORRETO:
+✅ CORRETO
+// candidato.hooks.ts
+export const useMeusCandidatos = () => useQuery({ ... })
 
-// user.hooks.ts
-export const useUser = () => useQuery({ ... })
-
-// LoginForm.tsx
-export function LoginForm() {
-  const user = useUser()
+// CandidatoLista.tsx
+export function CandidatoLista() {
+  const { data } = useMeusCandidatos()
   // ...
 }
 
-❌ INCORRETO:
-
-// LoginForm.tsx
-export function LoginForm() {
-  const user = useQuery({...})  // Aqui não!
-  // ...
+❌ INCORRETO
+export function CandidatoLista() {
+  const [data, setData] = useState(null)
+  useEffect(() => { fetch("/candidatos").then(...) }, [])   // sem fetch direto
 }
 ```
 
@@ -878,32 +799,19 @@ export function LoginForm() {
 
 ## Performance
 
-### Frontend
+**Frontend:** cache do React Query (`staleTime`/`gcTime`), divisão de código por rota, tree-shaking do Tailwind.
 
-- React Query caching (staleTime + gcTime)
-- Component code splitting (file-based routing)
-- TailwindCSS tree-shaking (produção build)
-- Lazy loading routes (React Router)
+**Backend:** índices em `avaliador_id`/`auditor_id`, sem N+1 nas listagens (um `select` com `leftJoin`), projeção só das colunas necessárias, importação em lote dentro de uma transação (e em _chunks_ se o lote crescer), `Promise.all` entre as consultas de mestrado e doutorado.
 
-### Backend
-
-- Drizzle prepared statements
-- DAO pattern para evitar N+1 queries
-- Middleware caching (HTTP headers)
-- Connection pooling (Drizzle)
-
-### Database
-
-- Indexes em foreign keys (automático)
-- Constraints para referential integrity
-- Migrations versionadas (reproducible)
+**Banco:** com poucos milhares de linhas o planner pode preferir varredura sequencial; o ganho principal dos índices em FK é na exclusão e nas checagens de integridade.
 
 ---
 
-## Próximos Passos para Dominar
+## Legado
 
-1. ✅ Ler `SETUP.md` para entender como rodaar
-2. ✅ Ler `FLUXOS.md` para visual dos fluxogramas
-3. ✅ Ler `DATABASE.md` para detalhes do schema
-4. ✅ Ler `PATTERNS.md` para padrões específicos
-5. ✅ Explorar código seguindo padrões neste arquivo
+Presentes no repositório mas **fora do escopo do SISSEL**; não estender. Remover só depois de confirmar que não há referências no web ou no seed:
+
+- `apps/frontend-old`, `apps/yii2-organizacao-de-defesas`
+- `packages/pdf-components` e `apps/web/app/components/pdf/` (atas e declarações de defesa)
+- calendário e documentos, tabelas e telas de banca, curso e convite, e o papel `STUDENT`
+- `ARCHITECTURE`-style docs antigos que citam bancas (`FLUXOS.md`, `PATTERNS.md`, `SETUP_COMPLETO.md`): usar só pelos padrões genéricos

@@ -11,7 +11,7 @@ import {
 
 interface CandidateActionsProps {
   user: {
-    role: "STUDENT" | "TEACHER" | "ADMIN"
+    role: "TEACHER" | "ADMIN"
   } | null
   candidato: {
     id: string

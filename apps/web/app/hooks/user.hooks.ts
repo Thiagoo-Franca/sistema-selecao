@@ -9,7 +9,7 @@ const updateUserSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   school: z.string().min(1, "Escola é obrigatória"),
   academicTitle: z.string().min(1, "Título acadêmico é obrigatório"),
-  role: z.enum(["STUDENT", "TEACHER", "ADMIN"], {
+  role: z.enum(["TEACHER", "ADMIN"], {
     required_error: "Função é obrigatória",
   }),
 })
@@ -33,7 +33,7 @@ export const useUpdateUser = () => {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: UpdateUserFormData }) => {
+    mutationFn: async ({ id, data }: { id: string; data: UpdateUserFormData }) => {
       const res = await apiClient.usuario[":id"].$put({
         param: { id: id.toString() },
         json: data,
@@ -98,7 +98,7 @@ export const useDeleteUser = () => {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async ({ id, cascade }: { id: number; cascade?: boolean }) => {
+    mutationFn: async ({ id, cascade }: { id: string; cascade?: boolean }) => {
       const res = await apiClient.usuario[":id"].$delete({
         param: { id: id.toString() },
         query: { cascade: cascade ? "true" : "false" },

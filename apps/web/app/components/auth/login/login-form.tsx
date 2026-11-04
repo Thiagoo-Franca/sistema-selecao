@@ -12,10 +12,9 @@ import type { LoginFormValues } from "@/schema/schema"
 
 interface LoginFormProps {
   onForgotPassword: () => void
-  createAccount: () => void
 }
 
-export default function LoginForm({ onForgotPassword, createAccount }: LoginFormProps) {
+export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
   const {
@@ -104,9 +103,6 @@ export default function LoginForm({ onForgotPassword, createAccount }: LoginForm
       </Button>
       <Button type="button" variant="link" className="w-full text-sm" onClick={onForgotPassword}>
         Esqueci minha senha
-      </Button>
-      <Button type="button" variant="link" className="w-full text-sm" onClick={createAccount}>
-        Criar uma conta
       </Button>
     </form>
   )

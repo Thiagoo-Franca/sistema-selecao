@@ -213,19 +213,12 @@ function PercentageBar({ label, count, percentage }: PercentageBarProps) {
 }
 
 function AcademicProfileSection({ statistics }: StatisticsProps) {
-  const studentPercentage = (statistics.studentSubmissions / statistics.totalSubmissions) * 100
   const teacherPercentage = (statistics.teacherSubmissions / statistics.totalSubmissions) * 100
-  console.log(statistics, studentPercentage, teacherPercentage)
 
   return (
     <div className="space-y-2">
       <PercentageBar
-        label="Estudantes"
-        count={statistics.studentSubmissions}
-        percentage={studentPercentage}
-      />
-      <PercentageBar
-        label="Professores"
+        label="Professores e administradores"
         count={statistics.teacherSubmissions}
         percentage={teacherPercentage}
       />

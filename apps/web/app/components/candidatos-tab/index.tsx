@@ -95,7 +95,7 @@ export function HomeTableCandidatos({
                 {capitalizarNomeCompleto(candidato.nome ?? "")}
               </div>
               <span className="inline-flex w-fit items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700">
-                {candidato.tipo}
+                {candidato.tipo[0].toUpperCase() + candidato.tipo.slice(1).toLowerCase()}
               </span>
               <div className="col-span-1 hidden text-sm text-neutral-500 md:flex">
                 {candidato.email}

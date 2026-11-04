@@ -4,6 +4,7 @@ import { Users } from "../../database/index.js";
 export const createUserSchema = createInsertSchema(Users)
   .omit({
     passwordHash: true,
+    ativo: true,
     createdAt: true,
     updatedAt: true,
   })
@@ -16,7 +17,7 @@ export const preRegisterUserSchema = createUserSchema.pick({
 });
 
 export const idParamSchema = z.object({
-  param: z.object({ id: z.coerce.number() }),
+  param: z.object({ id: z.string().uuid() }),
 });
 
 export const deleteUserQuerySchema = z.object({

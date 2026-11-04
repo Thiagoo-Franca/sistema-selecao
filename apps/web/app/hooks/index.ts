@@ -1,7 +1,5 @@
 // Export all centralized hooks
 export * from "./user.hooks"
-export * from "./teacher-invitation.hooks"
-export * from "./student-invitation.hooks"
 export * from "./candidato.hooks"
 export * from "./auth/useLogin"
 export * from "./auth/useResetPassword"

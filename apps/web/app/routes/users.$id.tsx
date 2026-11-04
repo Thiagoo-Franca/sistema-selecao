@@ -95,7 +95,6 @@ export default function UserProfilePage() {
 
   const roleLabel = match(user.role)
     .with("TEACHER", () => "Professor")
-    .with("STUDENT", () => "Aluno")
     .with("ADMIN", () => "Administrador")
     .otherwise(() => user.role)
 
@@ -164,9 +163,7 @@ export default function UserProfilePage() {
             <CardDescription>
               {user.role === "TEACHER"
                 ? "Bancas onde este professor participou como orientador, coorientador ou avaliador"
-                : user.role === "STUDENT"
-                  ? "Bancas onde este aluno defendeu"
-                  : "Bancas onde este usuário participou"}
+                : "Bancas onde este usuário participou"}
             </CardDescription>
           </CardHeader>
           {/*

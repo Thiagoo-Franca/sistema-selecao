@@ -1,13 +1,13 @@
 import { AUTH_TOKEN_KEY } from "@/config/env"
 import { useMutation } from "@tanstack/react-query"
 import { rpcReturn, type RpcType } from "../lib/utils"
-import apiClient from "./apiClient"
+import apiClient, { publicApiClient } from "./apiClient"
 
 export const useLoginMutation = () => {
   type query = RpcType<typeof apiClient.auth.login.$post>
   return useMutation({
     mutationFn: async (request: query["input"]) => {
-      const response = await apiClient.auth.login.$post(request)
+      const response = await publicApiClient.auth.login.$post(request)
       return rpcReturn(response)
     },
     onSuccess: (response) => {
@@ -19,21 +19,11 @@ export const useLoginMutation = () => {
   })
 }
 
-export const useRegisterMutation = () => {
-  type Query = RpcType<typeof apiClient.auth.register.$post>
-  return useMutation({
-    mutationFn: async (request: Query["input"]) => {
-      const response = await apiClient.auth.register.$post(request)
-      return rpcReturn(response)
-    },
-  })
-}
-
 export const useRequestPasswordResetMutation = () => {
   type Query = RpcType<(typeof apiClient.usuario)["request-password-reset"]["$post"]>
   return useMutation({
     mutationFn: async (request: Query["input"]) => {
-      const response = await apiClient.usuario["request-password-reset"]["$post"](request)
+      const response = await publicApiClient.usuario["request-password-reset"]["$post"](request)
       return rpcReturn(response)
     },
   })
@@ -43,7 +33,7 @@ export const useResetPasswordMutation = () => {
   type Query = RpcType<(typeof apiClient.usuario)["reset-password"]["$post"]>
   return useMutation({
     mutationFn: async (request: Query["input"]) => {
-      const response = await apiClient.usuario["reset-password"]["$post"](request)
+      const response = await publicApiClient.usuario["reset-password"]["$post"](request)
       return rpcReturn(response)
     },
   })

@@ -18,7 +18,7 @@ export const createFeatureRequest = async (
   data: CreateFeatureRequestInput,
 ): Promise<AppResult<{ id: number }, CreateFeatureRequestError>> => {
   const dbInstance = c.get("db");
-  const userId = c.get("jwtPayload").sub;
+  const userId = c.get("usuario").id;
 
   try {
     const [newFeatureRequest] = await dbInstance

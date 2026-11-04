@@ -62,3 +62,6 @@ yarn-error.log*
 *.synctex.gz
 
 apps/server/api/index.mjs
+
+# Local architectural work plans
+PLANO-TRABALHO-BACKEND.md

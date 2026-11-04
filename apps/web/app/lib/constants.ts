@@ -1,3 +1,10 @@
+export const TABS = [
+  { value: "meus-candidatos", label: "Meus Candidatos", type: "meus", onlyAdmin: false },
+  { value: "candidatos-mestrado", label: "Mestrado", type: "mestrado", onlyAdmin: false },
+  { value: "candidatos-doutorado", label: "Doutorado", type: "doutorado", onlyAdmin: false },
+  { value: "professores", label: "Professores", type: "professores", onlyAdmin: true },
+] as const
+
 export const GRU_OPTIONS = [
   { value: "isento", label: "ISENTO" },
   { value: "pago", label: "PAGO" },

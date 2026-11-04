@@ -1,6 +1,5 @@
 import {
   useCandidatesByTeacherId,
-  useCandidatos,
   useCandidatosDoutorado,
   useCandidatosMestrado,
   useTeachers,
@@ -35,7 +34,7 @@ export function CandidatosTab({
   setOrder,
 }: CandidatosTabProps) {
   const user = useUser().data
-  const todosQuery = useCandidatos()
+
   const mestradoQuery = useCandidatosMestrado()
   const doutoradoQuery = useCandidatosDoutorado()
   const meusCandidatosQuery = useCandidatesByTeacherId(user?.id ?? 0)
@@ -50,10 +49,10 @@ export function CandidatosTab({
   }
 
   const candidateQuery = {
-    todos: todosQuery,
     mestrado: mestradoQuery,
     doutorado: doutoradoQuery,
     meus: meusCandidatosQuery,
+    professores: professoresQuery,
   }[type === "professores" ? "todos" : (type ?? "todos")]
 
   function renderContent() {

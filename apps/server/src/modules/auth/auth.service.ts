@@ -11,7 +11,6 @@ import {
 } from "../../database/schema.js";
 import { err, ok, type AppResult } from "../../result.js";
 import { type AppVariables } from "../../types.js";
-import { type RegisterUserInput } from "./auth.schema.js";
 import {
   JWT_AUDIENCE,
   JWT_EXPIRY_SECONDS,
@@ -19,19 +18,8 @@ import {
   JWT_SECRET,
 } from "./jwt.js";
 
-export const getUserService = async (
-  c: Context<{ Variables: AppVariables }>,
-) => {
-  const dbInstance = c.get("db");
-  const user = await dbInstance
-    .select()
-    .from(Users)
-    .where(eq(Users.id, Number(c.get("jwtPayload").sub)));
-  return ok(user);
-};
-
 interface LoginResponse {
-  id: number;
+  id: string;
   token: string;
   role: string;
   name: string;
@@ -62,6 +50,10 @@ export const loginUserService = async (
     if (!user) {
       console.log(`Login attempt failed: User not found for email ${email}`);
       return err({ type: "invalid_credentials" });
+    }
+
+    if (!user.ativo) {
+      return err({ type: "inactive_user" });
     }
 
     if (!user.passwordHash) {
@@ -109,6 +101,7 @@ export const loginUserService = async (
         matricula: user.matricula,
         areas: user.areas,
         academicTitle: user.academicTitle,
+        ativo: user.ativo,
         updatedAt: user.updatedAt,
       },
     });
@@ -385,89 +378,3 @@ export const verifyInviteHashService = async (
 };
 
 */
-
-interface RegisterUserResponse {
-  userId: number;
-}
-
-type RegisterUserServiceError =
-  | { type: "duplicate_email" }
-  | { type: "duplicate_username" }
-  | { type: "hashing_error" }
-  | { type: "database_error" };
-
-// --- Register User Service ---
-export const registerUserService = async (
-  c: Context<{ Variables: AppVariables }>,
-  userData: RegisterUserInput,
-): Promise<AppResult<RegisterUserResponse, RegisterUserServiceError>> => {
-  const dbInstance = c.get("db");
-  const { email, password, nome, school, academicTitle } = userData;
-
-  try {
-    // Check for duplicate email
-    const existingEmail = await dbInstance
-      .select({ id: Users.id })
-      .from(Users)
-      .where(eq(Users.email, email))
-      .limit(1);
-    console.log("existingEmail", existingEmail, email, existingEmail.length);
-
-    if (existingEmail.length > 0) {
-      console.log(`Registration failed: Email ${email} already exists.`);
-      return err({ type: "duplicate_email" });
-    }
-
-    // Check for duplicate username
-    const existingUsername = await dbInstance
-      .select({ id: Users.id })
-      .from(Users)
-      .where(eq(Users.email, email))
-      .limit(1);
-
-    if (existingUsername.length > 0) {
-      console.log(`Registration failed: Username ${email} already exists.`);
-      return err({ type: "duplicate_username" });
-    }
-
-    // Hash password
-    let passwordHash: string;
-    try {
-      passwordHash = await bcrypt.hash(password, 10);
-    } catch (hashError) {
-      console.error("Password hashing failed during registration:", hashError);
-      return err({ type: "hashing_error" });
-    }
-
-    // Insert new user
-    const now = new Date();
-    const newUserResult = await dbInstance
-      .insert(Users)
-      .values({
-        passwordHash: passwordHash,
-        email: email,
-        nome: nome,
-        school: school,
-        academicTitle: academicTitle,
-        matricula: userData.matricula,
-        createdAt: now,
-        updatedAt: now,
-        role: "STUDENT",
-      })
-      .returning({ insertedId: Users.id });
-
-    const insertedUser = newUserResult[0];
-    if (!insertedUser || !insertedUser.insertedId) {
-      console.error("Failed to insert user or retrieve ID after insert.");
-      return err({ type: "database_error" });
-    }
-
-    console.log(
-      `User registered successfully: ${email}, ID: ${insertedUser.insertedId}`,
-    );
-    return ok({ userId: insertedUser.insertedId });
-  } catch (dbError) {
-    console.error("Database error during registration:", dbError);
-    return err({ type: "database_error" });
-  }
-};

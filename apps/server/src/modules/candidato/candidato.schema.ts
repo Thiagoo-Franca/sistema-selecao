@@ -1,37 +1,9 @@
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { CandidatoMestrado, NotaMestrado } from "../../database/schema";
-
-const notaMestradoSchema = createInsertSchema(NotaMestrado)
-  .omit({ id: true, idCandidato: true, notaEtapaII: true })
-  .nullish();
-
-export const uploadCandidatosMestradoSchema = z.array(
-  createInsertSchema(CandidatoMestrado, {
-    numeroInscricao: (s) => s.min(1),
-  })
-    .omit({ id: true, avaliado: true, tipoCurso: true })
-    .extend({ notas: notaMestradoSchema }),
-);
-
-export type UploadCandidatosMestradoInput = z.infer<
-  typeof uploadCandidatosMestradoSchema
->;
-const areaEnum = z.enum([
-  "CVIS",
-  "CD",
-  "ICOT",
-  "SIBW",
-  "IEDU",
-  "ES",
-  "RCSD",
-  "SCTR",
-  "SSEG",
-]);
+import { AREAS, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
+const areaEnum = z.enum(AREAS);
 const updateCandidatoMestradoSchema = z.object({
-  avaliado: z.boolean().optional(),
-  avaliadorId: z.number().int().positive().nullable().optional(),
-  auditorId: z.number().int().positive().nullable().optional(),
+  avaliadorId: z.string().uuid().nullable().optional(),
+  auditorId: z.string().uuid().nullable().optional(),
   primeiraAreaPreferencia: areaEnum.optional(),
   segundaAreaPreferencia: areaEnum.optional(),
   cpf: z
@@ -42,11 +14,9 @@ const updateCandidatoMestradoSchema = z.object({
   email: z.string().email("Email inválido").optional(),
   cidade: z.string().optional(),
   solicitouIsencaoTaxaInscricao: z.string().optional(),
-  isencaoAprovada: z.string().optional(),
-  gru: z
-    .enum(["isento", "pago", "aberto", "nao-isento", "nao-pagou"])
-    .optional(),
-  homologa: z.string().optional(),
+  isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
+  gru: z.enum(GRU_STATUS).optional(),
+  homologa: z.boolean().nullable().optional(),
   universidade: z.string().optional(),
   cursoGrad: z.string().optional(),
   cidadeGrad: z.string().optional(),
@@ -57,22 +27,8 @@ const updateCandidatoMestradoSchema = z.object({
 });
 
 export { updateCandidatoMestradoSchema };
-const updateNotaMestradoSchema = z.object({
-  grad: z.number().optional(),
-  area: z.number().optional(),
-  enade: z.number().optional(),
-  a1a2a3a4: z.number().optional(),
-  b1b2b3b4: z.number().optional(),
-  icIt: z.number().optional(),
-  poscomp: z.number().optional(),
-  disciplinaPosCapes6Mais: z.number().optional(),
-  disciplinaPosCapes3a5: z.number().optional(),
-  notaEtapaII: z.number().optional(),
-});
-export { updateNotaMestradoSchema };
 
-const updateCandidatoDoutoradoSchema = z.object({
-  avaliado: z.boolean().optional(),
+export const updateCandidatoDoutoradoSchema = z.object({
   avaliador: z.string().nullable().optional(),
   auditor: z.string().nullable().optional(),
   cpf: z
@@ -82,9 +38,9 @@ const updateCandidatoDoutoradoSchema = z.object({
   nome: z.string().min(1, "O nome é obrigatório").optional(),
   email: z.string().email("Email inválido").optional(),
   solicitouIsencaoTaxaInscricao: z.boolean().optional(),
-  isencaoAprovada: z.boolean().optional(),
-  gru: z.string().optional(),
-  homologa: z.string().optional(),
+  isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
+  gru: z.enum(GRU_STATUS).optional(),
+  homologa: z.boolean().nullable().optional(),
   areaPgcomp: z.string().optional(),
   orientadorMestrado: z.string().optional(),
   primeiraOpcaoOrientador: z.string().optional(),
@@ -97,15 +53,6 @@ const updateCandidatoDoutoradoSchema = z.object({
   nomeCursoMestrado: z.string().optional(),
   cidadeOndeRealizouMestrado: z.string().optional(),
 });
-export { updateCandidatoDoutoradoSchema };
-
-const updateNotaDoutoradoSchema = z.object({
-  msc: z.number().optional(),
-  areaFormacaoGraduacao: z.number().optional(),
-  conceitoCapesMestrado: z.number().optional(),
-  a1a2a3a4: z.number().optional(),
-  b1b2b3b4: z.number().optional(),
-  notaAnteprojeto: z.number().optional(),
-});
-
-export { updateNotaDoutoradoSchema };
+export type UpdateCandidatoDoutoradoInput = z.infer<
+  typeof updateCandidatoDoutoradoSchema
+>;

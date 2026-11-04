@@ -8,6 +8,7 @@ export const insertUserSchema = createInsertSchema(Users)
     createdAt: true,
     updatedAt: true,
     passwordHash: true,
+    ativo: true,
     role: true,
   })
   .extend({

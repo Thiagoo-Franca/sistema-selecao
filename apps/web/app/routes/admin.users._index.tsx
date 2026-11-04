@@ -56,7 +56,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUser } from "@/services/useUser"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { SelectUser } from "@tcc/server"
-import { AlertTriangle, Eye, MoreHorizontal, Search, Trash2, UserPlus } from "lucide-react"
+import { AlertTriangle, Eye, MoreHorizontal, Search, Trash2 } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Navigate, useNavigate } from "react-router"
@@ -159,18 +159,13 @@ export default function AdminUsersIndexPage() {
             className="pl-10"
           />
         </div>
-        <Button onClick={() => navigate("/admin/teacher-invitations")} variant="outline">
-          <UserPlus className="mr-2 h-4 w-4" />
-          Convites para Professores
-        </Button>
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="all">Todos ({filteredUsers.length})</TabsTrigger>
           <TabsTrigger value="ADMIN">Administrador ({getUsersByRole("ADMIN").length})</TabsTrigger>
           <TabsTrigger value="TEACHER">Professor ({getUsersByRole("TEACHER").length})</TabsTrigger>
-          <TabsTrigger value="STUDENT">Aluno ({getUsersByRole("STUDENT").length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-6">
@@ -204,15 +199,6 @@ export default function AdminUsersIndexPage() {
           />
         </TabsContent>
 
-        <TabsContent value="STUDENT" className="mt-6">
-          <UserTable
-            users={getUsersByRole("STUDENT")}
-            searchQuery={searchQuery}
-            onViewUser={(user) => navigate(`/admin/users/${user.id}`)}
-            onEditUser={handleEditUser}
-            onDeleteUser={handleDeleteUser}
-          />
-        </TabsContent>
       </Tabs>
 
       <EditUserDialog user={editingUser} open={editDialogOpen} onOpenChange={setEditDialogOpen} />
@@ -272,7 +258,6 @@ function UserTable({
                   <Badge variant="outline">
                     {match(user.role)
                       .with("TEACHER", () => "Professor")
-                      .with("STUDENT", () => "Aluno")
                       .with("ADMIN", () => "Administrador")
                       .otherwise(() => user.role)}
                   </Badge>
@@ -328,7 +313,7 @@ const updateUserSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   school: z.string().min(1, "Escola é obrigatória"),
   academicTitle: z.string().min(1, "Título acadêmico é obrigatório"),
-  role: z.enum(["STUDENT", "TEACHER", "ADMIN"], {
+  role: z.enum(["TEACHER", "ADMIN"], {
     required_error: "Função é obrigatória",
   }),
 })
@@ -352,7 +337,7 @@ function EditUserDialog({
       nome: user?.nome || "",
       school: user?.school || "",
       academicTitle: user?.academicTitle || "",
-      role: user?.role || "STUDENT",
+      role: user?.role || "TEACHER",
     },
   })
 
@@ -454,7 +439,6 @@ function EditUserDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="STUDENT">Aluno</SelectItem>
                       <SelectItem value="TEACHER">Professor</SelectItem>
                       <SelectItem value="ADMIN">Administrador</SelectItem>
                     </SelectContent>

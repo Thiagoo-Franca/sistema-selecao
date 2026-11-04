@@ -5,10 +5,8 @@ import { z } from "zod";
 import { AppError } from "../../error.js";
 import { type AppVariables } from "../../types.js";
 
-import { insertUserSchema } from "./auth.schema.js";
 import {
   loginUserService,
-  registerUserService,
   requestPasswordResetService,
   resetPasswordService,
   // verifyInviteHashService,
@@ -149,31 +147,4 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
       }
       return c.json({ message: "Senha redefinida com sucesso." }, 200);
     },
-  )
-  .post("/register", zValidator("json", insertUserSchema), async (c) => {
-    const userData = c.req.valid("json");
-    const result = await registerUserService(c, userData);
-
-    if (!result.ok) {
-      throw match(result.error)
-        .with(
-          { type: "duplicate_email" },
-          () => new AppError(409, "Este email já está em uso."),
-        )
-        .with(
-          { type: "duplicate_username" },
-          () => new AppError(409, "Este nome de usuário já está em uso."),
-        )
-        .with(
-          { type: "database_error" },
-          () =>
-            new AppError(
-              500,
-              "Erro ao criar o usuário. Tente novamente mais tarde.",
-            ),
-        )
-        .otherwise(() => new AppError(500, "Ocorreu um erro inesperado."));
-    }
-
-    return c.json(result.data, 201);
-  });
+  );

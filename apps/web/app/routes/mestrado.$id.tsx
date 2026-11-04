@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { CandidatoMestradoNotaSchema, type CandidatoMestradoNota } from "@/schema/schema"
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
-import { calcularMestradoNota, paraNumeroSeguro } from "@/lib/calculoNotas"
+import { calcularMestradoNota, paraNumeroSeguro } from "@tcc/shared"
 import { useTeachersSimplified, useToast } from "@/hooks"
 import {
   useCandidatoMestradoById,
@@ -25,8 +25,8 @@ import FormsAvaliacaoMestrado from "@/components/avaliacao/mestrado/forms"
 import CandidateInfo from "@/components/avaliacao/mestrado/candidate-info"
 import CandidateActions from "@/components/avaliacao/mestrado/candidate-actions"
 
-type TeacherOption = { id: number; nome: string }
-type TeacherData = { id: number; nome?: string | null; name?: string | null }
+type TeacherOption = { id: string; nome: string }
+type TeacherData = { id: string; nome?: string | null; name?: string | null }
 
 export const meta: Route.MetaFunction = () => [
   { title: `SISSEL - Avaliação candidato Mestrado` },
@@ -36,6 +36,8 @@ export const meta: Route.MetaFunction = () => [
 export default function AvaliacaoCandidatoMestradoPage() {
   const { id } = useParams<{ id: string | undefined }>()
   const [nota, setNota] = useState(0)
+  const [RGRAD, setRGRAD] = useState(0)
+  const [RPQ_GRAD, setRPQ_GRAD] = useState(0)
 
   const userQuery = useUser()
   const candidatoQuery = useCandidatoMestradoById(id ?? "")
@@ -95,7 +97,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
         solicitouIsencaoTaxaInscricao: valorIsencaoSelect(candidato.solicitouIsencaoTaxaInscricao),
         isencaoAprovada: candidato.isencaoAprovada ?? undefined,
         gru: normalizeGru(candidato.gru),
-        Homologa: valorSimNaoSelect(candidato.homologa),
+        homologa:
+          candidato.homologa === true ? true : candidato.homologa === false ? false : undefined,
         especiais: paraBooleano(candidato.especiais),
         cotas: paraBooleano(candidato.cotas),
         SUPRA: paraBooleano(candidato.supra),
@@ -163,6 +166,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
     })
 
     setNota(resultado.pontuacao)
+    setRGRAD(resultado.RGRAD)
+    setRPQ_GRAD(resultado.RPQ_GRAD)
   }, [camposNota])
 
   async function onSubmit(dados: CandidatoMestradoNota) {
@@ -173,13 +178,12 @@ export default function AvaliacaoCandidatoMestradoPage() {
         updateCandidatoMutation.mutateAsync({
           id,
           body: {
-            avaliado: true,
             avaliadorId: dados.avaliadorId || undefined,
             auditorId: dados.auditorId || undefined,
             solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
             isencaoAprovada: dados.isencaoAprovada ?? undefined,
             gru: dados.gru || undefined,
-            homologa: dados.Homologa || undefined,
+            homologa: dados.homologa === true ? true : dados.homologa === false ? false : undefined,
             especiais: dados.especiais ?? undefined,
             vagasNegrosPardos: dados.cotas ?? undefined,
             vagasSupranumerarias: dados.SUPRA ?? undefined,
@@ -241,6 +245,8 @@ export default function AvaliacaoCandidatoMestradoPage() {
         control={control}
         errors={errors}
         isSubmitting={isSubmitting}
+        RGRAD={RGRAD}
+        RPQ_GRAD={RPQ_GRAD}
         nota={nota}
         isAdmin={isAdmin}
         teachersData={teachersData}

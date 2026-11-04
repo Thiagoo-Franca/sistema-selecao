@@ -1,34 +1,37 @@
-import type { Context } from "hono";
 import { createMiddleware } from "hono/factory";
+import type { Context } from "hono";
 import { type SignatureKey } from "hono/utils/jwt/jws";
-import { match } from "ts-pattern";
-import { AppError } from "../../error.js";
-import { getUserById } from "../usuario/usuario.service.js";
-
 import { verify } from "hono/jwt";
+import { AppError } from "../../error.js";
 import type { AppVariables } from "../../types.js";
 import type { UserRole } from "../../database/schema.js";
+import { Users } from "../../database/schema.js";
+import { eq } from "drizzle-orm";
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const checkRole = (roles: UserRole[]) =>
   createMiddleware<{ Variables: AppVariables }>(async (c, next) => {
     const userId = c.get("jwtPayload")?.sub;
     if (!userId) {
-      throw new AppError(401, "Usuário não autenticado");
+      throw new AppError(401, "Não autenticado");
     }
-    const result = await getUserById(c, Number(userId));
-    if (!result.ok) {
-      throw match(result.error)
-        .with(
-          { type: "user_not_found" },
-          () => new AppError(404, "Usuário não encontrado"),
-        )
-        .with(
-          { type: "database_error" },
-          () => new AppError(500, "Erro ao buscar usuário"),
-        )
-        .exhaustive();
+
+    const [user] = await c
+      .get("db")
+      .select({ id: Users.id, role: Users.role, ativo: Users.ativo })
+      .from(Users)
+      .where(eq(Users.id, userId))
+      .limit(1);
+
+    if (!user || !user.ativo) {
+      throw new AppError(401, "Não autenticado");
     }
-    if (!roles.includes(result.data.role as UserRole)) {
+
+    c.set("usuario", { id: user.id, role: user.role });
+
+    if (!roles.includes(user.role)) {
       throw new AppError(
         403,
         "Usuário não tem permissão para acessar esta rota",
@@ -37,43 +40,39 @@ export const checkRole = (roles: UserRole[]) =>
     return next();
   });
 
-export const appJwt = (options: { secret: SignatureKey }) => {
-  return createMiddleware(async (ctx, next) => {
-    const credentials = ctx.req.raw.headers.get("Authorization");
-    if (!credentials) {
-      return await next();
-    }
-    const [, token] = credentials.split(/\s+/);
-    if (!token) {
-      return await next();
-    }
-
-    let payload;
-    try {
-      payload = await verify(token, options.secret);
-    } catch (e) {
-      return await next();
-    }
-    if (!payload) {
-      return await next();
-    }
-
-    ctx.set("jwtPayload", payload);
-    await next();
-  });
+export const getUsuarioAutenticado = (
+  c: Context<{ Variables: AppVariables }>,
+) => {
+  const usuario = c.get("usuario");
+  if (!usuario) {
+  throw new AppError(401, "Não autenticado");
+  }
+  return usuario;
 };
 
-function unauthorizedResponse(opts: {
-  ctx: Context;
-  error: string;
-  errDescription: string;
-  statusText?: string;
-}) {
-  return new Response("Unauthorized", {
-    status: 401,
-    statusText: opts.statusText,
-    headers: {
-      "WWW-Authenticate": `Bearer realm="${opts.ctx.req.url}",error="${opts.error}",error_description="${opts.errDescription}"`,
-    },
+export const appJwt = (options: { secret: SignatureKey }) =>
+  createMiddleware<{ Variables: AppVariables }>(async (c, next) => {
+    const credentials = c.req.raw.headers.get("Authorization");
+    if (!credentials) {
+      return next();
+    }
+
+    const bearerMatch = credentials.match(/^Bearer\s+([^\s]+)$/i);
+    if (!bearerMatch) {
+      throw new AppError(401, "Não autenticado");
+    }
+
+    let payload: Awaited<ReturnType<typeof verify>>;
+    try {
+      payload = await verify(bearerMatch[1], options.secret, "HS256");
+    } catch {
+      throw new AppError(401, "Não autenticado");
+    }
+
+    if (typeof payload.sub !== "string" || !UUID_PATTERN.test(payload.sub)) {
+      throw new AppError(401, "Não autenticado");
+    }
+
+    c.set("jwtPayload", payload);
+    return next();
   });
-}

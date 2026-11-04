@@ -33,6 +33,8 @@ interface FormsAvaliacaoMestradoProps {
   isTeachersLoading: boolean
   candidato: CandidatoMestradoComRelacoes
   onSubmit: (data: any) => Promise<void>
+  RGRAD: number
+  RPQ_GRAD: number
 }
 
 export default function FormsAvaliacaoMestrado({
@@ -47,6 +49,8 @@ export default function FormsAvaliacaoMestrado({
   isTeachersLoading,
   candidato,
   onSubmit,
+  RGRAD,
+  RPQ_GRAD,
 }: FormsAvaliacaoMestradoProps) {
   return (
     <form className="container mx-auto flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
@@ -233,18 +237,18 @@ export default function FormsAvaliacaoMestrado({
         {/* Homologa */}
         <Controller
           control={control}
-          name="Homologa"
+          name="homologa"
           render={({ field }) => (
             <Field className="flex flex-col gap-4">
-              <FieldLabel htmlFor="Homologa" className="font-bold text-muted-foreground">
+              <FieldLabel htmlFor="homologa" className="font-bold text-muted-foreground">
                 Homologa?
               </FieldLabel>
               <Select
                 key={valorSimNaoSelect(field.value)}
-                onValueChange={(v) => field.onChange(v === "sim" ? "sim" : "nao")}
+                onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
                 value={valorSimNaoSelect(field.value)}
               >
-                <SelectTrigger className="w-full max-w-[400px]" id="Homologa">
+                <SelectTrigger className="w-full max-w-[400px]" id="homologa">
                   <SelectValue placeholder="Homologa?" />
                 </SelectTrigger>
                 <SelectContent>
@@ -254,7 +258,7 @@ export default function FormsAvaliacaoMestrado({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FieldError>{errors.Homologa?.message}</FieldError>
+              <FieldError>{errors.homologa?.message}</FieldError>
             </Field>
           )}
         />
@@ -614,6 +618,9 @@ export default function FormsAvaliacaoMestrado({
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         {/* Prévia Nota */}
         <Field className="flex flex-col gap-4">
+          <FieldDescription className="text-sm text-muted-foreground">
+            RGRAD: {RGRAD.toFixed(2)} | RPQ_GRAD: {RPQ_GRAD.toFixed(2)}
+          </FieldDescription>
           <FieldLabel
             htmlFor=" notaFinal"
             className="text-lg font-bold text-muted-foreground"

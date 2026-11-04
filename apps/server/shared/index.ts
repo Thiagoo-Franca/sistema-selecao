@@ -7,5 +7,12 @@ export type {
   CandidatoDoutoradoComRelacoes,
   CandidatoMestradoComRelacoes,
 } from "../src/modules/candidato/candidato.service";
+export type {
+  CandidatoComRelacoes,
+  CandidatoResumo,
+  ResponsavelCandidato,
+  TipoCandidato,
+  NotaMestradoUpdate,
+} from "@tcc/shared";
 
 export type { AppType };

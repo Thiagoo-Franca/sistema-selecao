@@ -1,6 +1,8 @@
+import { AREAS, GRU_STATUS } from "@tcc/shared";
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  index,
   integer,
   numeric,
   pgEnum,
@@ -12,45 +14,29 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const tipoCursoEnum = pgEnum("tipo_curso", ["Doutorado", "Mestrado"]);
+export const tipoCursoEnum = pgEnum("tipo_curso", ["doutorado", "mestrado"]);
+
 export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number];
 
-export const Area = pgEnum("area_preferencia", [
-  "CVIS", //   Computação Visual",
-  "CD", //  Ciência de Dados",
-  "ICOT", //  Inteligência Computacional e Otimização",
-  "SIBW", //  Sistemas de Informação, Banco de Dados Web",
-  "IEDU", //  Informática & Educação",
-  "ES", //  Engenharia de Software",
-  "RCSD", //  Redes de Computadores e Sistemas Distribuídos",
-  "SCTR", //  Sistemas Ciberfísicos e de Tempo Real",
-  "SSEG", //  Segurança de Sistemas e Redes",
-]);
-export type AreaPreferencia = (typeof Area.enumValues)[number];
-/*
-
-export const Endereco = pgTable("endereco", {
-  id: serial("id").primaryKey(),
-  cep: text("cep").notNull(),
-  logradouro: text("logradouro").notNull(),
-  numero: text("numero"),
-  bairro: text("bairro").notNull(),
-  complemento: text("complemento"),
-  estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
-  municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
-});
-
-export type InsertEndereco = typeof Endereco.$inferInsert;
-export type SelectEndereco = typeof Endereco.$inferSelect;
-
-*/
+export const areaEnum = pgEnum("area", AREAS);
+export type Area = (typeof areaEnum.enumValues)[number];
+export const gruStatusEnum = pgEnum("gru_status", GRU_STATUS);
 
 export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
   idCandidato: uuid("id_candidato")
     .notNull()
-    .references(() => CandidatoMestrado.id)
+    .references(() => CandidatoMestrado.id, { onDelete: "cascade" })
     .unique(), // garante 1:1 com o candidato
+  avaliado: boolean("avaliado").notNull().default(false),
+  notaFinal: numeric("nota_final", { precision: 5, scale: 2, mode: "number" }),
+  formulaVersion: integer("formula_version").notNull().default(1),
+  avaliadoEm: timestamp("avaliado_em"),
+  avaliadoPorId: uuid("avaliado_por_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
   gradLink: text("grad_link"),
   grad: numeric("grad", { mode: "number" }),
@@ -86,12 +72,22 @@ export const NotaMestrado = pgTable("nota_mestrado", {
 export type InsertNotaMestrado = typeof NotaMestrado.$inferInsert;
 export type SelectNotaMestrado = typeof NotaMestrado.$inferSelect;
 
+// Notas específicas da avaliação de candidatos ao doutorado.
 export const NotaDoutorado = pgTable("nota_doutorado", {
   id: serial("id").primaryKey(),
   idCandidato: uuid("id_candidato")
     .notNull()
-    .references(() => CandidatoDoutorado.id)
+    .references(() => CandidatoDoutorado.id, { onDelete: "cascade" })
     .unique(), // garante 1:1 com o candidato
+  avaliado: boolean("avaliado").notNull().default(false),
+  notaFinal: numeric("nota_final", { precision: 5, scale: 2, mode: "number" }),
+  formulaVersion: integer("formula_version").notNull().default(1),
+  avaliadoEm: timestamp("avaliado_em"),
+  avaliadoPorId: uuid("avaliado_por_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
   msc: numeric("msc", { mode: "number" }), // nota do mestrado
   areaFormacaoGraduacao: numeric("area_formacao_graduacao", { mode: "number" }),
@@ -107,91 +103,47 @@ export type SelectNotaDoutorado = typeof NotaDoutorado.$inferSelect;
 const candidatoBaseColumns = {
   id: uuid("id").primaryKey().defaultRandom(),
   numeroInscricao: text("numero_inscricao"),
-  avaliado: boolean("avaliado").notNull().default(false),
-  cpf: text("cpf"), // .notNull(), // CPF pode ser nulo por enquanto
-  nome: text("nome"),
+  cpf: text("cpf"),
+  nome: text("nome").notNull(),
   email: text("email"),
 
   solicitouIsencaoTaxaInscricao: text("solicitou_isencao_taxa_inscricao"),
-  isencaoAprovada: text("isencao_aprovada"),
-  gru: text("gru"),
-  gruLink: text("gru_link"), // link para PDF da GRU
-  homologa: text("homologa"), // link para PDF da homologação
-  // status: text("status").notNull(), // Ex: 'Inscricao Submetida', 'Aprovada', 'Rejeitada'
-  // dataInscricao: timestamp("data_inscricao").notNull(),
-  // sexo: sexoEnum("sexo").notNull(), // Ex: 'Masculino', 'Feminino', 'Outro'
+  isencaoAprovada: text("isencao_aprovada")
+    .notNull()
+    .default("nao-solicitou"),
+  gru: gruStatusEnum("gru"),
+  gruLink: text("gru_link"), // Link para PDF do GRU pago
+  homologa: boolean("homologa"),
 
-  // dados pessoais
-  // estadoCivil: estadoCivilEnum("estado_civil").notNull(), // Ex: 'Solteiro', 'Casado', 'Divorciado'
-  // dataNascimento: timestamp("data_nascimento").notNull(),
-  // raca: text("raca").notNull(), // Ex: 'Branco', 'Preto', 'Pardo', 'Amarelo', 'Indígena'
-  // nomeMae: text("nome_mae").notNull(),
-  // nomePai: text("nome_pai"),
-  // tipoEscolaEnsinoMedio: text("tipo_escola_ensino_medio").notNull(), // Ex: 'Publica', 'Privada', 'Particular'
+  especiais: text("especiais"), // Texto pois pode conter links para documentos comprobatórios
+  cotas: text("cotas"), // Texto pois pode conter links para documentos comprobatórios
+  supra: text("supra"), // Texto pois pode conter links para documentos comprobatórios
 
-  // naturalidade
-  // pais: text("pais").notNull(), // Ex: 'Brasil', 'Argentina', etc.
-  // estado: text("estado").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
-  // municipio: text("municipio").notNull(), // Ex: 'Salvador', 'Rio de Janeiro', etc.
-
-  // documentos
-  // rg: text("rg").notNull(),
-  //orgaoExpedidor: text("orgao_expedidor").notNull(), // Ex: 'SSP', 'DETRAN', etc.
-  // estadoExpedicao: text("estado_expedicao").notNull(), // Ex: 'Bahia', 'São Paulo', etc.
-  // dataExpedicao: timestamp("data_expedicao").notNull(),
-  // tituloEleitor: text("titulo_eleitor").notNull(),
-  // secaoEleitoral: text("secao_eleitoral").notNull(),
-  // zonaEleitoral: text("zona_eleitoral"),
-  // passaporte: text("passaporte"),
-
-  // endereco
-  // idEndereco: integer("id_endereco")
-  //  .notNull()
-  //  .references(() => Endereco.id),
-
-  // telefoneFixo: text("telefone_fixo"),
-  // telefoneCelular: text("telefone_celular").notNull(),
-
-  // outras informacoes para o processo seletivo
-  // linhaPesquisa: text("linha_pesquisa").notNull(), // Ex: 'Inteligência Artificial', 'Sistemas de Informação', etc.
-
-  // formulario de inscricao para mestrado/doutorado em ciencia da computacao
-  // copiaCPF: text("copia_cpf").notNull(), // link para PDF da cópia do CPF
-  // copiaPassaporteOuRNE: text("copia_passaporte_ou_rne"), // link para PDF da cópia do passaporte ou RNE, apenas para estrangeiros
-  // copiaDocumentoIdentificacao: text("copia_documento_identificacao"), // link para PDF da cópia do RG ou CNH, apenas para brasileiros
-  // comprovacaoPesquisas: text("comprovacao_pesquisas").notNull(), // link para PDF de comprovação de participação em pesquisas, publicações, etc.
-  // possuiNecessidadesEspeciais: boolean("possui_necessidades_especiais")
-  //.notNull()
-  //default(false),
-  especiais: text("especiais"),
-  cotas: text("cotas"),
-  supra: text("supra"),
-
-  avaliadorId: integer("avaliador_id").references(() => Users.id),
-  auditorId: integer("auditor_id").references(() => Users.id),
+  avaliadorId: uuid("avaliador_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
+  auditorId: uuid("auditor_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 };
 
 export const CandidatoDoutorado = pgTable(
   "candidato_doutorado",
   {
     ...candidatoBaseColumns,
-    // dados inscricao
-    tipoCurso: tipoCursoEnum("tipo_curso").default("Doutorado").notNull(),
-
-    // formulario de inscricao para doutorado em ciencia da computacao
+    tipoCurso: tipoCursoEnum("tipo_curso").default("doutorado").notNull(),
     historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
     copiaDiplomaMestrado: text("copia_diploma_mestrado").notNull(), // link para PDF da cópia do diploma do mestrado ou declaracao de conclusão
     historicoMestrado: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado ou declaração de conclusão
     nomeUniversidadeMestrado: text("nome_universidade_mestrado").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
     nomeCursoMestrado: text("nome_curso_mestrado").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
-    // falta comprovações de pesquisa
     anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
     conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
     primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
     segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
     terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
-    isencaoAprovada: boolean("isencao_aprovada"),
-
     areaPgcomp: text("area_pgcomp"),
     orientadorMestrado: text("orientador_mestrado"),
   },
@@ -201,27 +153,14 @@ export const CandidatoDoutorado = pgTable(
     ).on(table.numeroInscricao),
     cpfUnique: unique("candidato_doutorado_cpf_unique").on(table.cpf),
     emailUnique: unique("candidato_doutorado_email_unique").on(table.email),
-    // rgUnique: unique("candidato_doutorado_rg_unique").on(table.rg),
-    //tituloEleitorUnique: unique("candidato_doutorado_titulo_eleitor_unique").on(
-    //  table.tituloEleitor,
-    //),
-    //passaporteUnique: unique("candidato_doutorado_passaporte_unique").on(
-    //  table.passaporte,
-    //),
+    avaliadorIdIdx: index("candidato_doutorado_avaliador_id_idx").on(
+      table.avaliadorId,
+    ),
+    auditorIdIdx: index("candidato_doutorado_auditor_id_idx").on(
+      table.auditorId,
+    ),
   }),
 );
-
-export const userArea = pgEnum("user_area", [
-  "CVIS", //   Computação Visual",
-  "CD", //  Ciência de Dados",
-  "ICOT", //  Inteligência Computacional e Otimização",
-  "SIBW", //  Sistemas de Informação, Banco de Dados Web",
-  "IEDU", //  Informática & Educação",
-  "ES", //  Engenharia de Software",
-  "RCSD", //  Redes de Computadores e Sistemas Distribuídos",
-  "SCTR", //  Sistemas Ciberfísicos e de Tempo Real",
-  "SSEG", //  Segurança de Sistemas e Redes",
-]);
 
 export type InsertCandidatoDoutorado = typeof CandidatoDoutorado.$inferInsert;
 export type SelectCandidatoDoutorado = typeof CandidatoDoutorado.$inferSelect;
@@ -231,13 +170,13 @@ export const CandidatoMestrado = pgTable(
   {
     ...candidatoBaseColumns,
     // dados da inscricao
-    tipoCurso: tipoCursoEnum("tipo_curso").default("Mestrado").notNull(),
-    primeiraAreaPreferencia: userArea("primeira_area_preferencia"),
-    segundaAreaPreferencia: userArea("segunda_area_preferencia"),
+    tipoCurso: tipoCursoEnum("tipo_curso").default("mestrado").notNull(),
+    primeiraAreaPreferencia: areaEnum("primeira_area_preferencia"),
+    segundaAreaPreferencia: areaEnum("segunda_area_preferencia"),
 
     universidade: text("universidade"),
     curso: text("curso"),
-    cidadeGraduacao: text("cidadeGraduacao"),
+    cidadeGraduacao: text("cidade_graduacao"),
   },
   (table) => ({
     numeroInscricaoUnique: unique(
@@ -245,30 +184,30 @@ export const CandidatoMestrado = pgTable(
     ).on(table.numeroInscricao),
     cpfUnique: unique("candidato_mestrado_cpf_unique").on(table.cpf),
     emailUnique: unique("candidato_mestrado_email_unique").on(table.email),
-    // rgUnique: unique("candidato_mestrado_rg_unique").on(table.rg),
-    //tituloEleitorUnique: unique("candidato_mestrado_titulo_eleitor_unique").on(
-    //  table.tituloEleitor,
-    //),
-    //passaporteUnique: unique("candidato_mestrado_passaporte_unique").on(
-    //table.passaporte,
-    //),
+    avaliadorIdIdx: index("candidato_mestrado_avaliador_id_idx").on(
+      table.avaliadorId,
+    ),
+    auditorIdIdx: index("candidato_mestrado_auditor_id_idx").on(
+      table.auditorId,
+    ),
   }),
 );
 
 export type InsertCandidatoMestrado = typeof CandidatoMestrado.$inferInsert;
 export type SelectCandidatoMestrado = typeof CandidatoMestrado.$inferSelect;
 
-export const userRole = pgEnum("user_role", ["TEACHER", "ADMIN", "STUDENT"]); // student É TEMPORÁRIO, apenas para testes. O correto é TEACHER e ADMIN. Alunos não devem ter acesso ao sistema.
+export const userRole = pgEnum("user_role", ["TEACHER", "ADMIN"]);
 export type UserRole = (typeof userRole.enumValues)[number];
 export const Users = pgTable("usuario", {
-  id: serial("id").primaryKey(),
-  passwordHash: text("password_has").notNull(), // Nome da coluna original era password_has
+  id: uuid("id").primaryKey().defaultRandom(),
+  passwordHash: text("password_hash").notNull(),
   email: text("email").notNull().unique(),
   nome: text("nome").notNull(),
   school: text("school").notNull(), // Ex: Instituto de Computação
   matricula: text("matricula").notNull(),
-  areas: userArea("areas").array(), // Ex: ["CVIS", "CD"]
+  areas: areaEnum("areas").array(), // Ex: ["CVIS", "CD"]
   academicTitle: text("academic_title").notNull(), // Ex: Doutorado
+  ativo: boolean("ativo").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   role: userRole("role").notNull(),
@@ -276,93 +215,9 @@ export const Users = pgTable("usuario", {
 export type InsertUser = typeof Users.$inferInsert;
 export type SelectUser = typeof Users.$inferSelect;
 
-/*
-export const Cursos = pgTable("cursos", {
-  id: serial("id").primaryKey(),
-  nome: text("nome").notNull(),
-  sigla: text("sigla").notNull().unique(), // Ex: 'BCC', 'ENGCOMP'
-  // Adicionar outros campos como coordenacao, disciplina principal, etc., se necessário
-});
-export type InsertCurso = typeof Cursos.$inferInsert;
-export type SelectCurso = typeof Cursos.$inferSelect;
-*/
-
-/*
-export const modalidadeEnum = pgEnum("modalidade", ["remoto", "local"]);
-export const Bancas = pgTable(
-  "banca",
-  {
-    id: serial("id").primaryKey(),
-    // user_id no dump original parece redundante se temos a relação N:N em usuario_banca
-    // Mantendo por ora para refletir o dump, mas pode ser removido.
-    // userId: int('user_id').notNull().references(() => usuarios.id), // FK para usuario (Proprietário?)
-    orientadorId: integer("orientador_id")
-      .notNull()
-      .references(() => Users.id),
-    cursoId: integer("curso_id")
-      .notNull()
-      .references(() => Cursos.id), // FK para curso (ajustado de text)
-    autor: text("autor").notNull(), // Nome do autor/aluno principal
-    alunoId: integer("aluno_id")
-      .notNull()
-      .references(() => Users.id),
-    matricula: text("matricula"), // Matrícula do autor/aluno principal
-    turma: text("turma").notNull(),
-    periodoAcademico: text("periodo_academico").notNull(),
-    tituloTrabalho: text("titulo_trabalho").notNull(),
-    resumo: text("resumo").notNull(),
-    abstract: text("abstract").notNull(),
-    palavrasChave: text("palavras_chave").notNull(),
-    dataRealizacao: timestamp("data_realizacao").notNull(),
-    notaFinal: text("nota_final"),
-    local: text("local"), // Room or Meeting Link
-    modalidade: modalidadeEnum("modalidade").notNull(), // 'remoto' or 'local'
-    visible: boolean("visible").notNull().default(true),
-  },
-  (table) => {
-    return {
-      alunoCursoUnique: unique("aluno_curso_unique").on(
-        table.alunoId,
-        table.cursoId,
-      ),
-    };
-  },
-);
-export type InsertBanca = typeof Bancas.$inferInsert;
-export type SelectBanca = typeof Bancas.$inferSelect;
-*/
-
-/*
-export const documentos = pgTable("documento", {
-  id: serial("id").primaryKey(),
-  path: text("path"), // Caminho no storage
-  descricao: text("descricao").notNull(), // Nome original do arquivo?
-  status: text("status").notNull(), // Ex: 'pending', 'approved', 'rejected'
-  dataSubmissao: timestamp("data_submissao").notNull(),
-});
-*/
-
-/*
-export const invites = pgTable("invite", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => Users.id), // Quem foi convidado (opcional até aceitar?)
-  bancaId: integer("banca_id")
-    .notNull()
-    .references(() => Bancas.id), // Para qual banca
-  emailConvidado: text("email_convidado").notNull(), // Email para onde o convite foi enviado
-  roleConvidado: text("role_convidado").notNull(), // Papel oferecido (orientador, avaliador)
-  inviteHash: text("invite_hash").unique(), // Hash único do convite
-  status: text("status").default("pending"), // Ex: pending, accepted, expired
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-});
-
-*/
-
 export const resetPasswords = pgTable("reset_password", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => Users.id),
   resetPasswordHash: text("reset_password_hash").unique(),
@@ -372,98 +227,11 @@ export const resetPasswords = pgTable("reset_password", {
   expiresAt: timestamp("expires_at").notNull(), // Adicionado para controle
 });
 
-export const teacherInvitations = pgTable("teacher_invitation", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  nome: text("nome").notNull(),
-  invitationHash: text("invitation_hash").unique().notNull(),
-  status: text("status").default("pending").notNull(), // pending, used, expired
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-
-  expiresAt: timestamp("expires_at").notNull(),
-  invitedBy: integer("invited_by")
-    .notNull()
-    .references(() => Users.id), // Admin who sent the invitation
-  userId: integer("user_id").references(() => Users.id), // Set when account is created
-});
-export type InsertTeacherInvitation = typeof teacherInvitations.$inferInsert;
-export type SelectTeacherInvitation = typeof teacherInvitations.$inferSelect;
-
-export const studentInvitations = pgTable("student_invitation", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  nome: text("nome").notNull(),
-  matricula: text("matricula").notNull(),
-  invitationHash: text("invitation_hash").unique().notNull(),
-  status: text("status").default("pending").notNull(), // pending, used
-  createdAt: timestamp("created_at")
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  invitedBy: integer("invited_by")
-    .notNull()
-    .references(() => Users.id), // Teacher/Admin who sent the invitation
-  userId: integer("user_id")
-    .notNull()
-    .references(() => Users.id), // Stub Users row created with the invitation
-});
-export type InsertStudentInvitation = typeof studentInvitations.$inferInsert;
-export type SelectStudentInvitation = typeof studentInvitations.$inferSelect;
-
-/*
-export const sessions = pgTable("session", {
-  id: text("id").primaryKey(), // Aumentado tamanho
-  userId: integer("user_id").references(() => Users.id), // Associar sessão a usuário
-  expire: timestamp("expire").notNull(),
-  data: text("data"), // Usar text em vez de blob para JSON
-  // token_access removido, geralmente gerenciado por JWT em header
-});
-*/
-/*
-export const usuarioBancaRole = pgEnum("usuario_banca_role", [
-  "orientador",
-  "coorientador",
-  "aluno",
-  "avaliador",
-]);
-*/
-
-/*
-export const usuariosBancas = pgTable("usuario_banca", {
-  id: serial("id").primaryKey(),
-  usuarioId: integer("id_usuario")
-    .notNull()
-    .references(() => Users.id),
-  bancaId: integer("id_banca")
-    .notNull()
-    .references(() => Bancas.id),
-  role: usuarioBancaRole("role").notNull(),
-  nota: text("nota"),
-  // Adicionar unique constraint para (usuarioId, bancaId) ?
-});
-export type InsertUsuarioBanca = typeof usuariosBancas.$inferInsert;
-export type SelectUsuarioBanca = typeof usuariosBancas.$inferSelect;
-*/
-
-/*
-export const bancasDocumentos = pgTable("banca_documento", {
-  id: serial("id").primaryKey(),
-  bancaId: integer("id_banca")
-    .notNull()
-    .$type<number>() // Explicitly cast to integer
-    .references(() => Bancas.id, { onDelete: "cascade" }), // Ensure cascading deletes
-  documentoId: integer("id_documento")
-    .notNull()
-    .references(() => documentos.id),
-});
-*/
-
 // === FEEDBACK SYSTEM ===
 
 export const feedbackSubmissions = pgTable("feedback_submission", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => Users.id)
     .unique(), // Only one feedback per user
@@ -481,10 +249,9 @@ export const feedbackSubmissions = pgTable("feedback_submission", {
 export type InsertFeedbackSubmission = typeof feedbackSubmissions.$inferInsert;
 export type SelectFeedbackSubmission = typeof feedbackSubmissions.$inferSelect;
 
-/*
 export const featureRequests = pgTable("feature_request", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => Users.id),
   title: text("title").notNull(),
@@ -496,13 +263,12 @@ export const featureRequests = pgTable("feature_request", {
 });
 export type InsertFeatureRequest = typeof featureRequests.$inferInsert;
 export type SelectFeatureRequest = typeof featureRequests.$inferSelect;
-*/
-/*
+
 export const featureRequestVotes = pgTable(
   "feature_request_vote",
   {
     id: serial("id").primaryKey(),
-    userId: integer("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => Users.id),
     featureRequestId: integer("feature_request_id")
@@ -523,125 +289,16 @@ export const featureRequestVotes = pgTable(
 );
 export type InsertFeatureRequestVote = typeof featureRequestVotes.$inferInsert;
 export type SelectFeatureRequestVote = typeof featureRequestVotes.$inferSelect;
-*/
+
 // === DEFINIÇÃO DAS RELAÇÕES ===
 
-/*
-export const usuariosRelations = relations(Users, ({ one, many }) => ({
-  sessoes: many(sessions),
-  convitesEnviados: many(invites), // Se um admin pode convidar
-  resetsSenha: many(resetPasswords),
-  bancasAssociadas: many(usuariosBancas), // Relação através da tabela de junção
-  teacherInvitationsSent: many(teacherInvitations),
-  teacherInvitationReceived: one(teacherInvitations),
-  feedbackSubmissions: many(feedbackSubmissions),
-  featureRequests: many(featureRequests),
-  featureRequestVotes: many(featureRequestVotes),
-  // bancasCriadas: many(bancas), // Descomentar se banca.userId for mantido
-}));
-*/
-
-/*
-export const cursosRelations = relations(Cursos, ({ many }) => ({
-  bancas: many(Bancas),
-}));
-*/
-
-/*
-export const bancasRelations = relations(Bancas, ({ one, many }) => ({
-  orientador: one(Users, {
-    fields: [Bancas.orientadorId],
-    references: [Users.id],
-  }),
-  curso: one(Cursos, {
-    fields: [Bancas.cursoId],
-    references: [Cursos.id],
-  }),
-  // criador: one(usuarios, { // Descomentar se banca.userId for mantido
-  //     fields: [bancas.userId],
-  //     references: [usuarios.id],
-  // }),
-  membros: many(usuariosBancas), // Relação com usuários através da tabela de junção
-  documentosAssociados: many(bancasDocumentos), // Relação com documentos através da tabela de junção
-  convites: many(invites), // Convites relacionados a esta banca
-}));
-*/
-/*
-export const documentosRelations = relations(documentos, ({ many }) => ({
-  bancasAssociadas: many(bancasDocumentos), // Relação através da tabela de junção
-}));
-*/
-/*
-export const invitesRelations = relations(invites, ({ one }) => ({
-  usuarioConvidado: one(Users, {
-    fields: [invites.userId],
-    references: [Users.id],
-  }),
-  banca: one(Bancas, {
-    fields: [invites.bancaId],
-    references: [Bancas.id],
-  }),
-}));
-*/
 export const resetPasswordsRelations = relations(resetPasswords, ({ one }) => ({
   usuario: one(Users, {
     fields: [resetPasswords.userId],
     references: [Users.id],
   }),
 }));
-/*
-export const teacherInvitationsRelations = relations(
-  teacherInvitations,
-  ({ one }) => ({
-    invitedBy: one(Users, {
-      fields: [teacherInvitations.invitedBy],
-      references: [Users.id],
-    }),
-    user: one(Users, {
-      fields: [teacherInvitations.userId],
-      references: [Users.id],
-    }),
-  }),
-);
-*/
 
-/*
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  usuario: one(Users, {
-    fields: [sessions.userId],
-    references: [Users.id],
-  }),
-}));
-*/
-/*
-// Relações para a tabela de junção usuario_banca
-export const usuariosBancasRelations = relations(usuariosBancas, ({ one }) => ({
-  usuario: one(Users, {
-    fields: [usuariosBancas.usuarioId],
-    references: [Users.id],
-  }),
-  banca: one(Bancas, {
-    fields: [usuariosBancas.bancaId],
-    references: [Bancas.id],
-  }),
-}));
-*/
-/*
-// Relações para a tabela de junção banca_documento
-export const bancasDocumentosRelations = relations(
-  bancasDocumentos,
-  ({ one }) => ({
-    banca: one(Bancas, {
-      fields: [bancasDocumentos.bancaId],
-      references: [Bancas.id],
-    }),
-    documento: one(documentos, {
-      fields: [bancasDocumentos.documentoId],
-      references: [documentos.id],
-    }),
-  }),
-);
-*/
 // Relações para feedback submissions
 export const feedbackSubmissionsRelations = relations(
   feedbackSubmissions,
@@ -652,7 +309,7 @@ export const feedbackSubmissionsRelations = relations(
     }),
   }),
 );
-/*
+
 // Relações para feature requests
 export const featureRequestsRelations = relations(
   featureRequests,
@@ -664,8 +321,7 @@ export const featureRequestsRelations = relations(
     votes: many(featureRequestVotes),
   }),
 );
-*/
-/*
+
 // Relações para feature request votes
 export const featureRequestVotesRelations = relations(
   featureRequestVotes,
@@ -680,4 +336,3 @@ export const featureRequestVotesRelations = relations(
     }),
   }),
 );
-*/
