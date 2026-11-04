@@ -17,26 +17,24 @@ import { alias } from "drizzle-orm/pg-core";
 import {
   calcularMestradoNota,
   paraNumeroSeguro,
-  type CandidatoComRelacoes,
   type CandidatoResumo,
   type NotaMestradoUpdate,
 } from "@tcc/shared";
 import type { UpdateCandidatoDoutoradoInput } from "./candidato.schema.js";
+import {
+  toCandidatoDoutoradoDetalhe,
+  toCandidatoMestradoDetalhe,
+  type CandidatoDoutoradoDetalhe,
+  type CandidatoMestradoDetalhe,
+} from "./candidato.dto.js";
 
 const Avaliador = alias(Users, "avaliador");
 const Auditor = alias(Users, "auditor");
 
 type GetAllCandidatosError = { type: "database_error"; error: unknown };
 
-export type CandidatoMestradoComRelacoes = CandidatoComRelacoes<
-  typeof CandidatoMestrado.$inferSelect,
-  typeof NotaMestrado.$inferSelect
->;
-
-export type CandidatoDoutoradoComRelacoes = CandidatoComRelacoes<
-  typeof CandidatoDoutorado.$inferSelect,
-  typeof NotaDoutorado.$inferSelect
->;
+export type CandidatoMestradoComRelacoes = CandidatoMestradoDetalhe;
+export type CandidatoDoutoradoComRelacoes = CandidatoDoutoradoDetalhe;
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -289,18 +287,7 @@ export const getCandidatoMestradoById = async (
     const row = result[0];
     if (!row) return ok(null);
 
-    return ok({
-      ...row.candidato,
-      notas: row.notas,
-      avaliador:
-        row.avaliadorId !== null && row.avaliadorNome !== null
-          ? { id: row.avaliadorId, nome: row.avaliadorNome }
-          : null,
-      auditor:
-        row.auditorId !== null && row.auditorNome !== null
-          ? { id: row.auditorId, nome: row.auditorNome }
-          : null,
-    });
+    return ok(toCandidatoMestradoDetalhe(row));
   } catch (error) {
     console.error(`Error fetching mestrado candidato with ID ${id}:`, error);
     return err({ type: "database_error", error });
@@ -337,18 +324,7 @@ export const getCandidatoDoutoradoById = async (
     const row = result[0];
     if (!row) return ok(null);
 
-    return ok({
-      ...row.candidato,
-      notas: row.notas,
-      avaliador:
-        row.avaliadorId !== null && row.avaliadorNome !== null
-          ? { id: row.avaliadorId, nome: row.avaliadorNome }
-          : null,
-      auditor:
-        row.auditorId !== null && row.auditorNome !== null
-          ? { id: row.auditorId, nome: row.auditorNome }
-          : null,
-    });
+    return ok(toCandidatoDoutoradoDetalhe(row));
   } catch (error) {
     console.error(`Error fetching doutorado candidato with ID ${id}:`, error);
     return err({ type: "database_error", error });

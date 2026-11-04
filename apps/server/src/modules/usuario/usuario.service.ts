@@ -16,6 +16,7 @@ import {
 } from "../../services/email.service.js";
 import { type AppVariables } from "../../types.js";
 import { createUserSchema, updateUserSchema } from "./usuario.schema.js";
+import { toUsuarioPublico, type UsuarioPublico } from "./usuario.dto.js";
 
 type GetUserByIdError =
   { type: "user_not_found" } | { type: "database_error"; error: unknown };
@@ -32,11 +33,22 @@ type UpdateUserRoleError =
 type GetAllUsersError = { type: "database_error"; error: unknown };
 export const getAllUsers = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<SelectUser[], GetAllUsersError>> => {
+): Promise<AppResult<UsuarioPublico[], GetAllUsersError>> => {
   const dbInstance = c.get("db");
   try {
     const allUsers = await dbInstance
-      .select()
+      .select({
+        id: Users.id,
+        email: Users.email,
+        nome: Users.nome,
+        school: Users.school,
+        matricula: Users.matricula,
+        areas: Users.areas,
+        academicTitle: Users.academicTitle,
+        ativo: Users.ativo,
+        updatedAt: Users.updatedAt,
+        role: Users.role,
+      })
       .from(Users)
       .orderBy(asc(Users.nome));
 
@@ -50,11 +62,22 @@ export const getAllUsers = async (
 type GetTeachersError = { type: "database_error"; error: unknown };
 export const getTeachers = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<SelectUser[], GetTeachersError>> => {
+): Promise<AppResult<UsuarioPublico[], GetTeachersError>> => {
   const dbInstance = c.get("db");
   try {
     const teachers = await dbInstance
-      .select()
+      .select({
+        id: Users.id,
+        email: Users.email,
+        nome: Users.nome,
+        school: Users.school,
+        matricula: Users.matricula,
+        areas: Users.areas,
+        academicTitle: Users.academicTitle,
+        ativo: Users.ativo,
+        updatedAt: Users.updatedAt,
+        role: Users.role,
+      })
       .from(Users)
       .where(and(or(eq(Users.role, "TEACHER"), eq(Users.role, "ADMIN"))))
       .orderBy(Users.nome);
@@ -97,7 +120,7 @@ type CreateUserError =
 export const createUser = async (
   c: Context<{ Variables: AppVariables }>,
   userData: z.infer<typeof createUserSchema>,
-): Promise<AppResult<SelectUser, CreateUserError>> => {
+): Promise<AppResult<UsuarioPublico, CreateUserError>> => {
   const dbInstance = c.get("db");
 
   try {
@@ -148,7 +171,7 @@ export const createUser = async (
       });
     }
 
-    return ok(newUserResult);
+    return ok(toUsuarioPublico(newUserResult));
   } catch (error) {
     console.error("Database error during user creation:", error);
     return err({ type: "database_error", error });
@@ -159,7 +182,7 @@ export const getUserById = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
 ): Promise<
-  AppResult<Omit<SelectUser, "passwordHash" | "createdAt">, GetUserByIdError>
+  AppResult<UsuarioPublico, GetUserByIdError>
 > => {
   const dbInstance = c.get("db");
   try {
@@ -173,7 +196,7 @@ export const getUserById = async (
     if (!user) {
       return err({ type: "user_not_found" });
     }
-    return ok(user);
+    return ok(toUsuarioPublico(user));
   } catch (error) {
     console.error(`Error fetching user with ID ${id}:`, error);
     return err({ type: "database_error", error });
@@ -186,7 +209,7 @@ export const updateUser = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
   updateData: UpdateUserInput,
-): Promise<AppResult<SelectUser, UpdateUserError>> => {
+): Promise<AppResult<UsuarioPublico, UpdateUserError>> => {
   const dbInstance = c.get("db");
   const { nome, school, academicTitle, role } = updateData;
 
@@ -219,7 +242,7 @@ export const updateUser = async (
       return err({ type: "user_not_found" });
     }
 
-    return ok(updatedUser);
+    return ok(toUsuarioPublico(updatedUser));
   } catch (error) {
     console.error(`Error updating user with ID ${id}:`, error);
 

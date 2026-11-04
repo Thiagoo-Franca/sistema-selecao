@@ -4,6 +4,7 @@ import { Users } from "../../database/index.js";
 export const createUserSchema = createInsertSchema(Users)
   .omit({
     passwordHash: true,
+    ativo: true,
     createdAt: true,
     updatedAt: true,
   })
