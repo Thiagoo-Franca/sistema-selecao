@@ -4,13 +4,11 @@ import { logger } from "hono/logger";
 import { poweredBy } from "hono/powered-by";
 import { prettyJSON } from "hono/pretty-json";
 import { AppError } from "./error.js";
-import { appJwt } from "./modules/auth/auth.middleware.js";
-import { authRoutes } from "./modules/auth/auth.route.js";
-import { JWT_SECRET } from "./modules/auth/jwt.js";
-import { feedbackRoutes } from "./modules/feedback/feedback.route.js";
-import { usuarioRoutes } from "./modules/usuario/usuario.route.js";
+import { appJwt, authRoutes, JWT_SECRET } from "./modules/auth/index.js";
+import { feedbackRoutes } from "./modules/feedback/index.js";
+import { usuarioRoutes } from "./modules/usuario/index.js";
 import { type AppVariables } from "./types.js";
-import { candidatoRoutes } from "./modules/candidato/candidato.route.js";
+import { candidatoRoutes } from "./modules/candidato/index.js";
 
 export const app = (
   depsMiddleware: MiddlewareHandler<{ Variables: AppVariables }>,

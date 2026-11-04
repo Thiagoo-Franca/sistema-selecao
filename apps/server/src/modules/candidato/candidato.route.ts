@@ -17,7 +17,7 @@ import {
   updateNotaMestradoSchema,
 } from "../nota/index.js";
 import { AppError } from "../../error.js";
-import { checkRole } from "../auth/auth.middleware.js";
+import { checkRole } from "../auth/index.js";
 import { match } from "ts-pattern";
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()

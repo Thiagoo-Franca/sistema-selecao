@@ -8,7 +8,7 @@ import {
 } from "../../database/schema.js";
 import { logDatabaseError } from "../../database/errors.js";
 import { err, ok, type AppResult } from "../../result.js";
-import { getUsuarioAutenticado } from "../auth/auth.middleware.js";
+import { getUsuarioAutenticado } from "../auth/index.js";
 import {
   calcularDoutoradoNota,
   calcularMestradoNota,

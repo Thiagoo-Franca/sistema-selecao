@@ -7,7 +7,7 @@ import { type AppVariables } from "../../types.js";
 import {
   checkRole,
   getUsuarioAutenticado,
-} from "../auth/auth.middleware.js";
+} from "../auth/index.js";
 import * as schema from "./usuario.schema.js";
 import * as service from "./usuario.service.js";
 
