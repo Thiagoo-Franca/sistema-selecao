@@ -3,11 +3,12 @@ import { Hono } from "hono";
 import { match } from "ts-pattern";
 import { AppError } from "../../error.js";
 import { type AppVariables } from "../../types.js";
+import { checkRole } from "../auth/auth.middleware.js";
 import { createFeedbackSchema } from "./feedback.schema.js";
 import { createFeedback, getFeedbackStatistics } from "./feedback.service.js";
 
 export const feedbackRoutes = new Hono<{ Variables: AppVariables }>()
-  .post("/", zValidator("json", createFeedbackSchema), async (c) => {
+  .post("/", checkRole(["ADMIN", "TEACHER"]), zValidator("json", createFeedbackSchema), async (c) => {
     const validatedData = c.req.valid("json");
     const result = await createFeedback(c, validatedData);
 
@@ -26,7 +27,7 @@ export const feedbackRoutes = new Hono<{ Variables: AppVariables }>()
 
     return c.json(result.data, 201);
   })
-  .get("/statistics", async (c) => {
+  .get("/statistics", checkRole(["ADMIN"]), async (c) => {
     const result = await getFeedbackStatistics(c);
 
     if (!result.ok) {

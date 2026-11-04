@@ -208,6 +208,7 @@ export const Users = pgTable("usuario", {
   matricula: text("matricula").notNull(),
   areas: areaEnum("areas").array(), // Ex: ["CVIS", "CD"]
   academicTitle: text("academic_title").notNull(), // Ex: Doutorado
+  ativo: boolean("ativo").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   role: userRole("role").notNull(),

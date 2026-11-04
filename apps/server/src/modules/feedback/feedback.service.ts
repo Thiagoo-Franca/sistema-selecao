@@ -13,7 +13,7 @@ export const createFeedback = async (
   data: CreateFeedbackInput,
 ): Promise<AppResult<{ id: number }, CreateFeedbackError>> => {
   const dbInstance = c.get("db");
-  const userId = c.get("jwtPayload").sub;
+  const userId = c.get("usuario").id;
 
   try {
     // Check if user already submitted feedback

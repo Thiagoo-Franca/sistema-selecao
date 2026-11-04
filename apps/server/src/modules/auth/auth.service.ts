@@ -18,17 +18,6 @@ import {
   JWT_SECRET,
 } from "./jwt.js";
 
-export const getUserService = async (
-  c: Context<{ Variables: AppVariables }>,
-) => {
-  const dbInstance = c.get("db");
-  const user = await dbInstance
-    .select()
-    .from(Users)
-    .where(eq(Users.id, c.get("jwtPayload").sub));
-  return ok(user);
-};
-
 interface LoginResponse {
   id: string;
   token: string;
@@ -61,6 +50,10 @@ export const loginUserService = async (
     if (!user) {
       console.log(`Login attempt failed: User not found for email ${email}`);
       return err({ type: "invalid_credentials" });
+    }
+
+    if (!user.ativo) {
+      return err({ type: "inactive_user" });
     }
 
     if (!user.passwordHash) {
@@ -108,6 +101,7 @@ export const loginUserService = async (
         matricula: user.matricula,
         areas: user.areas,
         academicTitle: user.academicTitle,
+        ativo: user.ativo,
         updatedAt: user.updatedAt,
       },
     });

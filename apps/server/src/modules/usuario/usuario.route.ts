@@ -4,16 +4,16 @@ import { Hono } from "hono";
 import { match } from "ts-pattern";
 import { AppError } from "../../error.js";
 import { type AppVariables } from "../../types.js";
-import { checkRole } from "../auth/auth.middleware.js";
+import {
+  checkRole,
+  getUsuarioAutenticado,
+} from "../auth/auth.middleware.js";
 import * as schema from "./usuario.schema.js";
 import * as service from "./usuario.service.js";
 
 export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
-  .get("/me", async (c) => {
-    const result = await service.getUserById(
-      c,
-      c.get("jwtPayload").sub,
-    );
+  .get("/me", checkRole(["ADMIN", "TEACHER"]), async (c) => {
+    const result = await service.getUserById(c, getUsuarioAutenticado(c).id);
     if (!result.ok) {
       throw match(result.error)
         .with(
@@ -40,7 +40,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
-  .get("/teachers", async (c) => {
+  .get("/teachers", checkRole(["ADMIN", "TEACHER"]), async (c) => {
     const result = await service.getTeachers(c);
     if (!result.ok) {
       throw match(result.error)
@@ -97,6 +97,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
   )
   .get(
     "/:id",
+    checkRole(["ADMIN", "TEACHER"]),
     zValidator("param", schema.idParamSchema.shape.param),
     async (c) => {
       const { id } = c.req.valid("param");
@@ -123,7 +124,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
       const validatedUpdateData = c.req.valid("json");
       const result = await service.updateUser(
         c,
-        c.get("jwtPayload").sub,
+        getUsuarioAutenticado(c).id,
         validatedUpdateData,
       );
       if (!result.ok) {
@@ -150,7 +151,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     zValidator("json", schema.changePasswordSchema),
     async (c) => {
       const { currentPassword, newPassword } = c.req.valid("json");
-      const userId = c.get("jwtPayload").sub;
+      const userId = getUsuarioAutenticado(c).id;
 
       const result = await service.changeUserPassword(
         c,

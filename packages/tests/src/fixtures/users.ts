@@ -6,7 +6,7 @@ export interface TestUserData {
   nome: string
   role: "TEACHER" | "ADMIN"
   matricula: string
-  status: "ACTIVE" | "INACTIVE"
+  ativo: boolean
   school: string
   academicTitle: string
   createdAt: Date
@@ -19,7 +19,7 @@ export const TEST_TEACHER: TestUserData = {
   nome: "Test Teacher",
   role: "TEACHER",
   matricula: "111",
-  status: "ACTIVE",
+  ativo: true,
   school: "ICC",
   academicTitle: "PhD",
   createdAt: new Date(),
@@ -32,7 +32,7 @@ export const TEST_ADMIN: TestUserData = {
   nome: "Test Admin",
   role: "ADMIN",
   matricula: "333",
-  status: "ACTIVE",
+  ativo: true,
   school: "ICC",
   academicTitle: "PhD",
   createdAt: new Date(),
@@ -45,7 +45,7 @@ export const TEST_USER_BASIC: TestUserData = {
   nome: "Test User",
   role: "TEACHER",
   matricula: "123",
-  status: "ACTIVE",
+  ativo: true,
   school: "Test School",
   academicTitle: "PhD",
   createdAt: new Date(),
