@@ -7,7 +7,7 @@ import { type AppVariables } from "../../types.js";
 import {
   checkRole,
   getUsuarioAutenticado,
-} from "../auth/auth.middleware.js";
+} from "../auth/index.js";
 import * as schema from "./usuario.schema.js";
 import * as service from "./usuario.service.js";
 
@@ -67,7 +67,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
 
   .post(
     "/",
-    checkRole(["ADMIN", "TEACHER"]),
+    checkRole(["ADMIN"]),
     zValidator("json", schema.createUserSchema),
     async (c) => {
       const validatedUserData = c.req.valid("json");
@@ -119,6 +119,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
   )
   .put(
     "/me",
+    checkRole(["ADMIN", "TEACHER"]),
     zValidator("json", schema.updateUserSchema.shape.body.omit({ role: true })),
     async (c) => {
       const validatedUpdateData = c.req.valid("json");
@@ -148,14 +149,12 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
   )
   .post(
     "/me/change-password",
+    checkRole(["ADMIN", "TEACHER"]),
     zValidator("json", schema.changePasswordSchema),
     async (c) => {
       const { currentPassword, newPassword } = c.req.valid("json");
-      const userId = getUsuarioAutenticado(c).id;
-
       const result = await service.changeUserPassword(
         c,
-        userId,
         currentPassword,
         newPassword,
       );
@@ -237,63 +236,5 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
           .exhaustive();
       }
       return c.body(null, 204);
-    },
-  )
-  .post(
-    "/request-password-reset",
-    zValidator("json", schema.requestPasswordResetSchema),
-    async (c) => {
-      const { email } = c.req.valid("json");
-      const result = await service.requestPasswordReset(c, email);
-      if (!result.ok) {
-        throw match(result.error)
-          .with(
-            { type: "user_not_found" },
-            () => new AppError(404, "Usuário não encontrado"),
-          )
-          .with(
-            { type: "email_error" },
-            () => new AppError(500, "Erro ao enviar email"),
-          )
-          .with(
-            { type: "database_error" },
-            () => new AppError(500, "Erro interno do servidor"),
-          )
-          .exhaustive();
-      }
-      return c.json({ message: "Email de recuperação enviado com sucesso" });
-    },
-  )
-  .post(
-    "/reset-password",
-    zValidator("json", schema.resetPasswordSchema),
-    async (c) => {
-      const { token, newPassword } = c.req.valid("json");
-      const result = await service.resetPassword(c, token, newPassword);
-      if (!result.ok) {
-        throw match(result.error)
-          .with(
-            { type: "invalid_token" },
-            () => new AppError(400, "Token inválido"),
-          )
-          .with(
-            { type: "token_expired" },
-            () => new AppError(400, "Token expirado"),
-          )
-          .with(
-            { type: "user_not_found" },
-            () => new AppError(404, "Usuário não encontrado"),
-          )
-          .with(
-            { type: "hashing_error" },
-            () => new AppError(500, "Erro ao processar senha"),
-          )
-          .with(
-            { type: "database_error" },
-            () => new AppError(500, "Erro interno do servidor"),
-          )
-          .exhaustive();
-      }
-      return c.json({ message: "Senha redefinida com sucesso" });
     },
   );

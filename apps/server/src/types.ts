@@ -11,7 +11,7 @@ export interface AppVariables {
     iat: number;
     exp: number;
   };
-  usuario: {
+  usuario?: {
     id: SelectUser["id"];
     role: UserRole;
   };

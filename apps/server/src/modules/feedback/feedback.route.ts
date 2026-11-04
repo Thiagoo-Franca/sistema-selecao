@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { match } from "ts-pattern";
 import { AppError } from "../../error.js";
 import { type AppVariables } from "../../types.js";
-import { checkRole } from "../auth/auth.middleware.js";
+import { checkRole } from "../auth/index.js";
 import { createFeedbackSchema } from "./feedback.schema.js";
 import { createFeedback, getFeedbackStatistics } from "./feedback.service.js";
 

@@ -3,6 +3,7 @@ import { type Context } from "hono";
 import { feedbackSubmissions, Users } from "../../database/schema.js";
 import { type AppResult, err, ok } from "../../result.js";
 import { type AppVariables } from "../../types.js";
+import { getUsuarioAutenticado } from "../auth/index.js";
 import { type CreateFeedbackInput } from "./feedback.schema.js";
 
 type CreateFeedbackError =
@@ -13,7 +14,7 @@ export const createFeedback = async (
   data: CreateFeedbackInput,
 ): Promise<AppResult<{ id: number }, CreateFeedbackError>> => {
   const dbInstance = c.get("db");
-  const userId = c.get("usuario").id;
+  const userId = getUsuarioAutenticado(c).id;
 
   try {
     // Check if user already submitted feedback

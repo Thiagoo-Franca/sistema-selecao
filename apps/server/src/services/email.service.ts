@@ -29,7 +29,9 @@ export const sendEmail = async (
 ): Promise<AppResult<void, SendEmailError>> => {
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_PORT === 465,
       auth: {
         user: env.SMTP_USER,
         pass: env.SMTP_PASSWORD,
@@ -48,7 +50,7 @@ export const sendEmail = async (
           auth: { user: testAccount.user, pass: testAccount.pass },
         });
         const info = await devTransporter.sendMail({
-          from: input.from || '"Sistema Banca" <noreply@sistema-banca.com>',
+          from: input.from || env.SMTP_FROM || env.SMTP_USER,
           to: input.to,
           cc: input.cc,
           subject: input.subject,
@@ -67,22 +69,21 @@ export const sendEmail = async (
           jsonTransport: true,
         });
         const info = await jsonTransporter.sendMail({
-          from: input.from || '"Sistema Banca" <noreply@sistema-banca.com>',
+          from: input.from || env.SMTP_FROM || env.SMTP_USER,
           to: input.to,
           cc: input.cc,
           subject: input.subject,
           html: input.html,
           attachments: input.attachments,
         });
-        console.log("\n📧 [DEV EMAIL]", input.subject, "→", input.to);
-        console.log(info.message);
+        console.log("Development email generated:", info.messageId);
         return ok(undefined);
       }
     }
 
     // Production email sending
     const info = await transporter.sendMail({
-      from: input.from || '"Sistema Banca" <noreply@sistema-banca.com>',
+      from: input.from || env.SMTP_FROM || env.SMTP_USER,
       to: input.to,
       cc: input.cc,
       subject: input.subject,

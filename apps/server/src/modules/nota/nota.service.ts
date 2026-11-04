@@ -6,8 +6,9 @@ import {
   type SelectNotaDoutorado,
   type SelectNotaMestrado,
 } from "../../database/schema.js";
+import { logDatabaseError } from "../../database/errors.js";
 import { err, ok, type AppResult } from "../../result.js";
-import { getUsuarioAutenticado } from "../auth/auth.middleware.js";
+import { getUsuarioAutenticado } from "../auth/index.js";
 import {
   calcularDoutoradoNota,
   calcularMestradoNota,
@@ -128,7 +129,11 @@ export const updateNotaDoutorado = async (
 
       const [salva] = await tx
         .insert(NotaDoutorado)
-        .values({ idCandidato, ...values })
+        .values({
+          idCandidato,
+          historicoMestradoLink: atual?.historicoMestradoLink ?? "",
+          ...values,
+        })
         .onConflictDoUpdate({
           target: NotaDoutorado.idCandidato,
           set: values,
@@ -140,7 +145,7 @@ export const updateNotaDoutorado = async (
 
     return ok(nota ?? null);
   } catch (error) {
-    console.error(
+    logDatabaseError(
       `Error updating nota doutorado for candidato ID ${idCandidato}:`,
       error,
     );

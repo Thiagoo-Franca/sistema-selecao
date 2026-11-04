@@ -86,14 +86,23 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
   avaliadoPorId: uuid("avaliado_por_id").references(() => Users.id, {
     onDelete: "set null",
   }),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
   msc: numeric("msc", { mode: "number" }), // nota do mestrado
-  areaFormacaoGraduacao: numeric("area_formacao_graduacao", { mode: "number" }),
-  conceitoCapesMestrado: numeric("conceito_capes_mestrado", { mode: "number" }),
+  historicoMestradoLink: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado ou declaração de conclusão
+
+  area: numeric("area", { mode: "number" }),
+
+  conceitoCapesMestrado: numeric("conceito_capes_mestrado", { mode: "number" }), // 0,1,2,3,4,5,6,7
+
   a1a2a3a4: numeric("a1a2a3a4", { mode: "number" }),
+  a1a2a3a4Link: text("a1a2a3a4_link"),
+
   b1b2b3b4: numeric("b1b2b3b4", { mode: "number" }),
+  b1b2b3b4Link: text("b1b2b3b4_link"),
+
   notaAnteprojeto: numeric("nota_anteprojeto", { mode: "number" }),
 });
 
@@ -108,9 +117,7 @@ const candidatoBaseColumns = {
   email: text("email"),
 
   solicitouIsencaoTaxaInscricao: text("solicitou_isencao_taxa_inscricao"),
-  isencaoAprovada: text("isencao_aprovada")
-    .notNull()
-    .default("nao-solicitou"),
+  isencaoAprovada: text("isencao_aprovada").notNull().default("nao-solicitou"),
   gru: gruStatusEnum("gru"),
   gruLink: text("gru_link"), // Link para PDF do GRU pago
   homologa: boolean("homologa"),
@@ -134,18 +141,20 @@ export const CandidatoDoutorado = pgTable(
   {
     ...candidatoBaseColumns,
     tipoCurso: tipoCursoEnum("tipo_curso").default("doutorado").notNull(),
-    historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
-    copiaDiplomaMestrado: text("copia_diploma_mestrado").notNull(), // link para PDF da cópia do diploma do mestrado ou declaracao de conclusão
-    historicoMestrado: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado ou declaração de conclusão
-    nomeUniversidadeMestrado: text("nome_universidade_mestrado").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
-    nomeCursoMestrado: text("nome_curso_mestrado").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
-    anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
-    conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
+    areaPgcomp: text("area_pgcomp"), // Pode vir a ser um enum, mas por enquanto é texto livre
+    orientadorMestrado: text("orientador_mestrado"), // Pode ser nome do orientador ou link para PDF do histórico do mestrado com o nome do orientador
     primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
     segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
     terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
-    areaPgcomp: text("area_pgcomp"),
-    orientadorMestrado: text("orientador_mestrado"),
+
+    nomeUniversidadeMestrado: text("nome_universidade_mestrado").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
+    nomeCursoMestrado: text("nome_curso_mestrado").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
+    cidadeMestrado: text("cidade_mestrado"),
+
+    historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
+    copiaDiplomaMestrado: text("copia_diploma_mestrado").notNull(), // link para PDF da cópia do diploma do mestrado ou declaracao de conclusão
+    anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
+    conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
   },
   (table) => ({
     numeroInscricaoUnique: unique(
@@ -169,7 +178,6 @@ export const CandidatoMestrado = pgTable(
   "candidato_mestrado",
   {
     ...candidatoBaseColumns,
-    // dados da inscricao
     tipoCurso: tipoCursoEnum("tipo_curso").default("mestrado").notNull(),
     primeiraAreaPreferencia: areaEnum("primeira_area_preferencia"),
     segundaAreaPreferencia: areaEnum("segunda_area_preferencia"),

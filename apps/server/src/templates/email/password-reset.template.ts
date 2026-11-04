@@ -12,7 +12,7 @@ export const createPasswordResetEmail = (
 
   const content = `
     <h2>Olá, ${nome}!</h2>
-    <p>Você solicitou a recuperação de senha para sua conta no Sistema Banca.</p>
+    <p>Você solicitou a recuperação de senha para sua conta no SISSEL.</p>
     <p>Para redefinir sua senha, clique no botão abaixo:</p>
     
     <div class="warning">

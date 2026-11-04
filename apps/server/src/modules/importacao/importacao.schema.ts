@@ -1,7 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { CandidatoMestrado } from "../../database/schema.js";
-import { notaMestradoInputSchema } from "../nota/nota.schema.js";
+import { notaMestradoInputSchema } from "../nota/index.js";
 
 export const uploadCandidatosMestradoSchema = z.array(
   createInsertSchema(CandidatoMestrado, {

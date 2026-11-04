@@ -1,22 +1,22 @@
 import * as bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { and, asc, eq, or } from "drizzle-orm";
 import { type Context } from "hono";
 import { z } from "zod";
 import {
   feedbackSubmissions,
   resetPasswords,
-  type SelectUser,
   Users,
 } from "../../database/schema.js";
+import { databaseError, logDatabaseError } from "../../database/errors.js";
 import { type AppResult, err, ok } from "../../result.js";
-import {
-  createPasswordResetEmail,
-  sendEmail,
-} from "../../services/email.service.js";
 import { type AppVariables } from "../../types.js";
+import { getUsuarioAutenticado } from "../auth/index.js";
 import { createUserSchema, updateUserSchema } from "./usuario.schema.js";
-import { toUsuarioPublico, type UsuarioPublico } from "./usuario.dto.js";
+import {
+  toUsuarioPublico,
+  usuarioPublicoProjection,
+  type UsuarioPublico,
+} from "./usuario.dto.js";
 
 type GetUserByIdError =
   { type: "user_not_found" } | { type: "database_error"; error: unknown };
@@ -37,25 +37,14 @@ export const getAllUsers = async (
   const dbInstance = c.get("db");
   try {
     const allUsers = await dbInstance
-      .select({
-        id: Users.id,
-        email: Users.email,
-        nome: Users.nome,
-        school: Users.school,
-        matricula: Users.matricula,
-        areas: Users.areas,
-        academicTitle: Users.academicTitle,
-        ativo: Users.ativo,
-        updatedAt: Users.updatedAt,
-        role: Users.role,
-      })
+      .select(usuarioPublicoProjection)
       .from(Users)
       .orderBy(asc(Users.nome));
 
     return ok(allUsers);
   } catch (error) {
-    console.error("Error fetching all users:", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching all users:", error);
+    return databaseError(error);
   }
 };
 
@@ -66,26 +55,15 @@ export const getTeachers = async (
   const dbInstance = c.get("db");
   try {
     const teachers = await dbInstance
-      .select({
-        id: Users.id,
-        email: Users.email,
-        nome: Users.nome,
-        school: Users.school,
-        matricula: Users.matricula,
-        areas: Users.areas,
-        academicTitle: Users.academicTitle,
-        ativo: Users.ativo,
-        updatedAt: Users.updatedAt,
-        role: Users.role,
-      })
+      .select(usuarioPublicoProjection)
       .from(Users)
       .where(and(or(eq(Users.role, "TEACHER"), eq(Users.role, "ADMIN"))))
       .orderBy(Users.nome);
 
     return ok(teachers);
   } catch (error) {
-    console.error("Error fetching teachers:", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching teachers:", error);
+    return databaseError(error);
   }
 };
 
@@ -106,8 +84,8 @@ export const getTeachersSimplified = async (
 
     return ok(teachers);
   } catch (error) {
-    console.error("Error fetching teachers (simplified):", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Error fetching teachers (simplified):", error);
+    return databaseError(error);
   }
 };
 
@@ -131,11 +109,6 @@ export const createUser = async (
       .limit(1);
 
     if (existingUser.length > 0) {
-      // Resilience: if the email belongs to a stub created by a pending student
-      // invitation, claim it — update the stub with the real password & data and
-      // mark the invitation as used. Avoids "duplicate_email" friction for users
-      // who sign up directly instead of clicking the invite link.
-
       return err({ type: "duplicate_email" });
     }
 
@@ -173,8 +146,8 @@ export const createUser = async (
 
     return ok(toUsuarioPublico(newUserResult));
   } catch (error) {
-    console.error("Database error during user creation:", error);
-    return err({ type: "database_error", error });
+    logDatabaseError("Database error during user creation:", error);
+    return databaseError(error);
   }
 };
 
@@ -187,7 +160,7 @@ export const getUserById = async (
   const dbInstance = c.get("db");
   try {
     const result = await dbInstance
-      .select()
+      .select(usuarioPublicoProjection)
       .from(Users)
       .where(eq(Users.id, id))
       .limit(1);
@@ -196,10 +169,10 @@ export const getUserById = async (
     if (!user) {
       return err({ type: "user_not_found" });
     }
-    return ok(toUsuarioPublico(user));
+    return ok(user);
   } catch (error) {
-    console.error(`Error fetching user with ID ${id}:`, error);
-    return err({ type: "database_error", error });
+    logDatabaseError(`Error fetching user with ID ${id}:`, error);
+    return databaseError(error);
   }
 };
 
@@ -274,21 +247,9 @@ export const deleteUser = async (
     }
     
 
-    //await dbInstance
-    //  .delete(usuariosBancas)
-    //  .where(eq(usuariosBancas.usuarioId, id));
-
-    //  await dbInstance.delete(invites).where(eq(invites.userId, id));
     await dbInstance
       .delete(resetPasswords)
       .where(eq(resetPasswords.userId, id));
-    // await dbInstance.delete(sessions).where(eq(sessions.userId, id));
-    // await dbInstance
-    //  .delete(featureRequestVotes)
-    //  .where(eq(featureRequestVotes.userId, id));
-    // await dbInstance
-    //  .delete(featureRequests)
-    //  .where(eq(featureRequests.userId, id));
     await dbInstance
       .delete(feedbackSubmissions)
       .where(eq(feedbackSubmissions.userId, id));
@@ -355,11 +316,11 @@ type ChangePasswordServiceError =
 
 export const changeUserPassword = async (
   c: Context<{ Variables: AppVariables }>,
-  userId: string,
   currentPassword: string,
   newPassword: string,
 ): Promise<AppResult<void, ChangePasswordServiceError>> => {
   const dbInstance = c.get("db");
+  const userId = getUsuarioAutenticado(c).id;
 
   try {
     const [user] = await dbInstance
@@ -407,144 +368,4 @@ export const changeUserPassword = async (
     console.error("Error changing user password:", error);
     return err({ type: "database_error" });
   }
-};
-
-
-
-type RequestPasswordResetError =
-  | { type: "user_not_found" }
-  | { type: "database_error"; error: unknown }
-  | { type: "email_error" };
-
-export const requestPasswordReset = async (
-  c: Context<{ Variables: AppVariables }>,
-  email: string,
-): Promise<AppResult<void, RequestPasswordResetError>> => {
-  const dbInstance = c.get("db");
-
-  try {
-    // Check if user exists
-    const user = await dbInstance
-      .select({ id: Users.id, nome: Users.nome })
-      .from(Users)
-      .where(eq(Users.email, email))
-      .limit(1);
-
-    if (user.length === 0) {
-      return err({ type: "user_not_found" });
-    }
-
-    const userData = user[0];
-
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    // Store reset token
-    await dbInstance.insert(resetPasswords).values({
-      userId: userData.id,
-      resetPasswordHash: resetToken,
-      expiresAt,
-    });
-
-    // Send reset email
-    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password/${resetToken}`;
-    const emailHtml = createPasswordResetEmail(userData.nome, resetUrl);
-
-    const emailResult = await sendEmail({
-      to: email,
-      subject: "Recuperação de Senha - Sistema Banca",
-      html: emailHtml,
-    });
-
-    if (!emailResult.ok) {
-      console.error("Failed to send password reset email:", emailResult.error);
-      return err({ type: "email_error" });
-    }
-
-    return ok(undefined);
-  } catch (error) {
-    console.error("Error requesting password reset:", error);
-    return err({ type: "database_error", error });
-  }
-};
-
-type ResetPasswordError =
-  | { type: "invalid_token" }
-  | { type: "token_expired" }
-  | { type: "user_not_found" }
-  | { type: "hashing_error"; error: unknown }
-  | { type: "database_error"; error: unknown };
-
-export const resetPassword = async (
-  c: Context<{ Variables: AppVariables }>,
-  token: string,
-  newPassword: string,
-): Promise<AppResult<void, ResetPasswordError>> => {
-  const dbInstance = c.get("db");
-
-  try {
-    // Find reset token
-    const resetRecord = await dbInstance
-      .select({
-        id: resetPasswords.id,
-        userId: resetPasswords.userId,
-        expiresAt: resetPasswords.expiresAt,
-      })
-      .from(resetPasswords)
-      .where(eq(resetPasswords.resetPasswordHash, token))
-      .limit(1);
-
-    if (resetRecord.length === 0) {
-      return err({ type: "invalid_token" });
-    }
-
-    const reset = resetRecord[0];
-
-    // Check if token is expired
-    if (reset.expiresAt < new Date()) {
-      // Clean up expired token
-      await dbInstance
-        .delete(resetPasswords)
-        .where(eq(resetPasswords.id, reset.id));
-
-      return err({ type: "token_expired" });
-    }
-
-    // Hash new password
-    let passwordHash: string;
-    try {
-      passwordHash = await bcrypt.hash(newPassword, 10);
-    } catch (hashError) {
-      console.error("Password hashing failed during reset:", hashError);
-      return err({ type: "hashing_error", error: hashError });
-    }
-
-    // Update user password
-    await dbInstance
-      .update(Users)
-      .set({
-        passwordHash,
-        updatedAt: new Date(),
-      })
-      .where(eq(Users.id, reset.userId));
-
-    // Clean up used token
-    await dbInstance
-      .delete(resetPasswords)
-      .where(eq(resetPasswords.id, reset.id));
-
-    return ok(undefined);
-  } catch (error) {
-    console.error("Error resetting password:", error);
-    return err({ type: "database_error", error });
-  }
-};
-
-type GetStudentsAvailableForBancaError = {
-  type: "database_error";
-  error: unknown;
-};
-export type StudentAvailableForBanca = SelectUser & {
-  invitationPending: boolean;
 };

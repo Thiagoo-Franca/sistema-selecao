@@ -7,6 +7,7 @@ import type { AppVariables } from "../../types.js";
 import type { UserRole } from "../../database/schema.js";
 import { Users } from "../../database/schema.js";
 import { eq } from "drizzle-orm";
+import { JWT_AUDIENCE, JWT_ISSUER } from "./jwt.js";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -69,7 +70,12 @@ export const appJwt = (options: { secret: SignatureKey }) =>
       throw new AppError(401, "Não autenticado");
     }
 
-    if (typeof payload.sub !== "string" || !UUID_PATTERN.test(payload.sub)) {
+    if (
+      typeof payload.sub !== "string" ||
+      !UUID_PATTERN.test(payload.sub) ||
+      payload.iss !== JWT_ISSUER ||
+      payload.aud !== JWT_AUDIENCE
+    ) {
       throw new AppError(401, "Não autenticado");
     }
 
