@@ -9,7 +9,6 @@ import {
   loginUserService,
   requestPasswordResetService,
   resetPasswordService,
-  // verifyInviteHashService,
   verifyResetHashService,
 } from "./auth.service.js";
 
@@ -23,10 +22,10 @@ const requestResetSchema = z.object({
 });
 
 const resetPasswordSchema = z.object({
-  hash: z.string().min(1, { message: "Token de reset é obrigatório." }),
+  token: z.string().min(1, { message: "Token de reset é obrigatório." }),
   newPassword: z
     .string()
-    .min(6, { message: "Nova senha deve ter pelo menos 6 caracteres." }),
+    .min(8, { message: "Nova senha deve ter pelo menos 8 caracteres." }),
 });
 
 export const authRoutes = new Hono<{ Variables: AppVariables }>()
@@ -47,30 +46,6 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data, 200);
   })
-  /*
-  .get("/invites/:hash", async (c) => {
-    const hash = c.req.param("hash");
-    if (!hash) {
-      return c.json({ message: "Hash do convite é obrigatório." }, 400);
-    }
-    const result = await verifyInviteHashService(c, hash);
-    if (!result.ok) {
-      throw match(result.error)
-        .with(
-          { type: "invite_not_found" },
-          () => new AppError(404, "Convite não encontrado."),
-        )
-        .with(
-          { type: "invite_not_pending" },
-          () => new AppError(410, "Convite não está mais pendente."),
-        )
-        .otherwise(
-          () => new AppError(500, "Erro interno ao verificar o convite."),
-        );
-    }
-    return c.json(result.data, 200);
-  })
-  */
   .post(
     "/reset-password",
     zValidator("json", requestResetSchema),
@@ -133,8 +108,8 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
     "/reset-password/reset",
     zValidator("json", resetPasswordSchema),
     async (c) => {
-      const { hash, newPassword } = c.req.valid("json");
-      const result = await resetPasswordService(c, hash, newPassword);
+      const { token, newPassword } = c.req.valid("json");
+      const result = await resetPasswordService(c, token, newPassword);
       if (!result.ok) {
         throw match(result.error)
           .with(

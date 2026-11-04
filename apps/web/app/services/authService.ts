@@ -20,20 +20,20 @@ export const useLoginMutation = () => {
 }
 
 export const useRequestPasswordResetMutation = () => {
-  type Query = RpcType<(typeof apiClient.usuario)["request-password-reset"]["$post"]>
+  type Query = RpcType<typeof apiClient.auth["reset-password"]["$post"]>
   return useMutation({
     mutationFn: async (request: Query["input"]) => {
-      const response = await publicApiClient.usuario["request-password-reset"]["$post"](request)
+      const response = await publicApiClient.auth["reset-password"]["$post"](request)
       return rpcReturn(response)
     },
   })
 }
 
 export const useResetPasswordMutation = () => {
-  type Query = RpcType<(typeof apiClient.usuario)["reset-password"]["$post"]>
+  type Query = RpcType<typeof apiClient.auth["reset-password"]["reset"]["$post"]>
   return useMutation({
     mutationFn: async (request: Query["input"]) => {
-      const response = await publicApiClient.usuario["reset-password"]["$post"](request)
+      const response = await publicApiClient.auth["reset-password"]["reset"]["$post"](request)
       return rpcReturn(response)
     },
   })

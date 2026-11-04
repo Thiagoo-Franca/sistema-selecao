@@ -32,7 +32,7 @@ export const createBaseEmailTemplate = (props: BaseEmailProps): string => {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${title} - Sistema Banca</title>
+      <title>${title} - SISSEL</title>
       <style>
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -155,7 +155,7 @@ export const createBaseEmailTemplate = (props: BaseEmailProps): string => {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Sistema Banca</h1>
+          <h1>SISSEL</h1>
           <p>${title}</p>
         </div>
         <div class="content">
@@ -167,7 +167,7 @@ export const createBaseEmailTemplate = (props: BaseEmailProps): string => {
           ` : ''}
         </div>
         <div class="footer">
-          <p>Sistema Banca - Gerenciamento de Bancas de TCC</p>
+          <p>SISSEL - Seleção de candidatos PGCOMP/UFBA</p>
         </div>
       </div>
     </body>
