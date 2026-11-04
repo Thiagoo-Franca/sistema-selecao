@@ -1,6 +1,8 @@
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import {
+  CandidatoDoutorado,
+  CandidatoMestrado,
   NotaDoutorado,
   NotaMestrado,
   type SelectNotaDoutorado,
@@ -9,6 +11,7 @@ import {
 import { logDatabaseError } from "../../database/errors.js";
 import { err, ok, type AppResult } from "../../result.js";
 import { getUsuarioAutenticado } from "../auth/index.js";
+import { podeAcessarCandidato } from "../candidato/index.js";
 import {
   calcularDoutoradoNota,
   calcularMestradoNota,
@@ -35,6 +38,20 @@ export const updateNotaMestrado = async (
 
   try {
     const nota = await db.transaction(async (tx) => {
+      const [candidato] = await tx
+        .select({
+          avaliadorId: CandidatoMestrado.avaliadorId,
+          auditorId: CandidatoMestrado.auditorId,
+        })
+        .from(CandidatoMestrado)
+        .where(eq(CandidatoMestrado.id, idCandidato))
+        .limit(1)
+        .for("update");
+
+      if (!candidato || !podeAcessarCandidato(usuario, candidato)) {
+        return null;
+      }
+
       const [atual] = await tx
         .select()
         .from(NotaMestrado)
@@ -99,6 +116,20 @@ export const updateNotaDoutorado = async (
 
   try {
     const nota = await db.transaction(async (tx) => {
+      const [candidato] = await tx
+        .select({
+          avaliadorId: CandidatoDoutorado.avaliadorId,
+          auditorId: CandidatoDoutorado.auditorId,
+        })
+        .from(CandidatoDoutorado)
+        .where(eq(CandidatoDoutorado.id, idCandidato))
+        .limit(1)
+        .for("update");
+
+      if (!candidato || !podeAcessarCandidato(usuario, candidato)) {
+        return null;
+      }
+
       const [atual] = await tx
         .select()
         .from(NotaDoutorado)
