@@ -1,7 +1,7 @@
-import { Header } from "@/components/layout/header"
+import { Header } from "@/shared/components/layout/header"
 import type { Route } from "./+types/profile"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/shared/ui/button"
 import {
   Card,
   CardContent,
@@ -9,61 +9,43 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/hooks/use-toast"
-import { rpcReturn } from "@/lib/utils"
-import apiClient from "@/services/apiClient"
-import { useUser } from "@/services/useUser"
+} from "@/shared/ui/card"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/form"
+import { Input } from "@/shared/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
+import { rpcReturn } from "@/shared/lib/utils"
+import apiClient from "@/shared/services/apiClient"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { href, Navigate } from "react-router"
-import { z } from "zod"
-import Loading from "@/components/layout/loading"
+import Loading from "@/shared/components/layout/loading"
+import { useUser } from "@/features/auth/hooks/auth.queries"
+import {
+  passwordFormSchema,
+  profileFormSchema,
+  type PasswordFormValues,
+  type ProfileFormValues,
+} from "@/features/profile/schema/profile.schema"
+import {
+  changePasswordMutation,
+  updateProfileMutation,
+} from "@/features/profile/hooks/profile.mutation"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil" }]
 
-const profileFormSchema = z.object({
-  nome: z.string().min(2, {
-    message: "O nome deve ter pelo menos 2 caracteres",
-  }),
-  school: z.string().min(2, {
-    message: "A instituição deve ter pelo menos 2 caracteres",
-  }),
-  academicTitle: z.string().min(2, {
-    message: "O título acadêmico deve ter pelo menos 2 caracteres",
-  }),
+export const passwordForm = useForm<PasswordFormValues>({
+  resolver: zodResolver(passwordFormSchema),
+  defaultValues: {
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  },
 })
-
-const passwordFormSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Senha atual é obrigatória"),
-    newPassword: z.string().min(8, "Nova senha deve ter pelo menos 8 caracteres"),
-    confirmPassword: z.string().min(8, "Confirmação de senha é obrigatória"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "As senhas não coincidem",
-    path: ["confirmPassword"],
-  })
-
-type ProfileFormValues = z.infer<typeof profileFormSchema>
-type PasswordFormValues = z.infer<typeof passwordFormSchema>
 
 export default function ProfilePage() {
   const { data: user, isLoading, isError } = useUser()
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
 
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -76,69 +58,6 @@ export default function ProfilePage() {
       nome: user?.nome || "",
       school: user?.school || "",
       academicTitle: user?.academicTitle || "",
-    },
-  })
-
-  const passwordForm = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordFormSchema),
-    defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    },
-  })
-
-  const updateProfileMutation = useMutation({
-    mutationFn: async (data: ProfileFormValues) => {
-      if (!user?.id) throw new Error("Usuário não encontrado")
-      const response = await apiClient.usuario.me.$put({
-        json: data,
-      })
-      return rpcReturn(response)
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Perfil atualizado",
-        description: "Suas informações foram atualizadas com sucesso!",
-      })
-      queryClient.setQueryData(useUser.queryKey(), (oldData: any) => {
-        return { ...oldData, ...data }
-      })
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro ao atualizar perfil",
-        description:
-          error instanceof Error ? error.message : "Ocorreu um erro ao atualizar seu perfil.",
-        variant: "destructive",
-      })
-    },
-  })
-
-  const changePasswordMutation = useMutation({
-    mutationFn: async (data: PasswordFormValues) => {
-      const response = await apiClient.usuario.me["change-password"].$post({
-        json: {
-          currentPassword: data.currentPassword,
-          newPassword: data.newPassword,
-        },
-      })
-      return rpcReturn(response)
-    },
-    onSuccess: () => {
-      toast({
-        title: "Senha alterada",
-        description: "Sua senha foi alterada com sucesso!",
-      })
-      passwordForm.reset()
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro ao alterar senha",
-        description:
-          error instanceof Error ? error.message : "Ocorreu um erro ao alterar sua senha.",
-        variant: "destructive",
-      })
     },
   })
 

@@ -1,4 +1,3 @@
-import { useUser } from "@/services/useUser"
 import { Navigate, Outlet } from "react-router"
 import { useEffect, useState } from "react"
 import type { Route } from "./+types/admin"
@@ -7,6 +6,7 @@ export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Administraçã
 
 export default function AdminLayout() {
   const [isClient, setIsClient] = useState(false)
+
   const { data: user, isLoading, isError } = useUser()
 
   useEffect(() => {

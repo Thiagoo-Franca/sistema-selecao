@@ -1,19 +1,19 @@
 import { useEffect } from "react"
 import { useNavigate, useParams } from "react-router"
+import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
+
+import { formatBoolean, formatCPF, formatDate, formatPhoneNumber } from "@/shared/lib/format"
+import { Loader2 } from "lucide-react"
+import { Header } from "@/shared/components/layout/header"
+import type { Route } from "./+types/dashboard"
+import CandidateDetails from "@/features/candidates/shared/components/candidatos/candidate-details"
+import CandidateNotFound from "@/features/candidates/shared/components/candidatos/candidate-not-found"
+import { useUser } from "@/features/auth/hooks/auth.queries"
 import {
   useCandidatoDoutoradoById,
-  // useDeleteCandidatoDoutorado
-} from "@/hooks/candidato.hooks"
-import { useToast } from "@/hooks"
-import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
-import { useUser } from "@/services/useUser"
-
-import { formatBoolean, formatCPF, formatDate, formatPhoneNumber } from "@/lib/format"
-import { Loader2 } from "lucide-react"
-import { Header } from "@/components/layout/header"
-import type { Route } from "./+types/dashboard"
-import CandidateDetails from "@/components/candidatos/candidate-details"
-import CandidateNotFound from "@/components/candidatos/candidate-not-found"
+  useDeleteCandidatoDoutorado,
+} from "@/features/candidates/doutorado/hooks"
+import { toast } from "sonner"
 
 export const meta: Route.MetaFunction = () => [
   { title: "SISSEL - Candidato de doutorado", description: "Página do candidato de doutorado" },
@@ -23,10 +23,9 @@ export default function CandidatoDoutoradoPage() {
   const { id } = useParams<{ id: string | undefined }>()
   const userQuery = useUser()
 
-  const { toast } = useToast()
   const navigate = useNavigate()
   const candidatoQuery = useCandidatoDoutoradoById(id ?? "")
-  // const deleteCandidatoMutation = useDeleteCandidatoDoutorado(id ?? "")
+  const deleteCandidatoMutation = useDeleteCandidatoDoutorado(id ?? "")
   const user = userQuery.data
   const candidato: CandidatoDoutoradoComRelacoes = candidatoQuery.data
 
@@ -59,10 +58,7 @@ export default function CandidatoDoutoradoPage() {
   }
 
   if (candidatoQuery.isError || userQuery.isError) {
-    toast.error({
-      title: "Erro",
-      description: "Erro ao carregar os dados do candidato.",
-    })
+    toast.error("Erro ao carregar os dados do candidato.")
     navigate("/dashboard")
     return null
   }

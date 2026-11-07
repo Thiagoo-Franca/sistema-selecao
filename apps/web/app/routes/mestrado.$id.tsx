@@ -4,26 +4,35 @@ import { useNavigate, useParams } from "react-router"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
-import { CandidatoMestradoNotaSchema, type CandidatoMestradoNota } from "@/schema/schema"
+import {
+  CandidatoMestradoNotaSchema,
+  type CandidatoMestradoNota,
+} from "@/features/candidates/shared/schema/candidate.schema"
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
 import { calcularMestradoNota, paraNumeroSeguro } from "@tcc/shared"
-import { useTeachersSimplified, useToast } from "@/hooks"
+
+import { Header } from "@/shared/components/layout/header"
+import type { Route } from "../+types/root"
+import Loading from "@/shared/components/layout/loading"
+import CandidateNotFound from "@/shared/components/layout/candidate-not-found"
+import {
+  normalizeGru,
+  paraBooleano,
+  valorIsencaoSelect,
+  valorSimNaoSelect,
+} from "@/shared/lib/helpers"
+import FormsAvaliacaoMestrado from "@/features/candidates/shared/components/avaliacao/mestrado/forms"
+import CandidateInfo from "@/features/candidates/shared/components/avaliacao/mestrado/candidate-info"
+import CandidateActions from "@/features/candidates/shared/components/avaliacao/mestrado/candidate-actions"
+import { useUser } from "@/features/auth/hooks/auth.queries"
 import {
   useCandidatoMestradoById,
   useDeleteCandidatoMestrado,
   useUpdateCandidatoMestrado,
   useUpdateCandidatoMestradoNota,
-} from "@/hooks/candidato.hooks"
-import { useUser } from "@/services/useUser"
-
-import { Header } from "@/components/layout/header"
-import type { Route } from "../+types/root"
-import Loading from "@/components/layout/loading"
-import CandidateNotFound from "@/components/layout/candidate-not-found"
-import { normalizeGru, paraBooleano, valorIsencaoSelect, valorSimNaoSelect } from "@/lib/helpers"
-import FormsAvaliacaoMestrado from "@/components/avaliacao/mestrado/forms"
-import CandidateInfo from "@/components/avaliacao/mestrado/candidate-info"
-import CandidateActions from "@/components/avaliacao/mestrado/candidate-actions"
+} from "@/features/candidates/mestrado/hooks"
+import { useTeachersSimplified } from "@/features/users/hooks"
+import { toast } from "sonner"
 
 type TeacherOption = { id: string; nome: string }
 type TeacherData = { id: string; nome?: string | null; name?: string | null }
@@ -47,7 +56,6 @@ export default function AvaliacaoCandidatoMestradoPage() {
   const updateNotaMutation = useUpdateCandidatoMestradoNota()
 
   const navigate = useNavigate()
-  const { toast } = useToast()
 
   const form = useForm<CandidatoMestradoNota>({
     resolver: zodResolver(CandidatoMestradoNotaSchema),
@@ -212,18 +220,12 @@ export default function AvaliacaoCandidatoMestradoPage() {
         }
       }
 
-      toast({
-        title: "Avaliação salva com sucesso",
-        description: "A avaliação do candidato de mestrado foi salva com sucesso.",
-      })
+      toast.success("Avaliação salva com sucesso")
       navigate("/dashboard")
     } catch (error) {
-      toast({
-        title: "Erro ao salvar avaliação",
-        description:
-          "Ocorreu um erro ao salvar a avaliação do candidato de mestrado." +
-          (error instanceof Error ? ` Detalhes: ${error.message}` : ""),
-      })
+      toast.error(
+        "Erro ao salvar avaliação" + (error instanceof Error ? ` Detalhes: ${error.message}` : "")
+      )
     }
   }
   if (isLoading) {
