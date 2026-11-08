@@ -1,6 +1,6 @@
-import type { Route } from "./+types/_index"
-import AuthBrand from "@/features/auth/components/auth-brand"
-import Login from "@/features/auth/pages"
+import AuthBrand from "../components/auth-brand"
+import Login from "../components/login/login"
+import type { Route } from "./+types/LoginPage"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -14,7 +14,7 @@ export const meta: Route.MetaFunction = () => [
   },
 ]
 
-export default function LandingPage() {
+export default function LoginPage() {
   return (
     <main className="flex min-h-dvh animate-gradient-move items-center justify-center bg-white bg-[size:500%_500%] md:bg-[linear-gradient(to_right,_#F0523E,_#F8D65A,_#7BCB61,_#70C8EA)]">
       <div className="flex w-full max-w-md flex-col items-center justify-center gap-6 rounded-lg bg-white p-8 md:p-12 md:shadow-lg">

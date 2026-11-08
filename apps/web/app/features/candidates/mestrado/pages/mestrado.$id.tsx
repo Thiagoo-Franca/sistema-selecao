@@ -237,8 +237,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <Header className="mb-6" />
+    <div className="">
       <CandidateActions isAdmin={isAdmin} deleteCandidatoMutation={deleteCandidatoMutation} />
       <CandidateInfo candidato={candidato} />
       <FormsAvaliacaoMestrado

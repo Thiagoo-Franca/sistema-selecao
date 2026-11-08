@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router"
 import { useEffect, useState } from "react"
+import { useUser } from "@/features/auth"
 import type { Route } from "./+types/admin"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Administração" }]
@@ -20,7 +21,7 @@ export default function AdminLayout() {
     return <Navigate to="/" />
   }
   if (user.role !== "ADMIN") {
-    return <Navigate to="/" />
+    return <Navigate to="/dashboard" />
   }
   return <Outlet />
 }

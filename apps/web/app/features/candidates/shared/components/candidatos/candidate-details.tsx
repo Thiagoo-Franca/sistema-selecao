@@ -33,8 +33,7 @@ export default function CandidateDetails({
   SECTION_CONTENT,
 }: CandidateDetailsProps) {
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <Header className="mb-6" />
+    <div className="">
       <CandidateActions
         user={user}
         candidato={candidato}

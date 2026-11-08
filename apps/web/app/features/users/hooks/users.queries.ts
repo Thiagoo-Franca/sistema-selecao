@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/shared/services/apiClient"
 import { rpcReturn } from "@/shared/lib/utils"
+import { useUser } from "@/features/auth"
 
 export const useIsTeacher = () => {
   const userQuery = useUser()
