@@ -1,6 +1,6 @@
 import { useState } from "react"
-import ResetPasswordForm from "../components/login/reset-password-form"
-import LoginForm from "../components/login/login-form"
+import ResetPasswordForm from "./reset-password-form"
+import LoginForm from "./login-form"
 
 export default function Login() {
   const [showPasswordReset, setShowPasswordReset] = useState(false)

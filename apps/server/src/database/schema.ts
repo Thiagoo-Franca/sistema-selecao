@@ -115,16 +115,19 @@ const candidatoBaseColumns = {
   cpf: text("cpf"),
   nome: text("nome").notNull(),
   email: text("email"),
-
-  solicitouIsencaoTaxaInscricao: text("solicitou_isencao_taxa_inscricao"),
-  isencaoAprovada: text("isencao_aprovada").notNull().default("nao-solicitou"),
-  gru: gruStatusEnum("gru"),
+  solicitouIsencaoTaxaInscricao: boolean("solicitou_isencao_taxa_inscricao")
+    .notNull()
+    .default(false),
+  isencaoComprovanteLink: text("isencao_comprovante_link"),
+  isencaoAprovada: text("isencao_aprovada").notNull().default("nao-avaliado"), // "sim", "nao", "nao-solicitou", "nao-avaliado"
+  isencaoAprovadaLink: text("isencao_aprovada_link"),
+  gru: text("gru").notNull().default("nao-avaliado"), // "sim", "nao", "nao-solicitou", "nao-avaliado"
   gruLink: text("gru_link"), // Link para PDF do GRU pago
-  homologa: boolean("homologa"),
 
-  especiais: text("especiais"), // Texto pois pode conter links para documentos comprobatórios
-  cotas: text("cotas"), // Texto pois pode conter links para documentos comprobatórios
-  supra: text("supra"), // Texto pois pode conter links para documentos comprobatórios
+  homologa: boolean("homologa"),
+  especiais: boolean("especiais"),
+  cotas: boolean("cotas"),
+  supra: boolean("supra"),
 
   avaliadorId: uuid("avaliador_id").references(() => Users.id, {
     onDelete: "set null",
@@ -182,6 +185,7 @@ export const CandidatoMestrado = pgTable(
     primeiraAreaPreferencia: areaEnum("primeira_area_preferencia"),
     segundaAreaPreferencia: areaEnum("segunda_area_preferencia"),
 
+    cidadeResidencia: text("cidade_residencia"),
     universidade: text("universidade"),
     curso: text("curso"),
     cidadeGraduacao: text("cidade_graduacao"),

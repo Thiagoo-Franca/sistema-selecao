@@ -1,4 +1,5 @@
 import z from "zod"
+import { ISENCAO_STATUS } from "../../../../../../../packages/shared/src/isencao"
 
 const uploadCandidatosMestradoSchema = z.array(
   z.object({
@@ -11,21 +12,20 @@ const uploadCandidatosMestradoSchema = z.array(
     nome: z.string().optional(),
     email: z.string().email("Email inválido").optional(),
 
-    cidade_residencia: z.string().optional(),
-
+    cidadeResidencia: z.string().optional(),
     solicitouIsencaoTaxaInscricao: z.string().optional(),
-    isencaoAprovada: z.string().optional(),
+    isencaoAprovada: z.string(),
     gru: z.string().optional(),
     gruLink: z.string().optional(),
-    homologa: z.string().optional(),
 
     universidade: z.string().optional(),
     curso: z.string().optional(),
     cidadeGraduacao: z.string().optional(),
 
-    especiais: z.string().optional(),
-    cotas: z.string().optional(),
-    supra: z.string().optional(),
+    homologa: z.boolean(),
+    especiais: z.boolean(),
+    cotas: z.boolean(),
+    supra: z.boolean(),
 
     grad: z.number().nullable().optional(),
     area: z.number().nullable().optional(),
@@ -45,13 +45,22 @@ export { uploadCandidatosMestradoSchema }
 const CandidatoMestradoNotaSchema = z.object({
   avaliadorId: z.string().uuid().optional(),
   auditorId: z.string().uuid().optional(),
-  solicitouIsencaoTaxaInscricao: z.string().optional(),
-  isencaoAprovada: z.string().optional(),
+  cidadeResidencia: z.string().optional(),
+
+  universidade: z.string().optional(),
+  cursoGrad: z.string().optional(),
+  cidadeGrad: z.string().optional(),
+
+  solicitouIsencaoTaxaInscricao: z.boolean().optional(),
+  isencaoComprovanteLink: z.string().nullable().optional(),
+  isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
+  isencaoAprovadaLink: z.string().nullable().optional(),
   gru: z.string().optional(),
+
   homologa: z.boolean().optional(),
   especiais: z.boolean().optional(),
   cotas: z.boolean().optional(),
-  SUPRA: z.boolean().optional(),
+  supra: z.boolean().optional(),
 
   avaliado: z.boolean().optional(),
 
@@ -92,10 +101,11 @@ const CandidatoDoutoradoNotaEtapa1Schema = z.object({
   cpf: z.string().regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos"),
   nome: z.string().min(1, "O nome é obrigatório"),
   email: z.string().email("Email inválido"),
-  solicitouIsencaoTaxaInscricao: z.string(),
+  solicitouIsencaoTaxaInscricao: z.boolean().optional(),
   isencaoAprovada: z.string(),
-  gru: z.string(),
-  homologa: z.string(),
+  isencaoAprovadaLink: z.string().nullable().optional(),
+  gru: z.string().optional(),
+  homologa: z.boolean().optional(),
   areaPgcomp: z.string(),
   OrientadorMestrado: z.string(),
   PotencialOrientador1: z.string(),

@@ -2,7 +2,11 @@ import { useNavigate, useParams } from "react-router"
 import { useEffect, useState } from "react"
 
 import { Controller, useForm, useWatch } from "react-hook-form"
-import { calcularDoutoradoNota, paraNumeroSeguro } from "@tcc/shared"
+import {
+  calcularDoutoradoNota,
+  paraNumeroSeguro,
+  type CandidatoDoutoradoNotaEtapa1,
+} from "@tcc/shared"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Header } from "@/shared/components/layout/header"
@@ -20,6 +24,9 @@ import {
 import { Input } from "@/shared/ui/input"
 import type { Route } from "./+types/dashboard"
 import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
+import { useUser } from "@/features/auth/hooks/auth.queries"
+import { useCandidatoDoutoradoById } from "@/features/candidates/doutorado/hooks"
+import { CandidatoDoutoradoNotaEtapa1Schema } from "@/features/candidates/shared/schema/candidate.schema"
 
 const meta: Route.MetaFunction = () => [{ title: `SISSEL - Avaliação candidato Doutorado` }]
 
@@ -27,7 +34,7 @@ export default function AvaliacaoCandidatoDoutoradoPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string | undefined }>()
   const [nota, setNota] = useState(0)
-  const { toast } = useToast()
+
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const userQuery = useUser()

@@ -1,3 +1,5 @@
+const BOOLEANOS = ["homologa", "especiais", "cotas", "supra"] as const
+
 const COLUNAS = [
   "primeiraAreaPreferencia",
   "segundaAreaPreferencia",
@@ -6,8 +8,8 @@ const COLUNAS = [
   "nome",
   "email",
   "cidadeResidencia",
-  "solicitouIsencaoTaxaInscricao",
-  "isencaoAprovada",
+  "isencaoComprovanteLink",
+  "isencaoAprovadaLink",
   "gruLink",
   "homologa",
   "universidade",
@@ -34,9 +36,12 @@ const TOTAL_COLUNAS = COLUNAS.length + NOTAS.length
 
 const HYPERLINK = /^=HYPERLINK\(\s*"([^"]*)"\s*[;,]\s*"([^"]*)"\s*\)$/i
 
-type CandidatoBase = Omit<Record<(typeof COLUNAS)[number], string | null>, "homologa"> & {
-  homologa: boolean | null
-}
+type CandidatoBase = Omit<
+  Record<(typeof COLUNAS)[number], string | null>,
+  (typeof BOOLEANOS)[number]
+> &
+  Record<(typeof BOOLEANOS)[number], boolean | null>
+
 type Notas = Record<
   Exclude<(typeof NOTAS)[number]["chave"], "area" | "enade"> | "enadeLink",
   string | null
@@ -70,15 +75,15 @@ export function parseNumero(texto: string | null): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-function parseHomologa(texto: string | null): boolean | null {
+function parseBooleano(texto: string | null): boolean | null {
   if (!texto) return null
-
-  const valor = texto.trim().toUpperCase()
-  if (valor === "HOMOLOGA?" || valor === "NAO" || valor === "NÃO" || valor === "FALSE") {
-    return false
-  }
-  if (valor === "SIM" || valor === "TRUE") return true
-
+  const v = texto
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+  if (v === "SIM" || v === "TRUE") return true
+  if (v === "NAO" || v === "FALSE" || v === "HOMOLOGA?") return false
   return null
 }
 
@@ -104,11 +109,14 @@ export function parseCandidatosMestrado(text: string): CandidatoMestradoUpload[]
       const candidato = {} as CandidatoBase
       COLUNAS.forEach((coluna, i) => {
         const { link, texto } = parseHyperlink(celulas[i])
-        if (coluna === "homologa") {
-          candidato.homologa = parseHomologa(texto)
+
+        if ((BOOLEANOS as readonly string[]).includes(coluna)) {
+          candidato[coluna as (typeof BOOLEANOS)[number]] = parseBooleano(texto)
           return
         }
-        candidato[coluna] = link ?? texto
+
+        candidato[coluna as Exclude<(typeof COLUNAS)[number], (typeof BOOLEANOS)[number]>] =
+          link ?? texto
       })
 
       const notas = {} as Notas

@@ -11,8 +11,6 @@ import {
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
 import { calcularMestradoNota, paraNumeroSeguro } from "@tcc/shared"
 
-import { Header } from "@/shared/components/layout/header"
-import type { Route } from "../+types/root"
 import Loading from "@/shared/components/layout/loading"
 import CandidateNotFound from "@/shared/components/layout/candidate-not-found"
 import {
@@ -33,6 +31,7 @@ import {
 } from "@/features/candidates/mestrado/hooks"
 import { useTeachersSimplified } from "@/features/users/hooks"
 import { toast } from "sonner"
+import type { Route } from "./+types/mestrado.$id"
 
 type TeacherOption = { id: string; nome: string }
 type TeacherData = { id: string; nome?: string | null; name?: string | null }
@@ -95,21 +94,23 @@ export default function AvaliacaoCandidatoMestradoPage() {
     }
   }, [candidato])
 
-  // console.log(candidato)
-
   useEffect(() => {
     if (candidato) {
       reset({
         avaliadorId: candidato.avaliadorId ?? undefined,
         auditorId: candidato.auditorId ?? undefined,
-        solicitouIsencaoTaxaInscricao: valorIsencaoSelect(candidato.solicitouIsencaoTaxaInscricao),
+        cidadeResidencia: candidato.cidadeResidencia ?? undefined,
+        solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ?? undefined,
         isencaoAprovada: candidato.isencaoAprovada ?? undefined,
         gru: normalizeGru(candidato.gru),
         homologa:
           candidato.homologa === true ? true : candidato.homologa === false ? false : undefined,
         especiais: paraBooleano(candidato.especiais),
         cotas: paraBooleano(candidato.cotas),
-        SUPRA: paraBooleano(candidato.supra),
+        supra: paraBooleano(candidato.supra),
+        universidade: candidato.universidade ?? undefined,
+        cursoGrad: candidato.curso ?? undefined,
+        cidadeGrad: candidato.cidadeGraduacao ?? undefined,
         grad: candidato.notas?.grad ? Number(candidato.notas?.grad) : 0,
         area: candidato.notas?.area ? Number(candidato.notas?.area) : 0,
         enade: Number(candidato.notas?.enade ?? 0),
@@ -191,10 +192,15 @@ export default function AvaliacaoCandidatoMestradoPage() {
             solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
             isencaoAprovada: dados.isencaoAprovada ?? undefined,
             gru: dados.gru || undefined,
-            homologa: dados.homologa === true ? true : dados.homologa === false ? false : undefined,
+            homologa: dados.homologa ?? undefined,
+            cidadeGraduacao: dados.cidadeGrad ?? undefined,
+            universidade: dados.universidade ?? undefined,
+            curso: dados.cursoGrad ?? undefined,
             especiais: dados.especiais ?? undefined,
-            vagasNegrosPardos: dados.cotas ?? undefined,
-            vagasSupranumerarias: dados.SUPRA ?? undefined,
+            cidadeResidencia: dados.cidadeResidencia ?? undefined,
+
+            cotas: dados.cotas ?? undefined,
+            supra: dados.supra ?? undefined,
           },
         }),
         updateNotaMutation.mutateAsync({
@@ -237,8 +243,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <Header className="mb-6" />
+    <>
       <CandidateActions isAdmin={isAdmin} deleteCandidatoMutation={deleteCandidatoMutation} />
       <CandidateInfo candidato={candidato} />
       <FormsAvaliacaoMestrado
@@ -256,6 +261,6 @@ export default function AvaliacaoCandidatoMestradoPage() {
         candidato={candidato}
         onSubmit={onSubmit}
       />
-    </div>
+    </>
   )
 }

@@ -1,16 +1,16 @@
 import { useEffect, useRef } from "react"
 import { useNavigate } from "react-router"
-import { useUser } from "@/services/useUser"
 
-import { useQueryParamsState } from "@/shared/hooks/use-query-param-state"
+import { useQueryParamState } from "@/shared/hooks/use-query-param-state"
 
-import type { Route } from "./+types/dashboard"
 import { UploadCandidatosMestrado } from "@/features/candidates/shared/components/candidatos/upload-candidate"
 import { Header } from "@/shared/components/layout/header"
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 import SearchBar from "@/shared/ui/search-bar"
 import { CandidatosTab } from "@/features/candidates/shared/components/candidatos-tab/candidato-tab"
 import { TABS } from "@/shared/lib/constants"
+import { useUser } from "@/features/auth"
+import type { Route } from "./+types/DashboardPage"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -25,10 +25,10 @@ export const meta: Route.MetaFunction = () => [
 ]
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useQueryParamsState("searchQuery", "")
-  const [orderBy, setOrderBy] = useQueryParamsState("orderBy", "nome")
-  const [order, setOrder] = useQueryParamsState<"asc" | "desc">("order", "asc")
-  const [activeTab, setActiveTab] = useQueryParamsState("activeTab", "meus-candidatos")
+  const [searchQuery, setSearchQuery] = useQueryParamState("searchQuery", "")
+  const [orderBy, setOrderBy] = useQueryParamState("orderBy", "nome")
+  const [order, setOrder] = useQueryParamState<"asc" | "desc">("order", "asc")
+  const [activeTab, setActiveTab] = useQueryParamState("activeTab", "meus-candidatos")
 
   const navigate = useNavigate()
 
@@ -51,8 +51,7 @@ export default function Home() {
   }, [currentTab])
 
   return (
-    <div className="mx-auto px-4 md:px-8">
-      <Header className="mb-6 py-2" />
+    <div className="">
       <div className="mb-6 flex flex-row items-center justify-between gap-2">
         <div className="flex w-full flex-col items-center gap-2 self-stretch md:flex-row md:gap-4">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
