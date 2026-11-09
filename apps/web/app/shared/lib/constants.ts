@@ -11,6 +11,7 @@ export const GRU_OPTIONS = [
   { value: "aberto", label: "ABERTO" },
   { value: "nao-isento", label: "NÃO ISENTO" },
   { value: "nao-pagou", label: "NÃO PAGOU" },
+  { value: "nao-avaliado", label: "NÃO AVALIADO" },
 ] as const
 
 export const NAO_SOLICITOU = "NÃO SOLICITOU"

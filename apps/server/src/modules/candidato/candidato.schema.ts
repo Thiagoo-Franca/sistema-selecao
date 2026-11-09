@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { AREAS, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
+
 const areaEnum = z.enum(AREAS);
+
 const updateCandidatoMestradoSchema = z.object({
   avaliadorId: z.string().uuid().nullable().optional(),
   auditorId: z.string().uuid().nullable().optional(),
@@ -12,18 +14,19 @@ const updateCandidatoMestradoSchema = z.object({
     .optional(),
   nome: z.string().min(1, "O nome é obrigatório").optional(),
   email: z.string().email("Email inválido").optional(),
-  cidade: z.string().optional(),
-  solicitouIsencaoTaxaInscricao: z.string().optional(),
+  cidadeResidencia: z.string().optional(),
+  solicitouIsencaoTaxaInscricao: z.boolean().optional(),
+  isencaoComprovanteLink: z.string().nullable().optional(),
   isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
   gru: z.enum(GRU_STATUS).optional(),
-  homologa: z.boolean().nullable().optional(),
+
   universidade: z.string().optional(),
   cursoGrad: z.string().optional(),
   cidadeGrad: z.string().optional(),
-  possuiNecessidadesEspeciais: z.boolean().optional(),
-  vagasNegrosPardos: z.boolean().optional(),
-
-  vagasSupranumerarias: z.boolean().optional(),
+  homologa: z.boolean().optional(),
+  especiais: z.boolean().optional(),
+  cotas: z.boolean().optional(),
+  supra: z.boolean().optional(),
 });
 
 export { updateCandidatoMestradoSchema };
@@ -37,8 +40,11 @@ export const updateCandidatoDoutoradoSchema = z.object({
     .optional(),
   nome: z.string().min(1, "O nome é obrigatório").optional(),
   email: z.string().email("Email inválido").optional(),
+  cidadeResidencia: z.string().optional(),
   solicitouIsencaoTaxaInscricao: z.boolean().optional(),
+  isencaoComprovanteLink: z.string().nullable().optional(),
   isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
+  isencaoAprovadaLink: z.string().nullable().optional(),
   gru: z.enum(GRU_STATUS).optional(),
   homologa: z.boolean().nullable().optional(),
   areaPgcomp: z.string().optional(),

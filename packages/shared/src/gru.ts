@@ -4,4 +4,5 @@ export const GRU_STATUS = [
   "aberto",
   "nao-isento",
   "nao-pagou",
+  "nao-avaliado",
 ] as const;

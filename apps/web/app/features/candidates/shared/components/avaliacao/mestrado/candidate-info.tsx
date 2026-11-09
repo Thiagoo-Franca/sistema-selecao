@@ -17,10 +17,6 @@ export default function CandidateInfo({ candidato }: CandidateInfoProps) {
           Áreas de interesse do candidato: {candidato.primeiraAreaPreferencia}
           {candidato.segundaAreaPreferencia ? `, ${candidato.segundaAreaPreferencia}` : null}
         </p>
-        <p>
-          Dados da graduação: {candidato.universidade} - {candidato.curso} -{" "}
-          {candidato.cidadeGraduacao}
-        </p>
       </div>
     </div>
   )
