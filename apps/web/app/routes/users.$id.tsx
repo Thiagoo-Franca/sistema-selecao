@@ -1,15 +1,15 @@
-import { useUserById } from "@/hooks"
 import { useNavigate, useParams } from "react-router"
-import { useUser } from "@/services/useUser"
 
 import type { Route } from "./+types/users.$id"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/shared/ui/badge"
+import { Button } from "@/shared/ui/button"
+import { Skeleton } from "@/shared/ui/skeleton"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
 import { ArrowLeft, Mail, School, User, GraduationCap, Hash } from "lucide-react"
 import { match } from "ts-pattern"
-import { Header } from "@/components/layout/header"
+import { Header } from "@/shared/components/layout/header"
+import { useUser } from "@/features/auth/hooks/auth.queries"
+import { useUserById } from "@/features/users/hooks"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil do Usuário" }]
 

@@ -1,12 +1,12 @@
-import { FeatureRequests } from "@/components/feedback/FeatureRequests"
-import { FeedbackForm } from "@/components/feedback/FeedbackForm"
-import { FeedbackStatistics } from "@/components/feedback/FeedbackStatistics"
-import { Header } from "@/components/layout/header"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useUser } from "@/services/useUser"
+import { FeatureRequests } from "@/features/feedback/components/FeatureRequests"
+import { FeedbackForm } from "@/features/feedback/components/FeedbackForm"
+import { FeedbackStatistics } from "@/features/feedback/components/FeedbackStatistics"
+import { Header } from "@/shared/components/layout/header"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 import { Loader2 } from "lucide-react"
 import { Navigate } from "react-router"
 import type { Route } from "./+types/feedback"
+import { useUser } from "@/features/auth/hooks/auth.queries"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Feedback" }]
 

@@ -1,5 +1,5 @@
-import { Header } from "@/components/layout/header"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Header } from "@/shared/components/layout/header"
+import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,9 +9,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+} from "@/shared/ui/alert-dialog"
+import { Badge } from "@/shared/ui/badge"
+import { Button } from "@/shared/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -19,41 +19,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/shared/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useUser } from "@/services/useUser"
+} from "@/shared/ui/dropdown-menu"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/form"
+import { Input } from "@/shared/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
+import { Skeleton } from "@/shared/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { SelectUser } from "@tcc/server"
 import { AlertTriangle, Eye, MoreHorizontal, Search, Trash2 } from "lucide-react"
@@ -198,7 +177,6 @@ export default function AdminUsersIndexPage() {
             onDeleteUser={handleDeleteUser}
           />
         </TabsContent>
-
       </Tabs>
 
       <EditUserDialog user={editingUser} open={editDialogOpen} onOpenChange={setEditDialogOpen} />
@@ -307,18 +285,9 @@ function UserTable({
   )
 }
 
-import { useAllUsers, useDeleteUser, useUpdateUser } from "@/hooks"
-
-const updateUserSchema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório"),
-  school: z.string().min(1, "Escola é obrigatória"),
-  academicTitle: z.string().min(1, "Título acadêmico é obrigatório"),
-  role: z.enum(["TEACHER", "ADMIN"], {
-    required_error: "Função é obrigatória",
-  }),
-})
-
-type UpdateUserFormData = z.infer<typeof updateUserSchema>
+import { useUser } from "@/features/auth/hooks/auth.queries"
+import { useDeleteUser, useUpdateUser } from "@/features/users/hooks"
+import { updateUserSchema, type UpdateUserFormData } from "@/features/users/schema/users.schema"
 
 function EditUserDialog({
   user,
@@ -341,7 +310,7 @@ function EditUserDialog({
     },
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       form.reset({
         nome: user.nome,

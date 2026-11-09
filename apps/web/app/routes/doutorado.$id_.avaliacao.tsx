@@ -1,25 +1,14 @@
 import { useNavigate, useParams } from "react-router"
 import { useEffect, useState } from "react"
-import { useToast } from "@/hooks"
-import { useUser } from "@/services/useUser"
-import {
-  useCandidatoDoutoradoById,
-  // useUpdateCandidatoDoutorado,
-  // useUpdateCandidatoDoutoradoNota,
-} from "@/hooks/candidato.hooks"
+
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { calcularDoutoradoNota, paraNumeroSeguro } from "@tcc/shared"
-
-import {
-  CandidatoDoutoradoNotaEtapa1Schema,
-  type CandidatoDoutoradoNotaEtapa1,
-} from "@/schema/schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 
-import { Header } from "@/components/layout/header"
+import { Header } from "@/shared/components/layout/header"
 import { ArrowLeft, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Field, FieldLabel, FieldLegend } from "@/components/ui/field"
+import { Button } from "@/shared/ui/button"
+import { Field, FieldLabel, FieldLegend } from "@/shared/ui/field"
 import {
   Select,
   SelectContent,
@@ -27,8 +16,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
+} from "@/shared/ui/select"
+import { Input } from "@/shared/ui/input"
 import type { Route } from "./+types/dashboard"
 import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
 

@@ -1,16 +1,15 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useResetPasswordMutation } from "@/features/auth/hooks/auth.mutation"
 import type { Route } from "./+types/reset-password.$token"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { useResetPasswordMutation } from "@/services/authService"
-import { AlertCircle, CheckCircle } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Button } from "@/shared/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Input } from "@/shared/ui/input"
+import { Label } from "@/shared/ui/label"
 import { useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { CheckCircle } from "lucide-react"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Redefinir Senha" }]
 interface ResetPasswordFormValues {
@@ -21,7 +20,6 @@ interface ResetPasswordFormValues {
 export default function ResetPasswordPage() {
   const { token } = useParams()
   const navigate = useNavigate()
-  const { toast } = useToast()
   const resetPasswordMutation = useResetPasswordMutation()
   const [isSuccess, setIsSuccess] = useState(false)
   const [tokenValid, setTokenValid] = useState<boolean | null>(null)
@@ -59,10 +57,7 @@ export default function ResetPasswordPage() {
       {
         onSuccess: () => {
           setIsSuccess(true)
-          toast({
-            title: "Senha redefinida com sucesso ✅",
-            description: "Sua senha foi alterada. Você pode fazer login agora.",
-          })
+          toast.success("Senha redefinida com sucesso! Agora você pode fazer login.")
 
           // Redirect to login after 3 seconds
           setTimeout(() => {
@@ -70,10 +65,9 @@ export default function ResetPasswordPage() {
           }, 3000)
         },
         onError: (error) => {
-          toast({
-            title: "Erro ao redefinir senha ❌",
-            description: error.message || "Ocorreu um erro ao redefinir a senha",
-          })
+          toast.error(
+            `Erro ao redefinir senha: ${error.message || "Ocorreu um erro ao redefinir a senha"}`
+          )
         },
       }
     )

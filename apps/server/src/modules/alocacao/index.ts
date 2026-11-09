@@ -1,4 +1,8 @@
-export { escolherProfessor } from "./alocacao.policy.js";
+export {
+  escolherAvaliadorEAuditor,
+  escolherProfessor,
+  registrarAlocacao,
+} from "./alocacao.policy.js";
 export {
   alocarCandidatoMestrado,
   alocarLoteMestrado,

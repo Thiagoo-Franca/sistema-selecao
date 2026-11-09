@@ -1,20 +1,13 @@
-import { Header } from "@/components/layout/header"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useUserById } from "@/hooks"
+import { Header } from "@/shared/components/layout/header"
+import { Badge } from "@/shared/ui/badge"
+import { Button } from "@/shared/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Skeleton } from "@/shared/ui/skeleton"
+import { useUserById } from "@/features/users/hooks"
 import { ArrowLeft, GraduationCap, Hash, Mail, School, User } from "lucide-react"
 import { useNavigate, useParams } from "react-router"
 import { match } from "ts-pattern"
 import type { Route } from "./+types/admin.users.$userId"
-
-const roleLabels: Record<string, string> = {
-  orientador: "Orientador",
-  coorientador: "Coorientador",
-  aluno: "Aluno",
-  avaliador: "Avaliador",
-}
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Detalhe do Usuário" }]
 
@@ -22,11 +15,9 @@ export default function AdminUserDetailPage() {
   const navigate = useNavigate()
   const { userId } = useParams<{ userId: string }>()
   const userQuery = useUserById(userId)
-  // const associationsQuery = useUserAssociations(userId ? parseInt(userId, 10) : null)
 
   const isLoading = userQuery.isLoading // || associationsQuery.isLoading
   const user = userQuery.data
-  // const associations = associationsQuery.data
 
   if (isLoading) {
     return (

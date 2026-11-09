@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { z } from "zod";
 import type { AppVariables } from "../../types.js";
 import * as service from "./candidato.service.js";
 import { zValidator } from "@hono/zod-validator";
@@ -19,6 +20,10 @@ import {
 import { AppError } from "../../error.js";
 import { checkRole } from "../auth/index.js";
 import { match } from "ts-pattern";
+
+const candidatoIdParamsSchema = z.object({
+  id: z.string().uuid(),
+});
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   // GETS
@@ -193,6 +198,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   .patch(
     "/mestrado/:id/nota",
     checkRole(["ADMIN", "TEACHER"]),
+    zValidator("param", candidatoIdParamsSchema),
     zValidator("json", updateNotaMestradoSchema),
     async (c) => {
       const id = c.req.param("id");
@@ -218,6 +224,7 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   .patch(
     "/doutorado/:id/nota",
     checkRole(["ADMIN", "TEACHER"]),
+    zValidator("param", candidatoIdParamsSchema),
     zValidator("json", updateNotaDoutoradoSchema),
     async (c) => {
       const id = c.req.param("id");

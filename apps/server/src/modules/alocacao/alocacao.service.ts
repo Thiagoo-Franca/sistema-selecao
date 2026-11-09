@@ -5,7 +5,11 @@ import {
   Users,
 } from "../../database/schema.js";
 import type { db } from "../../database/index.js";
-import { escolherProfessor, type ProfessorDisponivel } from "./alocacao.policy.js";
+import {
+  escolherAvaliadorEAuditor,
+  registrarAlocacao,
+  type ProfessorDisponivel,
+} from "./alocacao.policy.js";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -42,33 +46,12 @@ export async function alocarCandidatoMestrado(
   },
 ): Promise<{ avaliadorId: string | null; auditorId: string | null }> {
   const professores = await listarProfessores(tx);
-  const areas = [
-    candidato.primeiraAreaPreferencia,
-    candidato.segundaAreaPreferencia,
-  ].filter((area): area is string => Boolean(area));
-
-  let avaliadorId: string | null = null;
-  for (const area of areas) {
-    avaliadorId = escolherProfessor(professores, area);
-    if (avaliadorId) break;
-  }
-
-  let auditorId: string | null = null;
-  for (const area of areas) {
-    auditorId = escolherProfessor(
-      professores,
-      area,
-      avaliadorId ? [avaliadorId] : [],
-    );
-    if (auditorId) break;
-  }
-  auditorId ??= escolherProfessor(
+  return escolherAvaliadorEAuditor(
     professores,
-    null,
-    avaliadorId ? [avaliadorId] : [],
+    [candidato.primeiraAreaPreferencia, candidato.segundaAreaPreferencia].filter(
+      (area): area is string => Boolean(area),
+    ),
   );
-
-  return { avaliadorId, auditorId };
 }
 
 export async function alocarLoteMestrado(
@@ -79,14 +62,21 @@ export async function alocarLoteMestrado(
     segundaAreaPreferencia: string | null;
   }>,
 ) {
+  const professores = await listarProfessores(tx);
   const resultado = [];
   for (const candidato of candidatos) {
-    const alocacao = await alocarCandidatoMestrado(tx, candidato);
+    const alocacao = escolherAvaliadorEAuditor(
+      professores,
+      [candidato.primeiraAreaPreferencia, candidato.segundaAreaPreferencia].filter(
+        (area): area is string => Boolean(area),
+      ),
+    );
     const [atualizado] = await tx
       .update(CandidatoMestrado)
       .set(alocacao)
       .where(eq(CandidatoMestrado.id, candidato.id))
       .returning();
+    registrarAlocacao(professores, alocacao);
     resultado.push(atualizado ?? candidato);
   }
   return resultado;

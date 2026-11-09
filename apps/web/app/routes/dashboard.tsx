@@ -2,15 +2,15 @@ import { useEffect, useRef } from "react"
 import { useNavigate } from "react-router"
 import { useUser } from "@/services/useUser"
 
-import { useQueryParamsState } from "@/hooks/use-query-param-state"
+import { useQueryParamsState } from "@/shared/hooks/use-query-param-state"
 
 import type { Route } from "./+types/dashboard"
-import { UploadCandidatosMestrado } from "@/components/candidatos/upload-candidate"
-import { Header } from "@/components/layout/header"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import SearchBar from "@/components/ui/search-bar"
-import { CandidatosTab } from "@/components/candidatos-tab/candidato-tab"
-import { TABS } from "@/lib/constants"
+import { UploadCandidatosMestrado } from "@/features/candidates/shared/components/candidatos/upload-candidate"
+import { Header } from "@/shared/components/layout/header"
+import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs"
+import SearchBar from "@/shared/ui/search-bar"
+import { CandidatosTab } from "@/features/candidates/shared/components/candidatos-tab/candidato-tab"
+import { TABS } from "@/shared/lib/constants"
 
 export const meta: Route.MetaFunction = () => [
   {

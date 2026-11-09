@@ -1,6 +1,6 @@
 import type { Route } from "./+types/_index"
-import AuthBrand from "@/components/auth/auth-brand"
-import Login from "@/components/auth/login"
+import AuthBrand from "@/features/auth/components/auth-brand"
+import Login from "@/features/auth/pages"
 
 export const meta: Route.MetaFunction = () => [
   {
