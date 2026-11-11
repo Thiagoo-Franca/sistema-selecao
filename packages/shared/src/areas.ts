@@ -1,3 +1,15 @@
+export const AREAPGCOMP = [
+  "COMPUTAÇÃO APLICADA",
+  "SISTEMAS COMPUTACIONAIS",
+  "ENGENHARIA DE SOFTWARE",
+] as const;
+
+export const AREAPGCOMP_LABEL: Record<(typeof AREAPGCOMP)[number], string> = {
+  "COMPUTAÇÃO APLICADA": "Computação Aplicada",
+  "SISTEMAS COMPUTACIONAIS": "Sistemas Computacionais",
+  "ENGENHARIA DE SOFTWARE": "Engenharia de Software",
+};
+
 export const AREAS = [
   "CVIS",
   "CD",

@@ -1,4 +1,4 @@
-import { AREAS, GRU_STATUS } from "@tcc/shared";
+import { AREAPGCOMP, AREAS, GRU_STATUS } from "@tcc/shared";
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
@@ -21,6 +21,9 @@ export type TipoCurso = (typeof tipoCursoEnum.enumValues)[number];
 export const areaEnum = pgEnum("area", AREAS);
 export type Area = (typeof areaEnum.enumValues)[number];
 export const gruStatusEnum = pgEnum("gru_status", GRU_STATUS);
+
+export const areaPgcompEnum = pgEnum("area_pgcomp", AREAPGCOMP);
+export type AreaPgcomp = (typeof areaPgcompEnum.enumValues)[number];
 
 export const NotaMestrado = pgTable("nota_mestrado", {
   id: serial("id").primaryKey(),
@@ -90,10 +93,9 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 
-  msc: numeric("msc", { mode: "number" }), // nota do mestrado
-  historicoMestradoLink: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado ou declaração de conclusão
+  msc: numeric("msc", { mode: "number" }), // Nota do mestrado
 
-  area: numeric("area", { mode: "number" }),
+  areaGrad: numeric("area_grad", { mode: "number" }), //  Área de formação da graduação
 
   conceitoCapesMestrado: numeric("conceito_capes_mestrado", { mode: "number" }), // 0,1,2,3,4,5,6,7
 
@@ -104,6 +106,7 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
   b1b2b3b4Link: text("b1b2b3b4_link"),
 
   notaAnteprojeto: numeric("nota_anteprojeto", { mode: "number" }),
+  notaEtapaII: numeric("nota_etapa_ii", { mode: "number" }),
 });
 
 export type InsertNotaDoutorado = typeof NotaDoutorado.$inferInsert;
@@ -118,9 +121,11 @@ const candidatoBaseColumns = {
   solicitouIsencaoTaxaInscricao: boolean("solicitou_isencao_taxa_inscricao")
     .notNull()
     .default(false),
+
   isencaoComprovanteLink: text("isencao_comprovante_link"),
   isencaoAprovada: text("isencao_aprovada").notNull().default("nao-avaliado"), // "sim", "nao", "nao-solicitou", "nao-avaliado"
   isencaoAprovadaLink: text("isencao_aprovada_link"),
+
   gru: text("gru").notNull().default("nao-avaliado"), // "sim", "nao", "nao-solicitou", "nao-avaliado"
   gruLink: text("gru_link"), // Link para PDF do GRU pago
 
@@ -144,20 +149,18 @@ export const CandidatoDoutorado = pgTable(
   {
     ...candidatoBaseColumns,
     tipoCurso: tipoCursoEnum("tipo_curso").default("doutorado").notNull(),
-    areaPgcomp: text("area_pgcomp"), // Pode vir a ser um enum, mas por enquanto é texto livre
+    areaPgcomp: areaPgcompEnum("area_pgcomp"), // Pode vir a ser um enum, mas por enquanto é texto livre
+
+    historicoMestradoLink: text("historico_mestrado").notNull(), // link para PDF do histórico do mestrado
     orientadorMestrado: text("orientador_mestrado"), // Pode ser nome do orientador ou link para PDF do histórico do mestrado com o nome do orientador
-    primeiraOpcaoOrientador: text("primeira_opcao_orientador").notNull(),
-    segundaOpcaoOrientador: text("segunda_opcao_orientador").notNull(),
-    terceiraOpcaoOrientador: text("terceira_opcao_orientador").notNull(),
+
+    primeiraOpcaoOrientador: text("primeira_opcao_orientador"),
+    segundaOpcaoOrientador: text("segunda_opcao_orientador"),
+    terceiraOpcaoOrientador: text("terceira_opcao_orientador"),
 
     nomeUniversidadeMestrado: text("nome_universidade_mestrado").notNull(), // Ex: 'Universidade Federal da Bahia', 'Universidade de São Paulo', etc.
     nomeCursoMestrado: text("nome_curso_mestrado").notNull(), // Ex: 'Ciência da Computação', 'Engenharia de Software', etc.
     cidadeMestrado: text("cidade_mestrado"),
-
-    historicoGraduacao: text("historico_graduacao").notNull(), // link para PDF do histórico da graduação
-    copiaDiplomaMestrado: text("copia_diploma_mestrado").notNull(), // link para PDF da cópia do diploma do mestrado ou declaracao de conclusão
-    anteprojetoTese: text("anteprojeto_tese").notNull(), // Link para PDF do anteprojeto de tese
-    conceitoCapesMestrado: text("conceito_capes_mestrado"), // Ex: '3', '4', '5', etc.
   },
   (table) => ({
     numeroInscricaoUnique: unique(
