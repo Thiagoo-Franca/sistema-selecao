@@ -20,6 +20,8 @@ import {
 import { AppError } from "../../error.js";
 import { checkRole } from "../auth/index.js";
 import { match } from "ts-pattern";
+import { uploadCandidatosDoutorado } from "../importacao/importacao.service.js";
+import { uploadCandidatosDoutoradoSchema } from "../importacao/importacao.schema.js";
 
 const candidatoIdParamsSchema = z.object({
   id: z.string().uuid(),
@@ -94,6 +96,23 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
       }
       return c.json({
         message: "Candidatos de mestrado adicionados com sucesso",
+      });
+    },
+  )
+  .post(
+    "/doutorado",
+    checkRole(["ADMIN"]),
+    zValidator("json", uploadCandidatosDoutoradoSchema),
+    async (c) => {
+      const candidatos = c.req.valid("json");
+      const result = await uploadCandidatosDoutorado(c, candidatos);
+
+      if (!result.ok) {
+        console.error("Error uploading doutorado candidatos:", result.error);
+        throw new AppError(500, "Erro ao fazer upload de candidatos");
+      }
+      return c.json({
+        message: "Candidatos de doutorado adicionados com sucesso",
       });
     },
   )
@@ -173,18 +192,12 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
       const id = c.req.param("id");
       const body = c.req.valid("json");
       const result = await service.updateCandidatoDoutorado(c, id, body);
-
       if (!result.ok) {
         console.error(
           `Error updating doutorado candidato with ID ${id}:`,
           result.error,
         );
-        throw match(result.error)
-          .with(
-            { type: "database_error" },
-            () => new AppError(500, "Erro ao atualizar candidato"),
-          )
-          .exhaustive();
+        throw new AppError(500, "Erro ao atualizar candidato");
       }
 
       if (!result.data) {

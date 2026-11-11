@@ -7,6 +7,7 @@ import {
 import type { db } from "../../database/index.js";
 import {
   escolherAvaliadorEAuditor,
+  escolherPorOpcoesOrientador,
   registrarAlocacao,
   type ProfessorDisponivel,
 } from "./alocacao.policy.js";
@@ -25,6 +26,7 @@ async function listarProfessores(tx: Tx): Promise<ProfessorDisponivel[]> {
   const professores = await tx
     .select({
       id: Users.id,
+      nome: Users.nome,
       areas: Users.areas,
       carga: cargaProfessor,
     })
@@ -33,6 +35,7 @@ async function listarProfessores(tx: Tx): Promise<ProfessorDisponivel[]> {
 
   return professores.map((professor) => ({
     id: professor.id,
+    nome: professor.nome,
     areas: professor.areas,
     carga: Number(professor.carga),
   }));
@@ -48,9 +51,10 @@ export async function alocarCandidatoMestrado(
   const professores = await listarProfessores(tx);
   return escolherAvaliadorEAuditor(
     professores,
-    [candidato.primeiraAreaPreferencia, candidato.segundaAreaPreferencia].filter(
-      (area): area is string => Boolean(area),
-    ),
+    [
+      candidato.primeiraAreaPreferencia,
+      candidato.segundaAreaPreferencia,
+    ].filter((area): area is string => Boolean(area)),
   );
 }
 
@@ -67,9 +71,10 @@ export async function alocarLoteMestrado(
   for (const candidato of candidatos) {
     const alocacao = escolherAvaliadorEAuditor(
       professores,
-      [candidato.primeiraAreaPreferencia, candidato.segundaAreaPreferencia].filter(
-        (area): area is string => Boolean(area),
-      ),
+      [
+        candidato.primeiraAreaPreferencia,
+        candidato.segundaAreaPreferencia,
+      ].filter((area): area is string => Boolean(area)),
     );
     const [atualizado] = await tx
       .update(CandidatoMestrado)
@@ -83,3 +88,31 @@ export async function alocarLoteMestrado(
 }
 
 export { cargaProfessor };
+
+export async function alocarLoteDoutorado(
+  tx: Tx,
+  candidatos: Array<{
+    id: string;
+    primeiraOpcaoOrientador: string | null;
+    segundaOpcaoOrientador: string | null;
+    terceiraOpcaoOrientador: string | null; // novo
+  }>,
+) {
+  const professores = await listarProfessores(tx);
+  const resultado = [];
+  for (const candidato of candidatos) {
+    const alocacao = escolherPorOpcoesOrientador(professores, {
+      primeira: candidato.primeiraOpcaoOrientador,
+      segunda: candidato.segundaOpcaoOrientador,
+      terceira: candidato.terceiraOpcaoOrientador,
+    });
+    const [atualizado] = await tx
+      .update(CandidatoDoutorado)
+      .set(alocacao)
+      .where(eq(CandidatoDoutorado.id, candidato.id))
+      .returning();
+    registrarAlocacao(professores, alocacao);
+    resultado.push(atualizado ?? candidato);
+  }
+  return resultado;
+}
