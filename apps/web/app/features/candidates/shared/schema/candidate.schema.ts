@@ -95,36 +95,77 @@ export type CandidatoMestradoNota = z.infer<typeof CandidatoMestradoNotaSchema>
 
 export { CandidatoMestradoNotaSchema }
 
-const CandidatoDoutoradoNotaEtapa1Schema = z.object({
-  avaliadorId: z.string(),
-  auditorId: z.string().optional(),
-  cpf: z.string().regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos"),
-  nome: z.string().min(1, "O nome é obrigatório"),
-  email: z.string().email("Email inválido"),
+const uploadCandidatosDoutoradoSchema = z.array(
+  z.object({
+    numeroInscricao: z.string().optional(),
+
+    cpf: z.string().optional(),
+    nome: z.string().optional(),
+    email: z.string().email("Email inválido").optional(),
+
+    solicitouIsencaoTaxaInscricao: z.string().optional(),
+    isencaoAprovada: z.string(),
+    gru: z.string().optional(),
+    gruLink: z.string().optional(),
+
+    universidadeMestrado: z.string().optional(),
+    cursoMestrado: z.string().optional(),
+    cidadeMestrado: z.string().optional(),
+    avaliado: z.boolean().optional(),
+    areaPgcomp: z.string().optional(),
+    msc: z.number().nullable().optional(),
+    areaFormacaoGraduacao: z.number().nullable().optional(),
+    conceitoCapesMestrado: z.number().nullable().optional(),
+    a1a2a3a4: z.number().nullable().optional(),
+    b1b2b3b4: z.number().nullable().optional(),
+    notaAnteprojeto: z.number().nullable().optional(),
+  })
+)
+
+export type uploadCandidatosDoutoradoSchema = z.infer<typeof uploadCandidatosDoutoradoSchema>
+export { uploadCandidatosDoutoradoSchema }
+
+const CandidatoDoutoradoNotaSchema = z.object({
+  avaliadorId: z.string().uuid().optional(),
+  auditorId: z.string().uuid().optional(),
+
+  universidadeMestrado: z.string().optional(),
+  cursoMestrado: z.string().optional(),
+  cidadeMestrado: z.string().optional(),
+
   solicitouIsencaoTaxaInscricao: z.boolean().optional(),
-  isencaoAprovada: z.string(),
+  isencaoComprovanteLink: z.string().nullable().optional(),
+  isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
   isencaoAprovadaLink: z.string().nullable().optional(),
   gru: z.string().optional(),
+
   homologa: z.boolean().optional(),
-  areaPgcomp: z.string(),
-  OrientadorMestrado: z.string(),
-  PotencialOrientador1: z.string(),
-  PotencialOrientador2: z.string(),
-  PotencialOrientador3: z.string(),
-  Especiais: z.string(),
-  Cotas: z.string(),
-  Supra: z.string(),
-  Universidade: z.string(),
-  Curso: z.string(),
-  Cidade: z.string(),
-  msc: z.number(),
-  areaFormacaoGraduacao: z.number(),
-  conceitoCapesMestrado: z.number(),
-  a1a2a3a4: z.number(),
-  b1b2b3b4: z.number(),
-  notaAnteprojeto: z.number(),
+  especiais: z.boolean().optional(),
+  cotas: z.boolean().optional(),
+  supra: z.boolean().optional(),
+
+  avaliado: z.boolean().optional(),
+
+  msc: z.coerce
+    .number()
+    .min(0, "A nota do mestrado não pode ser menor que 0")
+    .max(10, "A nota do mestrado não pode ser maior que 10")
+    .optional(),
+  areaGrad: z.coerce.number().optional(),
+  a1a2a3a4: z.coerce.number().optional(),
+  b1b2b3b4: z.coerce.number().optional(),
+  conceitoCapesMestrado: z.coerce.number().optional(),
+  notaAnteprojeto: z.coerce.number().optional(),
+  notaEtapaII: z.preprocess(
+    (value) => (typeof value === "number" && Number.isNaN(value) ? undefined : value),
+    z.coerce
+      .number()
+      .min(0, "A nota da etapa II não pode ser menor que 0")
+      .max(10, "A nota da etapa II não pode ser maior que 10")
+      .optional()
+  ),
 })
 
-export type CandidatoDoutoradoNotaEtapa1 = z.infer<typeof CandidatoDoutoradoNotaEtapa1Schema>
+export type CandidatoDoutoradoNota = z.infer<typeof CandidatoDoutoradoNotaSchema>
 
-export { CandidatoDoutoradoNotaEtapa1Schema }
+export { CandidatoDoutoradoNotaSchema }
