@@ -1,19 +1,31 @@
-import { useEffect } from "react"
 import { useNavigate, useParams } from "react-router"
-import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
-
-import { formatBoolean, formatCPF, formatDate, formatPhoneNumber } from "@/shared/lib/format"
-import { Loader2 } from "lucide-react"
-import { Header } from "@/shared/components/layout/header"
-import type { Route } from "./+types/dashboard"
-import CandidateDetails from "@/features/candidates/shared/components/candidatos/candidate-details"
-import CandidateNotFound from "@/features/candidates/shared/components/candidatos/candidate-not-found"
-import { useUser } from "@/features/auth/hooks/auth.queries"
+import type { Route } from "./+types/doutorado.$id"
+import { useEffect, useState } from "react"
+import { useUser } from "@/features/auth"
 import {
   useCandidatoDoutoradoById,
   useDeleteCandidatoDoutorado,
-} from "@/features/candidates/doutorado/hooks"
+  useUpdateCandidatoDoutorado,
+  useUpdateCandidatoDoutoradoNota,
+} from "../hooks"
+import { useTeachersSimplified } from "@/features/users/hooks"
+import { useForm, useWatch } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import type { TeacherOption } from "@/shared/ui/teacher-combox"
+import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
+import {
+  CandidatoDoutoradoNotaSchema,
+  type CandidatoDoutoradoNota,
+} from "../../shared/schema/candidate.schema"
+import type { TeacherData } from "../../mestrado/pages/mestrado.$id"
+import { normalizeGru, paraBooleano } from "@/shared/lib/helpers"
+import { calcularDoutoradoNota, paraNumeroSeguro } from "@tcc/shared"
 import { toast } from "sonner"
+import Loading from "@/shared/components/layout/loading"
+import CandidateNotFound from "@/shared/components/layout/candidate-not-found"
+import CandidateActions from "../../shared/components/candidatos/candidate-actions"
+import CandidateInfo from "../../shared/components/avaliacao/candidate-info"
+import FormsAvaliacaoDoutorado from "../components/forms"
 
 export const meta: Route.MetaFunction = () => [
   { title: "SISSEL - Candidato de doutorado", description: "Página do candidato de doutorado" },
@@ -21,303 +33,194 @@ export const meta: Route.MetaFunction = () => [
 
 export default function CandidatoDoutoradoPage() {
   const { id } = useParams<{ id: string | undefined }>()
-  const userQuery = useUser()
+  const [nota, setNota] = useState(0)
+  const [RPQ_MSC, setRPQ_MSC] = useState(0)
+  const [RPG, setRPG] = useState(0)
 
-  const navigate = useNavigate()
+  const userQuery = useUser()
   const candidatoQuery = useCandidatoDoutoradoById(id ?? "")
   const deleteCandidatoMutation = useDeleteCandidatoDoutorado(id ?? "")
+  const teachers = useTeachersSimplified()
+  const updateCandidatoMutation = useUpdateCandidatoDoutorado()
+  const updateNotaMutation = useUpdateCandidatoDoutoradoNota()
+
+  const navigate = useNavigate()
+
+  const form = useForm<CandidatoDoutoradoNota>({
+    resolver: zodResolver(CandidatoDoutoradoNotaSchema),
+  })
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = form
+
   const user = userQuery.data
-  const candidato: CandidatoDoutoradoComRelacoes = candidatoQuery.data
+  const candidato: CandidatoDoutoradoComRelacoes | null | undefined = candidatoQuery.data
+
+  const isLoading = candidatoQuery.isLoading || userQuery.isLoading
+  const isAdmin = user?.role === "ADMIN"
+  const isTeachersLoading = teachers.isLoading || teachers.isFetching
+
+  const teachersData: TeacherOption[] =
+    (teachers.data as unknown as TeacherData[] | undefined)?.map((t) => ({
+      id: t.id,
+      nome: t.nome ?? t.name ?? "",
+    })) ?? []
 
   useEffect(() => {
-    document.title = `SISSEL - ${candidato?.nome ?? "Candidato de doutorado"}`
-  }, [candidato?.nome])
+    if (!user && !userQuery.isLoading) {
+      navigate("/")
+    }
+  }, [user, userQuery.isLoading, navigate])
 
-  if (id === undefined) {
-    navigate("/dashboard")
-    return null
+  useEffect(() => {
+    if (!!candidato) {
+      document.title = `SISSEL |  Avaliação - ${candidato.nome}`
+    }
+  }, [candidato])
+
+  useEffect(() => {
+    if (candidato) {
+      reset({
+        avaliadorId: candidato.avaliadorId ?? undefined,
+        auditorId: candidato.auditorId ?? undefined,
+        solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ?? undefined,
+        isencaoAprovada: candidato.isencaoAprovada ?? undefined,
+        gru: normalizeGru(candidato.gru),
+        homologa:
+          candidato.homologa === true ? true : candidato.homologa === false ? false : undefined,
+        especiais: paraBooleano(candidato.especiais),
+        cotas: paraBooleano(candidato.cotas),
+        supra: paraBooleano(candidato.supra),
+        universidade: candidato.nomeUniversidadeMestrado ?? undefined,
+        cursoMestrado: candidato.nomeCursoMestrado ?? undefined,
+        cidadeMestrado: candidato.cidadeMestrado ?? undefined,
+        msc: candidato.notas?.msc ? Number(candidato.notas?.msc) : 0,
+        areaGrad: candidato.notas?.areaGrad ? Number(candidato.notas?.areaGrad) : 0,
+        conceitoCapesMestrado: Number(candidato.notas?.conceitoCapesMestrado ?? 0),
+        a1a2a3a4: candidato.notas?.a1a2a3a4 ? Number(candidato.notas?.a1a2a3a4) : 0,
+        b1b2b3b4: candidato.notas?.b1b2b3b4 ? Number(candidato.notas?.b1b2b3b4) : 0,
+        notaAnteprojeto: candidato.notas?.notaAnteprojeto
+          ? Number(candidato.notas?.notaAnteprojeto)
+          : 0,
+      })
+    }
+  }, [candidato, reset])
+
+  const camposNota = useWatch({
+    control,
+    name: [
+      "msc",
+      "areaGrad",
+      "a1a2a3a4",
+      "b1b2b3b4",
+      "conceitoCapesMestrado",
+      "notaEtapaII",
+      "notaAnteprojeto",
+    ],
+  })
+
+  useEffect(() => {
+    const [msc, areaGrad, a1a2a3a4, b1b2b3b4, conceitoCapesMestrado, notaAnteprojeto] = camposNota
+
+    const resultado = calcularDoutoradoNota({
+      msc: paraNumeroSeguro(msc),
+      areaFormacaoGraduacao: paraNumeroSeguro(areaGrad),
+      a1a2a3a4: paraNumeroSeguro(a1a2a3a4),
+      b1b2b3b4: paraNumeroSeguro(b1b2b3b4),
+      conceitoCapesMestrado: paraNumeroSeguro(conceitoCapesMestrado),
+      notaAnteprojeto: paraNumeroSeguro(notaAnteprojeto),
+    })
+
+    setNota(resultado.pontuacao)
+    setRPQ_MSC(resultado.RPQ_MSC)
+    setRPG(resultado.RPG)
+  }, [camposNota])
+
+  async function onSubmit(dados: CandidatoDoutoradoNota) {
+    if (!id) return
+
+    try {
+      const resultados = await Promise.allSettled([
+        updateCandidatoMutation.mutateAsync({
+          id,
+          body: {
+            avaliadorId: dados.avaliadorId || undefined,
+            auditorId: dados.auditorId || undefined,
+            solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
+            isencaoAprovada: dados.isencaoAprovada ?? undefined,
+            gru: dados.gru || undefined,
+            homologa: dados.homologa ?? undefined,
+            cidadeMestrado: dados.cidadeMestrado ?? undefined,
+            nomeUniversidadeMestrado: dados.universidadeMestrado ?? undefined,
+            nomeCursoMestrado: dados.cursoMestrado ?? undefined,
+            especiais: dados.especiais ?? undefined,
+            cotas: dados.cotas ?? undefined,
+            supra: dados.supra ?? undefined,
+          },
+        }),
+        updateNotaMutation.mutateAsync({
+          id,
+          body: {
+            notas: {
+              msc: dados.msc ?? undefined,
+              areaGrad: dados.areaGrad ?? undefined,
+              a1a2a3a4: dados.a1a2a3a4 ?? undefined,
+              b1b2b3b4: dados.b1b2b3b4 ?? undefined,
+              conceitoCapesMestrado: dados.conceitoCapesMestrado ?? undefined,
+              notaAnteprojeto: dados.notaAnteprojeto ?? undefined,
+              notaFinal: nota ?? undefined,
+            },
+          },
+        }),
+      ])
+
+      for (const resultado of resultados) {
+        if (resultado.status === "rejected") {
+          throw resultado.reason
+        }
+      }
+
+      toast.success("Avaliação salva com sucesso")
+      navigate("/dashboard")
+    } catch (error) {
+      toast.error(
+        "Erro ao salvar avaliação" + (error instanceof Error ? ` Detalhes: ${error.message}` : "")
+      )
+    }
   }
-
-  if (!id || !user) {
-    navigate("/")
-    return
-  }
-
-  // Ainda sem funcinalidade
-  const isAdmin = user?.role === "ADMIN"
-
-  if (candidatoQuery.isLoading || userQuery.isLoading) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <Header className="mb-6" />
-        <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
-        </div>
-      </div>
-    )
-  }
-
-  if (candidatoQuery.isError || userQuery.isError) {
-    toast.error("Erro ao carregar os dados do candidato.")
-    navigate("/dashboard")
-    return null
+  if (isLoading) {
+    return <Loading />
   }
 
   if (!candidato) {
     return <CandidateNotFound />
   }
 
-  function handleDelete() {
-    if (!confirm("Tem certeza que deseja excluir este candidato?")) return
-
-    deleteCandidatoMutation
-      .mutateAsync()
-      .then(() => navigate("/dashboard"))
-      .catch(() => undefined)
-  }
-
-  const SECTION_CONTENT: {
-    title: string
-    content: { label: string; value: string | boolean | Date | null | undefined; link?: boolean }[]
-  }[] = [
-    {
-      title: "INFORMAÇÕES DA CANDIDATURA",
-      content: [
-        { label: "Número de inscrição", value: candidato.numeroInscricao },
-        { label: "Situação", value: candidato.status },
-        { label: "Data de Inscrição", value: formatDate(candidato.dataInscricao) },
-      ],
-    },
-    {
-      title: "INFORMAÇÕES DO CANDIDATO",
-      content: [
-        {
-          label: "CPF",
-          value: formatCPF(candidato.cpf),
-        },
-        {
-          label: "Nome",
-          value: candidato.nome,
-        },
-        {
-          label: "Sexo",
-          value: candidato.sexo,
-        },
-        {
-          label: "Estado civil",
-          value: candidato.estadoCivil,
-        },
-        {
-          label: "Email",
-          value: candidato.email,
-        },
-        {
-          label: "Data de Nascimento",
-          value: formatDate(candidato.dataNascimento),
-        },
-        {
-          label: "Nome da mãe",
-          value: candidato.nomeMae,
-        },
-        {
-          label: "Nome do pai",
-          value: candidato.nomePai,
-        },
-        {
-          label: "Tipo de escola no ensino médio",
-          value: candidato.tipoEscolaEnsinoMedio,
-        },
-        {
-          label: "Telefone fixo",
-          value: candidato.telefoneFixo,
-        },
-        {
-          label: "Telefone celular",
-          value: formatPhoneNumber(candidato.telefoneCelular),
-        },
-      ],
-    },
-    {
-      title: "NACIONALIDADE",
-      content: [
-        {
-          label: "País",
-          value: candidato.pais,
-        },
-        {
-          label: "Município",
-          value: candidato.municipio,
-        },
-        {
-          label: "UF",
-          value: candidato.estado,
-        },
-      ],
-    },
-    {
-      title: "DOCUMENTOS",
-      content: [
-        {
-          label: "RG",
-          value: candidato.rg,
-        },
-        {
-          label: "Orgão de expedição",
-          value: candidato.orgaoExpedidor,
-        },
-        {
-          label: "UF",
-          value: candidato.estadoExpedicao,
-        },
-        {
-          label: "Data de expedição",
-          value: formatDate(candidato.dataExpedicao),
-        },
-        {
-          label: "Título de eleitor",
-          value: candidato.tituloEleitor,
-        },
-        {
-          label: "Zona",
-          value: candidato.zonaEleitoral,
-        },
-        {
-          label: "Seção",
-          value: candidato.secaoEleitoral,
-        },
-        {
-          label: "Passaporte",
-          value: candidato.passaporte,
-        },
-      ],
-    },
-    {
-      title: "ENDEREÇO",
-      content: [
-        {
-          label: "CEP",
-          value: candidato.endereco?.cep,
-        },
-        {
-          label: "Logradouro",
-          value: candidato.endereco?.logradouro,
-        },
-        {
-          label: "Bairro",
-          value: candidato.endereco?.bairro,
-        },
-        {
-          label: "Complemento",
-          value: candidato.endereco?.complemento,
-        },
-        {
-          label: "UF",
-          value: candidato.endereco?.estado,
-        },
-        {
-          label: "Município",
-          value: candidato.endereco?.municipio,
-        },
-      ],
-    },
-    {
-      title: "INFORMAÇÕES ADICIONAIS",
-      content: [
-        {
-          label: "Comprovação de inscrição",
-          value: candidato.comprovantePagTaxaInscricao,
-          link: true,
-        },
-        {
-          label: "Cópia CPF",
-          value: candidato.copiaCPF,
-          link: true,
-        },
-        {
-          label: "Cópia Passaporte ou RNE (Apenas para estrageiros)",
-          value: candidato.copiaPassaporteOuRNE,
-          link: !!candidato.copiaPassaporteOuRNE,
-        },
-        {
-          label: "Isenção pagamento taxa de inscrição",
-          value: formatBoolean(candidato.solicitouIsencaoTaxaInscricao),
-        },
-        {
-          label: "Histórico acadêmico do curso de graduação",
-          value: candidato.historicoGraduacao,
-          link: true,
-        },
-        {
-          label: "Cópia de diploma de mestrado ou declaração de concluinte",
-          value: candidato.copiaDiplomaMestrado,
-          link: true,
-        },
-        {
-          label: "Histórico acadêmico do curso de mestrado",
-          value: candidato.historicoMestrado,
-          link: true,
-        },
-        {
-          label: "Nome da universidade/faculdade onde realizou mestrado",
-          value: candidato.nomeUniversidadeMestrado,
-        },
-        {
-          label: "Nome do curso de mestrado",
-          value: candidato.nomeCursoMestrado,
-        },
-        {
-          label: "Comprovações de pesquisa",
-          value: candidato.comprovacaoPesquisas,
-          link: true,
-        },
-        {
-          label: "Anteprojeto de tese",
-          value: candidato.anteprojetoTese,
-          link: true,
-        },
-        {
-          label: "Conceito CAPES do programa do curso de mestrado",
-          value: candidato.conceitoCapesMestrado,
-        },
-        {
-          label: "Possui necessidades especiais",
-          value: formatBoolean(candidato.possuiNecessidadesEspeciais),
-        },
-        {
-          label: "Concorre às vagas reservadas para negros(as) - preto(as) e pardos(as)",
-          value: formatBoolean(candidato.vagasNegrosPardos),
-        },
-        {
-          label: "Concorre às vagas supranumerárias",
-          value: formatBoolean(candidato.vagasSupranumerarias),
-        },
-      ],
-    },
-    {
-      title: "Opções para orientadores",
-      content: [
-        {
-          label: "Primeira opção de orientador(a)",
-          value: candidato.primeiraOpcaoOrientador,
-        },
-        {
-          label: "Segunda opção de orientador(a)",
-          value: candidato.segundaOpcaoOrientador,
-        },
-        {
-          label: "Terceira opção de orientador(a)",
-          value: candidato.terceiraOpcaoOrientador,
-        },
-      ],
-    },
-  ]
   return (
-    <CandidateDetails
-      user={user}
-      candidato={candidato}
-      handleDelete={handleDelete}
-      deleteCandidatoMutation={deleteCandidatoMutation}
-      SECTION_CONTENT={SECTION_CONTENT}
-    />
+    <>
+      <CandidateActions isAdmin={isAdmin} deleteCandidatoMutation={deleteCandidatoMutation} />
+      <CandidateInfo candidato={candidato} />
+      <FormsAvaliacaoDoutorado
+        handleSubmit={handleSubmit}
+        register={register}
+        control={control}
+        errors={errors}
+        isSubmitting={isSubmitting}
+        RPG={RPG}
+        RPQ_MSC={RPQ_MSC}
+        nota={nota}
+        isAdmin={isAdmin}
+        teachersData={teachersData}
+        isTeachersLoading={isTeachersLoading}
+        candidato={candidato}
+        onSubmit={onSubmit}
+      />
+    </>
   )
 }

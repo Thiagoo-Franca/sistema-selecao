@@ -19,9 +19,9 @@ import {
   valorIsencaoSelect,
   valorSimNaoSelect,
 } from "@/shared/lib/helpers"
-import FormsAvaliacaoMestrado from "@/features/candidates/shared/components/avaliacao/mestrado/forms"
-import CandidateInfo from "@/features/candidates/shared/components/avaliacao/mestrado/candidate-info"
-import CandidateActions from "@/features/candidates/shared/components/avaliacao/mestrado/candidate-actions"
+import FormsAvaliacaoMestrado from "@/features/candidates/mestrado/components/forms"
+import CandidateInfo from "@/features/candidates/shared/components/avaliacao/candidate-info"
+import CandidateActions from "@/features/candidates/shared/components/avaliacao/candidate-actions"
 import { useUser } from "@/features/auth/hooks/auth.queries"
 import {
   useCandidatoMestradoById,
@@ -33,8 +33,8 @@ import { useTeachersSimplified } from "@/features/users/hooks"
 import { toast } from "sonner"
 import type { Route } from "./+types/mestrado.$id"
 
-type TeacherOption = { id: string; nome: string }
-type TeacherData = { id: string; nome?: string | null; name?: string | null }
+export type TeacherOption = { id: string; nome: string }
+export type TeacherData = { id: string; nome?: string | null; name?: string | null }
 
 export const meta: Route.MetaFunction = () => [
   { title: `SISSEL - Avaliação candidato Mestrado` },

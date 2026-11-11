@@ -1,5 +1,5 @@
-export type CandidatoDoutoradoNotaEtapa1 = {
-  msc: number; // nota do mestrado
+export type CandidatoDoutoradoNota = {
+  msc: number;
   areaFormacaoGraduacao: number;
   conceitoCapesMestrado: number;
   a1a2a3a4: number;
@@ -80,18 +80,29 @@ export function calcularDoutoradoNota({
   a1a2a3a4,
   b1b2b3b4,
   notaAnteprojeto,
-}: CandidatoDoutoradoNotaEtapa1): { pontuacao: number; aprovado: boolean } {
+}: CandidatoDoutoradoNota): {
+  pontuacao: number;
+  aprovado: boolean;
+  RPQ_MSC: number;
+  RPG: number;
+} {
   // ROQ_MSC = MÍNIMO(10;(MÍNIMO(10;(Y2*2)))+(MÍNIMO(5;(Z2*0,5))))
-  const RPQ_MSC =
-    Math.min(10, Math.min(10, a1a2a3a4 * 2)) + Math.min(5, b1b2b3b4 * 0.5);
+  const RPQ_MSC = Math.min(
+    10,
+    Math.min(10, a1a2a3a4 * 2) + Math.min(5, b1b2b3b4 * 0.5),
+  );
   // RPG = ((((V2*W2)*8)+((X2+3)*2))/10)
   const RPG =
     (msc * areaFormacaoGraduacao * 8 + (conceitoCapesMestrado + 3) * 2) / 10;
   // nota_primeira_fase = ((AD2*7+AC2*3)/10)
-  const pontuacao = (RPG * 7 + RPQ_MSC * 3) / 10;
+  const notaEtapaI = (RPG * 7 + RPQ_MSC * 3) / 10;
+
+  const pontuacao = (notaEtapaI + notaAnteprojeto) / 2;
 
   return {
     pontuacao,
+    RPQ_MSC,
+    RPG,
     aprovado: pontuacao >= 7,
   };
 }

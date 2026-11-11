@@ -20,6 +20,15 @@ import {
   type UseFormHandleSubmit,
   type UseFormRegister,
 } from "react-hook-form"
+import {
+  AuditorField,
+  AvaliadorField,
+  GruField,
+  HomologaField,
+  IsencaoAprovadaField,
+} from "@/features/candidates/shared/components/forms/fields"
+import { PediuIsencaoField } from "@/features/candidates/shared/components/forms/fields/pediu-isencao"
+import { EspeciaisField } from "@/features/candidates/shared/components/forms/fields/especiais"
 
 interface FormsAvaliacaoMestradoProps {
   handleSubmit: UseFormHandleSubmit<any>
@@ -37,6 +46,9 @@ interface FormsAvaliacaoMestradoProps {
   RPQ_GRAD: number
 }
 
+export const msg = (e: FieldErrors<any>[string]) =>
+  typeof e?.message === "string" ? e.message : undefined
+
 export default function FormsAvaliacaoMestrado({
   handleSubmit,
   register,
@@ -52,65 +64,29 @@ export default function FormsAvaliacaoMestrado({
   RGRAD,
   RPQ_GRAD,
 }: FormsAvaliacaoMestradoProps) {
-  const msg = (e: FieldErrors<any>[string]) =>
-    typeof e?.message === "string" ? e.message : undefined
-
   return (
     <form className="container mx-auto flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
       <FieldLegend className="font-bold text-muted-foreground">Avaliadores</FieldLegend>
       <div className="grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">
         {/* Avaliador */}
 
-        <Field className="flex flex-col gap-4">
-          <FieldLabel htmlFor="avaliadorId" className="font-bold text-muted-foreground">
-            Avaliador
-          </FieldLabel>
-          {isAdmin ? (
-            <Controller
-              control={control}
-              name="avaliadorId"
-              render={({ field }) => (
-                <TeacherCombobox
-                  options={teachersData}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder={
-                    candidato.avaliador ? candidato.avaliador.nome : "Selecione um avaliador"
-                  }
-                  isLoading={isTeachersLoading}
-                />
-              )}
-            />
-          ) : (
-            <p>{candidato.avaliador?.nome ?? "Não alocado"}</p>
-          )}
-          <FieldError>{msg(errors.avaliadorId)}</FieldError>
-        </Field>
-
+        <AvaliadorField
+          candidato={candidato}
+          control={control}
+          isAdmin={isAdmin}
+          teachersData={teachersData}
+          isTeachersLoading={isTeachersLoading}
+          errors={errors}
+        />
         {/* Auditor */}
-        <Field className="flex flex-col gap-4">
-          <FieldLabel htmlFor="auditorId" className="font-bold text-muted-foreground">
-            Auditor
-          </FieldLabel>
-          {isAdmin ? (
-            <Controller
-              control={control}
-              name="auditorId"
-              render={({ field }) => (
-                <TeacherCombobox
-                  options={teachersData}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder={candidato.auditor ? candidato.auditor.nome : "Selecione um auditor"}
-                  isLoading={isTeachersLoading}
-                />
-              )}
-            />
-          ) : (
-            <p>{candidato.auditor?.nome ?? "Não alocado"}</p>
-          )}
-          <FieldError>{msg(errors.auditorId)}</FieldError>
-        </Field>
+        <AuditorField
+          candidato={candidato}
+          control={control}
+          isAdmin={isAdmin}
+          teachersData={teachersData}
+          isTeachersLoading={isTeachersLoading}
+          errors={errors}
+        />
       </div>
 
       <div className="mt-4 grid w-full grid-cols-1 gap-4 px-2 md:grid-cols-3">
@@ -126,179 +102,11 @@ export default function FormsAvaliacaoMestrado({
           />
           <FieldError>{msg(errors.cidadeResidencia)}</FieldError>
         </Field>
-
-        <Controller
-          control={control}
-          name="solicitouIsencaoTaxaInscricao"
-          render={({ field }) => (
-            <Field className="flex flex-col gap-4">
-              <FieldLabel
-                htmlFor="solicitouIsencaoTaxaInscricao"
-                className="font-bold text-muted-foreground"
-              >
-                PEDIU ISENÇÃO?
-                {candidato.isencaoComprovanteLink ? (
-                  <a
-                    href={candidato.isencaoComprovanteLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Ver comprovante
-                  </a>
-                ) : (
-                  <span className="text-sm text-muted-foreground">Sem comprovante</span>
-                )}
-              </FieldLabel>
-              <Select
-                key={field.value}
-                onValueChange={(v) => field.onChange(v === "sim")}
-                value={valorBooleanoSelect(field.value)}
-              >
-                <SelectTrigger className="w-full max-w-[400px]" id="solicitouIsencaoTaxaInscricao">
-                  <SelectValue placeholder="Pediu ISENÇÃO?" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="sim">Sim</SelectItem>
-                    <SelectItem value="nao">Não</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FieldError>{msg(errors.solicitouIsencaoTaxaInscricao)}</FieldError>{" "}
-            </Field>
-          )}
-        />
-
-        {/* Isenção Aprovada */}
-        <Controller
-          control={control}
-          name="isencaoAprovada"
-          render={({ field }) => (
-            <Field className="flex flex-col gap-4">
-              <FieldLabel htmlFor="isencaoAprovada" className="font-bold text-muted-foreground">
-                ISENÇÃO APROVADA?
-                {candidato.isencaoAprovadaLink ? (
-                  <a href={candidato.isencaoAprovadaLink} target="_blank" rel="noopener noreferrer">
-                    Ver comprovante
-                  </a>
-                ) : (
-                  <span className="text-sm text-muted-foreground">Sem comprovante</span>
-                )}
-              </FieldLabel>
-              <Select key={field.value} onValueChange={field.onChange} value={field.value ?? ""}>
-                <SelectTrigger className="w-full max-w-[400px]" id="isencaoAprovada">
-                  <SelectValue placeholder="Isenção aprovada?" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="sim">Sim</SelectItem>
-                    <SelectItem value="nao">Não</SelectItem>
-                    <SelectItem value="nao-solicitou">Não solicitou</SelectItem>
-                    <SelectItem value="nao-avaliado">Não avaliado</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FieldError>{msg(errors.isencaoAprovada)}</FieldError>
-            </Field>
-          )}
-        />
-
-        {/* GRU (Guia de Recolhimento da União) */}
-        <Controller
-          control={control}
-          name="gru"
-          render={({ field }) => (
-            <Field className="flex flex-col gap-4">
-              <div className="flex flex-row items-center justify-between gap-2">
-                <FieldLabel htmlFor="gru" className="font-bold text-muted-foreground">
-                  GRU
-                </FieldLabel>
-                {candidato.gruLink && (
-                  <FieldDescription>
-                    <a href={candidato.gruLink} target="_blank" rel="noopener noreferrer">
-                      Ver comprovante
-                    </a>
-                  </FieldDescription>
-                )}
-              </div>
-
-              <Select key={field.value} onValueChange={field.onChange} value={field.value ?? ""}>
-                {" "}
-                <SelectTrigger className="w-full max-w-[400px]" id="gru">
-                  <SelectValue placeholder="GRU" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {GRU_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FieldError>{msg(errors.gru)}</FieldError>
-            </Field>
-          )}
-        />
-
-        {/* Homologa */}
-        <Controller
-          control={control}
-          name="homologa"
-          render={({ field }) => (
-            <Field className="flex flex-col gap-4">
-              <FieldLabel htmlFor="homologa" className="font-bold text-muted-foreground">
-                Homologa?
-              </FieldLabel>
-              <Select
-                key={valorBooleanoSelect(field.value)}
-                onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
-                value={valorBooleanoSelect(field.value)}
-              >
-                <SelectTrigger className="w-full max-w-[400px]" id="homologa">
-                  <SelectValue placeholder="Homologa?" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="sim">SIM</SelectItem>
-                    <SelectItem value="nao">NÃO</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FieldError>{msg(errors.homologa)}</FieldError>
-            </Field>
-          )}
-        />
-        {/* Especiais */}
-        <Controller
-          control={control}
-          name="especiais"
-          render={({ field }) => (
-            <Field className="flex flex-col gap-4">
-              <FieldLabel htmlFor="especiais" className="font-bold text-muted-foreground">
-                Especiais
-              </FieldLabel>
-              <Select
-                key={valorBooleanoSelect(field.value)}
-                onValueChange={(v) => field.onChange(v === "sim" ? true : false)}
-                value={valorBooleanoSelect(field.value)}
-              >
-                <SelectTrigger className="w-full max-w-[400px]" id="especiais">
-                  <SelectValue placeholder="Especiais?" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="sim">SIM</SelectItem>
-                    <SelectItem value="nao">NÃO</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FieldError>{msg(errors.especiais)}</FieldError>
-            </Field>
-          )}
-        />
-
+        <PediuIsencaoField control={control} errors={errors} candidato={candidato} />
+        <IsencaoAprovadaField control={control} errors={errors} candidato={candidato} />
+        <GruField control={control} errors={errors} candidato={candidato} />
+        <HomologaField control={control} errors={errors} candidato={candidato} />
+        <EspeciaisField control={control} errors={errors} />
         {/* Cotas */}
         <Controller
           control={control}
