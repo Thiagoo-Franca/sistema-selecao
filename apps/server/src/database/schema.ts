@@ -98,7 +98,7 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
   areaGrad: numeric("area_grad", { mode: "number" }), //  Área de formação da graduação
 
   conceitoCapesMestrado: numeric("conceito_capes_mestrado", { mode: "number" }), // 0,1,2,3,4,5,6,7
-
+  conceitoCapesMestradoLink: text("conceito_capes_mestrado_link"),
   a1a2a3a4: numeric("a1a2a3a4", { mode: "number" }),
   a1a2a3a4Link: text("a1a2a3a4_link"),
 

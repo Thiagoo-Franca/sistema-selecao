@@ -2,7 +2,10 @@ import { useRef, useState } from "react"
 
 import { Button } from "../../../../../shared/ui/button"
 import { useUploadCandidatosMestrado } from "@/features/candidates/mestrado/hooks"
-import { parseCandidatosMestrado } from "@/features/candidates/mestrado/lib/parse-upload"
+import {
+  parseCandidatosDoutorado,
+  parseCandidatosMestrado,
+} from "@/features/candidates/shared/components/lib/parse-upload"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -14,14 +17,20 @@ import {
   DialogTrigger,
 } from "@/shared/ui/dialog"
 import { Input } from "@/shared/ui/input"
+import { useUploadCandidatosDoutorado } from "@/features/candidates/doutorado/hooks/doutorado.mutations"
 
-export function UploadCandidatosMestrado() {
+export function UploadCandidatos() {
   const [file, setFile] = useState<File | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isMestradoUpload, setIsMestradoUpload] = useState(true) // Estado para controlar se é upload de mestrado ou doutorado
 
   const [modalOpen, setModalOpen] = useState(false)
 
-  const upload = useUploadCandidatosMestrado()
+  const uploadMestrado = useUploadCandidatosMestrado()
+  const uploadDoutorado = useUploadCandidatosDoutorado() // Substitua pelo hook correto para doutorado quando disponível
+
+  const upload = isMestradoUpload ? uploadMestrado : uploadDoutorado // Escolhe o hook correto com base no estado
+  const parseCandidatos = isMestradoUpload ? parseCandidatosMestrado : parseCandidatosDoutorado // Substitua pelo parser correto para doutorado quando disponível
 
   function clearFile() {
     setFile(null)
@@ -36,7 +45,7 @@ export function UploadCandidatosMestrado() {
     if (!file) return
 
     try {
-      const candidatos = parseCandidatosMestrado(await file.text())
+      const candidatos = parseCandidatos(await file.text())
       if (candidatos.length === 0) {
         toast.error("Nenhum candidato encontrado no arquivo")
         return
@@ -65,9 +74,33 @@ export function UploadCandidatosMestrado() {
           Adicionar candidatos
         </DialogTrigger>
 
-        <DialogContent className="flex flex-col gap-4">
-          <DialogHeader>
+        <DialogContent className="flex flex-col gap-4 md:gap-6">
+          <DialogHeader className="flex flex-col gap-2">
             <DialogTitle>Adicionar candidato(os)</DialogTitle>
+            <DialogDescription>Selecione o tipo de candidato a ser adicionado.</DialogDescription>
+            <div className="flex flex-row items-center gap-4">
+              <Button
+                aria-label="Mestrado"
+                className={`w-full ${
+                  isMestradoUpload ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
+                } hover:bg-blue-600`}
+                onClick={() => setIsMestradoUpload(true)}
+              >
+                Mestrado
+              </Button>
+              <Button
+                aria-label="Doutorado"
+                className={`w-full ${
+                  !isMestradoUpload ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
+                } hover:bg-blue-600`}
+                onClick={() => setIsMestradoUpload(false)}
+              >
+                Doutorado
+              </Button>
+            </div>
+            <p className="mt-2 text-sm text-gray-500">
+              tipo de candidato selecionado: {isMestradoUpload ? "Mestrado" : "Doutorado"}
+            </p>
           </DialogHeader>
           <DialogDescription>
             Selecione um arquivo de texto (.txt) com um candidato por linha, colunas separadas por

@@ -2,6 +2,27 @@ import { rpcReturn } from "@/shared/lib/utils"
 import apiClient from "@/shared/services/apiClient"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
+import { toast } from "sonner"
+import type { CandidatoDoutoradoUpload } from "../../shared/components/lib/parse-upload"
+
+export const useUploadCandidatosDoutorado = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (candidatos: CandidatoDoutoradoUpload[]) => {
+      const response = await apiClient.candidato.doutorado.$post({ json: candidatos })
+      return rpcReturn(response)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["candidatos", "doutorado"] })
+      queryClient.removeQueries({ queryKey: ["candidatoDoutorado"] })
+      toast.success("Candidatos de doutorado adicionados com sucesso!")
+    },
+    onError: (error) => {
+      toast.error(`Erro ao adicionar candidatos: ${error.message}`)
+    },
+  })
+}
 
 export const useUpdateCandidatoDoutorado = () => {
   const queryClient = useQueryClient()
@@ -32,12 +53,15 @@ export const useUpdateCandidatoDoutoradoNota = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: { id: string | number; body: Partial<NotaDoutorado | any> }) => {
+    mutationFn: async (data: {
+      id: string | number
+      body: Partial<CandidatoDoutoradoComRelacoes>
+    }) => {
       const response = await apiClient.candidato.doutorado[":id"].nota.$patch({
         param: { id: String(data.id) },
         json: data.body,
       })
-      return rpcReturn(response) as unknown as NotaDoutorado | any
+      return rpcReturn(response) as unknown as CandidatoDoutoradoComRelacoes
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["candidatos", "doutorado"] })

@@ -2,7 +2,7 @@ import { rpcReturn } from "@/shared/lib/utils"
 import apiClient from "@/shared/services/apiClient"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { CandidatoMestradoComRelacoes, NotaMestradoUpdate } from "@tcc/server"
-import type { CandidatoMestradoUpload } from "../lib/parse-upload"
+import type { CandidatoMestradoUpload } from "../../shared/components/lib/parse-upload"
 import { toast } from "sonner"
 
 export function useUploadCandidatosMestrado() {

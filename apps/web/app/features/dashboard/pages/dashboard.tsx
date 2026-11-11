@@ -3,14 +3,13 @@ import { useNavigate } from "react-router"
 
 import { useQueryParamState } from "@/shared/hooks/use-query-param-state"
 
-import { UploadCandidatosMestrado } from "@/features/candidates/shared/components/candidatos/upload-candidate"
-import { Header } from "@/shared/components/layout/header"
+import { UploadCandidatos } from "@/features/candidates/shared/components/candidatos/upload-candidate"
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 import SearchBar from "@/shared/ui/search-bar"
 import { CandidatosTab } from "@/features/candidates/shared/components/candidatos-tab/candidato-tab"
 import { TABS } from "@/shared/lib/constants"
 import { useUser } from "@/features/auth"
-import type { Route } from "./+types/DashboardPage"
+import type { Route } from "./+types/dashboard"
 
 export const meta: Route.MetaFunction = () => [
   {
@@ -56,7 +55,7 @@ export default function Home() {
         <div className="flex w-full flex-col items-center gap-2 self-stretch md:flex-row md:gap-4">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
-        {!!isAdmin && <UploadCandidatosMestrado />}
+        {!!isAdmin && <UploadCandidatos />}
       </div>
 
       <Tabs value={currentTab} onValueChange={setActiveTab} className="w-full hover:cursor-pointer">
