@@ -29,7 +29,6 @@ type GetAllCandidatosError = { type: "database_error"; error: unknown };
 export type CandidatoMestradoComRelacoes = CandidatoMestradoDetalhe;
 export type CandidatoDoutoradoComRelacoes = CandidatoDoutoradoDetalhe;
 
-
 export const getAllMyCandidates = async (
   c: Context<{ Variables: AppVariables }>,
   avaliadorId: string,
@@ -321,59 +320,18 @@ export const updateCandidatoDoutorado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,
   body: UpdateCandidatoDoutoradoInput,
-): Promise<
-  AppResult<
-    | (typeof CandidatoDoutorado.$inferSelect & {
-        //  endereco: typeof Endereco.$inferSelect | null;
-      })
-    | null,
-    GetAllCandidatosError
-  >
-> => {
+) => {
   const dbInstance = c.get("db");
 
   try {
-    const asText = (value: boolean | undefined) =>
-      value === undefined ? undefined : value ? "sim" : "nao";
-    const updateData: Partial<typeof CandidatoDoutorado.$inferInsert> = {
-      cpf: body.cpf,
-      nome: body.nome,
-      email: body.email,
-      solicitouIsencaoTaxaInscricao: asText(
-        body.solicitouIsencaoTaxaInscricao,
-      ),
-      isencaoAprovada: body.isencaoAprovada,
-      gru: body.gru,
-      homologa: body.homologa,
-      areaPgcomp: body.areaPgcomp,
-      orientadorMestrado: body.orientadorMestrado,
-      primeiraOpcaoOrientador: body.primeiraOpcaoOrientador,
-      segundaOpcaoOrientador: body.segundaOpcaoOrientador ?? undefined,
-      terceiraOpcaoOrientador: body.terceiraOpcaoOrientador,
-      nomeUniversidadeMestrado: body.nomeUniversidadeMestrado,
-      nomeCursoMestrado: body.nomeCursoMestrado,
-      especiais: asText(body.possuiNecessidadesEspeciais),
-      cotas: asText(body.vagasNegrosPardos),
-      supra: asText(body.vagasSupranumerarias),
-    };
-
     const [candidatoAtualizado] = await dbInstance
       .update(CandidatoDoutorado)
-      .set(updateData)
+      .set(body)
       .where(eq(CandidatoDoutorado.id, id))
       .returning();
-
     if (!candidatoAtualizado) return ok(null);
 
-    //    const [enderecoAtual] = await dbInstance
-    //      .select()
-    //      .from(Endereco)
-    //      .where(eq(Endereco.id, candidatoAtualizado.idEndereco));
-
-    return ok({
-      ...candidatoAtualizado,
-      //  endereco: enderecoAtual ?? null
-    });
+    return ok({ ...candidatoAtualizado });
   } catch (error) {
     logDatabaseError(
       `Error updating doutorado candidato with ID ${id}:`,
@@ -382,6 +340,7 @@ export const updateCandidatoDoutorado = async (
     return databaseError(error);
   }
 };
+
 export const deleteCandidatoMestrado = async (
   c: Context<{ Variables: AppVariables }>,
   id: string,

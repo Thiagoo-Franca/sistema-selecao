@@ -2,12 +2,21 @@ export type ProfessorDisponivel = {
   id: string;
   carga: number;
   areas: string[] | null;
+  nome?: string;
 };
 
 export type Alocacao = {
   avaliadorId: string | null;
   auditorId: string | null;
 };
+
+const normalizarNome = (nome: string) =>
+  nome
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 
 export function escolherProfessor(
   professores: ProfessorDisponivel[],
@@ -60,4 +69,32 @@ export function registrarAlocacao(
     const professor = professores.find((item) => item.id === id);
     if (professor) professor.carga += 1;
   }
+}
+
+export function escolherPorOpcoesOrientador(
+  professores: ProfessorDisponivel[],
+  opcoes: {
+    primeira: string | null;
+    segunda: string | null;
+    terceira: string | null;
+  },
+): { avaliadorId: string | null; auditorId: string | null } {
+  const idPorNome = new Map<string, string>();
+  for (const p of professores) {
+    if (!p.nome) continue;
+    const chave = normalizarNome(p.nome);
+    if (!idPorNome.has(chave)) idPorNome.set(chave, p.id); // duplicado: o primeiro vence
+  }
+
+  const encontrados: string[] = [];
+  for (const nome of [opcoes.primeira, opcoes.segunda, opcoes.terceira]) {
+    if (!nome?.trim()) continue;
+    const id = idPorNome.get(normalizarNome(nome));
+    if (id && !encontrados.includes(id)) encontrados.push(id); // evita repetir professor
+  }
+
+  return {
+    avaliadorId: encontrados[0] ?? null,
+    auditorId: encontrados[1] ?? null,
+  };
 }
