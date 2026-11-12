@@ -18,6 +18,10 @@ export const useUpdateUser = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users", "all"] })
+      // Tela de detalhe (["user", id]), perfil do próprio usuário (["user"]) e listas de professores
+      queryClient.invalidateQueries({ queryKey: ["user"] })
+      queryClient.invalidateQueries({ queryKey: ["teachers"] })
+      queryClient.invalidateQueries({ queryKey: ["teachersSimplified"] })
       toast.success(
         "Usuário atualizado com sucesso. Os dados do usuário foram atualizados com sucesso"
       )

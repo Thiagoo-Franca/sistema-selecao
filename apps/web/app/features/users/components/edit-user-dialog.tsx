@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/shared/ui/button"
 
 interface EditUserDialogProps {
-  user: UserType | null
+  user: Pick<UserType, "id" | "nome" | "school" | "academicTitle" | "role"> | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
