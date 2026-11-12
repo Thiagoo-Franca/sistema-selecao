@@ -10,7 +10,7 @@ interface UserInfoCardProps {
     matricula: string
     school: string
     academicTitle: string
-    areas: string[] | undefined
+    areas: string[] | null | undefined
     role: string
   }
 }
