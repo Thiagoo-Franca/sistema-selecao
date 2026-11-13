@@ -14,6 +14,7 @@ interface HomeTableCandidatosProps {
   order?: "asc" | "desc"
   setOrderBy?: (orderBy: string) => void
   setOrder?: (order: "asc" | "desc") => void
+  onSort?: (key: string) => void
 }
 
 export function HomeTableCandidatos({
@@ -23,6 +24,7 @@ export function HomeTableCandidatos({
   order,
   setOrderBy,
   setOrder,
+  onSort,
 }: HomeTableCandidatosProps) {
   const navigate = useNavigate()
 
@@ -71,7 +73,13 @@ export function HomeTableCandidatos({
         {LABELS.map((label) => (
           <div
             key={label.key}
-            onClick={() => handleSort(label.key, setOrderBy, setOrder, orderBy, order)}
+            onClick={() => {
+              if (onSort) {
+                onSort(label.key)
+              } else {
+                handleSort(label.key, setOrderBy, setOrder, orderBy, order)
+              }
+            }}
             className={`flex items-center gap-1 ${label.hiddenOnMobile ? "hidden md:flex" : ""}`}
           >
             <ChevronUp

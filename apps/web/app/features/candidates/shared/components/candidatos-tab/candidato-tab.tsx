@@ -19,6 +19,7 @@ interface CandidatosTabProps {
   order?: "asc" | "desc"
   setOrderBy?: (orderBy: string) => void
   setOrder?: (order: "asc" | "desc") => void
+  onSort?: (key: string) => void
 }
 
 export function CandidatosTab({
@@ -29,6 +30,7 @@ export function CandidatosTab({
   order,
   setOrderBy,
   setOrder,
+  onSort,
 }: CandidatosTabProps) {
   const user = useUser().data
 
@@ -50,7 +52,7 @@ export function CandidatosTab({
     doutorado: doutoradoQuery,
     meus: meusCandidatosQuery,
     professores: professoresQuery,
-  }[type === "professores" ? "todos" : (type ?? "todos")]
+  }[type === "professores" ? "professores" : (type ?? "mestrado")]
 
   function renderContent() {
     if (type === "professores") {
@@ -75,6 +77,7 @@ export function CandidatosTab({
           order={order}
           setOrderBy={setOrderBy}
           setOrder={setOrder}
+          onSort={onSort}
         />
       )
     }
@@ -98,6 +101,7 @@ export function CandidatosTab({
         order={order}
         setOrderBy={setOrderBy}
         setOrder={setOrder}
+        onSort={onSort}
       />
     )
   }
