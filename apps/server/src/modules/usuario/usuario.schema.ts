@@ -1,5 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { AREAS } from "@tcc/shared";
 import { Users } from "../../database/index.js";
 export const createUserSchema = createInsertSchema(Users)
   .omit({
@@ -46,6 +47,9 @@ export const updateUserSchema = z.object({
       school: true,
       academicTitle: true,
       role: true,
+    })
+    .extend({
+      areas: z.array(z.enum(AREAS)).transform((areas) => [...new Set(areas)]),
     })
     .partial(),
 });

@@ -120,7 +120,11 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
   .put(
     "/me",
     checkRole(["ADMIN", "TEACHER"]),
-    zValidator("json", schema.updateUserSchema.shape.body.omit({ role: true })),
+    // Função e áreas só o ADMIN altera (áreas definem a alocação de candidatos).
+    zValidator(
+      "json",
+      schema.updateUserSchema.shape.body.omit({ role: true, areas: true }),
+    ),
     async (c) => {
       const validatedUpdateData = c.req.valid("json");
       const result = await service.updateUser(

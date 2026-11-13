@@ -184,7 +184,7 @@ export const updateUser = async (
   updateData: UpdateUserInput,
 ): Promise<AppResult<UsuarioPublico, UpdateUserError>> => {
   const dbInstance = c.get("db");
-  const { nome, school, academicTitle, role } = updateData;
+  const { nome, school, academicTitle, role, areas } = updateData;
 
   try {
     const userCheck = await dbInstance
@@ -203,6 +203,7 @@ export const updateUser = async (
         school: school,
         academicTitle: academicTitle,
         role: role,
+        areas: areas,
         updatedAt: new Date(),
       })
       .where(eq(Users.id, id))

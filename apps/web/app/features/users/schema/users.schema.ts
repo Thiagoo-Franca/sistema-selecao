@@ -1,4 +1,5 @@
 import z from "zod"
+import { AREAS } from "@tcc/shared"
 
 // Schema for updating user
 export const updateUserSchema = z.object({
@@ -8,6 +9,7 @@ export const updateUserSchema = z.object({
   role: z.enum(["TEACHER", "ADMIN"], {
     required_error: "Função é obrigatória",
   }),
+  areas: z.array(z.enum(AREAS)),
 })
 
 export type UpdateUserFormData = z.infer<typeof updateUserSchema>
