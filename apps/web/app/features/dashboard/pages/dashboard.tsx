@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react"
-import { useNavigate } from "react-router"
+import { useCallback, useEffect, useRef } from "react"
+import { useNavigate, useSearchParams } from "react-router"
 
 import { useQueryParamState } from "@/shared/hooks/use-query-param-state"
 
@@ -28,6 +28,7 @@ export default function Home() {
   const [orderBy, setOrderBy] = useQueryParamState("orderBy", "nome")
   const [order, setOrder] = useQueryParamState<"asc" | "desc">("order", "asc")
   const [activeTab, setActiveTab] = useQueryParamState("activeTab", "meus-candidatos")
+  const [, setSearchParams] = useSearchParams()
 
   const navigate = useNavigate()
 
@@ -35,6 +36,29 @@ export default function Home() {
   const isAdmin = userQuery.data?.role === "ADMIN"
 
   const currentTab = TABS.some((t) => t.value === activeTab) ? activeTab : "meus-candidatos"
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const nextOrder = orderBy === key && order === "asc" ? "desc" : "asc"
+
+      setSearchParams(
+        (prev) => {
+          const params = new URLSearchParams(prev)
+          params.set("orderBy", JSON.stringify(key))
+
+          if (nextOrder === "asc") {
+            params.delete("order")
+          } else {
+            params.set("order", JSON.stringify(nextOrder))
+          }
+
+          return params
+        },
+        { replace: true }
+      )
+    },
+    [order, orderBy, setSearchParams]
+  )
 
   useEffect(() => {
     if (!userQuery.data && !userQuery.isLoading) {
@@ -85,6 +109,7 @@ export default function Home() {
             order={order}
             setOrderBy={setOrderBy}
             setOrder={setOrder}
+            onSort={handleSort}
           />
         ))}
       </Tabs>

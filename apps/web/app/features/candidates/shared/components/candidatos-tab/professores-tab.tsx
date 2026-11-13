@@ -11,6 +11,7 @@ interface HomeTableProfessoresProps {
   order?: "asc" | "desc"
   setOrderBy?: (orderBy: string) => void
   setOrder?: (order: "asc" | "desc") => void
+  onSort?: (key: string) => void
 }
 
 const LABELS = [
@@ -30,6 +31,7 @@ export default function ProfessoresTab({
   order,
   setOrderBy,
   setOrder,
+  onSort,
 }: HomeTableProfessoresProps) {
   const navigate = useNavigate()
 
@@ -87,7 +89,13 @@ export default function ProfessoresTab({
         {LABELS.map((label) => (
           <div
             key={label.key}
-            onClick={() => handleSort(label.key)}
+            onClick={() => {
+              if (onSort) {
+                onSort(label.key)
+              } else {
+                handleSort(label.key)
+              }
+            }}
             className={`flex items-center gap-1 ${label.hiddenOnMobile ? "hidden md:flex" : ""}`}
           >
             <ChevronUp
