@@ -11,14 +11,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/form"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/ui/form"
+import { AreasMultiSelect } from "./areas-multi-select"
 import { Input } from "@/shared/ui/input"
 import type { UserType } from "../pages/admin.users"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 import { Button } from "@/shared/ui/button"
 
 interface EditUserDialogProps {
-  user: Pick<UserType, "id" | "nome" | "school" | "academicTitle" | "role"> | null
+  user: Pick<UserType, "id" | "nome" | "school" | "academicTitle" | "role" | "areas"> | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -33,6 +42,7 @@ export default function EditUserDialog({ user, open, onOpenChange }: EditUserDia
       school: user?.school || "",
       academicTitle: user?.academicTitle || "",
       role: user?.role || "TEACHER",
+      areas: user?.areas ?? [],
     },
   })
 
@@ -43,6 +53,7 @@ export default function EditUserDialog({ user, open, onOpenChange }: EditUserDia
         school: user.school,
         academicTitle: user.academicTitle,
         role: user.role,
+        areas: user.areas ?? [],
       })
     }
   }, [user, form])
@@ -138,6 +149,24 @@ export default function EditUserDialog({ user, open, onOpenChange }: EditUserDia
                       <SelectItem value="ADMIN">Administrador</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="areas"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Áreas de Atuação</FormLabel>
+                  <FormControl>
+                    <AreasMultiSelect value={field.value} onChange={field.onChange} />
+                  </FormControl>
+                  <FormDescription>
+                    Usadas na alocação de novos candidatos. Alterar as áreas não realoca
+                    candidatos já atribuídos.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
