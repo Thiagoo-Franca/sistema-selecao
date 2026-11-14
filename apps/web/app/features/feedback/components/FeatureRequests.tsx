@@ -122,7 +122,7 @@ function SubmissionSection({ user }: SubmissionSectionProps) {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={createFeatureRequestMutation.isPending || !user}
             >
               {createFeatureRequestMutation.isPending ? (
@@ -156,7 +156,7 @@ function FeatureRequestsList({ user }: FeatureRequestsListProps) {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#70C8EA]" />
           </div>
         </CardContent>
       </Card>

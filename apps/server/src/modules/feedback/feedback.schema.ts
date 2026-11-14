@@ -1,3 +1,4 @@
+import { USAGE_PURPOSE_IDS } from "@tcc/shared"
 import { z } from "zod"
 
 export const createFeedbackSchema = z.object({
@@ -21,7 +22,9 @@ export const createFeedbackSchema = z.object({
     .int()
     .min(1, { message: "Avaliação deve ser entre 1 e 5." })
     .max(5, { message: "Avaliação deve ser entre 1 e 5." }),
-  usagePurposes: z.array(z.string()).min(1, { message: "Selecione ao menos uma finalidade." }),
+  usagePurposes: z
+    .array(z.enum(USAGE_PURPOSE_IDS))
+    .min(1, { message: "Selecione ao menos uma finalidade." }),
   usagePurposeOther: z.string().optional(),
   completedAllTasks: z.boolean({ message: "Campo obrigatório." }),
 })
