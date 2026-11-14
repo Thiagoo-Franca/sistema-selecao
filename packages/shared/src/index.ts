@@ -3,3 +3,4 @@ export * from "./areas";
 export * from "./candidato-types";
 export * from "./gru";
 export * from "./isencao";
+export * from "./feedback";

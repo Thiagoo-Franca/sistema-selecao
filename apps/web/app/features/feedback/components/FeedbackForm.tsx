@@ -71,7 +71,11 @@ export function FeedbackForm() {
             <SystemUsageSection form={form} />
             <TaskCompletionSection form={form} />
 
-            <Button type="submit" className="w-full" disabled={submitFeedbackMutation.isPending}>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={submitFeedbackMutation.isPending}
+            >
               {submitFeedbackMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -158,8 +162,8 @@ function RatingScale({ form, name, label, minLabel, maxLabel }: RatingScaleProps
                     onClick={() => field.onChange(value)}
                     className={`h-12 flex-1 rounded-md border-2 transition-colors ${
                       field.value === value
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input hover:border-primary hover:bg-accent"
+                        ? "border-blue-500 bg-blue-500 text-primary-foreground"
+                        : "border-input hover:border-blue-500 hover:bg-blue-50 focus:border-blue-500 focus:bg-blue-50 focus:outline-none"
                     }`}
                   >
                     {value}
@@ -204,6 +208,7 @@ function SystemUsageSection({ form }: FormSectionProps) {
                       <FormControl>
                         <Checkbox
                           checked={field.value?.includes(option.id)}
+                          className="data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-500 data-[state=checked]:text-white"
                           onCheckedChange={(checked) => {
                             const value = field.value || []
                             if (checked) {
@@ -261,13 +266,21 @@ function TaskCompletionSection({ form }: FormSectionProps) {
                 value={String(field.value)}
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="true" id="completed-yes" />
+                  <RadioGroupItem
+                    value="true"
+                    id="completed-yes"
+                    className="data-[state=checked]:border-blue-500 data-[state=checked]:text-blue-500"
+                  />
                   <Label htmlFor="completed-yes" className="cursor-pointer font-normal">
                     Sim
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="false" id="completed-no" />
+                  <RadioGroupItem
+                    value="false"
+                    id="completed-no"
+                    className="data-[state=checked]:border-blue-500 data-[state=checked]:text-blue-500"
+                  />
                   <Label htmlFor="completed-no" className="cursor-pointer font-normal">
                     Não
                   </Label>

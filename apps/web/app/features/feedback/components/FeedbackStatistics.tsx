@@ -2,16 +2,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import type { FeedbackStatistics } from "@tcc/server/src/modules/feedback/feedback.service"
 import { Loader2 } from "lucide-react"
 import { useFeedbackStatisticsQuery } from "../hooks/feedback.queries"
+import Loading from "@/shared/components/layout/loading"
 
 export function FeedbackStatistics() {
   const { data: statistics, isLoading: statsLoading } = useFeedbackStatisticsQuery()
 
   if (statsLoading) {
-    return (
-      <div className="flex h-48 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
+    return <Loading />
   }
 
   if (!statistics || statistics.totalSubmissions < 3) {
@@ -146,14 +143,14 @@ function RatingBar({ label, value, description }: RatingBarProps) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium">{label}</p>
+          <p className="bg text-sm font-medium">{label}</p>
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
         <span className="text-lg font-semibold">{value.toFixed(2)}</span>
       </div>
       <div className="h-3 w-full overflow-hidden rounded-full bg-secondary">
         <div
-          className="h-full rounded-full bg-primary transition-all duration-300"
+          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -204,7 +201,7 @@ function PercentageBar({ label, count, percentage }: PercentageBarProps) {
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
         <div
-          className="h-full rounded-full bg-primary transition-all duration-300"
+          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
           style={{ width: `${percentage}%` }}
         />
       </div>
