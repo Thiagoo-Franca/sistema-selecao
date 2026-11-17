@@ -1,9 +1,7 @@
-import { Input } from "@/shared/ui/input"
 import { Skeleton } from "@/shared/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 import type { SelectUser } from "@tcc/server"
-import { Search } from "lucide-react"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Navigate, useNavigate } from "react-router"
 import DeleteUserDialog from "../components/delete-user-dialog"
 import type { Route } from "./+types/admin"
@@ -11,6 +9,8 @@ import { useUser } from "@/features/auth"
 import { useAllUsers } from "../hooks"
 import EditUserDialog from "../components/edit-user-dialog"
 import UserTable from "../components/user-table"
+import SearchBar from "@/shared/ui/search-bar"
+import { removerAcentos } from "@/shared/lib/helpers"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Gerenciar Usuários" }]
 
@@ -31,12 +31,12 @@ export default function AdminUsersIndexPage() {
 
   const filteredUsers = React.useMemo(() => {
     const users = allUsersQuery.data || []
+    const normalizedSearch = removerAcentos(searchQuery.toLowerCase())
 
-    return users.filter(
-      (user) =>
-        user.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.matricula.toLowerCase().includes(searchQuery.toLowerCase())
+    return users.filter((user) =>
+      [user.nome, user.email, user.matricula].some((field) =>
+        removerAcentos(field.toLowerCase()).includes(normalizedSearch)
+      )
     )
   }, [allUsersQuery.data, searchQuery])
 
@@ -49,6 +49,13 @@ export default function AdminUsersIndexPage() {
   )
 
   const isAdmin = userQuery.data?.role === "ADMIN"
+  const currentTab = "all" // Default tab is "all"
+  const listRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const activeTrigger = listRef.current?.querySelector<HTMLElement>('[data-state="active"]')
+    activeTrigger?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
+  }, [currentTab])
 
   if (userQuery.isSuccess && !isAdmin) {
     return <Navigate to="/" />
@@ -100,22 +107,35 @@ export default function AdminUsersIndexPage() {
       </div>
 
       <div className="mb-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome, email ou matrícula..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+        <div className="flex w-full flex-col items-center gap-2 self-stretch md:flex-row md:gap-4">
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all">Todos ({filteredUsers.length})</TabsTrigger>
-          <TabsTrigger value="ADMIN">Administrador ({getUsersByRole("ADMIN").length})</TabsTrigger>
-          <TabsTrigger value="TEACHER">Professor ({getUsersByRole("TEACHER").length})</TabsTrigger>
+        <TabsList
+          ref={listRef}
+          className="relative flex h-auto w-full snap-x justify-start gap-1 overflow-x-auto rounded-full border bg-white p-1 shadow-none [scrollbar-width:none] md:max-w-lg md:overflow-x-visible [&::-webkit-scrollbar]:hidden"
+        >
+          {" "}
+          <TabsTrigger
+            value="all"
+            className="shrink-0 snap-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md md:flex-1"
+          >
+            Todos ({filteredUsers.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="ADMIN"
+            className="shrink-0 snap-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md md:flex-1"
+          >
+            Administrador ({getUsersByRole("ADMIN").length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="TEACHER"
+            className="shrink-0 snap-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md md:flex-1"
+          >
+            Professor ({getUsersByRole("TEACHER").length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-6">

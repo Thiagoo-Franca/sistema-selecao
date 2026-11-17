@@ -70,7 +70,7 @@ export function UploadCandidatos() {
           if (!open) reset()
         }}
       >
-        <DialogTrigger className="w-full max-w-sm rounded-md bg-gradient-to-r from-blue-500 to-indigo-500 p-2 text-sm text-white hover:from-blue-600 hover:to-indigo-600 md:px-4 md:py-2 md:text-base">
+        <DialogTrigger className="w-full max-w-sm rounded-md bg-gradient-to-r from-blue-500 to-indigo-500 p-2 text-sm text-white hover:from-blue-600 hover:to-indigo-600 md:max-w-[300px] md:px-4 md:py-2 md:text-base">
           Adicionar candidatos
         </DialogTrigger>
 
