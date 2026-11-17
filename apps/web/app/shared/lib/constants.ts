@@ -28,7 +28,6 @@ export const LABELS = [
   {
     key: "email",
     label: "Email",
-    hiddenOnMobile: true,
   },
   {
     key: "avaliado",
@@ -37,21 +36,17 @@ export const LABELS = [
   {
     key: "area1",
     label: "Área 1",
-    hiddenOnMobile: true,
   },
   {
     key: "area2",
     label: "Área 2",
-    hiddenOnMobile: true,
   },
   {
     key: "avaliador",
     label: "Avaliador",
-    hiddenOnMobile: true,
   },
   {
     key: "auditor",
     label: "Auditor",
-    hiddenOnMobile: true,
   },
 ]
