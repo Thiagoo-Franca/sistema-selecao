@@ -9,9 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select"
-import { TeacherCombobox } from "@/shared/ui/teacher-combox"
-import { GRU_OPTIONS } from "@/shared/lib/constants"
-import { normalizeGru, valorBooleanoSelect, valorSimNaoSelect } from "@/shared/lib/helpers"
+import { valorBooleanoSelect } from "@/shared/lib/helpers"
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
 import {
   Controller,
@@ -21,8 +19,11 @@ import {
   type UseFormRegister,
 } from "react-hook-form"
 import {
+  A1a2a3a4Field,
   AuditorField,
   AvaliadorField,
+  B1b2b3b4Field,
+  EnadeField,
   GruField,
   HomologaField,
   IsencaoAprovadaField,
@@ -306,60 +307,7 @@ export default function FormsAvaliacaoMestrado({
           }}
         />
 
-        {/* ENADE */}
-        <Controller
-          control={control}
-          name="enade"
-          render={({ field }) => {
-            const enadeValue =
-              typeof field.value === "number" &&
-              Number.isInteger(field.value) &&
-              field.value >= 1 &&
-              field.value <= 5
-                ? String(field.value)
-                : ""
-
-            return (
-              <Field className="flex flex-col gap-4">
-                <div className="flex flex-row items-center justify-between gap-2">
-                  <FieldLabel htmlFor="enade" className="font-bold text-muted-foreground">
-                    ENADE
-                  </FieldLabel>
-                  <FieldDescription>
-                    <a
-                      href={candidato.notas?.enadeLink ?? "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Ver comprovante.
-                    </a>
-                  </FieldDescription>
-                </div>
-
-                <Select
-                  key={enadeValue || "empty"}
-                  value={enadeValue}
-                  onValueChange={(value) => field.onChange(Number(value))}
-                >
-                  <SelectTrigger className="w-full max-w-[400px]" id="enade">
-                    <SelectValue placeholder={candidato.notas?.enade ?? "0"} />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <FieldError>{errors.enade?.message}</FieldError>
-              </Field>
-            )
-          }}
-        />
+        <EnadeField control={control} errors={errors} candidato={candidato} />
         <div>
           <a
             href={candidato.notas?.a1a2a3a4Link ?? "#"}
@@ -372,33 +320,8 @@ export default function FormsAvaliacaoMestrado({
         </div>
         <div />
         <div />
-        {/* A1A2A3A4 */}
-        <Field className="flex flex-col gap-4">
-          <FieldLabel htmlFor="a1a2a3a4" className="font-bold text-muted-foreground">
-            A1, A2, A3, A4
-          </FieldLabel>
-          <Input
-            {...register("a1a2a3a4", { valueAsNumber: true })}
-            className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-            type="number"
-            id="a1a2a3a4"
-          />
-          <FieldError>{errors.a1a2a3a4?.message}</FieldError>
-        </Field>
-
-        {/* B1B2B3B4 */}
-        <Field className="flex flex-col gap-4">
-          <FieldLabel htmlFor="b1b2b3b4" className="font-bold text-muted-foreground">
-            B1, B2, B3, B4
-          </FieldLabel>
-          <Input
-            {...register("b1b2b3b4", { valueAsNumber: true })}
-            className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-            type="number"
-            id="b1b2b3b4"
-          />
-          <FieldError>{errors.b1b2b3b4?.message}</FieldError>
-        </Field>
+        <A1a2a3a4Field register={register} />
+        <B1b2b3b4Field register={register} />
 
         {/* IC/IT */}
         <Field className="flex flex-col gap-4">

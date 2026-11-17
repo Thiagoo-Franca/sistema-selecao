@@ -30,6 +30,10 @@ import {
 import { PediuIsencaoField } from "@/features/candidates/shared/components/forms/fields/pediu-isencao"
 import { EspeciaisField } from "@/features/candidates/shared/components/forms/fields/especiais"
 import { AREAPGCOMP, AREAPGCOMP_LABEL } from "@tcc/shared"
+import {
+  A1a2a3a4Field,
+  B1b2b3b4Field,
+} from "@/features/candidates/shared/components/forms/fields/producoes"
 
 interface FormsAvaliacaoDoutoradoProps {
   handleSubmit: UseFormHandleSubmit<any>
@@ -62,6 +66,9 @@ export default function FormsAvaliacaoDoutorado({
   RPG,
   RPQ_MSC,
 }: FormsAvaliacaoDoutoradoProps) {
+  // Log de debug para verificar os dados do candidato vindo do banco de dados
+  console.log("candidatos vindo do banco de dados:", candidato)
+
   return (
     <form className="container mx-auto flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
       <FieldLegend className="font-bold text-muted-foreground">Avaliadores</FieldLegend>
@@ -89,9 +96,13 @@ export default function FormsAvaliacaoDoutorado({
 
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
         <PediuIsencaoField control={control} errors={errors} candidato={candidato} />
+
         <IsencaoAprovadaField control={control} errors={errors} candidato={candidato} />
+
         <GruField control={control} errors={errors} candidato={candidato} />
+
         <HomologaField control={control} errors={errors} candidato={candidato} />
+
         <Controller
           control={control}
           name="areaPgcomp"
@@ -230,14 +241,17 @@ export default function FormsAvaliacaoDoutorado({
         />
         {/* Universidade */}
         <Field className="flex flex-col gap-4">
-          <FieldLabel htmlFor="universidadeMestrado" className="font-bold text-muted-foreground">
+          <FieldLabel
+            htmlFor="nomeUniversidadeMestrado"
+            className="font-bold text-muted-foreground"
+          >
             Universidade Mestrado
           </FieldLabel>
           <Input
-            {...register("universidadeMestrado")}
+            {...register("nomeUniversidadeMestrado")}
             className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
             type="text"
-            id="universidadeMestrado"
+            id="nomeUniversidadeMestrado"
           />
         </Field>
         {/* Curso */}
@@ -246,10 +260,10 @@ export default function FormsAvaliacaoDoutorado({
             Curso
           </FieldLabel>
           <Input
-            {...register("cursoMestrado")}
+            {...register("nomeCursoMestrado")}
             className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
             type="text"
-            id="cursoMestrado"
+            id="nomeCursoMestrado"
           />
         </Field>
         {/* Cidade Universiade */}
@@ -283,96 +297,81 @@ export default function FormsAvaliacaoDoutorado({
 
         {/* AREA */}
         <Field className="flex flex-col gap-4">
-          <FieldLabel htmlFor="areaGrad" className="font-bold text-muted-foreground">
+          <FieldLabel htmlFor="areaFormacaoGraduacao" className="font-bold text-muted-foreground">
             AREA DE FORMAÇÃO DA GRADUAÇÃO
           </FieldLabel>
           <Input
-            {...register("areaGrad", { valueAsNumber: true })}
+            {...register("areaFormacaoGraduacao", { valueAsNumber: true })}
             className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
             type="number"
             step="0.01"
-            id="areaGrad"
+            id="areaFormacaoGraduacao"
           />
         </Field>
-
         {/* Conceito CAPES */}
         <Controller
           control={control}
           name="conceitoCapesMestrado"
-          render={({ field }) => (
-            <Field className="flex flex-col gap-4">
-              <FieldLabel
-                htmlFor="conceitoCapesMestrado"
-                className="font-bold text-muted-foreground"
-              >
-                CONCEITO CAPES
-              </FieldLabel>
-              <Select
-                onValueChange={(v) => field.onChange(Number(v))}
-                value={field.value ? String(field.value) : ""}
-              >
-                <SelectTrigger className="w-full max-w-[400px]">
-                  <SelectValue placeholder="Conceito CAPES" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="7">7</SelectItem>
-                    <SelectItem value="6">6</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="4">4</SelectItem>
-                    <SelectItem value="3">3</SelectItem>
-                    <SelectItem value="2">2</SelectItem>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="0">0</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
+          render={({ field }) => {
+            const capesValue =
+              typeof field.value === "number" &&
+              Number.isInteger(field.value) &&
+              field.value >= 0 &&
+              field.value <= 7
+                ? String(field.value)
+                : ""
+
+            return (
+              <Field className="flex flex-col gap-4">
+                <FieldLabel
+                  htmlFor="conceitoCapesMestrado"
+                  className="font-bold text-muted-foreground"
+                >
+                  CONCEITO CAPES
+                </FieldLabel>
+
+                <Select
+                  key={capesValue || "empty"}
+                  value={capesValue}
+                  onValueChange={(value) => field.onChange(Number(value))}
+                >
+                  <SelectTrigger className="w-full max-w-[400px]" id="conceitoCapesMestrado">
+                    <SelectValue placeholder="Conceito CAPES" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="7">7</SelectItem>
+                      <SelectItem value="6">6</SelectItem>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="4">4</SelectItem>
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="2">2</SelectItem>
+                      <SelectItem value="1">1</SelectItem>
+                      <SelectItem value="0">0</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
+                <FieldError>{msg(errors.conceitoCapesMestrado)}</FieldError>
+              </Field>
+            )
+          }}
         />
 
-        {/* A1A2A3A4 */}
+        <A1a2a3a4Field register={register} />
+        <B1b2b3b4Field register={register} />
+        {/* NOTA ANTEPROJETO */}
         <Field className="flex flex-col gap-4">
-          <FieldLabel htmlFor="a1a2a3a4" className="font-bold text-muted-foreground">
-            A1, A2, A3, A4
-          </FieldLabel>
-          <Input
-            {...register("a1a2a3a4", { valueAsNumber: true })}
-            className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-            type="number"
-            id="a1a2a3a4"
-          />
-        </Field>
-
-        {/* B1B2B3B4 */}
-        <Field className="flex flex-col gap-4">
-          <FieldLabel htmlFor="b1b2b3b4" className="font-bold text-muted-foreground">
-            B1, B2, B3, B4
-          </FieldLabel>
-          <Input
-            {...register("b1b2b3b4", { valueAsNumber: true })}
-            className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
-            type="number"
-            id="b1b2b3b4"
-          />
-        </Field>
-        <Field className="flex flex-col gap-4" data-invalid={!!errors.notaAnteprojeto}>
           <FieldLabel htmlFor="notaAnteprojeto" className="font-bold text-muted-foreground">
             Nota do Anteprojeto
           </FieldLabel>
           <Input
-            {...register("notaAnteprojeto", {
-              setValueAs: (v) => (v === "" || v == null ? undefined : Number(v)),
-            })}
-            className="w-full max-w-[400px]"
+            {...register("notaAnteprojeto", { valueAsNumber: true })}
+            className="w-full max-w-[400px] rounded-[8px] border border-gray-800 p-2"
             type="number"
             id="notaAnteprojeto"
-            step="0.01"
-            min={0}
-            max={10}
-            aria-invalid={!!errors.notaAnteprojeto}
           />
-          {errors.notaAnteprojeto && <FieldError errors={[errors.notaAnteprojeto]} />}
         </Field>
       </div>
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
@@ -384,7 +383,7 @@ export default function FormsAvaliacaoDoutorado({
           <FieldLabel
             htmlFor="notas.notaFinal"
             className="text-lg font-bold text-muted-foreground"
-          >{`NOTA FINAL (PRÉVIA): ${nota}`}</FieldLabel>
+          >{`NOTA FINAL (PRÉVIA): ${nota.toFixed(2)}`}</FieldLabel>
         </Field>
 
         <Button
