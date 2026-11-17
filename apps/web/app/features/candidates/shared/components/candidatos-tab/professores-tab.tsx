@@ -1,7 +1,7 @@
 import { capitalizarNomeCompleto } from "@/shared/lib/format"
 import type { InsertUser } from "@tcc/server"
 import { ChevronUp } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router"
 
 interface HomeTableProfessoresProps {
@@ -17,12 +17,11 @@ interface HomeTableProfessoresProps {
 const LABELS = [
   { key: "nome", label: "Nome" },
   { key: "email", label: "Email" },
-  {
-    key: "areas",
-    label: "Áreas",
-    hiddenOnMobile: true,
-  },
+  { key: "areas", label: "Áreas" },
 ]
+
+const TABLE_GRID =
+  "grid w-full grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)_9rem] gap-4 md:grid-cols-[1fr_1fr_2fr]"
 
 export default function ProfessoresTab({
   data,
@@ -34,6 +33,7 @@ export default function ProfessoresTab({
   onSort,
 }: HomeTableProfessoresProps) {
   const navigate = useNavigate()
+  const swipeRef = useRef({ x: 0, dragged: false })
 
   const [professores, setProfessores] = useState(data)
 
@@ -85,55 +85,77 @@ export default function ProfessoresTab({
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="grid w-full grid-cols-[2fr_1fr_1fr] gap-2 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground md:grid-cols-[1fr_1fr_2fr] md:gap-4 md:px-8 md:py-3">
-        {LABELS.map((label) => (
+      <div
+        className="w-full cursor-grab overflow-x-auto overscroll-x-contain active:cursor-grabbing [-webkit-overflow-scrolling:touch] [scrollbar-width:none] md:cursor-default md:overflow-x-visible md:active:cursor-default md:[scrollbar-width:auto] [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block"
+        onPointerDown={(event) => {
+          swipeRef.current = { x: event.clientX, dragged: false }
+        }}
+        onPointerMove={(event) => {
+          if (Math.abs(event.clientX - swipeRef.current.x) > 8) {
+            swipeRef.current.dragged = true
+          }
+        }}
+      >
+        <div className="flex w-[calc(100%+5.5rem)] flex-col gap-2 md:w-full">
           <div
-            key={label.key}
-            onClick={() => {
-              if (onSort) {
-                onSort(label.key)
-              } else {
-                handleSort(label.key)
-              }
-            }}
-            className={`flex items-center gap-1 ${label.hiddenOnMobile ? "hidden md:flex" : ""}`}
+            className={`${TABLE_GRID} px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground md:px-8 md:py-3`}
           >
-            <ChevronUp
-              className={`inline-block h-4 w-4 cursor-pointer transition-transform duration-200 md:mr-1 ${
-                orderBy === label.key && order === "asc" ? "rotate-180" : ""
-              }`}
-            />
-            {label.label}
-          </div>
-        ))}
-      </div>
-      <div className="flex w-full flex-col gap-2">
-        {sortedProfessores?.length > 0 ? (
-          sortedProfessores.map((professor: InsertUser) => (
-            <div
-              className="grid w-full cursor-pointer grid-cols-2 items-center gap-4 rounded-lg border border-transparent bg-white px-0 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:flex md:px-4"
-              key={professor.id}
-              onClick={() => navigate(`/admin/users/${professor.id}`)}
-            >
-              <div className="w-full font-medium text-neutral-900 md:w-1/4">
-                {capitalizarNomeCompleto(professor.nome ?? "")}
+            {LABELS.map((label) => (
+              <div
+                key={label.key}
+                onClick={() => {
+                  if (swipeRef.current.dragged) return
+                  if (onSort) {
+                    onSort(label.key)
+                  } else {
+                    handleSort(label.key)
+                  }
+                }}
+                className="flex items-center gap-1 whitespace-nowrap"
+              >
+                <ChevronUp
+                  className={`inline-block h-4 w-4 shrink-0 cursor-pointer transition-transform duration-200 md:mr-1 ${
+                    orderBy === label.key && order === "asc" ? "rotate-180" : ""
+                  }`}
+                />
+                {label.label}
               </div>
+            ))}
+          </div>
+          <div className="flex w-full flex-col gap-2">
+            {sortedProfessores?.length > 0 ? (
+              sortedProfessores.map((professor: InsertUser) => (
+                <div
+                  className={`${TABLE_GRID} cursor-pointer items-center rounded-lg border border-transparent bg-white px-4 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md`}
+                  key={professor.id}
+                  onClick={() => {
+                    if (swipeRef.current.dragged) return
+                    navigate(`/admin/users/${professor.id}`)
+                  }}
+                >
+                  <div className="truncate font-medium text-neutral-900">
+                    {capitalizarNomeCompleto(professor.nome ?? "")}
+                  </div>
 
-              <div className="flex w-full text-sm text-neutral-500 md:w-1/4">{professor.email}</div>
-              <div className="hidden w-full text-sm text-neutral-500 md:flex md:w-1/2">
-                {professor.areas &&
-                  professor.areas.length > 0 &&
-                  professor.areas.map((area) => (
-                    <div className="w-full text-sm text-neutral-500">{area}</div>
-                  ))}
+                  <div className="truncate text-sm text-neutral-500">{professor.email}</div>
+                  <div className="flex flex-nowrap gap-x-3 text-sm text-neutral-500">
+                    {professor.areas && professor.areas.length > 0
+                      ? professor.areas.map((area) => (
+                          <span key={area} className="whitespace-nowrap">
+                            {area}
+                          </span>
+                        ))
+                      : "—"}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="mt-8 flex flex-col items-center justify-center gap-2 text-center">
+                <p className="text-sm text-black">Nenhum professor encontrado.</p>
               </div>
-            </div>
-          ))
-        ) : (
-          <div className="mt-8 flex flex-col items-center justify-center gap-2 text-center">
-            <p className="text-sm text-black">Nenhum professor encontrado.</p>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       <span className="my-4 self-center text-sm text-muted-foreground">

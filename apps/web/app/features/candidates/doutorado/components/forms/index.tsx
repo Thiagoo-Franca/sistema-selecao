@@ -66,9 +66,6 @@ export default function FormsAvaliacaoDoutorado({
   RPG,
   RPQ_MSC,
 }: FormsAvaliacaoDoutoradoProps) {
-  // Log de debug para verificar os dados do candidato vindo do banco de dados
-  console.log("candidatos vindo do banco de dados:", candidato)
-
   return (
     <form className="container mx-auto flex flex-col gap-y-3" onSubmit={handleSubmit(onSubmit)}>
       <FieldLegend className="font-bold text-muted-foreground">Avaliadores</FieldLegend>
