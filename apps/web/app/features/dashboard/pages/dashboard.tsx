@@ -75,7 +75,7 @@ export default function Home() {
 
   return (
     <div className="">
-      <div className="mb-6 flex flex-row items-center justify-between gap-2">
+      <div className="mb-6 flex flex-col items-center justify-between gap-2 sm:flex-row">
         <div className="flex w-full flex-col items-center gap-2 self-stretch md:flex-row md:gap-4">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>

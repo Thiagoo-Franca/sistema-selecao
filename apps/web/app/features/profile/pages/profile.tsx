@@ -24,6 +24,7 @@ import {
 } from "@/features/profile/schema/profile.schema"
 import { useChangePassword, useUpdateProfile } from "@/features/profile/hooks/profile.mutation"
 import type { Route } from ".react-router/types/app/+types/root"
+import { useEffect, useRef } from "react"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil" }]
 
@@ -53,6 +54,12 @@ export default function ProfilePage() {
   function onSubmitPassword(data: PasswordFormValues) {
     changePassword.mutate(data)
   }
+  const listRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const activeTrigger = listRef.current?.querySelector<HTMLElement>('[data-state="active"]')
+    activeTrigger?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
+  }, [])
 
   if (isLoading) {
     return <Loading />
@@ -65,9 +72,23 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-2xl">
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="profile">Meu Perfil</TabsTrigger>
-          <TabsTrigger value="security">Segurança</TabsTrigger>
+        <TabsList
+          ref={listRef}
+          className="relative flex h-auto w-full snap-x justify-start gap-1 overflow-x-auto rounded-full border bg-white p-1 shadow-none [scrollbar-width:none] md:max-w-lg md:overflow-x-visible [&::-webkit-scrollbar]:hidden"
+        >
+          <TabsTrigger
+            value="profile"
+            className="shrink-0 snap-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md md:flex-1"
+          >
+            Meu Perfil
+          </TabsTrigger>
+          <TabsTrigger
+            className="shrink-0 snap-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md md:flex-1"
+
+            value="security"
+          >
+            Segurança
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
