@@ -1,5 +1,3 @@
-import { Header } from "@/shared/components/layout/header"
-
 import { Button } from "@/shared/ui/button"
 import {
   Card,

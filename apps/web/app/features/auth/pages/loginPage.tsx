@@ -1,6 +1,6 @@
 import AuthBrand from "../components/auth-brand"
 import Login from "../components/login/login"
-import type { Route } from "./+types/LoginPage"
+import type { Route } from "./+types/loginPage"
 
 export const meta: Route.MetaFunction = () => [
   {
