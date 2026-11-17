@@ -25,7 +25,6 @@ interface CandidateActionsProps {
 
 export default function CandidateActions({
   user,
-  candidato,
   handleDelete,
   deleteCandidatoMutation,
 }: CandidateActionsProps) {
@@ -47,11 +46,6 @@ export default function CandidateActions({
                 <NavigationMenuContent>
                   <ul className="flex flex-col gap-2 p-4">
                     <li>
-                      <Button className="w-full bg-white text-black hover:bg-black/10">
-                        Editar candidato
-                      </Button>
-                    </li>
-                    <li>
                       <Button
                         className="w-full bg-red-500 hover:bg-red-600"
                         onClick={() => {
@@ -68,14 +62,6 @@ export default function CandidateActions({
             </NavigationMenuList>
           </NavigationMenu>
         )}
-        <Button
-          className="bg-blue-500 hover:bg-blue-600"
-          onClick={() =>
-            navigate(`/${candidato.tipoCurso.toLowerCase()}/${candidato.id}/avaliacao`)
-          }
-        >
-          Avaliar
-        </Button>
       </div>
     </div>
   )

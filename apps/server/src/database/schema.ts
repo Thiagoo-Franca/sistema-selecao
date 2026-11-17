@@ -95,7 +95,7 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
 
   msc: numeric("msc", { mode: "number" }), // Nota do mestrado
 
-  areaGrad: numeric("area_grad", { mode: "number" }), //  Área de formação da graduação
+  areaFormacaoGraduacao: numeric("area_formacao_graduacao", { mode: "number" }), //  Área de formação da graduação
 
   conceitoCapesMestrado: numeric("conceito_capes_mestrado", { mode: "number" }), // 0,1,2,3,4,5,6,7
   conceitoCapesMestradoLink: text("conceito_capes_mestrado_link"),
@@ -106,7 +106,6 @@ export const NotaDoutorado = pgTable("nota_doutorado", {
   b1b2b3b4Link: text("b1b2b3b4_link"),
 
   notaAnteprojeto: numeric("nota_anteprojeto", { mode: "number" }),
-  notaEtapaII: numeric("nota_etapa_ii", { mode: "number" }),
 });
 
 export type InsertNotaDoutorado = typeof NotaDoutorado.$inferInsert;

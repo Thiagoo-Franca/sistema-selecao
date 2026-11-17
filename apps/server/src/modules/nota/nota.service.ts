@@ -162,7 +162,6 @@ export const updateNotaDoutorado = async (
         .insert(NotaDoutorado)
         .values({
           idCandidato,
-          historicoMestradoLink: atual?.historicoMestradoLink ?? "",
           ...values,
         })
         .onConflictDoUpdate({

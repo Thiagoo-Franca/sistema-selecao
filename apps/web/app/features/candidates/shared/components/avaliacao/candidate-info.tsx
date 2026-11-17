@@ -18,9 +18,7 @@ export default function CandidateInfo({ candidato }: CandidateInfoProps) {
             Áreas de interesse do candidato: {candidato.primeiraAreaPreferencia}
             {candidato.segundaAreaPreferencia ? `, ${candidato.segundaAreaPreferencia}` : null}
           </p>
-        ) : (
-          <p className="text-sm text-muted-foreground">Área PGCOMP: {candidato.areaPgcomp}</p>
-        )}
+        ) : null}
       </div>
     </div>
   )

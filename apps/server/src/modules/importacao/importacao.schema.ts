@@ -28,8 +28,12 @@ export const uploadCandidatosDoutoradoSchema = z.array(
     .extend({
       notas: z
         .object({
+          msc: z.number().optional(),
+          areaFormacaoGraduacao: z.number().optional(),
+          conceitoCapesMestrado: z.number().optional(),
+          a1a2a3a4: z.number().optional(),
+          b1b2b3b4: z.number().optional(),
           notaAnteprojeto: z.number().optional(),
-          notaEtapaII: z.number().optional(),
         })
         .nullish(),
     }),

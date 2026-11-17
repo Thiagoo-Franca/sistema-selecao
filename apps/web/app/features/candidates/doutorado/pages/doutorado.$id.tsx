@@ -87,8 +87,9 @@ export default function CandidatoDoutoradoPage() {
   useEffect(() => {
     if (candidato) {
       reset({
-        avaliadorId: candidato.avaliadorId ?? undefined,
         auditorId: candidato.auditorId ?? undefined,
+        avaliadorId: candidato.avaliadorId ?? undefined,
+        areaPgcomp: candidato.areaPgcomp ?? undefined,
         solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ?? undefined,
         isencaoAprovada: candidato.isencaoAprovada ?? undefined,
         gru: normalizeGru(candidato.gru),
@@ -97,11 +98,17 @@ export default function CandidatoDoutoradoPage() {
         especiais: paraBooleano(candidato.especiais),
         cotas: paraBooleano(candidato.cotas),
         supra: paraBooleano(candidato.supra),
-        universidade: candidato.nomeUniversidadeMestrado ?? undefined,
-        cursoMestrado: candidato.nomeCursoMestrado ?? undefined,
+        nomeUniversidadeMestrado: candidato.nomeUniversidadeMestrado ?? undefined,
+        nomeCursoMestrado: candidato.nomeCursoMestrado ?? undefined,
         cidadeMestrado: candidato.cidadeMestrado ?? undefined,
+        orientadorMestrado: candidato.orientadorMestrado ?? undefined,
+        primeiraOpcaoOrientador: candidato.primeiraOpcaoOrientador ?? undefined,
+        segundaOpcaoOrientador: candidato.segundaOpcaoOrientador ?? undefined,
+        terceiraOpcaoOrientador: candidato.terceiraOpcaoOrientador ?? undefined,
         msc: candidato.notas?.msc ? Number(candidato.notas?.msc) : 0,
-        areaGrad: candidato.notas?.areaGrad ? Number(candidato.notas?.areaGrad) : 0,
+        areaFormacaoGraduacao: candidato.notas?.areaFormacaoGraduacao
+          ? Number(candidato.notas?.areaFormacaoGraduacao)
+          : 0,
         conceitoCapesMestrado: Number(candidato.notas?.conceitoCapesMestrado ?? 0),
         a1a2a3a4: candidato.notas?.a1a2a3a4 ? Number(candidato.notas?.a1a2a3a4) : 0,
         b1b2b3b4: candidato.notas?.b1b2b3b4 ? Number(candidato.notas?.b1b2b3b4) : 0,
@@ -116,21 +123,21 @@ export default function CandidatoDoutoradoPage() {
     control,
     name: [
       "msc",
-      "areaGrad",
+      "areaFormacaoGraduacao",
       "a1a2a3a4",
       "b1b2b3b4",
       "conceitoCapesMestrado",
-      "notaEtapaII",
       "notaAnteprojeto",
     ],
   })
 
   useEffect(() => {
-    const [msc, areaGrad, a1a2a3a4, b1b2b3b4, conceitoCapesMestrado, notaAnteprojeto] = camposNota
+    const [msc, areaFormacaoGraduacao, a1a2a3a4, b1b2b3b4, conceitoCapesMestrado, notaAnteprojeto] =
+      camposNota
 
     const resultado = calcularDoutoradoNota({
       msc: paraNumeroSeguro(msc),
-      areaFormacaoGraduacao: paraNumeroSeguro(areaGrad),
+      areaFormacaoGraduacao: paraNumeroSeguro(areaFormacaoGraduacao),
       a1a2a3a4: paraNumeroSeguro(a1a2a3a4),
       b1b2b3b4: paraNumeroSeguro(b1b2b3b4),
       conceitoCapesMestrado: paraNumeroSeguro(conceitoCapesMestrado),
@@ -150,15 +157,20 @@ export default function CandidatoDoutoradoPage() {
         updateCandidatoMutation.mutateAsync({
           id,
           body: {
+            areaPgcomp: dados.areaPgcomp ?? undefined,
             avaliadorId: dados.avaliadorId || undefined,
             auditorId: dados.auditorId || undefined,
             solicitouIsencaoTaxaInscricao: dados.solicitouIsencaoTaxaInscricao ?? undefined,
             isencaoAprovada: dados.isencaoAprovada ?? undefined,
             gru: dados.gru || undefined,
             homologa: dados.homologa ?? undefined,
+            orientadorMestrado: dados.orientadorMestrado ?? undefined,
+            primeiraOpcaoOrientador: dados.primeiraOpcaoOrientador ?? undefined,
+            segundaOpcaoOrientador: dados.segundaOpcaoOrientador ?? undefined,
+            terceiraOpcaoOrientador: dados.terceiraOpcaoOrientador ?? undefined,
             cidadeMestrado: dados.cidadeMestrado ?? undefined,
-            nomeUniversidadeMestrado: dados.universidadeMestrado ?? undefined,
-            nomeCursoMestrado: dados.cursoMestrado ?? undefined,
+            nomeUniversidadeMestrado: dados.nomeUniversidadeMestrado ?? undefined,
+            nomeCursoMestrado: dados.nomeCursoMestrado ?? undefined,
             especiais: dados.especiais ?? undefined,
             cotas: dados.cotas ?? undefined,
             supra: dados.supra ?? undefined,
@@ -167,15 +179,12 @@ export default function CandidatoDoutoradoPage() {
         updateNotaMutation.mutateAsync({
           id,
           body: {
-            notas: {
-              msc: dados.msc ?? undefined,
-              areaGrad: dados.areaGrad ?? undefined,
-              a1a2a3a4: dados.a1a2a3a4 ?? undefined,
-              b1b2b3b4: dados.b1b2b3b4 ?? undefined,
-              conceitoCapesMestrado: dados.conceitoCapesMestrado ?? undefined,
-              notaAnteprojeto: dados.notaAnteprojeto ?? undefined,
-              notaFinal: nota ?? undefined,
-            },
+            msc: dados.msc ?? null,
+            areaFormacaoGraduacao: dados.areaFormacaoGraduacao ?? null,
+            a1a2a3a4: dados.a1a2a3a4 ?? null,
+            b1b2b3b4: dados.b1b2b3b4 ?? null,
+            conceitoCapesMestrado: dados.conceitoCapesMestrado ?? null,
+            notaAnteprojeto: dados.notaAnteprojeto ?? null,
           },
         }),
       ])
