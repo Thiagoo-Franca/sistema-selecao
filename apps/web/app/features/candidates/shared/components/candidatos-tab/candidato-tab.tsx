@@ -3,11 +3,15 @@ import CandidatosTabError from "./candidatos-tab-error"
 import { HomeTableCandidatos } from "."
 import { TabsContent } from "../../../../../shared/ui/tabs"
 import ProfessoresTab from "./professores-tab"
+import { PaginationControls } from "@/shared/ui/pagination-controls"
 import { useUser } from "@/features/auth"
 import { useCandidatosMestrado } from "@/features/candidates/mestrado/hooks"
 import { useCandidatosDoutorado } from "@/features/candidates/doutorado/hooks"
 import { useCandidatesByTeacherId } from "../../use-meus-candidatos"
 import { useTeachers } from "@/features/users/hooks"
+import type { Paginated } from "@/shared/types/pagination"
+import type { CandidatoResumo } from "@tcc/shared"
+import { useEffect, useRef } from "react"
 
 type TabsType = "mestrado" | "doutorado" | "meus" | "professores" | undefined
 
@@ -20,6 +24,10 @@ interface CandidatosTabProps {
   setOrderBy?: (orderBy: string) => void
   setOrder?: (order: "asc" | "desc") => void
   onSort?: (key: string) => void
+  page: number
+  limit: number
+  onPageChange: (page: number) => void
+  onLimitChange: (limit: number) => void
 }
 
 export function CandidatosTab({
@@ -31,13 +39,41 @@ export function CandidatosTab({
   setOrderBy,
   setOrder,
   onSort,
+  page,
+  limit,
+  onPageChange,
+  onLimitChange,
 }: CandidatosTabProps) {
   const user = useUser().data
+  const listRef = useRef<HTMLDivElement>(null)
 
-  const mestradoQuery = useCandidatosMestrado()
-  const doutoradoQuery = useCandidatosDoutorado()
+  // Smooth scroll to list when page changes
+  useEffect(() => {
+    listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [page])
+
+  const mestradoQuery = useCandidatosMestrado({
+    page,
+    limit,
+    search: searchQuery,
+    sortBy: orderBy,
+    order,
+  })
+  const doutoradoQuery = useCandidatosDoutorado({
+    page,
+    limit,
+    search: searchQuery,
+    sortBy: orderBy,
+    order,
+  })
   const meusCandidatosQuery = useCandidatesByTeacherId(user?.id ?? 0)
-  const professoresQuery = useTeachers()
+  const professoresQuery = useTeachers({
+    page,
+    limit,
+    search: searchQuery,
+    sortBy: orderBy,
+    order,
+  })
 
   if (!user) {
     return (
@@ -56,12 +92,17 @@ export function CandidatosTab({
 
   function renderContent() {
     if (type === "professores") {
-      if (professoresQuery.isLoading) return <CandidatosTabLoading />
+      // Show skeleton only on initial load (isPending), keep data during background fetch (isFetching)
+      if (professoresQuery.isPending && !professoresQuery.data) return <CandidatosTabLoading />
       if (professoresQuery.isError) {
         return <CandidatosTabError error={professoresQuery.error} />
       }
 
-      if (!professoresQuery.data || professoresQuery.data.length === 0) {
+      const professoresData = professoresQuery.data as Paginated<any> | any[]
+      const data = Array.isArray(professoresData) ? professoresData : professoresData.data
+      const meta = Array.isArray(professoresData) ? null : professoresData.meta
+
+      if (!data || data.length === 0) {
         return (
           <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
             Ops, nenhum professor encontrado.
@@ -70,22 +111,43 @@ export function CandidatosTab({
       }
 
       return (
-        <ProfessoresTab
-          data={professoresQuery.data}
-          searchQuery={searchQuery}
-          orderBy={orderBy}
-          order={order}
-          setOrderBy={setOrderBy}
-          setOrder={setOrder}
-          onSort={onSort}
-        />
+        <>
+          <ProfessoresTab
+            data={data}
+            searchQuery={searchQuery}
+            orderBy={orderBy}
+            order={order}
+            setOrderBy={setOrderBy}
+            setOrder={setOrder}
+            onSort={onSort}
+          />
+          {meta && (
+            <PaginationControls
+              page={meta.page}
+              limit={meta.limit}
+              total={meta.total}
+              totalPages={meta.totalPages}
+              hasNextPage={meta.hasNextPage}
+              hasPreviousPage={meta.hasPreviousPage}
+              onPageChange={onPageChange}
+              onLimitChange={onLimitChange}
+            />
+          )}
+        </>
       )
     }
 
-    if (candidateQuery.isLoading) return <CandidatosTabLoading />
+    // Show skeleton only on initial load (isPending), keep data during background fetch (isFetching)
+    if (candidateQuery.isPending && !candidateQuery.data) return <CandidatosTabLoading />
     if (candidateQuery.isError) return <CandidatosTabError error={candidateQuery.error} />
 
-    if (!candidateQuery.data || candidateQuery.data.length === 0) {
+    // For "meus" candidates, the endpoint returns array directly (not paginated yet)
+    const isMeus = type === "meus"
+    const rawData = candidateQuery.data
+    const data: CandidatoResumo[] = isMeus ? (rawData as CandidatoResumo[]) : (rawData as Paginated<CandidatoResumo>).data
+    const meta = isMeus ? null : (rawData as Paginated<CandidatoResumo>).meta
+
+    if (!data || data.length === 0) {
       return (
         <div className="flex h-[200px] w-full items-center justify-center text-muted-foreground">
           Ops, nenhum candidato encontrado.
@@ -94,17 +156,31 @@ export function CandidatosTab({
     }
 
     return (
-      <HomeTableCandidatos
-        data={candidateQuery.data}
-        searchQuery={searchQuery}
-        orderBy={orderBy}
-        order={order}
-        setOrderBy={setOrderBy}
-        setOrder={setOrder}
-        onSort={onSort}
-      />
+      <>
+        <HomeTableCandidatos
+          data={data}
+          searchQuery={searchQuery}
+          orderBy={orderBy}
+          order={order}
+          setOrderBy={setOrderBy}
+          setOrder={setOrder}
+          onSort={onSort}
+        />
+        {meta && (
+          <PaginationControls
+            page={meta.page}
+            limit={meta.limit}
+            total={meta.total}
+            totalPages={meta.totalPages}
+            hasNextPage={meta.hasNextPage}
+            hasPreviousPage={meta.hasPreviousPage}
+            onPageChange={onPageChange}
+            onLimitChange={onLimitChange}
+          />
+        )}
+      </>
     )
   }
 
-  return <TabsContent value={tabValue}>{renderContent()}</TabsContent>
+  return <TabsContent value={tabValue}><div ref={listRef}>{renderContent()}</div></TabsContent>
 }

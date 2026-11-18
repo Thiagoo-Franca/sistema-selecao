@@ -1,6 +1,5 @@
-import { ArrowLeft } from "lucide-react"
 import { Button } from "../../../../../shared/ui/button"
-import { useNavigate } from "react-router"
+import { ButtonBack } from "../../../../../shared/ui/button-back"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -33,9 +32,7 @@ export default function CandidateActions({
   return (
     <div className="mb-6 flex w-full flex-row justify-between">
       <div className="flex flex-row items-center gap-4">
-        <Button onClick={() => navigate(-1)} variant="outline" className="">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-        </Button>
+        <ButtonBack />
       </div>
       <div className="flex flex-row items-center gap-2 self-stretch md:gap-4">
         {user?.role === "ADMIN" && (

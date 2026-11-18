@@ -56,7 +56,7 @@ export const updateUserSchema = z.object({
     .partial(),
 });
 
-const usuarioSortByValues = ["nome", "email", "matricula", "createdAt"] as const;
+const usuarioSortByValues = ["nome", "email", "matricula", "createdAt", "areas"] as const;
 
 export const usuarioPaginationQuerySchema = z
   .object({

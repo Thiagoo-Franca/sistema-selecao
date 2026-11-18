@@ -63,7 +63,19 @@ export type UpdateCandidatoDoutoradoInput = z.infer<
   typeof updateCandidatoDoutoradoSchema
 >;
 
-const candidatoSortByValues = ["nome", "dataInscricao", "numeroInscricao", "status"] as const;
+const candidatoSortByValues = [
+  "nome",
+  "dataInscricao",
+  "numeroInscricao",
+  "status",
+  "tipoCurso",
+  "email",
+  "avaliado",
+  "area1",
+  "area2",
+  "avaliador",
+  "auditor",
+] as const;
 
 export const candidatoPaginationQuerySchema = z
   .object({

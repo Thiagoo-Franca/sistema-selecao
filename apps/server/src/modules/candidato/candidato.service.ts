@@ -60,6 +60,13 @@ const candidatoMestradoSortColumnMap: Record<string, Column> = {
   dataInscricao: CandidatoMestrado.createdAt,
   numeroInscricao: CandidatoMestrado.numeroInscricao,
   status: CandidatoMestrado.tipoCurso,
+  tipoCurso: CandidatoMestrado.tipoCurso,
+  email: CandidatoMestrado.email,
+  avaliado: NotaMestrado.avaliado,
+  area1: CandidatoMestrado.primeiraAreaPreferencia,
+  area2: CandidatoMestrado.segundaAreaPreferencia,
+  avaliador: Avaliador.nome,
+  auditor: Auditor.nome,
 };
 
 const candidatoDoutoradoSortColumnMap: Record<string, Column> = {
@@ -67,6 +74,13 @@ const candidatoDoutoradoSortColumnMap: Record<string, Column> = {
   dataInscricao: CandidatoDoutorado.createdAt,
   numeroInscricao: CandidatoDoutorado.numeroInscricao,
   status: CandidatoDoutorado.tipoCurso,
+  tipoCurso: CandidatoDoutorado.tipoCurso,
+  email: CandidatoDoutorado.email,
+  avaliado: NotaDoutorado.avaliado,
+  area1: CandidatoDoutorado.primeiraOpcaoOrientador,
+  area2: CandidatoDoutorado.segundaOpcaoOrientador,
+  avaliador: Avaliador.nome,
+  auditor: Auditor.nome,
 };
 
 function buildWhereConditions(

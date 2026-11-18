@@ -2,7 +2,8 @@ import { useState } from "react"
 import { useNavigate, useParams } from "react-router"
 
 import { Button } from "@/shared/ui/button"
-import { ArrowLeft, Pen } from "lucide-react"
+import { ButtonBack } from "@/shared/ui/button-back"
+import { Pen } from "lucide-react"
 import { useUser } from "@/features/auth/hooks/auth.queries"
 import { useUserById } from "@/features/users/hooks"
 import IsLoadingUsers from "@/features/users/components/loading-users"
@@ -41,9 +42,7 @@ export default function UserProfilePage() {
   return (
     <div className="mx-auto w-full space-y-6">
       <div className="mb-4 flex items-center justify-between">
-        <Button onClick={() => navigate(-1)} variant="outline">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-        </Button>
+        <ButtonBack />
         {isAdmin && (
           <Button onClick={() => setEditDialogOpen(true)} aria-label={`Editar ${user.nome}`}>
             <Pen className="mr-2 h-4 w-4" /> Editar
