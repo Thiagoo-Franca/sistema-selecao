@@ -25,13 +25,6 @@ export const PENDENCIAS = [
       "GET /auth/reset-password/:hash e POST /auth/reset-password/reset (força bruta e spam de e-mails).",
   },
   {
-    id: "revogar-sessoes-apos-reset",
-    origem: "SDS-5",
-    descricao:
-      "Ao redefinir a senha (reset ou primeira senha), revogar os refresh tokens do usuário " +
-      "quando a SDS-4 introduzir refresh token.",
-  },
-  {
     id: "web-criar-professor",
     origem: "SDS-5",
     descricao:

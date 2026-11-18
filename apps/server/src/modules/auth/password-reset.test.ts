@@ -143,6 +143,23 @@ describe("recuperação de senha", () => {
     expect(await db.select().from(resetPasswords)).toHaveLength(0);
   });
 
+  it("redefinir a senha revoga as sessões abertas (refresh token antigo → 401)", async () => {
+    const sessao = await login(TEST_USER_BASIC.email, TEST_USER_BASIC.password);
+    const { refreshToken } = (await sessao.json()) as { refreshToken: string };
+    expect((await post("/auth/refresh", { refreshToken })).status).toBe(200);
+
+    const novaSessao = await login(TEST_USER_BASIC.email, TEST_USER_BASIC.password);
+    const { refreshToken: refreshAntesDoReset } = (await novaSessao.json()) as {
+      refreshToken: string;
+    };
+
+    await solicitarReset(TEST_USER_BASIC.email);
+    await vi.waitFor(() => expect(sendEmailMock).toHaveBeenCalledTimes(1));
+    expect((await redefinir(tokenDoEmail())).status).toBe(200);
+
+    expect((await post("/auth/refresh", { refreshToken: refreshAntesDoReset })).status).toBe(401);
+  });
+
   it("token expirado → 400 com mensagem genérica no GET e no POST", async () => {
     const token = "a".repeat(64);
     await db.insert(resetPasswords).values({

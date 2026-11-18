@@ -15,7 +15,11 @@ import {
   gerarTokenSenha,
   hashTokenSenha,
 } from "./password-token.js";
-import { issueRefreshToken, signAccessToken } from "./refresh-token.service.js";
+import {
+  issueRefreshToken,
+  revokeAllRefreshTokensForUser,
+  signAccessToken,
+} from "./refresh-token.service.js";
 
 interface LoginResponse {
   id: string;
@@ -245,6 +249,8 @@ export const resetPasswordService = async (
       await tx
         .delete(resetPasswords)
         .where(eq(resetPasswords.userId, lockedReset.userId));
+      // Senha nova derruba todas as sessões abertas (reset e primeira senha).
+      await revokeAllRefreshTokensForUser(tx, lockedReset.userId);
       return true;
     });
 
