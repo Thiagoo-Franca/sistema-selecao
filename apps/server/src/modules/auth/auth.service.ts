@@ -2,7 +2,6 @@ import * as bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { and, eq, gte } from "drizzle-orm";
 import { type Context } from "hono";
-import { sign } from "hono/jwt";
 import {
   resetPasswords,
   Users,
@@ -10,12 +9,7 @@ import {
 } from "../../database/schema.js";
 import { err, ok, type AppResult } from "../../result.js";
 import { type AppVariables } from "../../types.js";
-import {
-  JWT_AUDIENCE,
-  JWT_EXPIRY_SECONDS,
-  JWT_ISSUER,
-  JWT_SECRET,
-} from "./jwt.js";
+import { issueRefreshToken, signAccessToken } from "./refresh-token.service.js";
 import { env } from "../../config/env.js";
 import { createPasswordResetEmail, sendEmail } from "../../services/email.service.js";
 
@@ -25,6 +19,7 @@ const hashResetToken = (token: string) =>
 interface LoginResponse {
   id: string;
   token: string;
+  refreshToken: string;
   role: string;
   name: string;
   user: Omit<SelectUser, "passwordHash" | "createdAt">;
@@ -69,26 +64,20 @@ export const loginUserService = async (
       return err({ type: "invalid_credentials" });
     }
 
-    const now = Math.floor(Date.now() / 1000);
-    const payload = {
-      iss: JWT_ISSUER,
-      aud: JWT_AUDIENCE,
-      sub: user.id.toString(),
-      iat: now,
-      exp: now + JWT_EXPIRY_SECONDS,
-    };
-
     let token: string;
     try {
-      token = await sign(payload, JWT_SECRET);
-    } catch (jwtError) {
-      console.error("JWT signing error:", jwtError);
+      token = await signAccessToken(user.id);
+    } catch {
+      console.error("JWT signing error during login");
       return err({ type: "jwt_signing_error" });
     }
+
+    const refreshToken = await issueRefreshToken(dbInstance, user.id);
 
     return ok({
       id: user.id,
       token: token,
+      refreshToken,
       role: user.role,
       name: user.nome,
       user: {

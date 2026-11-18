@@ -10,7 +10,10 @@ import {
 import { databaseError, logDatabaseError } from "../../database/errors.js";
 import { type AppResult, err, ok } from "../../result.js";
 import { type AppVariables } from "../../types.js";
-import { getUsuarioAutenticado } from "../auth/index.js";
+import {
+  getUsuarioAutenticado,
+  revokeAllRefreshTokensForUser,
+} from "../auth/index.js";
 import { createUserSchema, updateUserSchema, type UsuarioPaginationQuery } from "./usuario.schema.js";
 import {
   toUsuarioPublico,
@@ -447,13 +450,17 @@ export const changeUserPassword = async (
       return err({ type: "hashing_error" });
     }
 
-    await dbInstance
-      .update(Users)
-      .set({
-        passwordHash: newPasswordHash,
-        updatedAt: new Date(),
-      })
-      .where(eq(Users.id, userId));
+    // Troca de senha encerra todas as sessões (refresh tokens) do usuário.
+    await dbInstance.transaction(async (tx) => {
+      await tx
+        .update(Users)
+        .set({
+          passwordHash: newPasswordHash,
+          updatedAt: new Date(),
+        })
+        .where(eq(Users.id, userId));
+      await revokeAllRefreshTokensForUser(tx, userId);
+    });
 
     return ok(undefined);
   } catch (error) {
