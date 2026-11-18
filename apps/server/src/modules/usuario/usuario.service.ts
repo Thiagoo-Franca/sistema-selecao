@@ -1,5 +1,5 @@
 import * as bcrypt from "bcryptjs";
-import { and, asc, eq, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or, sql, type Column } from "drizzle-orm";
 import { type Context } from "hono";
 import { z } from "zod";
 import {
@@ -11,12 +11,13 @@ import { databaseError, logDatabaseError } from "../../database/errors.js";
 import { type AppResult, err, ok } from "../../result.js";
 import { type AppVariables } from "../../types.js";
 import { getUsuarioAutenticado } from "../auth/index.js";
-import { createUserSchema, updateUserSchema } from "./usuario.schema.js";
+import { createUserSchema, updateUserSchema, type UsuarioPaginationQuery } from "./usuario.schema.js";
 import {
   toUsuarioPublico,
   usuarioPublicoProjection,
   type UsuarioPublico,
 } from "./usuario.dto.js";
+import { applyOrderBy, buildPaginationMeta, getOffset, mapSortByToColumn } from "../../lib/pagination.js";
 
 type GetUserByIdError =
   { type: "user_not_found" } | { type: "database_error"; error: unknown };
@@ -31,17 +32,72 @@ type DeleteUserError =
 type UpdateUserRoleError =
   { type: "user_not_found" } | { type: "database_error"; error: unknown };
 type GetAllUsersError = { type: "database_error"; error: unknown };
+
+export interface PaginatedUsuarios {
+  data: UsuarioPublico[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
+const usuarioSortColumnMap: Record<string, Column> = {
+  nome: Users.nome,
+  email: Users.email,
+  matricula: Users.matricula,
+  createdAt: Users.createdAt,
+};
+
 export const getAllUsers = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<UsuarioPublico[], GetAllUsersError>> => {
+  query: UsuarioPaginationQuery,
+): Promise<AppResult<PaginatedUsuarios, GetAllUsersError>> => {
   const dbInstance = c.get("db");
-  try {
-    const allUsers = await dbInstance
-      .select(usuarioPublicoProjection)
-      .from(Users)
-      .orderBy(asc(Users.nome));
+  const { page, limit, search, sortBy, order } = query;
 
-    return ok(allUsers);
+  try {
+    const whereConditions = [];
+
+    if (search) {
+      const searchTerm = `%${search}%`;
+      whereConditions.push(
+        or(
+          ilike(Users.nome, searchTerm),
+          ilike(Users.email, searchTerm),
+          ilike(Users.matricula, searchTerm),
+        ),
+      );
+    }
+
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+    const sortColumn = mapSortByToColumn(sortBy, usuarioSortColumnMap, Users.nome);
+    const orderByClause = applyOrderBy(sortColumn, order, Users.id);
+
+    const [data, totalResult] = await Promise.all([
+      dbInstance
+        .select(usuarioPublicoProjection)
+        .from(Users)
+        .where(whereClause)
+        .limit(limit)
+        .offset(getOffset(page, limit))
+        .orderBy(...orderByClause),
+      dbInstance
+        .select({ count: count() })
+        .from(Users)
+        .where(whereClause),
+    ]);
+
+    const total = totalResult[0]?.count ?? 0;
+
+    return ok({
+      data,
+      meta: buildPaginationMeta(page, limit, total),
+    });
   } catch (error) {
     logDatabaseError("Error fetching all users:", error);
     return databaseError(error);
@@ -49,18 +105,53 @@ export const getAllUsers = async (
 };
 
 type GetTeachersError = { type: "database_error"; error: unknown };
+
 export const getTeachers = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<UsuarioPublico[], GetTeachersError>> => {
+  query: UsuarioPaginationQuery,
+): Promise<AppResult<PaginatedUsuarios, GetTeachersError>> => {
   const dbInstance = c.get("db");
-  try {
-    const teachers = await dbInstance
-      .select(usuarioPublicoProjection)
-      .from(Users)
-      .where(and(or(eq(Users.role, "TEACHER"), eq(Users.role, "ADMIN"))))
-      .orderBy(Users.nome);
+  const { page, limit, search, sortBy, order } = query;
 
-    return ok(teachers);
+  try {
+    const whereConditions = [and(or(eq(Users.role, "TEACHER"), eq(Users.role, "ADMIN")))];
+
+    if (search) {
+      const searchTerm = `%${search}%`;
+      whereConditions.push(
+        or(
+          ilike(Users.nome, searchTerm),
+          ilike(Users.email, searchTerm),
+          ilike(Users.matricula, searchTerm),
+        ),
+      );
+    }
+
+    const whereClause = and(...whereConditions);
+
+    const sortColumn = mapSortByToColumn(sortBy, usuarioSortColumnMap, Users.nome);
+    const orderByClause = applyOrderBy(sortColumn, order, Users.id);
+
+    const [data, totalResult] = await Promise.all([
+      dbInstance
+        .select(usuarioPublicoProjection)
+        .from(Users)
+        .where(whereClause)
+        .limit(limit)
+        .offset(getOffset(page, limit))
+        .orderBy(...orderByClause),
+      dbInstance
+        .select({ count: count() })
+        .from(Users)
+        .where(whereClause),
+    ]);
+
+    const total = totalResult[0]?.count ?? 0;
+
+    return ok({
+      data,
+      meta: buildPaginationMeta(page, limit, total),
+    });
   } catch (error) {
     logDatabaseError("Error fetching teachers:", error);
     return databaseError(error);

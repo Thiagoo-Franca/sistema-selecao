@@ -8,11 +8,11 @@ import {
   NotaMestrado,
   Users,
 } from "../../database/schema.js";
-import { and, asc, eq, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or, sql, type Column } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { databaseError, logDatabaseError } from "../../database/errors.js";
 import type { CandidatoResumo } from "@tcc/shared";
-import type { UpdateCandidatoDoutoradoInput } from "./candidato.schema.js";
+import type { CandidatoPaginationQuery, UpdateCandidatoDoutoradoInput } from "./candidato.schema.js";
 import { createCandidatoResumoProjection } from "./candidato.projection.js";
 import {
   toCandidatoDoutoradoDetalhe,
@@ -20,6 +20,7 @@ import {
   type CandidatoDoutoradoDetalhe,
   type CandidatoMestradoDetalhe,
 } from "./candidato.dto.js";
+import { applyOrderBy, buildPaginationMeta, getOffset, mapSortByToColumn } from "../../lib/pagination.js";
 
 const Avaliador = alias(Users, "avaliador");
 const Auditor = alias(Users, "auditor");
@@ -28,6 +29,110 @@ type GetAllCandidatosError = { type: "database_error"; error: unknown };
 
 export type CandidatoMestradoComRelacoes = CandidatoMestradoDetalhe;
 export type CandidatoDoutoradoComRelacoes = CandidatoDoutoradoDetalhe;
+
+export interface PaginatedCandidatos {
+  mestrado: {
+    data: CandidatoResumo[];
+    meta: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+  };
+  doutorado: {
+    data: CandidatoResumo[];
+    meta: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+  };
+}
+
+const candidatoMestradoSortColumnMap: Record<string, Column> = {
+  nome: CandidatoMestrado.nome,
+  dataInscricao: CandidatoMestrado.createdAt,
+  numeroInscricao: CandidatoMestrado.numeroInscricao,
+  status: CandidatoMestrado.tipoCurso,
+};
+
+const candidatoDoutoradoSortColumnMap: Record<string, Column> = {
+  nome: CandidatoDoutorado.nome,
+  dataInscricao: CandidatoDoutorado.createdAt,
+  numeroInscricao: CandidatoDoutorado.numeroInscricao,
+  status: CandidatoDoutorado.tipoCurso,
+};
+
+function buildWhereConditions(
+  search: string | undefined,
+  table: typeof CandidatoMestrado | typeof CandidatoDoutorado,
+) {
+  if (!search) return undefined;
+  const searchTerm = `%${search}%`;
+  return or(
+    ilike(table.nome, searchTerm),
+    ilike(table.cpf, searchTerm),
+    ilike(table.email, searchTerm),
+    ilike(table.numeroInscricao, searchTerm),
+  );
+}
+
+async function fetchPaginatedCandidatos(
+  db: any,
+  table: typeof CandidatoMestrado | typeof CandidatoDoutorado,
+  notaTable: typeof NotaMestrado | typeof NotaDoutorado,
+  area1: any,
+  area2: any,
+  query: CandidatoPaginationQuery,
+  sortColumnMap: Record<string, Column>,
+) {
+  const { page, limit, search, sortBy, order } = query;
+  const whereClause = buildWhereConditions(search, table);
+  const sortColumn = mapSortByToColumn(sortBy, sortColumnMap, table.nome);
+  const orderByClause = applyOrderBy(sortColumn, order, table.id);
+
+  const projection = createCandidatoResumoProjection(
+    table,
+    notaTable,
+    area1,
+    area2,
+    Avaliador.nome,
+    Auditor.nome,
+  );
+
+  const [data, totalResult] = await Promise.all([
+    db
+      .select(projection)
+      .from(table)
+      .leftJoin(notaTable, eq(notaTable.idCandidato, table.id))
+      .leftJoin(Avaliador, eq(table.avaliadorId, Avaliador.id))
+      .leftJoin(Auditor, eq(table.auditorId, Auditor.id))
+      .where(whereClause)
+      .limit(limit)
+      .offset(getOffset(page, limit))
+      .orderBy(...orderByClause),
+    db
+      .select({ count: count() })
+      .from(table)
+      .leftJoin(notaTable, eq(notaTable.idCandidato, table.id))
+      .leftJoin(Avaliador, eq(table.avaliadorId, Avaliador.id))
+      .leftJoin(Auditor, eq(table.auditorId, Auditor.id))
+      .where(whereClause),
+  ]);
+
+  const total = totalResult[0]?.count ?? 0;
+
+  return {
+    data,
+    meta: buildPaginationMeta(page, limit, total),
+  };
+}
 
 export const getAllMyCandidates = async (
   c: Context<{ Variables: AppVariables }>,
@@ -100,84 +205,59 @@ export const getAllMyCandidates = async (
 
 export const getAllCandidatos = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<CandidatoResumo[], GetAllCandidatosError>> => {
+  query: CandidatoPaginationQuery,
+): Promise<AppResult<PaginatedCandidatos, GetAllCandidatosError>> => {
   const db = c.get("db");
 
   try {
     const [mestrado, doutorado] = await Promise.all([
-      db
-        .select(
-          createCandidatoResumoProjection(
-            CandidatoMestrado,
-            NotaMestrado,
-            CandidatoMestrado.primeiraAreaPreferencia,
-            CandidatoMestrado.segundaAreaPreferencia,
-            Avaliador.nome,
-            Auditor.nome,
-          ),
-        )
-        .from(CandidatoMestrado)
-        .leftJoin(
-          NotaMestrado,
-          eq(NotaMestrado.idCandidato, CandidatoMestrado.id),
-        )
-        .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
-        .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id)),
-      db
-        .select(
-          createCandidatoResumoProjection(
-            CandidatoDoutorado,
-            NotaDoutorado,
-            CandidatoDoutorado.primeiraOpcaoOrientador,
-            CandidatoDoutorado.segundaOpcaoOrientador,
-            Avaliador.nome,
-            Auditor.nome,
-          ),
-        )
-        .from(CandidatoDoutorado)
-        .leftJoin(
-          NotaDoutorado,
-          eq(NotaDoutorado.idCandidato, CandidatoDoutorado.id),
-        )
-        .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
-        .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id)),
+      fetchPaginatedCandidatos(
+        db,
+        CandidatoMestrado,
+        NotaMestrado,
+        CandidatoMestrado.primeiraAreaPreferencia,
+        CandidatoMestrado.segundaAreaPreferencia,
+        query,
+        candidatoMestradoSortColumnMap,
+      ),
+      fetchPaginatedCandidatos(
+        db,
+        CandidatoDoutorado,
+        NotaDoutorado,
+        CandidatoDoutorado.primeiraOpcaoOrientador,
+        CandidatoDoutorado.segundaOpcaoOrientador,
+        query,
+        candidatoDoutoradoSortColumnMap,
+      ),
     ]);
 
-    const todos = [...mestrado, ...doutorado].sort((a, b) =>
-      String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR"),
-    );
-
-    return ok(todos);
+    return ok({
+      mestrado,
+      doutorado,
+    });
   } catch (error) {
     logDatabaseError("Error fetching all candidatos:", error);
     return databaseError(error);
   }
 };
+
 export const getAllCandidatosMestrado = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<CandidatoResumo[], GetAllCandidatosError>> => {
+  query: CandidatoPaginationQuery,
+): Promise<AppResult<{ data: CandidatoResumo[]; meta: PaginatedCandidatos["mestrado"]["meta"] }, GetAllCandidatosError>> => {
   const db = c.get("db");
 
   try {
-    const result = await db
-      .select(
-        createCandidatoResumoProjection(
-          CandidatoMestrado,
-          NotaMestrado,
-          CandidatoMestrado.primeiraAreaPreferencia,
-          CandidatoMestrado.segundaAreaPreferencia,
-          Avaliador.nome,
-          Auditor.nome,
-        ),
-      )
-      .from(CandidatoMestrado)
-      .leftJoin(
-        NotaMestrado,
-        eq(NotaMestrado.idCandidato, CandidatoMestrado.id),
-      )
-      .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
-      .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id))
-      .orderBy(CandidatoMestrado.nome);
+    const result = await fetchPaginatedCandidatos(
+      db,
+      CandidatoMestrado,
+      NotaMestrado,
+      CandidatoMestrado.primeiraAreaPreferencia,
+      CandidatoMestrado.segundaAreaPreferencia,
+      query,
+      candidatoMestradoSortColumnMap,
+    );
+
     return ok(result);
   } catch (error) {
     logDatabaseError("Error fetching all mestrado candidatos:", error);
@@ -187,29 +267,21 @@ export const getAllCandidatosMestrado = async (
 
 export const getAllCandidatosDoutorado = async (
   c: Context<{ Variables: AppVariables }>,
-): Promise<AppResult<CandidatoResumo[], GetAllCandidatosError>> => {
+  query: CandidatoPaginationQuery,
+): Promise<AppResult<{ data: CandidatoResumo[]; meta: PaginatedCandidatos["doutorado"]["meta"] }, GetAllCandidatosError>> => {
   const db = c.get("db");
 
   try {
-    const result = await db
-      .select(
-        createCandidatoResumoProjection(
-          CandidatoDoutorado,
-          NotaDoutorado,
-          CandidatoDoutorado.primeiraOpcaoOrientador,
-          CandidatoDoutorado.segundaOpcaoOrientador,
-          Avaliador.nome,
-          Auditor.nome,
-        ),
-      )
-      .from(CandidatoDoutorado)
-      .leftJoin(
-        NotaDoutorado,
-        eq(NotaDoutorado.idCandidato, CandidatoDoutorado.id),
-      )
-      .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
-      .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id))
-      .orderBy(CandidatoDoutorado.nome);
+    const result = await fetchPaginatedCandidatos(
+      db,
+      CandidatoDoutorado,
+      NotaDoutorado,
+      CandidatoDoutorado.primeiraOpcaoOrientador,
+      CandidatoDoutorado.segundaOpcaoOrientador,
+      query,
+      candidatoDoutoradoSortColumnMap,
+    );
+
     return ok(result);
   } catch (error) {
     logDatabaseError("Error fetching all doutorado candidatos:", error);

@@ -28,8 +28,9 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
-  .get("/all", checkRole(["ADMIN"]), async (c) => {
-    const result = await service.getAllUsers(c);
+  .get("/all", checkRole(["ADMIN"]), zValidator("query", schema.usuarioPaginationQuerySchema), async (c) => {
+    const query = c.req.valid("query");
+    const result = await service.getAllUsers(c, query);
     if (!result.ok) {
       throw match(result.error)
         .with(
@@ -40,8 +41,9 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
     }
     return c.json(result.data);
   })
-  .get("/teachers", checkRole(["ADMIN", "TEACHER"]), async (c) => {
-    const result = await service.getTeachers(c);
+  .get("/teachers", checkRole(["ADMIN", "TEACHER"]), zValidator("query", schema.usuarioPaginationQuerySchema), async (c) => {
+    const query = c.req.valid("query");
+    const result = await service.getTeachers(c, query);
     if (!result.ok) {
       throw match(result.error)
         .with(
