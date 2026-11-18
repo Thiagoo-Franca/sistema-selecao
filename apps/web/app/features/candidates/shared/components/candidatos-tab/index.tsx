@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router"
 
 import { LABELS } from "@/shared/lib/constants"
 import { capitalizarNomeCompleto } from "@/shared/lib/format"
 import { ChevronUp } from "lucide-react"
 import type { CandidatoHome } from "@/types"
-import { handleSort, removerAcentos } from "@/shared/lib/helpers"
+import { handleSort } from "@/shared/lib/helpers"
 
 interface HomeTableCandidatosProps {
   data: CandidatoHome[]
@@ -28,45 +27,6 @@ export function HomeTableCandidatos({
 }: HomeTableCandidatosProps) {
   const navigate = useNavigate()
 
-  const [candidatos, setCandidatos] = useState(data)
-
-  useEffect(() => {
-    if (!searchQuery) {
-      setCandidatos(data)
-    } else {
-      const buscaSemAcentos = removerAcentos(searchQuery.toLowerCase())
-
-      const filteredData = data.filter((candidato) => {
-        if (!candidato.nome) return false
-
-        const nomeSemAcentos = removerAcentos(candidato.nome.toLowerCase())
-
-        return nomeSemAcentos.includes(buscaSemAcentos)
-      })
-      setCandidatos(filteredData)
-    }
-  }, [searchQuery, data])
-
-  const sortedCandidatos = useMemo(() => {
-    if (!orderBy) return candidatos
-
-    return [...candidatos].sort((a, b) => {
-      const aValue = a[orderBy as keyof typeof a]
-      const bValue = b[orderBy as keyof typeof b]
-      const direction = order === "asc" ? 1 : -1
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return aValue.localeCompare(bValue) * direction
-      }
-
-      if (typeof aValue === "boolean" && typeof bValue === "boolean") {
-        return (Number(aValue) - Number(bValue)) * direction
-      }
-
-      return 0
-    })
-  }, [candidatos, orderBy, order])
-
   return (
     <div className="flex w-full flex-col gap-2 overflow-x-auto min-[1440px]:overflow-x-hidden">
       <div className="lg:min-w-auto grid min-w-[1280px] grid-cols-[1.5fr_1fr_2fr_1fr_1fr_1fr_2fr_2fr] gap-2 px-2 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground md:gap-4 md:px-4 md:py-3">
@@ -80,7 +40,7 @@ export function HomeTableCandidatos({
                 handleSort(label.key, setOrderBy, setOrder, orderBy, order)
               }
             }}
-            className={`flex w-full items-center gap-1`}
+            className={`flex w-full items-center gap-1 cursor-pointer`}
           >
             <ChevronUp
               className={`inline-block h-4 w-4 cursor-pointer transition-transform duration-200 md:mr-1 ${
@@ -92,8 +52,8 @@ export function HomeTableCandidatos({
         ))}
       </div>
       <div className="flex w-full flex-col gap-2">
-        {sortedCandidatos?.length > 0 ? (
-          sortedCandidatos.map((candidato: CandidatoHome) => (
+        {data?.length > 0 ? (
+          data.map((candidato: CandidatoHome) => (
             <div
               className="lg:min-w-auto grid min-w-[1280px] cursor-pointer grid-cols-[1.5fr_1fr_2fr_1fr_1fr_1fr_2fr_2fr] items-center gap-4 rounded-lg border border-transparent bg-white px-2 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md md:grid-cols-[1.5fr_1fr_2fr_1fr_1fr_1fr_2fr_2fr] md:px-4"
               key={candidato.id}
@@ -127,10 +87,6 @@ export function HomeTableCandidatos({
           </div>
         )}
       </div>
-
-      <span className="my-4 self-center text-sm text-muted-foreground">
-        Exibindo {sortedCandidatos.length} de {data.length} candidatos
-      </span>
     </div>
   )
 }

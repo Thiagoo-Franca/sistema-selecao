@@ -2,7 +2,7 @@ import { useNavigate } from "react-router"
 import { handleDelete } from "@/shared/lib/helpers"
 
 import { Button } from "@/shared/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ButtonBack } from "@/shared/ui/button-back"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -26,9 +26,7 @@ export default function CandidateActions({
 
   return (
     <div className="container mx-auto mb-6 flex w-full flex-row items-center justify-between">
-      <Button onClick={() => navigate(-1)} variant="outline">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-      </Button>
+      <ButtonBack />
       {isAdmin && (
         <NavigationMenu>
           <NavigationMenuList>

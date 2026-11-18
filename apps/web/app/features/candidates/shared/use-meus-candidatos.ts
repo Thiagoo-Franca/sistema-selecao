@@ -1,5 +1,5 @@
 import { rpcReturn } from "@/shared/lib/utils"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import apiClient from "@/shared/services/apiClient"
 
 export const useCandidatesByTeacherId = (id: string | number) => {
@@ -11,5 +11,7 @@ export const useCandidatesByTeacherId = (id: string | number) => {
       })
       return rpcReturn(response)
     },
+    enabled: !!id,
+    placeholderData: keepPreviousData,
   })
 }

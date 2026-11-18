@@ -1,8 +1,6 @@
 import { Header } from "@/shared/components/layout/header"
-import { Button } from "@/shared/ui/button"
+import { ButtonBack } from "@/shared/ui/button-back"
 import { Card, CardContent } from "@/shared/ui/card"
-import { ArrowLeft } from "lucide-react"
-import { useNavigate } from "react-router"
 
 interface ErrorsUsersProps {
   userQuery: {
@@ -13,15 +11,11 @@ interface ErrorsUsersProps {
 }
 
 export default function ErrorUsers({ userQuery, user, error }: ErrorsUsersProps) {
-  const navigate = useNavigate()
-
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Header className="mb-6" />
       <div className="mx-auto max-w-4xl">
-        <Button onClick={() => navigate(-1)} variant="outline" className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-        </Button>
+        <ButtonBack className="mb-4" />
         <Card>
           <CardContent className="pt-6">
             <div className="rounded-md bg-destructive/10 p-4 text-destructive">

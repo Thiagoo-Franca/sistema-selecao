@@ -1,13 +1,8 @@
 import { useEffect } from "react"
-import { useNavigate } from "react-router"
-
-import { Button } from "../../../../../shared/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ButtonBack } from "../../../../../shared/ui/button-back"
 import { Header } from "@/shared/components/layout/header"
 
 export default function CandidateNotFound() {
-  const navigate = useNavigate()
-
   useEffect(() => {
     document.title = "SISSEL - Candidato não encontrado"
   }, [])
@@ -20,9 +15,7 @@ export default function CandidateNotFound() {
         <p className="text-muted-foreground">
           O candidato que você está procurando não existe ou foi removido.
         </p>
-        <Button onClick={() => navigate(-1)} variant="outline" className="hover:cursor-pointer">
-          <ArrowLeft className="text mr-2 h-4 w-4" /> Voltar
-        </Button>
+        <ButtonBack className="hover:cursor-pointer" />
       </div>
     </div>
   )

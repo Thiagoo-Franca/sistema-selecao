@@ -1,18 +1,12 @@
 import { Header } from "@/shared/components/layout/header"
-import { Button } from "@/shared/ui/button"
+import { ButtonBack } from "@/shared/ui/button-back"
 import { Card, CardContent, CardHeader } from "@/shared/ui/card"
 import { Skeleton } from "@/shared/ui/skeleton"
-import { ArrowLeft } from "lucide-react"
-import { useNavigate } from "react-router"
 
 export default function IsLoadingUsers() {
-  const navigate = useNavigate()
-
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <Button onClick={() => navigate(-1)} variant="outline" className="mb-4">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-      </Button>
+      <ButtonBack className="mb-4" />
       <Card>
         <CardHeader>
           <Skeleton className="mb-2 h-8 w-48" />

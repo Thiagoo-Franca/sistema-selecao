@@ -6,6 +6,7 @@ import { zValidator } from "@hono/zod-validator";
 import {
   updateCandidatoDoutoradoSchema,
   updateCandidatoMestradoSchema,
+  candidatoPaginationQuerySchema,
 } from "./candidato.schema.js";
 import {
   uploadCandidatosMestrado,
@@ -29,26 +30,44 @@ const candidatoIdParamsSchema = z.object({
 
 export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
   // GETS
-  .get("/", checkRole(["ADMIN", "TEACHER"]), async (c) => {
-    const result = await service.getAllCandidatos(c);
+  .get("/", checkRole(["ADMIN", "TEACHER"]), zValidator("query", candidatoPaginationQuerySchema), async (c) => {
+    const query = c.req.valid("query");
+    const result = await service.getAllCandidatos(c, query);
     if (!result.ok) {
-      throw new Error("Erro ao buscar candidatos");
+      throw match(result.error)
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao buscar candidatos"),
+        )
+        .exhaustive();
     }
     return c.json(result.data);
   })
 
-  .get("/mestrado", checkRole(["ADMIN", "TEACHER"]), async (c) => {
-    const result = await service.getAllCandidatosMestrado(c);
+  .get("/mestrado", checkRole(["ADMIN", "TEACHER"]), zValidator("query", candidatoPaginationQuerySchema), async (c) => {
+    const query = c.req.valid("query");
+    const result = await service.getAllCandidatosMestrado(c, query);
     if (!result.ok) {
-      throw new Error("Erro ao buscar candidatos de mestrado");
+      throw match(result.error)
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao buscar candidatos de mestrado"),
+        )
+        .exhaustive();
     }
     return c.json(result.data);
   })
 
-  .get("/doutorado", checkRole(["ADMIN", "TEACHER"]), async (c) => {
-    const result = await service.getAllCandidatosDoutorado(c);
+  .get("/doutorado", checkRole(["ADMIN", "TEACHER"]), zValidator("query", candidatoPaginationQuerySchema), async (c) => {
+    const query = c.req.valid("query");
+    const result = await service.getAllCandidatosDoutorado(c, query);
     if (!result.ok) {
-      throw new Error("Erro ao buscar candidatos de doutorado");
+      throw match(result.error)
+        .with(
+          { type: "database_error" },
+          () => new AppError(500, "Erro ao buscar candidatos de doutorado"),
+        )
+        .exhaustive();
     }
     return c.json(result.data);
   })

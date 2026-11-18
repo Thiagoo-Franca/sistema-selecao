@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AREAPGCOMP, AREAS, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared";
+import { createSortBySchema } from "../../lib/pagination.js";
 
 const areaEnum = z.enum(AREAS);
 
@@ -61,3 +62,29 @@ export const updateCandidatoDoutoradoSchema = z.object({
 export type UpdateCandidatoDoutoradoInput = z.infer<
   typeof updateCandidatoDoutoradoSchema
 >;
+
+const candidatoSortByValues = [
+  "nome",
+  "dataInscricao",
+  "numeroInscricao",
+  "status",
+  "tipoCurso",
+  "email",
+  "avaliado",
+  "area1",
+  "area2",
+  "avaliador",
+  "auditor",
+] as const;
+
+export const candidatoPaginationQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    search: z.string().trim().optional().transform((v) => (v === "" ? undefined : v)),
+    sortBy: createSortBySchema([...candidatoSortByValues] as [string, ...string[]]).default("nome"),
+    order: z.enum(["asc", "desc"]).default("asc"),
+  })
+  .strict();
+
+export type CandidatoPaginationQuery = z.infer<typeof candidatoPaginationQuerySchema>;

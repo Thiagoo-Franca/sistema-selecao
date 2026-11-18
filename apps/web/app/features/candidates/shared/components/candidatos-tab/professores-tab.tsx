@@ -1,11 +1,11 @@
 import { capitalizarNomeCompleto } from "@/shared/lib/format"
 import type { InsertUser } from "@tcc/server"
 import { ChevronUp } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useRef } from "react"
 import { useNavigate } from "react-router"
 
 interface HomeTableProfessoresProps {
-  data: any[]
+  data: InsertUser[]
   searchQuery: string
   orderBy?: string
   order?: "asc" | "desc"
@@ -35,54 +35,6 @@ export default function ProfessoresTab({
   const navigate = useNavigate()
   const swipeRef = useRef({ x: 0, dragged: false })
 
-  const [professores, setProfessores] = useState(data)
-
-  const removerAcentos = (str: string) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-  }
-
-  useEffect(() => {
-    if (!searchQuery) {
-      setProfessores(data)
-    } else {
-      const buscaSemAcentos = removerAcentos(searchQuery.toLowerCase())
-
-      const filteredData = data.filter((candidato) => {
-        if (!candidato.nome) return false
-
-        const nomeSemAcentos = removerAcentos(candidato.nome.toLowerCase())
-
-        return nomeSemAcentos.includes(buscaSemAcentos)
-      })
-      setProfessores(filteredData)
-    }
-  }, [searchQuery, data])
-
-  const handleSort = (key: string) => {
-    setOrder?.(orderBy === key && order === "asc" ? "desc" : "asc")
-    setOrderBy?.(key)
-  }
-
-  const sortedProfessores = useMemo(() => {
-    if (!orderBy) return professores
-
-    return [...professores].sort((a, b) => {
-      const aValue = a[orderBy as keyof typeof a]
-      const bValue = b[orderBy as keyof typeof b]
-      const direction = order === "asc" ? 1 : -1
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return aValue.localeCompare(bValue) * direction
-      }
-
-      if (typeof aValue === "boolean" && typeof bValue === "boolean") {
-        return (Number(aValue) - Number(bValue)) * direction
-      }
-
-      return 0
-    })
-  }, [professores, orderBy, order])
-
   return (
     <div className="flex w-full flex-col gap-2">
       <div
@@ -108,7 +60,8 @@ export default function ProfessoresTab({
                   if (onSort) {
                     onSort(label.key)
                   } else {
-                    handleSort(label.key)
+                    setOrder?.(orderBy === label.key && order === "asc" ? "desc" : "asc")
+                    setOrderBy?.(label.key)
                   }
                 }}
                 className="flex items-center gap-1 whitespace-nowrap"
@@ -123,8 +76,8 @@ export default function ProfessoresTab({
             ))}
           </div>
           <div className="flex w-full flex-col gap-2">
-            {sortedProfessores?.length > 0 ? (
-              sortedProfessores.map((professor: InsertUser) => (
+            {data?.length > 0 ? (
+              data.map((professor: InsertUser) => (
                 <div
                   className={`${TABLE_GRID} cursor-pointer items-center rounded-lg border border-transparent bg-white px-4 py-3 text-sm shadow-sm transition-all hover:border-blue-200 hover:shadow-md`}
                   key={professor.id}
@@ -157,10 +110,6 @@ export default function ProfessoresTab({
           </div>
         </div>
       </div>
-
-      <span className="my-4 self-center text-sm text-muted-foreground">
-        Exibindo {sortedProfessores.length} de {data.length} professores
-      </span>
     </div>
   )
 }

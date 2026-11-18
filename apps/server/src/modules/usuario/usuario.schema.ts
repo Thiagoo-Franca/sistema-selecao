@@ -2,6 +2,8 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { AREAS } from "@tcc/shared";
 import { Users } from "../../database/index.js";
+import { createSortBySchema } from "../../lib/pagination.js";
+
 export const createUserSchema = createInsertSchema(Users)
   .omit({
     passwordHash: true,
@@ -53,3 +55,17 @@ export const updateUserSchema = z.object({
     })
     .partial(),
 });
+
+const usuarioSortByValues = ["nome", "email", "matricula", "createdAt", "areas"] as const;
+
+export const usuarioPaginationQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    search: z.string().trim().optional().transform((v) => (v === "" ? undefined : v)),
+    sortBy: createSortBySchema([...usuarioSortByValues] as [string, ...string[]]).default("nome"),
+    order: z.enum(["asc", "desc"]).default("asc"),
+  })
+  .strict();
+
+export type UsuarioPaginationQuery = z.infer<typeof usuarioPaginationQuerySchema>;

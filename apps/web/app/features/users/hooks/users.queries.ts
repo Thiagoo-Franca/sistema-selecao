@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import apiClient from "@/shared/services/apiClient"
 import { rpcReturn } from "@/shared/lib/utils"
 import { useUser } from "@/features/auth"
+import type { PaginationParams } from "@/shared/types/pagination"
 
 export const useIsTeacher = () => {
   const userQuery = useUser()
@@ -10,24 +11,56 @@ export const useIsTeacher = () => {
 }
 
 // Hook to fetch all users (admin only)
-export const useAllUsers = () => {
+interface UseAllUsersOptions extends PaginationParams {
+  enabled?: boolean
+}
+
+export const useAllUsers = (options: UseAllUsersOptions = {}) => {
+  const { page = 1, limit = 10, search, sortBy, order, enabled = true } = options
+
   return useQuery({
-    queryKey: ["users", "all"],
+    queryKey: ["users", "all", { page, limit, search, sortBy, order }],
     queryFn: async () => {
-      const res = await apiClient.usuario.all.$get()
+      const res = await apiClient.usuario.all.$get({
+        query: {
+          page: String(page),
+          limit: String(limit),
+          ...(search && { search }),
+          ...(sortBy && { sortBy }),
+          ...(order && { order }),
+        },
+      })
       return rpcReturn(res)
     },
+    enabled,
+    placeholderData: keepPreviousData,
   })
 }
 
 // Hook to fetch teachers
-export const useTeachers = () => {
+interface UseTeachersOptions extends PaginationParams {
+  enabled?: boolean
+}
+
+export const useTeachers = (options: UseTeachersOptions = {}) => {
+  const { page = 1, limit = 10, search, sortBy, order, enabled = true } = options
+
   return useQuery({
-    queryKey: ["teachers"],
+    queryKey: ["teachers", { page, limit, search, sortBy, order }],
     queryFn: async () => {
-      const response = await apiClient.usuario.teachers.$get()
+      const response = await apiClient.usuario.teachers.$get({
+        query: {
+          page: String(page),
+          limit: String(limit),
+          ...(search && { search }),
+          ...(sortBy && { sortBy }),
+          ...(order && { order }),
+        },
+      })
       return rpcReturn(response)
     },
+    enabled,
+    placeholderData: keepPreviousData,
   })
 }
 
