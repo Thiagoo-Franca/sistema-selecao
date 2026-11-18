@@ -3,21 +3,30 @@ import { z } from "zod";
 import { AREAS } from "@tcc/shared";
 import { Users } from "../../database/index.js";
 import { createSortBySchema } from "../../lib/pagination.js";
+import { emailSchema, senhaSchema } from "../auth/index.js";
 
-export const createUserSchema = createInsertSchema(Users)
-  .omit({
-    passwordHash: true,
-    ativo: true,
-    createdAt: true,
-    updatedAt: true,
+// Base não estrita: cada schema de entrada escolhe seus campos com `.pick`.
+const usuarioCamposSchema = createInsertSchema(Users);
+
+const areasSchema = z
+  .array(z.enum(AREAS))
+  .transform((areas) => [...new Set(areas)]);
+
+// Professor é criado sem senha: o hash é aleatório e a senha é definida pelo
+// link enviado por e-mail. `.strict()` rejeita `password` e campos de sistema.
+export const createUserSchema = usuarioCamposSchema
+  .pick({
+    nome: true,
+    school: true,
+    matricula: true,
+    academicTitle: true,
+    role: true,
   })
   .extend({
-    password: z.string().min(8),
-  });
-export const preRegisterUserSchema = createUserSchema.pick({
-  email: true,
-  role: true,
-});
+    email: emailSchema,
+    areas: areasSchema.optional(),
+  })
+  .strict();
 
 export const idParamSchema = z.object({
   param: z.object({ id: z.string().uuid() }),
@@ -29,21 +38,12 @@ export const deleteUserQuerySchema = z.object({
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Senha atual é obrigatória"),
-  newPassword: z.string().min(8, "Nova senha deve ter pelo menos 8 caracteres"),
-});
-
-export const requestPasswordResetSchema = z.object({
-  email: z.string().email("Email inválido"),
-});
-
-export const resetPasswordSchema = z.object({
-  token: z.string().min(1, "Token é obrigatório"),
-  newPassword: z.string().min(8, "Nova senha deve ter pelo menos 8 caracteres"),
+  newPassword: senhaSchema,
 });
 
 export const updateUserSchema = z.object({
   param: idParamSchema.shape.param,
-  body: createUserSchema
+  body: usuarioCamposSchema
     .pick({
       nome: true,
       school: true,
@@ -51,7 +51,7 @@ export const updateUserSchema = z.object({
       role: true,
     })
     .extend({
-      areas: z.array(z.enum(AREAS)).transform((areas) => [...new Set(areas)]),
+      areas: areasSchema,
     })
     .partial(),
 });

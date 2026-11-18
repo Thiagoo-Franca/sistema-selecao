@@ -6,6 +6,13 @@ import { AppError } from "../../error.js";
 import { type AppVariables } from "../../types.js";
 
 import {
+  emailSchema,
+  requestResetSchema,
+  resetPasswordSchema,
+  resetTokenParamSchema,
+  TOKEN_SENHA_INVALIDO_MENSAGEM,
+} from "./auth.schema.js";
+import {
   loginUserService,
   requestPasswordResetService,
   resetPasswordService,
@@ -13,19 +20,8 @@ import {
 } from "./auth.service.js";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Email inválido." }),
+  email: emailSchema,
   password: z.string().min(1, { message: "Senha é obrigatória." }),
-});
-
-const requestResetSchema = z.object({
-  email: z.string().email({ message: "Email inválido." }),
-});
-
-const resetPasswordSchema = z.object({
-  token: z.string().min(1, { message: "Token de reset é obrigatório." }),
-  newPassword: z
-    .string()
-    .min(8, { message: "Nova senha deve ter pelo menos 8 caracteres." }),
 });
 
 export const authRoutes = new Hono<{ Variables: AppVariables }>()
@@ -63,13 +59,7 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
                 "Erro interno ao solicitar redefinição de senha.",
               ),
           )
-          .otherwise(
-            () =>
-              new AppError(
-                500,
-                "Erro interno ao solicitar redefinição de senha.",
-              ),
-          );
+          .exhaustive();
       }
 
       return c.json(
@@ -78,32 +68,37 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
       );
     },
   )
-  .get("/reset-password/:hash", async (c) => {
-    const hash = c.req.param("hash");
-    if (!hash) {
-      return c.json({ message: "Hash de reset é obrigatório." }, 400);
-    }
-    const result = await verifyResetHashService(c, hash);
-    if (!result.ok) {
-      throw match(result.error)
-        .with(
-          { type: "token_expired" },
-          () => new AppError(400, "Token de redefinição expirado."),
-        )
-        .with(
-          { type: "token_invalid" },
-          () => new AppError(400, "Token de redefinição inválido."),
-        )
-        .otherwise(
-          () =>
-            new AppError(
-              500,
-              "Erro interno ao verificar o token de redefinição.",
-            ),
-        );
-    }
-    return c.json(result.data, 200);
-  })
+  .get(
+    "/reset-password/:hash",
+    // Token malformado recebe a mesma resposta de token inexistente.
+    zValidator("param", resetTokenParamSchema, (result) => {
+      if (!result.success) {
+        throw new AppError(400, TOKEN_SENHA_INVALIDO_MENSAGEM);
+      }
+    }),
+    async (c) => {
+      const { hash } = c.req.valid("param");
+      const result = await verifyResetHashService(c, hash);
+      if (!result.ok) {
+        throw match(result.error)
+          .with(
+            { type: "token_expired" },
+            { type: "token_invalid" },
+            () => new AppError(400, TOKEN_SENHA_INVALIDO_MENSAGEM),
+          )
+          .with(
+            { type: "database_error" },
+            () =>
+              new AppError(
+                500,
+                "Erro interno ao verificar o link de redefinição.",
+              ),
+          )
+          .exhaustive();
+      }
+      return c.json(result.data, 200);
+    },
+  )
   .post(
     "/reset-password/reset",
     zValidator("json", resetPasswordSchema),
@@ -113,12 +108,15 @@ export const authRoutes = new Hono<{ Variables: AppVariables }>()
       if (!result.ok) {
         throw match(result.error)
           .with(
-            { type: "update_error" },
-            () => new AppError(500, "Erro ao atualizar a senha."),
+            { type: "token_invalid_or_expired" },
+            () => new AppError(400, TOKEN_SENHA_INVALIDO_MENSAGEM),
           )
-          .otherwise(
+          .with(
+            { type: "hashing_error" },
+            { type: "database_error" },
             () => new AppError(500, "Erro interno ao redefinir a senha."),
-          );
+          )
+          .exhaustive();
       }
       return c.json({ message: "Senha redefinida com sucesso." }, 200);
     },

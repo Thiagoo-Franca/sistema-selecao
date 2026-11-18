@@ -16,7 +16,19 @@ export const app = (
   new Hono<{ Variables: AppVariables }>()
     .use(depsMiddleware)
     .use("*", poweredBy())
-    .use("*", logger())
+    // O token de senha viaja no path (GET /auth/reset-password/:hash); nunca logar.
+    .use(
+      "*",
+      logger((message, ...rest) =>
+        console.log(
+          message.replace(
+            /(\/reset-password\/)(?!reset(?:[\s/?]|$))[^\s/?]+/g,
+            "$1[redacted]",
+          ),
+          ...rest,
+        ),
+      ),
+    )
     .use("*", cors())
     .use("*", prettyJSON())
     .use("*", appJwt({ secret: JWT_SECRET }))

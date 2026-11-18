@@ -10,6 +10,7 @@ import IsLoadingUsers from "@/features/users/components/loading-users"
 import ErrorUsers from "@/features/users/components/error-users"
 import UserInfoCard from "@/features/users/components/user-info-card"
 import EditUserDialog from "@/features/users/components/edit-user-dialog"
+import { ReenviarConviteButton } from "@/features/users/components/reenviar-convite-button"
 import type { Route } from "./+types/admin.users.$id"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil do Usuário" }]
@@ -44,9 +45,12 @@ export default function UserProfilePage() {
       <div className="mb-4 flex items-center justify-between">
         <ButtonBack />
         {isAdmin && (
-          <Button onClick={() => setEditDialogOpen(true)} aria-label={`Editar ${user.nome}`}>
-            <Pen className="mr-2 h-4 w-4" /> Editar
-          </Button>
+          <div className="flex gap-2">
+            {user.ativo && <ReenviarConviteButton userId={user.id} nome={user.nome} />}
+            <Button onClick={() => setEditDialogOpen(true)} aria-label={`Editar ${user.nome}`}>
+              <Pen className="mr-2 h-4 w-4" /> Editar
+            </Button>
+          </div>
         )}
       </div>
 

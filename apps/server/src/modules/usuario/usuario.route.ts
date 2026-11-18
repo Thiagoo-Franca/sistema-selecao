@@ -82,11 +82,7 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
           )
           .with(
             { type: "duplicate_email" },
-            () => new AppError(400, "Email já cadastrado"),
-          )
-          .with(
-            { type: "duplicate_username" },
-            () => new AppError(400, "Nome de usuário já cadastrado"),
+            () => new AppError(409, "Email já cadastrado"),
           )
           .with(
             { type: "hashing_error" },
@@ -95,6 +91,44 @@ export const usuarioRoutes = new Hono<{ Variables: AppVariables }>()
           .exhaustive();
       }
       return c.json(result.data, 201);
+    },
+  )
+  .post(
+    "/:id/convite",
+    checkRole(["ADMIN"]),
+    zValidator("param", schema.idParamSchema.shape.param),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const result = await service.reenviarConvite(c, id);
+      if (!result.ok) {
+        throw match(result.error)
+          .with(
+            { type: "user_not_found" },
+            () => new AppError(404, "Usuário não encontrado"),
+          )
+          .with(
+            { type: "user_inactive" },
+            () =>
+              new AppError(
+                409,
+                "Usuário inativo. Reative o usuário antes de reenviar o convite.",
+              ),
+          )
+          .with(
+            { type: "email_error" },
+            () =>
+              new AppError(
+                502,
+                "Não foi possível enviar o email. Tente novamente mais tarde.",
+              ),
+          )
+          .with(
+            { type: "database_error" },
+            () => new AppError(500, "Erro ao reenviar convite"),
+          )
+          .exhaustive();
+      }
+      return c.json(result.data, 200);
     },
   )
   .get(

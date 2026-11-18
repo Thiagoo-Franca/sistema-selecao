@@ -1,5 +1,4 @@
 import * as bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { and, eq, gte } from "drizzle-orm";
 import { type Context } from "hono";
 import {
@@ -9,12 +8,14 @@ import {
 } from "../../database/schema.js";
 import { err, ok, type AppResult } from "../../result.js";
 import { type AppVariables } from "../../types.js";
+import { logDatabaseError } from "../../database/errors.js";
+import { emailIgual } from "./email.js";
+import {
+  enviarEmailTokenSenha,
+  gerarTokenSenha,
+  hashTokenSenha,
+} from "./password-token.js";
 import { issueRefreshToken, signAccessToken } from "./refresh-token.service.js";
-import { env } from "../../config/env.js";
-import { createPasswordResetEmail, sendEmail } from "../../services/email.service.js";
-
-const hashResetToken = (token: string) =>
-  crypto.createHash("sha256").update(token).digest("hex");
 
 interface LoginResponse {
   id: string;
@@ -43,7 +44,7 @@ export const loginUserService = async (
     const [user] = await dbInstance
       .select()
       .from(Users)
-      .where(eq(Users.email, email))
+      .where(emailIgual(email))
       .limit(1);
 
     if (!user) {
@@ -104,6 +105,13 @@ export const loginUserService = async (
 
 type RequestPasswordResetServiceError = { type: "database_error" };
 
+/**
+ * Solicita o link de recuperação. A resposta é a mesma para e-mail existente,
+ * inexistente ou inativo. Para não revelar a existência pelo tempo de resposta,
+ * o envio do e-mail (SMTP, a parte lenta) não é aguardado: a resposta sai logo
+ * depois de gravar o token. A diferença restante é uma transação curta no banco.
+ * Funciona porque o servidor é um processo contínuo (Dokku/tsx), não serverless.
+ */
 export const requestPasswordResetService = async (
   c: Context<{ Variables: AppVariables }>,
   email: string,
@@ -111,44 +119,27 @@ export const requestPasswordResetService = async (
   const dbInstance = c.get("db");
 
   try {
-    const potentialUsers = await dbInstance
-      .select({ id: Users.id, nome: Users.nome, ativo: Users.ativo })
+    const [user] = await dbInstance
+      .select({
+        id: Users.id,
+        nome: Users.nome,
+        email: Users.email,
+        ativo: Users.ativo,
+      })
       .from(Users)
-      .where(eq(Users.email, email))
+      .where(emailIgual(email))
       .limit(1);
-    const user = potentialUsers[0];
     if (!user || !user.ativo) return ok(undefined);
 
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-    await dbInstance.transaction(async (tx) => {
-      await tx.delete(resetPasswords).where(eq(resetPasswords.userId, user.id));
-      await tx.insert(resetPasswords).values({
-        userId: user.id,
-        resetPasswordHash: hashResetToken(resetToken),
-        expiresAt,
-      });
-    });
+    const resetToken = await dbInstance.transaction((tx) =>
+      gerarTokenSenha(tx, user.id, "reset"),
+    );
 
-    const resetUrl = new URL(`/reset-password/${resetToken}`, env.FRONTEND_URL).toString();
-    const emailResult = await sendEmail({
-      to: email,
-      subject: "Recuperação de senha - SISSEL",
-      html: createPasswordResetEmail(user.nome, resetUrl),
-    });
-
-    if (!emailResult.ok) {
-      await dbInstance
-        .delete(resetPasswords)
-        .where(eq(resetPasswords.resetPasswordHash, hashResetToken(resetToken)));
-    }
+    void enviarEmailTokenSenha(dbInstance, user, resetToken, "reset");
 
     return ok(undefined);
   } catch (error) {
-    console.error("Database error during password reset request:", {
-      code: (error as { code?: string }).code ?? "unknown",
-      constraint: (error as { constraint?: string }).constraint ?? "unknown",
-    });
+    logDatabaseError("Database error during password reset request:", error);
     return err({ type: "database_error" });
   }
 };
@@ -160,45 +151,35 @@ type VerifyResetHashServiceError =
 
 export const verifyResetHashService = async (
   c: Context<{ Variables: AppVariables }>,
-  hash: string,
+  token: string,
 ): Promise<AppResult<{ valid: boolean }, VerifyResetHashServiceError>> => {
   const dbInstance = c.get("db");
+  const tokenHash = hashTokenSenha(token);
   try {
-    const potentialResets = await dbInstance
-      .select({ id: resetPasswords.id })
+    const [resetRecord] = await dbInstance
+      .select({ id: resetPasswords.id, expiresAt: resetPasswords.expiresAt })
       .from(resetPasswords)
-      .where(
-        and(
-          eq(resetPasswords.resetPasswordHash, hashResetToken(hash)),
-          gte(resetPasswords.expiresAt, new Date()),
-        ),
-      )
+      .where(eq(resetPasswords.resetPasswordHash, tokenHash))
       .limit(1);
 
-    const resetRecord = potentialResets[0];
-
     if (!resetRecord) {
-      const expiredCheck = await dbInstance
-        .select({ id: resetPasswords.id })
-        .from(resetPasswords)
-        .where(eq(resetPasswords.resetPasswordHash, hashResetToken(hash)))
-        .limit(1);
-      if (expiredCheck[0]) {
-        try {
-          await dbInstance.delete(resetPasswords).where(
-            eq(resetPasswords.resetPasswordHash, hashResetToken(hash)),
-          );
-        } catch (cleanupError) {
-          console.error("Error cleaning up expired reset token:", cleanupError);
-        }
-        return err({ type: "token_expired" });
-      }
       return err({ type: "token_invalid" });
+    }
+
+    if (resetRecord.expiresAt < new Date()) {
+      try {
+        await dbInstance
+          .delete(resetPasswords)
+          .where(eq(resetPasswords.id, resetRecord.id));
+      } catch (cleanupError) {
+        logDatabaseError("Error cleaning up expired reset token:", cleanupError);
+      }
+      return err({ type: "token_expired" });
     }
 
     return ok({ valid: true });
   } catch (dbError) {
-    console.error("Database error during reset hash verification:", dbError);
+    logDatabaseError("Database error during reset hash verification:", dbError);
     return err({ type: "database_error" });
   }
 };
@@ -206,29 +187,27 @@ export const verifyResetHashService = async (
 type ResetPasswordServiceError =
   | { type: "token_invalid_or_expired" }
   | { type: "hashing_error" }
-  | { type: "user_not_found" }
-  | { type: "update_error" }
   | { type: "database_error" };
 
 export const resetPasswordService = async (
   c: Context<{ Variables: AppVariables }>,
-  hash: string,
+  token: string,
   newPassword: string,
 ): Promise<AppResult<void, ResetPasswordServiceError>> => {
   const dbInstance = c.get("db");
+  const tokenHash = hashTokenSenha(token);
   try {
-    const potentialResets = await dbInstance
-      .select({ userId: resetPasswords.userId })
+    // Checagem barata antes do bcrypt; a decisão final é tomada sob lock abaixo.
+    const [resetRecord] = await dbInstance
+      .select({ id: resetPasswords.id })
       .from(resetPasswords)
       .where(
         and(
-          eq(resetPasswords.resetPasswordHash, hashResetToken(hash)),
+          eq(resetPasswords.resetPasswordHash, tokenHash),
           gte(resetPasswords.expiresAt, new Date()),
         ),
       )
       .limit(1);
-
-    const resetRecord = potentialResets[0];
 
     if (!resetRecord) {
       return err({ type: "token_invalid_or_expired" });
@@ -237,35 +216,42 @@ export const resetPasswordService = async (
     let newPasswordHash: string;
     try {
       newPasswordHash = await bcrypt.hash(newPassword, 10);
-    } catch (hashError) {
-      console.error("Password hashing failed during reset:", hashError);
+    } catch {
+      console.error("Password hashing failed during reset");
       return err({ type: "hashing_error" });
     }
 
-    const updated = await dbInstance.transaction(async (tx) => {
+    // Consumo de uso único: trava a linha, troca a senha e apaga o token.
+    const consumido = await dbInstance.transaction(async (tx) => {
       const [lockedReset] = await tx
-        .select({ id: resetPasswords.id, userId: resetPasswords.userId, expiresAt: resetPasswords.expiresAt })
+        .select({
+          id: resetPasswords.id,
+          userId: resetPasswords.userId,
+          expiresAt: resetPasswords.expiresAt,
+        })
         .from(resetPasswords)
-        .where(eq(resetPasswords.resetPasswordHash, hashResetToken(hash)))
+        .where(eq(resetPasswords.resetPasswordHash, tokenHash))
         .limit(1)
         .for("update");
       if (!lockedReset || lockedReset.expiresAt < new Date()) return false;
 
-      const updateResult = await tx
+      const [updatedUser] = await tx
         .update(Users)
         .set({ passwordHash: newPasswordHash, updatedAt: new Date() })
-        .where(eq(Users.id, lockedReset.userId));
-      if (updateResult.rowCount === 0) return null;
+        .where(eq(Users.id, lockedReset.userId))
+        .returning({ id: Users.id });
+      if (!updatedUser) return false;
 
-      await tx.delete(resetPasswords).where(eq(resetPasswords.id, lockedReset.id));
+      await tx
+        .delete(resetPasswords)
+        .where(eq(resetPasswords.userId, lockedReset.userId));
       return true;
     });
 
-    if (updated === null) return err({ type: "user_not_found" });
-    if (!updated) return err({ type: "token_invalid_or_expired" });
+    if (!consumido) return err({ type: "token_invalid_or_expired" });
     return ok(undefined);
   } catch (dbError) {
-    console.error("Database error during password reset:", dbError);
+    logDatabaseError("Database error during password reset:", dbError);
     return err({ type: "database_error" });
   }
 };
