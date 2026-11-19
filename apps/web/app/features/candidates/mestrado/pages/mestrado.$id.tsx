@@ -124,9 +124,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
         disciplinaPosCapes3a5: candidato.notas?.disciplinaPosCapes3a5
           ? Number(candidato.notas?.disciplinaPosCapes3a5)
           : 0,
-        notaEtapaII: candidato.notas?.notaEtapaII
-          ? Number(candidato.notas?.notaEtapaII)
-          : undefined,
+        notaEtapaII: candidato.notas?.notaEtapaII ?? undefined,
       })
     }
   }, [candidato, reset])

@@ -40,7 +40,7 @@ export default function CandidateActions({
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Outras opções</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="hover:bg-gray-50">Outras opções</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="flex flex-col gap-2 p-4">
                     <li>
