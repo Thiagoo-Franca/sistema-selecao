@@ -1,4 +1,5 @@
 import * as bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { and, asc, count, desc, eq, ilike, or, sql, type Column } from "drizzle-orm";
 import { type Context } from "hono";
 import { z } from "zod";
@@ -11,6 +12,9 @@ import { databaseError, logDatabaseError } from "../../database/errors.js";
 import { type AppResult, err, ok } from "../../result.js";
 import { type AppVariables } from "../../types.js";
 import {
+  emailIgual,
+  enviarEmailTokenSenha,
+  gerarTokenSenha,
   getUsuarioAutenticado,
   revokeAllRefreshTokensForUser,
 } from "../auth/index.js";
@@ -185,62 +189,134 @@ export const getTeachersSimplified = async (
 
 type CreateUserError =
   | { type: "duplicate_email" }
-  | { type: "duplicate_username" }
   | { type: "hashing_error"; error: unknown }
   | { type: "database_error"; error: unknown };
 
+const isEmailUniqueViolation = (error: unknown) => {
+  const details = error as { code?: string; constraint?: string };
+  return (
+    details.code === "23505" && details.constraint === "usuario_email_unique"
+  );
+};
+
+/**
+ * Cria o professor sem senha conhecida e envia o link "Defina sua senha" (7 dias).
+ * Usuário e token são gravados na mesma transação; o e-mail sai depois do commit.
+ * Se o envio falhar, o usuário continua criado e `conviteEnviado` volta false,
+ * para o admin usar o reenvio do convite.
+ */
 export const createUser = async (
   c: Context<{ Variables: AppVariables }>,
   userData: z.infer<typeof createUserSchema>,
-): Promise<AppResult<UsuarioPublico, CreateUserError>> => {
+): Promise<
+  AppResult<UsuarioPublico & { conviteEnviado: boolean }, CreateUserError>
+> => {
   const dbInstance = c.get("db");
 
   try {
     const existingUser = await dbInstance
       .select({ id: Users.id })
       .from(Users)
-      .where(eq(Users.email, userData.email))
+      .where(emailIgual(userData.email))
       .limit(1);
 
     if (existingUser.length > 0) {
       return err({ type: "duplicate_email" });
     }
 
-    let passwordHash: string | undefined = undefined;
+    // Senha inutilizável: hash de um valor aleatório que ninguém conhece.
+    let passwordHash: string;
     try {
-      passwordHash = await bcrypt.hash(userData.password, 10);
+      passwordHash = await bcrypt.hash(
+        crypto.randomBytes(32).toString("hex"),
+        10,
+      );
     } catch (hashError) {
-      console.error("Password hashing failed during user creation:", hashError);
+      console.error("Password hashing failed during user creation");
       return err({ type: "hashing_error", error: hashError });
     }
 
-    const now = new Date();
-    const [newUserResult] = await dbInstance
-      .insert(Users)
-      .values({
-        nome: userData.nome.trim(),
-        academicTitle: userData.academicTitle.trim(),
-        email: userData.email.trim(),
-        matricula: userData.matricula.trim(),
-        passwordHash: passwordHash,
-        role: userData.role,
-        createdAt: now,
-        updatedAt: now,
-        school: userData.school,
-      })
-      .returning();
+    const { newUser, token } = await dbInstance.transaction(async (tx) => {
+      const [newUser] = await tx
+        .insert(Users)
+        .values({
+          nome: userData.nome.trim(),
+          academicTitle: userData.academicTitle.trim(),
+          email: userData.email,
+          matricula: userData.matricula.trim(),
+          passwordHash,
+          role: userData.role,
+          school: userData.school,
+          areas: userData.areas ?? [],
+        })
+        .returning();
+      const token = await gerarTokenSenha(tx, newUser.id, "primeira_senha");
+      return { newUser, token };
+    });
 
-    if (!newUserResult) {
-      console.error("Failed to insert user or retrieve data after insert.");
-      return err({
-        type: "database_error",
-        error: "Insert operation did not return expected data.",
-      });
-    }
+    const conviteEnviado = await enviarEmailTokenSenha(
+      dbInstance,
+      newUser,
+      token,
+      "primeira_senha",
+    );
 
-    return ok(toUsuarioPublico(newUserResult));
+    return ok({ ...toUsuarioPublico(newUser), conviteEnviado });
   } catch (error) {
+    if (isEmailUniqueViolation(error)) {
+      return err({ type: "duplicate_email" });
+    }
     logDatabaseError("Database error during user creation:", error);
+    return databaseError(error);
+  }
+};
+
+type ReenviarConviteError =
+  | { type: "user_not_found" }
+  | { type: "user_inactive" }
+  | { type: "email_error" }
+  | { type: "database_error"; error: unknown };
+
+/**
+ * Reenvia o link "Defina sua senha": invalida os tokens anteriores do usuário
+ * e gera um novo, de 7 dias. Usuário inativo é recusado.
+ */
+export const reenviarConvite = async (
+  c: Context<{ Variables: AppVariables }>,
+  id: string,
+): Promise<AppResult<{ conviteEnviado: true }, ReenviarConviteError>> => {
+  const dbInstance = c.get("db");
+
+  try {
+    const [user] = await dbInstance
+      .select({
+        id: Users.id,
+        nome: Users.nome,
+        email: Users.email,
+        ativo: Users.ativo,
+      })
+      .from(Users)
+      .where(eq(Users.id, id))
+      .limit(1);
+
+    if (!user) return err({ type: "user_not_found" });
+    if (!user.ativo) return err({ type: "user_inactive" });
+
+    const token = await dbInstance.transaction((tx) =>
+      gerarTokenSenha(tx, user.id, "primeira_senha"),
+    );
+
+    const enviado = await enviarEmailTokenSenha(
+      dbInstance,
+      user,
+      token,
+      "primeira_senha",
+    );
+    if (!enviado) return err({ type: "email_error" });
+
+    return ok({ conviteEnviado: true });
+  } catch (error) {
+    logDatabaseError("Database error while resending invite:", error);
     return databaseError(error);
   }
 };

@@ -7,6 +7,10 @@ export {
   type PasswordResetEmailProps,
 } from "./password-reset.template.js";
 export {
+  createDefinirSenhaEmail,
+  type DefinirSenhaEmailProps,
+} from "./definir-senha.template.js";
+export {
   createCalendarInviteEmail,
   type CalendarInviteEmailProps,
 } from "./calendar-invite.template.js";

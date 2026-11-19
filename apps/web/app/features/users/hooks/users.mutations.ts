@@ -62,3 +62,19 @@ export const useDeleteUser = () => {
     },
   })
 }
+
+// Reenvia o link "Defina sua senha" (7 dias); invalida o link anterior.
+export const useReenviarConvite = () => {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiClient.usuario[":id"].convite.$post({ param: { id } })
+      return rpcReturn(res)
+    },
+    onSuccess: () => {
+      toast.success("Convite reenviado. Enviamos um novo link para definir a senha.")
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Não foi possível reenviar o convite")
+    },
+  })
+}

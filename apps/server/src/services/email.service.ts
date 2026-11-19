@@ -94,7 +94,12 @@ export const sendEmail = async (
     console.log("Email sent: %s", info.messageId);
     return ok(undefined);
   } catch (error) {
-    console.error("Email sending failed:", error);
+    // Erros do SMTP podem conter o destinatário; registra só o código.
+    console.error("Email sending failed:", {
+      code: (error as { code?: string }).code ?? "unknown",
+      responseCode:
+        (error as { responseCode?: number }).responseCode ?? "unknown",
+    });
     return err({ type: "email_error" });
   }
 };

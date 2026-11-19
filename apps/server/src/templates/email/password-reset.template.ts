@@ -1,4 +1,4 @@
-import { createBaseEmailTemplate } from "./base.template.js";
+import { createBaseEmailTemplate, escapeHtml } from "./base.template.js";
 
 export interface PasswordResetEmailProps {
   nome: string;
@@ -11,7 +11,7 @@ export const createPasswordResetEmail = (
   const { nome, resetUrl } = props;
 
   const content = `
-    <h2>Olá, ${nome}!</h2>
+    <h2>Olá, ${escapeHtml(nome)}!</h2>
     <p>Você solicitou a recuperação de senha para sua conta no SISSEL.</p>
     <p>Para redefinir sua senha, clique no botão abaixo:</p>
     

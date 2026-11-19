@@ -11,7 +11,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { CheckCircle } from "lucide-react"
 
-export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Redefinir Senha" }]
+export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Definir Senha" }]
 interface ResetPasswordFormValues {
   password: string
   confirmPassword: string
@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
       {
         onSuccess: () => {
           setIsSuccess(true)
-          toast.success("Senha redefinida com sucesso! Agora você pode fazer login.")
+          toast.success("Senha definida com sucesso! Agora você pode fazer login.")
 
           // Redirect to login after 3 seconds
           setTimeout(() => {
@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
         },
         onError: (error) => {
           toast.error(
-            `Erro ao redefinir senha: ${error.message || "Ocorreu um erro ao redefinir a senha"}`
+            `Erro ao definir a senha: ${error.message || "Ocorreu um erro ao definir a senha"}`
           )
         },
       }
@@ -96,9 +96,9 @@ export default function ResetPasswordPage() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <CheckCircle className="h-6 w-6 text-green-600" />
             </div>
-            <CardTitle className="text-green-600">Senha Redefinida!</CardTitle>
+            <CardTitle className="text-green-600">Senha definida!</CardTitle>
             <CardDescription>
-              Sua senha foi alterada com sucesso. Você será redirecionado para a página de login.
+              Sua senha foi salva. Você será redirecionado para a página de login.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -115,8 +115,8 @@ export default function ResetPasswordPage() {
     <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Redefinir Senha</CardTitle>
-          <CardDescription>Digite sua nova senha abaixo</CardDescription>
+          <CardTitle>Defina sua nova senha</CardTitle>
+          <CardDescription>Escolha uma senha com pelo menos 8 caracteres</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -158,7 +158,7 @@ export default function ResetPasswordPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={resetPasswordMutation.isPending}>
-              {resetPasswordMutation.isPending ? "Redefinindo..." : "Redefinir Senha"}
+              {resetPasswordMutation.isPending ? "Salvando..." : "Salvar senha"}
             </Button>
 
             <Button
