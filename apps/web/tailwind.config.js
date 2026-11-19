@@ -4,6 +4,9 @@ export default {
   content: ["./app/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Poppins", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

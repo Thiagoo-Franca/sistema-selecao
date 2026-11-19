@@ -66,7 +66,13 @@ export function CandidatosTab({
     sortBy: orderBy,
     order,
   })
-  const meusCandidatosQuery = useCandidatesByTeacherId(user?.id ?? 0)
+  const meusCandidatosQuery = useCandidatesByTeacherId(user?.id ?? 0, {
+    page,
+    limit,
+    search: searchQuery,
+    sortBy: orderBy,
+    order,
+  })
   const professoresQuery = useTeachers({
     page,
     limit,
@@ -165,6 +171,7 @@ export function CandidatosTab({
           setOrderBy={setOrderBy}
           setOrder={setOrder}
           onSort={onSort}
+          type={type === "meus" ? "meus" : type}
         />
         {meta && (
           <PaginationControls
