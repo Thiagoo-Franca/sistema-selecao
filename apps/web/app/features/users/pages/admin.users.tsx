@@ -13,6 +13,7 @@ import SearchBar from "@/shared/ui/search-bar"
 import { removerAcentos } from "@/shared/lib/helpers"
 import { PaginationControls } from "@/shared/ui/pagination-controls"
 import type { Paginated } from "@/shared/types/pagination"
+import { ButtonBack } from "@/shared/ui/button-back"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Gerenciar Usuários" }]
 
@@ -134,6 +135,9 @@ export default function AdminUsersIndexPage() {
 
   return (
     <div className="">
+      <div className="mb-4">
+        <ButtonBack />
+      </div>
       <div className="mb-6">
         <h1 className="mb-2 text-2xl font-bold">Gerenciamento de Usuários</h1>
         <p className="text-muted-foreground">Visualize e gerencie todos os usuários do sistema.</p>

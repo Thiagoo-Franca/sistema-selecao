@@ -25,6 +25,7 @@ import {
 import { useChangePassword, useUpdateProfile } from "@/features/profile/hooks/profile.mutation"
 import type { Route } from ".react-router/types/app/+types/root"
 import { useEffect, useRef } from "react"
+import { ButtonBack } from "@/shared/ui/button-back"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Perfil" }]
 
@@ -71,6 +72,9 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
+      <div className="mb-4">
+        <ButtonBack />
+      </div>
       <Tabs defaultValue="profile" className="w-full">
         <TabsList
           ref={listRef}

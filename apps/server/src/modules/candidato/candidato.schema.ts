@@ -22,8 +22,8 @@ const updateCandidatoMestradoSchema = z.object({
   gru: z.enum(GRU_STATUS).optional(),
 
   universidade: z.string().optional(),
-  cursoGrad: z.string().optional(),
-  cidadeGrad: z.string().optional(),
+  curso: z.string().optional(),
+  cidadeGraduacao: z.string().optional(),
   homologa: z.boolean().optional(),
   especiais: z.boolean().optional(),
   cotas: z.boolean().optional(),

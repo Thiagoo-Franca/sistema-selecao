@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 import { Loader2 } from "lucide-react"
 import { useEffect, useRef } from "react"
 import { Navigate } from "react-router"
+import { ButtonBack } from "@/shared/ui/button-back"
 
 export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Feedback" }]
 
@@ -42,6 +43,9 @@ export default function FeedbackPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
+      <div className="mb-4">
+        <ButtonBack />
+      </div>
       <Tabs defaultValue="form" className="w-full">
         <TabsList
           ref={listRef}
