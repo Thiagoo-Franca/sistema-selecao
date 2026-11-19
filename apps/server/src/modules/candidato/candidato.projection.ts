@@ -40,3 +40,30 @@ export const createCandidatoResumoProjection = <
   area1,
   area2,
 });
+
+export const createCandidatoResumoProjectionDoutorado = <
+  TCandidate extends CandidateTable,
+  TNote extends NoteTable,
+  TAreaPgcomp extends AnyPgColumn,
+  TAvaliador extends AnyPgColumn,
+  TAuditor extends AnyPgColumn,
+>(
+  candidato: TCandidate,
+  nota: TNote,
+  areaPgcomp: TAreaPgcomp,
+  avaliador: TAvaliador,
+  auditor: TAuditor,
+) => ({
+  id: candidato.id,
+  tipo: candidato.tipoCurso,
+  numeroInscricao: candidato.numeroInscricao,
+  nome: candidato.nome,
+  email: candidato.email,
+  avaliadorId: candidato.avaliadorId,
+  avaliador,
+  auditorId: candidato.auditorId,
+  auditor,
+  avaliado: sql<boolean>`coalesce(${nota.avaliado}, false)`,
+  area1: areaPgcomp,
+  area2: sql<null>`null`,
+});

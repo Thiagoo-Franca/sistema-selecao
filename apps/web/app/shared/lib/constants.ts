@@ -50,3 +50,34 @@ export const LABELS = [
     label: "Auditor",
   },
 ]
+
+export const LABELS_DOUTORADO = [
+  {
+    key: "nome",
+    label: "Nome",
+  },
+  {
+    key: "tipoCurso",
+    label: "Nível",
+  },
+  {
+    key: "email",
+    label: "Email",
+  },
+  {
+    key: "avaliado",
+    label: "Avaliado",
+  },
+  {
+    key: "area1",
+    label: "Área PGCOMP",
+  },
+  {
+    key: "avaliador",
+    label: "Avaliador",
+  },
+  {
+    key: "auditor",
+    label: "Auditor",
+  },
+]

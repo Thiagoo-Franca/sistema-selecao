@@ -90,9 +90,10 @@ export const candidatoRoutes = new Hono<{ Variables: AppVariables }>()
     return c.json(result.data);
   })
 
-  .get("/:id", checkRole(["ADMIN", "TEACHER"]), async (c) => {
+  .get("/:id", checkRole(["ADMIN", "TEACHER"]), zValidator("query", candidatoPaginationQuerySchema), async (c) => {
     const id = c.req.param("id");
-    const result = await service.getAllMyCandidates(c, id);
+    const query = c.req.valid("query");
+    const result = await service.getAllMyCandidates(c, id, query);
 
     if (!result.ok) {
       throw new Error("Erro ao buscar candidatos do avaliador");

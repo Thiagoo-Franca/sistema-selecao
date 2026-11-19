@@ -65,8 +65,10 @@ export default function Home() {
         },
         { replace: true },
       )
+      // Reset current tab's page to 1 when sorting
+      setTabPages((prev) => ({ ...prev, [currentTab]: 1 }))
     },
-    [order, orderBy, setSearchParams],
+    [currentTab, order, orderBy, setSearchParams],
   )
 
   const handleSearchChange = useCallback(
@@ -81,8 +83,10 @@ export default function Home() {
         },
         { replace: true },
       )
+      // Reset current tab's page to 1 when searching
+      setTabPages((prev) => ({ ...prev, [currentTab]: 1 }))
     },
-    [setSearchParams],
+    [currentTab, setSearchParams],
   )
 
   const handlePageChange = useCallback(
@@ -112,8 +116,10 @@ export default function Home() {
         },
         { replace: true },
       )
+      // Reset current tab's page to 1 when changing limit
+      setTabPages((prev) => ({ ...prev, [currentTab]: 1 }))
     },
-    [setSearchParams],
+    [currentTab, setSearchParams],
   )
 
   useEffect(() => {
@@ -139,19 +145,6 @@ export default function Home() {
       return newPages
     })
   }, [currentTab])
-
-  // Sync URL page to current tab's page
-  useEffect(() => {
-    const currentPage = tabPages[currentTab] ?? 1
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev)
-        params.set("page", String(currentPage))
-        return params
-      },
-      { replace: true },
-    )
-  }, [currentTab, tabPages, setSearchParams])
 
   const listRef = useRef<HTMLDivElement>(null)
 

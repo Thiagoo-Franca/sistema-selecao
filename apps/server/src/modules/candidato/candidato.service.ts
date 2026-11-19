@@ -13,7 +13,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { databaseError, logDatabaseError } from "../../database/errors.js";
 import type { CandidatoResumo } from "@tcc/shared";
 import type { CandidatoPaginationQuery, UpdateCandidatoDoutoradoInput } from "./candidato.schema.js";
-import { createCandidatoResumoProjection } from "./candidato.projection.js";
+import { createCandidatoResumoProjection, createCandidatoResumoProjectionDoutorado } from "./candidato.projection.js";
 import {
   toCandidatoDoutoradoDetalhe,
   toCandidatoMestradoDetalhe,
@@ -77,8 +77,7 @@ const candidatoDoutoradoSortColumnMap: Record<string, Column> = {
   tipoCurso: CandidatoDoutorado.tipoCurso,
   email: CandidatoDoutorado.email,
   avaliado: NotaDoutorado.avaliado,
-  area1: CandidatoDoutorado.primeiraOpcaoOrientador,
-  area2: CandidatoDoutorado.segundaOpcaoOrientador,
+  area1: CandidatoDoutorado.areaPgcomp,
   avaliador: Avaliador.nome,
   auditor: Auditor.nome,
 };
@@ -105,20 +104,23 @@ async function fetchPaginatedCandidatos(
   area2: any,
   query: CandidatoPaginationQuery,
   sortColumnMap: Record<string, Column>,
+  customProjection?: (table: any, notaTable: any, avaliador: any, auditor: any) => any,
 ) {
   const { page, limit, search, sortBy, order } = query;
   const whereClause = buildWhereConditions(search, table);
   const sortColumn = mapSortByToColumn(sortBy, sortColumnMap, table.nome);
   const orderByClause = applyOrderBy(sortColumn, order, table.id);
 
-  const projection = createCandidatoResumoProjection(
-    table,
-    notaTable,
-    area1,
-    area2,
-    Avaliador.nome,
-    Auditor.nome,
-  );
+  const projection = customProjection
+    ? customProjection(table, notaTable, Avaliador.nome, Auditor.nome)
+    : createCandidatoResumoProjection(
+        table,
+        notaTable,
+        area1,
+        area2,
+        Avaliador.nome,
+        Auditor.nome,
+      );
 
   const [data, totalResult] = await Promise.all([
     db
@@ -148,13 +150,76 @@ async function fetchPaginatedCandidatos(
   };
 }
 
+const meusCandidatosSortColumnMap: Record<string, (c: CandidatoResumo) => any> = {
+  nome: (c) => c.nome,
+  numeroInscricao: (c) => c.numeroInscricao,
+  status: (c) => c.tipo,
+  tipoCurso: (c) => c.tipo,
+  email: (c) => c.email,
+  avaliado: (c) => c.avaliado,
+  area1: (c) => c.area1,
+  area2: (c) => c.area2,
+  avaliador: (c) => c.avaliador,
+  auditor: (c) => c.auditor,
+};
+
+function applySortToCandidates(
+  candidates: CandidatoResumo[],
+  sortBy: string,
+  order: string,
+) {
+  const normalizedOrder = order === "desc" ? "desc" : "asc";
+  const sortFn = meusCandidatosSortColumnMap[sortBy] || meusCandidatosSortColumnMap.nome;
+  return [...candidates].sort((a, b) => {
+    const aVal = sortFn(a);
+    const bVal = sortFn(b);
+    const comparison =
+      aVal == null && bVal == null
+        ? 0
+        : aVal == null
+        ? 1
+        : bVal == null
+        ? -1
+        : String(aVal).localeCompare(String(bVal), "pt-BR", { numeric: true });
+    return normalizedOrder === "asc" ? comparison : -comparison;
+  });
+}
+
 export const getAllMyCandidates = async (
   c: Context<{ Variables: AppVariables }>,
   avaliadorId: string,
+  query: CandidatoPaginationQuery,
 ): Promise<AppResult<CandidatoResumo[], GetAllCandidatosError>> => {
   const db = c.get("db");
 
   try {
+    const { search } = query;
+    const whereMestrado = search
+      ? and(
+          or(
+            eq(CandidatoMestrado.avaliadorId, avaliadorId),
+            eq(CandidatoMestrado.auditorId, avaliadorId),
+          ),
+          buildWhereConditions(search, CandidatoMestrado),
+        )
+      : or(
+          eq(CandidatoMestrado.avaliadorId, avaliadorId),
+          eq(CandidatoMestrado.auditorId, avaliadorId),
+        );
+
+    const whereDoutorado = search
+      ? and(
+          or(
+            eq(CandidatoDoutorado.avaliadorId, avaliadorId),
+            eq(CandidatoDoutorado.auditorId, avaliadorId),
+          ),
+          buildWhereConditions(search, CandidatoDoutorado),
+        )
+      : or(
+          eq(CandidatoDoutorado.avaliadorId, avaliadorId),
+          eq(CandidatoDoutorado.auditorId, avaliadorId),
+        );
+
     const [mestrado, doutorado] = await Promise.all([
       db
         .select(
@@ -174,19 +239,13 @@ export const getAllMyCandidates = async (
         )
         .leftJoin(Avaliador, eq(CandidatoMestrado.avaliadorId, Avaliador.id))
         .leftJoin(Auditor, eq(CandidatoMestrado.auditorId, Auditor.id))
-        .where(
-          or(
-            eq(CandidatoMestrado.avaliadorId, avaliadorId),
-            eq(CandidatoMestrado.auditorId, avaliadorId),
-          ),
-        ),
+        .where(whereMestrado),
       db
         .select(
-          createCandidatoResumoProjection(
+          createCandidatoResumoProjectionDoutorado(
             CandidatoDoutorado,
             NotaDoutorado,
-            CandidatoDoutorado.primeiraOpcaoOrientador,
-            CandidatoDoutorado.segundaOpcaoOrientador,
+            CandidatoDoutorado.areaPgcomp,
             Avaliador.nome,
             Auditor.nome,
           ),
@@ -198,19 +257,13 @@ export const getAllMyCandidates = async (
         )
         .leftJoin(Avaliador, eq(CandidatoDoutorado.avaliadorId, Avaliador.id))
         .leftJoin(Auditor, eq(CandidatoDoutorado.auditorId, Auditor.id))
-        .where(
-          or(
-            eq(CandidatoDoutorado.avaliadorId, avaliadorId),
-            eq(CandidatoDoutorado.auditorId, avaliadorId),
-          ),
-        ),
+        .where(whereDoutorado),
     ]);
 
-    const todos = [...mestrado, ...doutorado].sort((a, b) =>
-      String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR"),
-    );
+    const todos = [...mestrado, ...doutorado];
+    const sorted = applySortToCandidates(todos, query.sortBy ?? "nome", query.order ?? "asc");
 
-    return ok(todos);
+    return ok(sorted);
   } catch (error) {
     logDatabaseError("Error fetching all my candidates:", error);
     return databaseError(error);
@@ -238,10 +291,12 @@ export const getAllCandidatos = async (
         db,
         CandidatoDoutorado,
         NotaDoutorado,
-        CandidatoDoutorado.primeiraOpcaoOrientador,
-        CandidatoDoutorado.segundaOpcaoOrientador,
+        CandidatoDoutorado.areaPgcomp,
+        CandidatoDoutorado.areaPgcomp,
         query,
         candidatoDoutoradoSortColumnMap,
+        (table, notaTable, avaliador, auditor) =>
+          createCandidatoResumoProjectionDoutorado(table, notaTable, table.areaPgcomp, avaliador, auditor),
       ),
     ]);
 
@@ -290,10 +345,12 @@ export const getAllCandidatosDoutorado = async (
       db,
       CandidatoDoutorado,
       NotaDoutorado,
-      CandidatoDoutorado.primeiraOpcaoOrientador,
-      CandidatoDoutorado.segundaOpcaoOrientador,
+      CandidatoDoutorado.areaPgcomp,
+      CandidatoDoutorado.areaPgcomp,
       query,
       candidatoDoutoradoSortColumnMap,
+      (table, notaTable, avaliador, auditor) =>
+        createCandidatoResumoProjectionDoutorado(table, notaTable, table.areaPgcomp, avaliador, auditor),
     );
 
     return ok(result);
