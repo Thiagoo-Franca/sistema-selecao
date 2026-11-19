@@ -241,6 +241,29 @@ export const resetPasswords = pgTable("reset_password", {
   expiresAt: timestamp("expires_at").notNull(), // Adicionado para controle
 });
 
+// Refresh tokens opacos: só o sha256 é guardado. `familyId` agrupa a cadeia
+// de rotação de uma sessão (login), para revogar a sessão inteira em caso de reuso.
+export const refreshTokens = pgTable(
+  "refresh_token",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => Users.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    familyId: uuid("family_id").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    revokedAt: timestamp("revoked_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("refresh_token_user_id_idx").on(table.userId),
+    index("refresh_token_family_id_idx").on(table.familyId),
+  ],
+).enableRLS();
+export type InsertRefreshToken = typeof refreshTokens.$inferInsert;
+export type SelectRefreshToken = typeof refreshTokens.$inferSelect;
+
 // === FEEDBACK SYSTEM ===
 
 export const feedbackSubmissions = pgTable("feedback_submission", {
