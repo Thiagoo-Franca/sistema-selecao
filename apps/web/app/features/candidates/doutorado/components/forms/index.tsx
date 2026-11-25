@@ -108,7 +108,7 @@ export default function FormsAvaliacaoDoutorado({
               <FieldLabel htmlFor="areaPgcomp" className="font-bold text-muted-foreground">
                 Área PGCOMP
               </FieldLabel>
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
+              <Select key={field.value} onValueChange={field.onChange} value={field.value ?? ""}>
                 <SelectTrigger
                   id="areaPgcomp"
                   className="w-full max-w-[400px]"

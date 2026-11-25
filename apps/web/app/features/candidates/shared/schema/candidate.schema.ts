@@ -101,7 +101,9 @@ export { CandidatoMestradoNotaSchema }
 const CandidatoDoutoradoNotaSchema = z.object({
   avaliadorId: z.string().uuid().optional(),
   auditorId: z.string().uuid().optional(),
-  areaPgcomp: z.enum(AREAPGCOMP),
+  areaPgcomp: z.enum(AREAPGCOMP, {
+    errorMap: () => ({ message: "Selecione a área PGCOMP" }),
+  }),
   avaliado: z.boolean().optional(),
 
   nomeUniversidadeMestrado: z.string().optional(),
