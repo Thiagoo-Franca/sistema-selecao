@@ -30,7 +30,6 @@ export function UploadCandidatos() {
   const uploadDoutorado = useUploadCandidatosDoutorado() // Substitua pelo hook correto para doutorado quando disponível
 
   const upload = isMestradoUpload ? uploadMestrado : uploadDoutorado // Escolhe o hook correto com base no estado
-  const parseCandidatos = isMestradoUpload ? parseCandidatosMestrado : parseCandidatosDoutorado // Substitua pelo parser correto para doutorado quando disponível
 
   function clearFile() {
     setFile(null)
@@ -45,12 +44,16 @@ export function UploadCandidatos() {
     if (!file) return
 
     try {
-      const candidatos = parseCandidatos(await file.text())
-      if (candidatos.length === 0) {
-        toast.error("Nenhum candidato encontrado no arquivo")
-        return
+      const text = await file.text()
+      if (isMestradoUpload) {
+        const candidatos = parseCandidatosMestrado(text)
+        if (candidatos.length === 0) return toast.error("Nenhum candidato encontrado no arquivo")
+        uploadMestrado.mutate(candidatos, { onSuccess: reset })
+      } else {
+        const candidatos = parseCandidatosDoutorado(text)
+        if (candidatos.length === 0) return toast.error("Nenhum candidato encontrado no arquivo")
+        uploadDoutorado.mutate(candidatos, { onSuccess: reset })
       }
-      upload.mutate(candidatos, { onSuccess: reset })
     } catch (error) {
       toast.error(
         `Arquivo inválido: ${error instanceof Error ? error.message : "Não foi possível ler o arquivo"}`

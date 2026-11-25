@@ -11,13 +11,3 @@ export const useFeedbackStatisticsQuery = () => {
     },
   })
 }
-
-export const useFeatureRequestsQuery = () => {
-  return useQuery({
-    queryKey: ["feature-requests"],
-    queryFn: async () => {
-      const response = await apiClient["feature-request"].$get()
-      return rpcReturn(response)
-    },
-  })
-}

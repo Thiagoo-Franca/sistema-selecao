@@ -11,6 +11,7 @@ import {
 } from "@/shared/ui/select"
 import { valorBooleanoSelect } from "@/shared/lib/helpers"
 import type { CandidatoMestradoComRelacoes } from "@tcc/server"
+import type { CandidatoMestradoNota } from "@/features/candidates/shared/schema/candidate.schema"
 import {
   Controller,
   type Control,
@@ -34,7 +35,7 @@ import { EspeciaisField } from "@/features/candidates/shared/components/forms/fi
 interface FormsAvaliacaoMestradoProps {
   handleSubmit: UseFormHandleSubmit<any>
   register: UseFormRegister<any>
-  control: Control<any, any>
+  control: Control<CandidatoMestradoNota>
   errors: FieldErrors<any>
   isSubmitting: boolean
   nota: number
@@ -161,7 +162,7 @@ export default function FormsAvaliacaoMestrado({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FieldError>{msg(errors.SUPRA)}</FieldError>
+              <FieldError>{msg(errors.supra)}</FieldError>
             </Field>
           )}
         />
@@ -232,7 +233,7 @@ export default function FormsAvaliacaoMestrado({
             step="0.01"
             id="grad"
           />
-          <FieldError>{errors.grad?.message}</FieldError>
+          <FieldError>{msg(errors.grad)}</FieldError>
         </Field>
 
         {/* AREA 
@@ -247,7 +248,7 @@ export default function FormsAvaliacaoMestrado({
               step="0.01"
               id="area"
             />
-            <FieldError>{errors.area?.message}</FieldError>
+            <FieldError>{msg(errors.area)}</FieldError>
           </Field>
               */}
         {/* AREA */}
@@ -301,7 +302,7 @@ export default function FormsAvaliacaoMestrado({
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                <FieldError>{errors.area?.message}</FieldError>
+                <FieldError>{msg(errors.area)}</FieldError>
               </Field>
             )
           }}
@@ -334,7 +335,7 @@ export default function FormsAvaliacaoMestrado({
             type="number"
             id="icit"
           />
-          <FieldError>{errors.icIt?.message}</FieldError>
+          <FieldError>{msg(errors.icIt)}</FieldError>
         </Field>
 
         {/* POSCOMP */}
@@ -348,7 +349,7 @@ export default function FormsAvaliacaoMestrado({
             type="number"
             id="poscomp"
           />
-          <FieldError>{errors.poscomp?.message}</FieldError>
+          <FieldError>{msg(errors.poscomp)}</FieldError>
         </Field>
 
         {/* DISCIPLINA PÓS CAPES 6+ */}
@@ -362,7 +363,7 @@ export default function FormsAvaliacaoMestrado({
             type="number"
             id="posCapes"
           />
-          <FieldError>{errors.disciplinaPosCapes6Mais?.message}</FieldError>
+          <FieldError>{msg(errors.disciplinaPosCapes6Mais)}</FieldError>
         </Field>
 
         {/* DISCIPLINA PÓS CAPES 3 a 5 */}
@@ -376,7 +377,7 @@ export default function FormsAvaliacaoMestrado({
             type="number"
             id="posCapes3a5"
           />
-          <FieldError>{errors.disciplinaPosCapes3a5?.message}</FieldError>
+          <FieldError>{msg(errors.disciplinaPosCapes3a5)}</FieldError>
         </Field>
       </div>
 
@@ -392,7 +393,7 @@ export default function FormsAvaliacaoMestrado({
           type="number"
           id="notaEtapaII"
         />
-        <FieldError>{errors.notaEtapaII?.message}</FieldError>
+        <FieldError>{msg(errors.notaEtapaII)}</FieldError>
       </Field>
 
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">

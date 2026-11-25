@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router"
-import { handleDelete } from "@/shared/lib/helpers"
+import { handleDelete, type DeleteCandidatoMutation } from "@/shared/lib/helpers"
 
 import { Button } from "@/shared/ui/button"
 import { ButtonBack } from "@/shared/ui/button-back"
@@ -13,9 +13,7 @@ import {
 
 interface CandidateActionsProps {
   isAdmin: boolean
-  deleteCandidatoMutation: {
-    isPending: boolean
-  }
+  deleteCandidatoMutation: DeleteCandidatoMutation
 }
 
 export default function CandidateActions({

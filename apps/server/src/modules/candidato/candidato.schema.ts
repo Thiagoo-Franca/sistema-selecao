@@ -31,6 +31,9 @@ const updateCandidatoMestradoSchema = z.object({
 });
 
 export { updateCandidatoMestradoSchema };
+export type UpdateCandidatoMestradoInput = z.infer<
+  typeof updateCandidatoMestradoSchema
+>;
 
 export const updateCandidatoDoutoradoSchema = z.object({
   avaliadorId: z.string().uuid().nullable().optional(),
@@ -55,8 +58,8 @@ export const updateCandidatoDoutoradoSchema = z.object({
   segundaOpcaoOrientador: z.string().nullable().optional(),
   terceiraOpcaoOrientador: z.string().optional(),
 
-  universidadeMestrado: z.string().optional(),
-  cursoMestrado: z.string().optional(),
+  nomeUniversidadeMestrado: z.string().optional(),
+  nomeCursoMestrado: z.string().optional(),
   cidadeMestrado: z.string().optional(),
 });
 export type UpdateCandidatoDoutoradoInput = z.infer<

@@ -1,15 +1,19 @@
 import { rpcReturn } from "@/shared/lib/utils"
 import apiClient from "@/shared/services/apiClient"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import type { CandidatoDoutoradoComRelacoes } from "@tcc/server"
+import type {
+  CandidatoDoutoradoComRelacoes,
+  UpdateCandidatoDoutoradoInput,
+  UpdateNotaDoutoradoInput,
+  UploadCandidatosDoutoradoInput,
+} from "@tcc/server"
 import { toast } from "sonner"
-import type { CandidatoDoutoradoUpload } from "../../shared/components/lib/parse-upload"
 
 export const useUploadCandidatosDoutorado = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (candidatos: CandidatoDoutoradoUpload[]) => {
+    mutationFn: async (candidatos: UploadCandidatosDoutoradoInput) => {
       const response = await apiClient.candidato.doutorado.$post({ json: candidatos })
       return rpcReturn(response)
     },
@@ -30,7 +34,7 @@ export const useUpdateCandidatoDoutorado = () => {
   return useMutation({
     mutationFn: async (data: {
       id: string | number
-      body: Partial<CandidatoDoutoradoComRelacoes>
+      body: UpdateCandidatoDoutoradoInput
     }) => {
       const response = await apiClient.candidato.doutorado[":id"].$patch({
         param: { id: String(data.id) },
@@ -55,7 +59,7 @@ export const useUpdateCandidatoDoutoradoNota = () => {
   return useMutation({
     mutationFn: async (data: {
       id: string | number
-      body: Partial<CandidatoDoutoradoComRelacoes>
+      body: UpdateNotaDoutoradoInput
     }) => {
       const response = await apiClient.candidato.doutorado[":id"].nota.$patch({
         param: { id: String(data.id) },

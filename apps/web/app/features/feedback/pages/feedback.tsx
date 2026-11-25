@@ -1,6 +1,5 @@
 import type { Route } from ".react-router/types/app/+types/root"
 import { useUser } from "@/features/auth"
-import { FeatureRequests } from "@/features/feedback/components/FeatureRequests"
 import { FeedbackForm } from "@/features/feedback/components/FeedbackForm"
 import { FeedbackStatistics } from "@/features/feedback/components/FeedbackStatistics"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
@@ -14,7 +13,6 @@ export const meta: Route.MetaFunction = () => [{ title: "SISSEL - Feedback" }]
 const feedbackTabs = [
   { value: "form", label: "Enviar Feedback" },
   { value: "statistics", label: "Resultados da Pesquisa" },
-  { value: "requests", label: "Solicitações" },
 ]
 
 export default function FeedbackPage() {
@@ -68,10 +66,6 @@ export default function FeedbackPage() {
 
         <TabsContent value="statistics">
           <FeedbackStatistics />
-        </TabsContent>
-
-        <TabsContent value="requests">
-          <FeatureRequests />
         </TabsContent>
       </Tabs>
     </div>

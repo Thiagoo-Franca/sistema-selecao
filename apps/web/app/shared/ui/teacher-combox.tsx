@@ -19,7 +19,7 @@ export interface TeacherOption {
 
 interface TeacherComboboxProps {
   options: TeacherOption[]
-  value: number | null | undefined
+  value: string | null | undefined
   onChange: (id: string | null) => void
   placeholder?: string
   isLoading?: boolean

@@ -3,7 +3,7 @@ import type { AppType } from "@tcc/server"
 import { hc } from "hono/client"
 
 const authenticatedClientOptions = {
-  headers() {
+  headers(): Record<string, string> {
     if (typeof window === "undefined") return {}
 
     const token = localStorage.getItem(AUTH_TOKEN_KEY)

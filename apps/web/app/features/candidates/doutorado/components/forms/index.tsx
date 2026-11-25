@@ -38,7 +38,7 @@ import {
 interface FormsAvaliacaoDoutoradoProps {
   handleSubmit: UseFormHandleSubmit<any>
   register: UseFormRegister<CandidatoDoutoradoNota>
-  control: Control<any, any>
+  control: Control<CandidatoDoutoradoNota>
   errors: FieldErrors<any>
   isSubmitting: boolean
   nota: number

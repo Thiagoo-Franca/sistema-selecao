@@ -35,14 +35,14 @@ export function AvaliadorField({
               value={field.value}
               onChange={field.onChange}
               placeholder={
-                candidato.avaliador ? candidato.avaliador.nome : "Selecione um avaliador"
+                candidato?.avaliador ? candidato.avaliador.nome : "Selecione um avaliador"
               }
               isLoading={isTeachersLoading}
             />
           )}
         />
       ) : (
-        <p>{candidato.avaliador?.nome ?? "Não alocado"}</p>
+        <p>{candidato?.avaliador?.nome ??"Não alocado"}</p>
       )}
       <FieldError>{msg(errors.avaliadorId)}</FieldError>
     </Field>

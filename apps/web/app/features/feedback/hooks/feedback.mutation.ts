@@ -11,23 +11,3 @@ export const useSubmitFeedbackMutation = () => {
     },
   })
 }
-
-export const useCreateFeatureRequestMutation = () => {
-  type Query = RpcType<(typeof apiClient)["feature-request"]["$post"]>
-  return useMutation({
-    mutationFn: async (request: Query["input"]) => {
-      const response = await apiClient["feature-request"].$post(request)
-      return rpcReturn(response)
-    },
-  })
-}
-
-export const useVoteFeatureRequestMutation = () => {
-  type Query = RpcType<(typeof apiClient)["feature-request"]["vote"]["$post"]>
-  return useMutation({
-    mutationFn: async (request: Query["input"]) => {
-      const response = await apiClient["feature-request"].vote.$post(request)
-      return rpcReturn(response)
-    },
-  })
-}
