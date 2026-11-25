@@ -1,6 +1,4 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { randomUUID } from "node:crypto";
-import { sql } from "drizzle-orm";
 import { app } from "../../index.js";
 import {
   CandidatoDoutorado,
@@ -29,22 +27,6 @@ describe("nota authorization", () => {
 
   beforeAll(async () => {
     db = await getFakeDb();
-    await db.execute(sql`
-      alter table nota_doutorado
-      add column if not exists historico_mestrado text
-    `);
-    await db.execute(sql`
-      alter table nota_doutorado
-      add column if not exists area numeric
-    `);
-    await db.execute(sql`
-      alter table nota_doutorado
-      add column if not exists a1a2a3a4_link text
-    `);
-    await db.execute(sql`
-      alter table nota_doutorado
-      add column if not exists b1b2b3b4_link text
-    `);
     application = app(fakeDeps(db));
   });
 
@@ -137,47 +119,27 @@ describe("nota authorization", () => {
       "TEACHER",
       "Outro",
     );
-    const id = randomUUID();
-    await db.execute(sql`
-      insert into candidato_doutorado (
-        id,
-        nome,
-        primeira_opcao_orientador,
-        segunda_opcao_orientador,
-        terceira_opcao_orientador,
-        nome_universidade_mestrado,
-        nome_curso_mestrado,
-        historico_graduacao,
-        copia_diploma_mestrado,
-        historico_mestrado,
-        anteprojeto_tese,
-        avaliador_id,
-        auditor_id
-      ) values (
-        ${id},
-        'Candidato Doutorado',
-        'Orientador 1',
-        'Orientador 2',
-        'Orientador 3',
-        'UFBA',
-        'Computação',
-        'historico.pdf',
-        'diploma.pdf',
-        'historico-mestrado.pdf',
-        'anteprojeto.pdf',
-        ${avaliadorId},
-        ${auditorId}
-      )
-    `);
-    await db
-      .insert(NotaDoutorado)
-      .values({ idCandidato: id, historicoMestradoLink: "historico.pdf" });
+    const [candidato] = await db
+      .insert(CandidatoDoutorado)
+      .values({
+        nome: "Candidato Doutorado",
+        primeiraOpcaoOrientador: "Orientador 1",
+        segundaOpcaoOrientador: "Orientador 2",
+        terceiraOpcaoOrientador: "Orientador 3",
+        nomeUniversidadeMestrado: "UFBA",
+        nomeCursoMestrado: "Computação",
+        historicoMestradoLink: "historico-mestrado.pdf",
+        avaliadorId,
+        auditorId,
+      })
+      .returning({ id: CandidatoDoutorado.id });
+    await db.insert(NotaDoutorado).values({ idCandidato: candidato.id });
     return {
       adminId,
       avaliadorId,
       auditorId,
       outroId,
-      id,
+      id: candidato.id,
     };
   }
 
