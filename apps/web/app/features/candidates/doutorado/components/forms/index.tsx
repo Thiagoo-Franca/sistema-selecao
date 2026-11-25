@@ -38,7 +38,7 @@ import {
 interface FormsAvaliacaoDoutoradoProps {
   handleSubmit: UseFormHandleSubmit<any>
   register: UseFormRegister<CandidatoDoutoradoNota>
-  control: Control<any, any>
+  control: Control<CandidatoDoutoradoNota>
   errors: FieldErrors<any>
   isSubmitting: boolean
   nota: number
@@ -108,7 +108,7 @@ export default function FormsAvaliacaoDoutorado({
               <FieldLabel htmlFor="areaPgcomp" className="font-bold text-muted-foreground">
                 Área PGCOMP
               </FieldLabel>
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
+              <Select key={field.value} onValueChange={field.onChange} value={field.value ?? ""}>
                 <SelectTrigger
                   id="areaPgcomp"
                   className="w-full max-w-[400px]"

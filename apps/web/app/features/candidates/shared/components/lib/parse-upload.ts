@@ -1,3 +1,6 @@
+import { AREAPGCOMP, AREAS } from "@tcc/shared"
+import type { UploadCandidatosDoutoradoInput, UploadCandidatosMestradoInput } from "@tcc/server"
+
 const BOOLEANOS = ["homologa", "especiais", "cotas", "supra"] as const
 
 const COLUNAS_DOUTORADO = [
@@ -5,7 +8,7 @@ const COLUNAS_DOUTORADO = [
   "cpf",
   "nome",
   "email",
-  "solicitacaoIsencaoLink",
+  "isencaoComprovanteLink",
   "isencaoAprovadaLink",
   "gruLink",
   "homologa",
@@ -56,7 +59,7 @@ const NOTAS_MESTRADO = [
 
 const NOTAS_DOUTORADO = [
   { chave: "msc", tipo: "numero" },
-  { chave: "areaGrad", tipo: "numero" },
+  { chave: "areaFormacaoGraduacao", tipo: "numero" },
   { chave: "conceitoCapesMestrado", tipo: "link" },
   { chave: "a1a2a3a4Link", tipo: "link" },
   { chave: "b1b2b3b4Link", tipo: "link" },
@@ -79,20 +82,36 @@ type NotasMestrado = Record<
   string | null
 > & { area: number | null; enade: number | null }
 
-export type CandidatoMestradoUpload = CandidatoBaseMestrado & { notas: NotasMestrado }
-
 type NotasDoutorado = Record<
   | Exclude<
       (typeof NOTAS_DOUTORADO)[number]["chave"],
-      "areaGrad" | "msc" | "notaAnteprojeto" | "conceitoCapesMestrado"
+      "areaFormacaoGraduacao" | "msc" | "notaAnteprojeto" | "conceitoCapesMestrado"
     >
   | "conceitoCapesMestradoLink",
   string | null
 > & {
-  areaGrad: number | null
+  areaFormacaoGraduacao: number | null
   msc: number | null
   notaAnteprojeto: number | null
   conceitoCapesMestrado: number | null
+}
+
+function obrigatorio(valor: string | null, campo: string, linha: number): string {
+  if (!valor) throw new Error(`Linha ${linha}: o campo "${campo}" é obrigatório`)
+  return valor
+}
+
+function paraOpcao<T extends string>(
+  valor: string | null,
+  opcoes: readonly T[],
+  campo: string,
+  linha: number
+): T | null {
+  if (!valor) return null
+  const normalizado = valor.trim().toUpperCase()
+  const opcao = opcoes.find((o) => o === normalizado)
+  if (!opcao) throw new Error(`Linha ${linha}: valor "${valor}" inválido para "${campo}"`)
+  return opcao
 }
 // Células copiadas do Excel/Sheets podem vir como "=HYPERLINK(""url""; ""txt"")"
 function limpaCelula(cell?: string): string {
@@ -132,8 +151,8 @@ function parseBooleano(texto: string | null): boolean | null {
   return null
 }
 
-export function parseCandidatosMestrado(text: string): CandidatoMestradoUpload[] {
-  const candidatos: CandidatoMestradoUpload[] = []
+export function parseCandidatosMestrado(text: string): UploadCandidatosMestradoInput {
+  const candidatos: UploadCandidatosMestradoInput = []
 
   text
     .split(/\r?\n/)
@@ -182,7 +201,22 @@ export function parseCandidatosMestrado(text: string): CandidatoMestradoUpload[]
         }
       })
 
-      candidatos.push({ ...candidato, notas })
+      const numeroLinha = idx + 1
+      candidatos.push({
+        ...candidato,
+        nome: obrigatorio(candidato.nome, "nome", numeroLinha),
+        primeiraAreaPreferencia: paraOpcao(
+          candidato.primeiraAreaPreferencia,
+          AREAS,
+          "primeiraAreaPreferencia", numeroLinha
+        ),
+        segundaAreaPreferencia: paraOpcao(
+          candidato.segundaAreaPreferencia,
+          AREAS,
+          "segundaAreaPreferencia", numeroLinha
+        ),
+        notas,
+      })
     })
 
   return candidatos
@@ -193,10 +227,9 @@ type CandidatoBaseDoutorado = Omit<
   (typeof BOOLEANOS)[number]
 > &
   Record<(typeof BOOLEANOS)[number], boolean | null>
-export type CandidatoDoutoradoUpload = CandidatoBaseDoutorado & { notas: NotasDoutorado }
 
-export function parseCandidatosDoutorado(text: string): CandidatoDoutoradoUpload[] {
-  const candidatos: CandidatoDoutoradoUpload[] = []
+export function parseCandidatosDoutorado(text: string): UploadCandidatosDoutoradoInput {
+  const candidatos: UploadCandidatosDoutoradoInput = []
 
   text
     .split(/\r?\n/)
@@ -239,13 +272,28 @@ export function parseCandidatosDoutorado(text: string): CandidatoDoutoradoUpload
         }
 
         if (tipo === "numero") {
-          notas[chave as "areaGrad" | "msc" | "notaAnteprojeto"] = parseNumero(texto)
+          notas[chave as "areaFormacaoGraduacao" | "msc" | "notaAnteprojeto"] = parseNumero(texto)
         } else {
           notas[chave as "a1a2a3a4Link" | "b1b2b3b4Link"] = link
         }
       })
 
-      candidatos.push({ ...candidato, notas })
+      const numeroLinha = idx + 1
+      candidatos.push({
+        ...candidato,
+        nome: obrigatorio(candidato.nome, "nome", numeroLinha),
+        historicoMestradoLink: obrigatorio(
+          candidato.historicoMestradoLink,
+          "historicoMestradoLink", numeroLinha
+        ),
+        nomeUniversidadeMestrado: obrigatorio(
+          candidato.nomeUniversidadeMestrado,
+          "nomeUniversidadeMestrado", numeroLinha
+        ),
+        nomeCursoMestrado: obrigatorio(candidato.nomeCursoMestrado, "nomeCursoMestrado", numeroLinha),
+        areaPgcomp: paraOpcao(candidato.areaPgcomp, AREAPGCOMP, "areaPgcomp", numeroLinha),
+        notas,
+      })
     })
 
   return candidatos

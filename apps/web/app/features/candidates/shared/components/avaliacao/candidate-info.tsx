@@ -13,7 +13,7 @@ export default function CandidateInfo({ candidato }: CandidateInfoProps) {
           Avalie o candidato: {candidato.nome} - {candidato.email}
         </p>
         <p>Número de inscrição: {candidato.numeroInscricao}</p>
-        {candidato.tipoCurso === "mestrado" ? (
+        {"primeiraAreaPreferencia" in candidato ? (
           <p className="text-sm text-muted-foreground">
             Áreas de interesse do candidato: {candidato.primeiraAreaPreferencia}
             {candidato.segundaAreaPreferencia ? `, ${candidato.segundaAreaPreferencia}` : null}

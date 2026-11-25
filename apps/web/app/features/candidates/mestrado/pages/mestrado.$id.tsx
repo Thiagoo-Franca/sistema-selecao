@@ -15,6 +15,7 @@ import Loading from "@/shared/components/layout/loading"
 import CandidateNotFound from "@/shared/components/layout/candidate-not-found"
 import {
   normalizeGru,
+  normalizeIsencao,
   paraBooleano,
   valorIsencaoSelect,
   valorSimNaoSelect,
@@ -101,7 +102,7 @@ export default function AvaliacaoCandidatoMestradoPage() {
         auditorId: candidato.auditorId ?? undefined,
         cidadeResidencia: candidato.cidadeResidencia ?? undefined,
         solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ?? undefined,
-        isencaoAprovada: candidato.isencaoAprovada ?? undefined,
+        isencaoAprovada: normalizeIsencao(candidato.isencaoAprovada),
         gru: normalizeGru(candidato.gru),
         homologa:
           candidato.homologa === true ? true : candidato.homologa === false ? false : undefined,

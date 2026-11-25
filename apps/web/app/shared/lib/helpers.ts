@@ -1,6 +1,9 @@
 import type { useNavigate } from "react-router"
+import type { UseMutationResult } from "@tanstack/react-query"
+import { ISENCAO_STATUS } from "@tcc/shared"
 import { GRU_OPTIONS, NAO_SOLICITOU } from "./constants"
-import type { useDeleteCandidatoMestrado } from "@/features/candidates/mestrado/hooks"
+
+export type DeleteCandidatoMutation = UseMutationResult<{ message: string }, Error, void>
 
 export function handleSort(
   key: string,
@@ -31,6 +34,11 @@ export function normalizeGru(value: string | null | undefined) {
     .replace(/\s+/g, "-") // "nao pagou" -> "nao-pagou"
 
   return GRU_OPTIONS.find((o) => o.value === v)?.value ?? ""
+}
+
+// isencao_aprovada é text no banco; só repassa ao formulário valores conhecidos.
+export function normalizeIsencao(value: string | null | undefined) {
+  return ISENCAO_STATUS.find((status) => status === value)
 }
 
 export function paraBooleano(value: unknown): boolean | undefined {
@@ -64,7 +72,7 @@ export function valorSimNaoSelect(value: unknown) {
 }
 
 export function handleDelete(
-  deleteCandidatoMutation: ReturnType<typeof useDeleteCandidatoMestrado>,
+  deleteCandidatoMutation: DeleteCandidatoMutation,
   navigate: ReturnType<typeof useNavigate>
 ) {
   if (!confirm("Tem certeza que deseja excluir este candidato?")) return

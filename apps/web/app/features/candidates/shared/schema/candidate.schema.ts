@@ -1,6 +1,8 @@
 import z from "zod"
-import { ISENCAO_STATUS } from "../../../../../../../packages/shared/src/isencao"
-import { AREAPGCOMP } from "@tcc/shared"
+import { AREAPGCOMP, GRU_STATUS, ISENCAO_STATUS } from "@tcc/shared"
+
+// normalizeGru devolve "" quando o valor salvo não é reconhecido
+const gruFormSchema = z.union([z.enum(GRU_STATUS), z.literal("")]).optional()
 
 const uploadCandidatosMestradoSchema = z.array(
   z.object({
@@ -56,7 +58,7 @@ const CandidatoMestradoNotaSchema = z.object({
   isencaoComprovanteLink: z.string().nullable().optional(),
   isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
   isencaoAprovadaLink: z.string().nullable().optional(),
-  gru: z.string().optional(),
+  gru: gruFormSchema,
 
   homologa: z.boolean().optional(),
   especiais: z.boolean().optional(),
@@ -99,7 +101,9 @@ export { CandidatoMestradoNotaSchema }
 const CandidatoDoutoradoNotaSchema = z.object({
   avaliadorId: z.string().uuid().optional(),
   auditorId: z.string().uuid().optional(),
-  areaPgcomp: z.string(),
+  areaPgcomp: z.enum(AREAPGCOMP, {
+    errorMap: () => ({ message: "Selecione a área PGCOMP" }),
+  }),
   avaliado: z.boolean().optional(),
 
   nomeUniversidadeMestrado: z.string().optional(),
@@ -110,7 +114,7 @@ const CandidatoDoutoradoNotaSchema = z.object({
   isencaoComprovanteLink: z.string().nullable().optional(),
   isencaoAprovada: z.enum(ISENCAO_STATUS).optional(),
   isencaoAprovadaLink: z.string().nullable().optional(),
-  gru: z.string().optional(),
+  gru: gruFormSchema,
 
   homologa: z.boolean().optional(),
   especiais: z.boolean().optional(),

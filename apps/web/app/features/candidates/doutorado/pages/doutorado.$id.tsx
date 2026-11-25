@@ -18,12 +18,12 @@ import {
   type CandidatoDoutoradoNota,
 } from "../../shared/schema/candidate.schema"
 import type { TeacherData } from "../../mestrado/pages/mestrado.$id"
-import { normalizeGru, paraBooleano } from "@/shared/lib/helpers"
+import { normalizeGru, normalizeIsencao, paraBooleano } from "@/shared/lib/helpers"
 import { calcularDoutoradoNota, paraNumeroSeguro } from "@tcc/shared"
 import { toast } from "sonner"
 import Loading from "@/shared/components/layout/loading"
 import CandidateNotFound from "@/shared/components/layout/candidate-not-found"
-import CandidateActions from "../../shared/components/candidatos/candidate-actions"
+import CandidateActions from "../../shared/components/avaliacao/candidate-actions"
 import CandidateInfo from "../../shared/components/avaliacao/candidate-info"
 import FormsAvaliacaoDoutorado from "../components/forms"
 
@@ -91,7 +91,7 @@ export default function CandidatoDoutoradoPage() {
         avaliadorId: candidato.avaliadorId ?? undefined,
         areaPgcomp: candidato.areaPgcomp ?? undefined,
         solicitouIsencaoTaxaInscricao: candidato.solicitouIsencaoTaxaInscricao ?? undefined,
-        isencaoAprovada: candidato.isencaoAprovada ?? undefined,
+        isencaoAprovada: normalizeIsencao(candidato.isencaoAprovada),
         gru: normalizeGru(candidato.gru),
         homologa:
           candidato.homologa === true ? true : candidato.homologa === false ? false : undefined,

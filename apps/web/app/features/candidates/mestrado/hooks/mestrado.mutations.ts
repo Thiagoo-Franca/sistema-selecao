@@ -1,15 +1,19 @@
 import { rpcReturn } from "@/shared/lib/utils"
 import apiClient from "@/shared/services/apiClient"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import type { CandidatoMestradoComRelacoes, NotaMestradoUpdate } from "@tcc/server"
-import type { CandidatoMestradoUpload } from "../../shared/components/lib/parse-upload"
+import type {
+  CandidatoMestradoComRelacoes,
+  NotaMestradoUpdate,
+  UpdateCandidatoMestradoInput,
+  UploadCandidatosMestradoInput,
+} from "@tcc/server"
 import { toast } from "sonner"
 
 export function useUploadCandidatosMestrado() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (candidatos: CandidatoMestradoUpload[]) => {
+    mutationFn: async (candidatos: UploadCandidatosMestradoInput) => {
       const response = await apiClient.candidato.mestrado.$post({ json: candidatos })
       return rpcReturn(response)
     },
@@ -30,7 +34,7 @@ export const useUpdateCandidatoMestrado = () => {
   return useMutation({
     mutationFn: async (data: {
       id: string | number
-      body: Partial<CandidatoMestradoComRelacoes>
+      body: UpdateCandidatoMestradoInput
     }) => {
       const response = await apiClient.candidato.mestrado[":id"].$patch({
         param: { id: String(data.id) },

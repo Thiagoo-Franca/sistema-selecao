@@ -8,6 +8,18 @@ export type {
   CandidatoMestradoComRelacoes,
 } from "../src/modules/candidato/candidato.service";
 export type {
+  UpdateCandidatoDoutoradoInput,
+  UpdateCandidatoMestradoInput,
+} from "../src/modules/candidato/candidato.schema";
+export type {
+  UpdateNotaDoutoradoInput,
+  UpdateNotaMestradoInput,
+} from "../src/modules/nota/nota.schema";
+export type {
+  UploadCandidatosDoutoradoInput,
+  UploadCandidatosMestradoInput,
+} from "../src/modules/importacao/importacao.schema";
+export type {
   CandidatoComRelacoes,
   CandidatoResumo,
   ResponsavelCandidato,
